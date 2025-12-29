@@ -9,6 +9,8 @@ const hintMap: Partial<Record<ValidationErrorCode, string>> = {
     'Close YAML front matter with a second ---.',
   E_GITHUB_URL_UNSUPPORTED:
     'Clone the repository and validate the local folder path instead.',
+  E_RECORD_TYPE_ID_INVALID:
+    'Use a stable identifier like note, project_task, research-paper (no spaces or "/").',
   E_USAGE: 'Provide a dataset path and valid flags.',
   E_INTERNAL: 'Re-run with NODE_DEBUG=graphdown or open an issue.'
 };
