@@ -103,7 +103,9 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       continue;
     }
     const parts = file.split('/');
-    if (parts.length === 2 && !isAllowedRecordsRootFile(file)) {
+    const isRootLevel = parts.length === 2;
+    const isMarkdown = file.toLowerCase().endsWith('.md');
+    if (isRootLevel && isMarkdown && !isAllowedRecordsRootFile(file)) {
       errors.push(
         makeError(
           'E_UNKNOWN_RECORD_DIR',
