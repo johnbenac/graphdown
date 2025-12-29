@@ -18,7 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { extractFrontMatter, parseYamlObject } = require('./dist/core');
 
 /**
  * Extract YAML front matter and body from a Markdown file.  The YAML front
@@ -29,73 +29,6 @@ const { spawnSync } = require('child_process');
  * @param {string} content The raw Markdown content
  * @returns {{ yaml: string, body: string }}
  */
-function extractFrontMatter(content) {
-  // Normalise line endings and split into lines
-  const lines = content.replace(/\r\n/g, '\n').split('\n');
-  if (lines.length < 3 || lines[0].trim() !== '---') {
-    throw new Error('Missing YAML front matter delimiter at top of file');
-  }
-  let endIndex = -1;
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim() === '---') {
-      endIndex = i;
-      break;
-    }
-  }
-  if (endIndex === -1) {
-    throw new Error('Missing closing YAML front matter delimiter');
-  }
-  const yamlLines = lines.slice(1, endIndex).join('\n');
-  const bodyLines = lines.slice(endIndex + 1).join('\n');
-  return { yaml: yamlLines, body: bodyLines };
-}
-
-/**
- * Parse a YAML string into a JavaScript object using Python's PyYAML via
- * a subprocess.  This helper avoids shipping a full YAML parser in this
- * JavaScript file.  If parsing fails the returned object will contain an
- * `__error__` property describing the error.
- *
- * @param {string} yamlString The YAML content to parse
- * @returns {object} The parsed object or an error indicator
- */
-function parseYaml(yamlString) {
-  // Spawn a Python process to parse YAML safely
-  const result = spawnSync(
-    'python',
-    [
-      '-c',
-      [
-        'import yaml, json, sys, datetime',
-        '# Read YAML from stdin and convert any datetime objects to strings to allow JSON serialisation',
-        'def convert(value):',
-        '    if isinstance(value, (datetime.date, datetime.datetime)):',
-        '        return value.isoformat()',
-        '    elif isinstance(value, dict):',
-        '        return {k: convert(v) for k, v in value.items()}',
-        '    elif isinstance(value, list):',
-        '        return [convert(v) for v in value]',
-        '    else:',
-        '        return value',
-        'try:',
-        '    data = yaml.safe_load(sys.stdin.read())',
-        '    data = convert(data)',
-        '    print(json.dumps(data))',
-        'except Exception as e:',
-        '    print(json.dumps({"__error__": str(e)}))'
-      ].join('\n'),
-    ],
-    { input: yamlString, encoding: 'utf-8' }
-  );
-  if (result.error) {
-    return { __error__: result.error.message };
-  }
-  try {
-    return JSON.parse(result.stdout.trim() || 'null');
-  } catch (err) {
-    return { __error__: 'Failed to parse YAML via Python: ' + err.message };
-  }
-}
 
 /**
  * Recursively list all Markdown files under a directory.
@@ -122,7 +55,7 @@ function listMarkdownFiles(dir) {
  * fields.  Captures any errors encountered during parsing.
  *
  * @param {string} filePath The path to the Markdown file
- * @returns {{ yaml: object|null, body: string, error: string|null }}
+ * @returns {{ yaml: object|null, body: string, error: string|null, errorCode: string|null }}
  */
 function readMarkdownFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf-8');
@@ -131,16 +64,23 @@ function readMarkdownFile(filePath) {
   try {
     ({ yaml: yamlSection, body } = extractFrontMatter(content));
   } catch (err) {
-    return { yaml: null, body: '', error: `Front matter error: ${err.message}` };
+    const message = err.message;
+    let errorCode = 'E_FRONT_MATTER_MISSING';
+    if (message.includes('Missing closing YAML front matter delimiter')) {
+      errorCode = 'E_FRONT_MATTER_UNTERMINATED';
+    }
+    return { yaml: null, body: '', error: `Front matter error: ${message}`, errorCode };
   }
-  const yamlObj = parseYaml(yamlSection);
-  if (yamlObj && yamlObj.__error__) {
-    return { yaml: null, body, error: `YAML parse error: ${yamlObj.__error__}` };
+  try {
+    const yamlObj = parseYamlObject(yamlSection);
+    return { yaml: yamlObj, body, error: null, errorCode: null };
+  } catch (err) {
+    const message = err.message;
+    if (message === 'YAML front matter is not a valid object') {
+      return { yaml: null, body, error: message, errorCode: 'E_YAML_NOT_OBJECT' };
+    }
+    return { yaml: null, body, error: `YAML parse error: ${message}`, errorCode: 'E_YAML_INVALID' };
   }
-  if (typeof yamlObj !== 'object' || yamlObj === null) {
-    return { yaml: null, body, error: 'YAML front matter is not a valid object' };
-  }
-  return { yaml: yamlObj, body, error: null };
 }
 
 /**
@@ -153,55 +93,69 @@ function readMarkdownFile(filePath) {
  */
 function validateDataset(root) {
   const errors = [];
+  const structuredErrors = /** @type {import('./dist/core').ValidationError[]} */ ([]);
+
+  function pushError(code, message, file, hint) {
+    errors.push(message);
+    structuredErrors.push({ code, message, file, hint });
+  }
   // Ensure required subdirectories exist
   const datasetsDir = path.join(root, 'datasets');
   const typesDir = path.join(root, 'types');
   const recordsDir = path.join(root, 'records');
   if (!fs.existsSync(datasetsDir) || !fs.statSync(datasetsDir).isDirectory()) {
-    errors.push('Missing required `datasets/` directory');
-    return { errors };
+    pushError('E_DIR_MISSING', 'Missing required `datasets/` directory', 'datasets/');
+    return { errors, structuredErrors };
   }
   if (!fs.existsSync(typesDir) || !fs.statSync(typesDir).isDirectory()) {
-    errors.push('Missing required `types/` directory');
-    return { errors };
+    pushError('E_DIR_MISSING', 'Missing required `types/` directory', 'types/');
+    return { errors, structuredErrors };
   }
   if (!fs.existsSync(recordsDir) || !fs.statSync(recordsDir).isDirectory()) {
-    errors.push('Missing required `records/` directory');
-    return { errors };
+    pushError('E_DIR_MISSING', 'Missing required `records/` directory', 'records/');
+    return { errors, structuredErrors };
   }
   // Validate dataset record (exactly one .md file in datasets/)
   const datasetFiles = fs.readdirSync(datasetsDir).filter(fn => fn.toLowerCase().endsWith('.md'));
   if (datasetFiles.length !== 1) {
-    errors.push(`Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`);
-    return { errors };
+    pushError(
+      'E_DATASET_FILE_COUNT',
+      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`,
+      'datasets/'
+    );
+    return { errors, structuredErrors };
   }
   const datasetPath = path.join(datasetsDir, datasetFiles[0]);
   const datasetDoc = readMarkdownFile(datasetPath);
   if (datasetDoc.error) {
-    errors.push(`Dataset file error in ${datasetFiles[0]}: ${datasetDoc.error}`);
-    return { errors };
+    pushError(
+      datasetDoc.errorCode || 'E_YAML_INVALID',
+      `Dataset file error in ${datasetFiles[0]}: ${datasetDoc.error}`,
+      datasetFiles[0]
+    );
+    return { errors, structuredErrors };
   }
   const datasetYaml = datasetDoc.yaml;
   // Validate required fields on dataset
   if (!datasetYaml.id || typeof datasetYaml.id !== 'string' || !datasetYaml.id.startsWith('dataset:')) {
-    errors.push('Dataset id must be a string beginning with "dataset:"');
+    pushError('E_ID_PREFIX_INVALID', 'Dataset id must be a string beginning with "dataset:"');
   }
   if (datasetYaml.datasetId !== datasetYaml.id) {
-    errors.push('Dataset file datasetId must equal its id');
+    pushError('E_DATASET_ID_MISMATCH', 'Dataset file datasetId must equal its id');
   }
   if (datasetYaml.typeId !== 'sys:dataset') {
-    errors.push('Dataset file typeId must be "sys:dataset"');
+    pushError('E_TYPEID_MISMATCH', 'Dataset file typeId must be "sys:dataset"');
   }
   // Required timestamp fields
   if (!datasetYaml.createdAt || !datasetYaml.updatedAt) {
-    errors.push('Dataset file must have createdAt and updatedAt');
+    pushError('E_REQUIRED_FIELD_MISSING', 'Dataset file must have createdAt and updatedAt');
   }
   // Fields map validation
   if (!datasetYaml.fields || typeof datasetYaml.fields !== 'object') {
-    errors.push('Dataset file fields must be an object');
+    pushError('E_REQUIRED_FIELD_MISSING', 'Dataset file fields must be an object');
   } else {
     if (!datasetYaml.fields.name || !datasetYaml.fields.description) {
-      errors.push('Dataset fields must include `name` and `description`');
+      pushError('E_DATASET_FIELDS_MISSING', 'Dataset fields must include `name` and `description`');
     }
   }
   const datasetId = datasetYaml.id;
@@ -213,36 +167,48 @@ function validateDataset(root) {
     const rel = path.relative(root, f);
     const doc = readMarkdownFile(f);
     if (doc.error) {
-      errors.push(`Type file error in ${rel}: ${doc.error}`);
+      pushError(doc.errorCode || 'E_YAML_INVALID', `Type file error in ${rel}: ${doc.error}`, rel);
       continue;
     }
     const y = doc.yaml;
     if (!y.id || typeof y.id !== 'string' || !y.id.startsWith('type:')) {
-      errors.push(`Type file ${rel} must have id beginning with "type:"`);
+      pushError('E_ID_PREFIX_INVALID', `Type file ${rel} must have id beginning with "type:"`, rel);
       continue;
     }
     if (typeIds.has(y.id)) {
-      errors.push(`Duplicate type id ${y.id}`);
+      pushError('E_DUPLICATE_ID', `Duplicate type id ${y.id}`, rel);
     }
     typeIds.add(y.id);
     if (y.datasetId !== datasetId) {
-      errors.push(`Type file ${rel} has datasetId ${y.datasetId} but dataset id is ${datasetId}`);
+      pushError(
+        'E_DATASET_ID_MISMATCH',
+        `Type file ${rel} has datasetId ${y.datasetId} but dataset id is ${datasetId}`,
+        rel
+      );
     }
     if (y.typeId !== 'sys:type') {
-      errors.push(`Type file ${rel} typeId must be "sys:type"`);
+      pushError('E_TYPEID_MISMATCH', `Type file ${rel} typeId must be "sys:type"`, rel);
     }
     if (!y.fields || typeof y.fields !== 'object') {
-      errors.push(`Type file ${rel} fields must be an object`);
+      pushError('E_REQUIRED_FIELD_MISSING', `Type file ${rel} fields must be an object`, rel);
       continue;
     }
     if (!y.fields.recordTypeId) {
-      errors.push(`Type file ${rel} fields must include recordTypeId`);
+      pushError(
+        'E_REQUIRED_FIELD_MISSING',
+        `Type file ${rel} fields must include recordTypeId`,
+        rel
+      );
       continue;
     }
     // Map recordTypeId to type YAML
     const recTypeId = y.fields.recordTypeId;
     if (typeMap.has(recTypeId)) {
-      errors.push(`Multiple types define recordTypeId ${recTypeId}`);
+      pushError(
+        'E_DUPLICATE_RECORD_TYPE_ID',
+        `Multiple types define recordTypeId ${recTypeId}`,
+        rel
+      );
     }
     typeMap.set(recTypeId, y);
   }
@@ -251,31 +217,47 @@ function validateDataset(root) {
   // All record directories should correspond to a known recordTypeId
   for (const dirName of recordDirs) {
     if (!typeMap.has(dirName)) {
-      errors.push(`Unknown record type directory ${dirName}/ (no type definition for recordTypeId ${dirName})`);
+      pushError(
+        'E_UNKNOWN_RECORD_DIR',
+        `Unknown record type directory ${dirName}/ (no type definition for recordTypeId ${dirName})`,
+        path.join('records', dirName)
+      );
     }
     const recFiles = listMarkdownFiles(path.join(recordsDir, dirName));
     for (const recPath of recFiles) {
       const rel = path.relative(root, recPath);
       const doc = readMarkdownFile(recPath);
       if (doc.error) {
-        errors.push(`Record file error in ${rel}: ${doc.error}`);
+        pushError(doc.errorCode || 'E_YAML_INVALID', `Record file error in ${rel}: ${doc.error}`, rel);
         continue;
       }
       const y = doc.yaml;
       if (!y.id || typeof y.id !== 'string') {
-        errors.push(`Record file ${rel} missing id or id not a string`);
+        pushError(
+          'E_REQUIRED_FIELD_MISSING',
+          `Record file ${rel} missing id or id not a string`,
+          rel
+        );
       }
       if (y.datasetId !== datasetId) {
-        errors.push(`Record file ${rel} datasetId mismatch: expected ${datasetId}, found ${y.datasetId}`);
+        pushError(
+          'E_DATASET_ID_MISMATCH',
+          `Record file ${rel} datasetId mismatch: expected ${datasetId}, found ${y.datasetId}`,
+          rel
+        );
       }
       if (y.typeId !== dirName) {
-        errors.push(`Record file ${rel} typeId ${y.typeId} does not match its containing directory name ${dirName}`);
+        pushError(
+          'E_TYPEID_MISMATCH',
+          `Record file ${rel} typeId ${y.typeId} does not match its containing directory name ${dirName}`,
+          rel
+        );
       }
       if (!y.createdAt || !y.updatedAt) {
-        errors.push(`Record file ${rel} must have createdAt and updatedAt`);
+        pushError('E_REQUIRED_FIELD_MISSING', `Record file ${rel} must have createdAt and updatedAt`, rel);
       }
       if (!y.fields || typeof y.fields !== 'object') {
-        errors.push(`Record file ${rel} fields must be an object`);
+        pushError('E_REQUIRED_FIELD_MISSING', `Record file ${rel} fields must be an object`, rel);
       }
     }
   }
@@ -283,7 +265,7 @@ function validateDataset(root) {
   const seenIds = new Set();
   function collectId(id, where) {
     if (seenIds.has(id)) {
-      errors.push(`Duplicate id detected: ${id} (in ${where})`);
+      pushError('E_DUPLICATE_ID', `Duplicate id detected: ${id} (in ${where})`);
     }
     seenIds.add(id);
   }
@@ -300,7 +282,7 @@ function validateDataset(root) {
       }
     }
   }
-  return { errors };
+  return { errors, structuredErrors };
 }
 
 /**
