@@ -1,6 +1,7 @@
 import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
 import ImportRoute from "./routes/ImportRoute";
 import DatasetRoute from "./routes/DatasetRoute";
+import ExportRoute from "./routes/ExportRoute";
 import { DatasetProvider } from "./state/DatasetContext";
 
 export const appRoutes = [
@@ -15,6 +16,10 @@ export const appRoutes = [
   {
     path: "/datasets",
     element: <DatasetRoute />,
+  },
+  {
+    path: "/export",
+    element: <ExportRoute />,
   },
 ];
 
