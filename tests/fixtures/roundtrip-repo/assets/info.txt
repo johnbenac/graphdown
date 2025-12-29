@@ -1,0 +1,1 @@
+Round-trip fixtures should preserve this file byte-for-byte.
