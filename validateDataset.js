@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const { extractFrontMatter, parseYamlObject, makeError } = require('./dist/core');
+const { formatJson, formatPretty } = require('./dist/cli/output');
 
 
 /**
@@ -286,32 +287,87 @@ function validateDataset(root) {
 /**
  * CLI entry point.  Accepts a single argument specifying the dataset root.
  */
-function main() {
-  const arg = process.argv[2];
-  if (!arg) {
-    console.error('Usage: node validateDataset.js <datasetPath>');
-    process.exit(1);
+function parseArgs(args) {
+  const usage = 'Usage: node validateDataset.js <datasetPath> [--json|--pretty]';
+  const jsonIndex = args.indexOf('--json');
+  const prettyIndex = args.indexOf('--pretty');
+  if (jsonIndex !== -1 && prettyIndex !== -1) {
+    return { error: makeError('E_USAGE', 'Cannot use both --json and --pretty.'), usage };
   }
-  let rootPath = arg;
+  const filtered = args.filter((arg) => arg !== '--json' && arg !== '--pretty');
+  if (filtered.length !== 1) {
+    return { error: makeError('E_USAGE', 'Expected a dataset path.'), usage };
+  }
+  return {
+    datasetPath: filtered[0],
+    mode: jsonIndex !== -1 ? 'json' : 'pretty',
+    usage
+  };
+}
+
+function printResult(mode, result, exitCode) {
+  const output = mode === 'json' ? formatJson(result) : formatPretty(result.errors);
+  if (mode === 'json') {
+    process.stdout.write(output);
+  } else if (exitCode === 0) {
+    process.stdout.write(output);
+  } else {
+    process.stderr.write(output);
+  }
+}
+
+function main() {
+  const parsed = parseArgs(process.argv.slice(2));
+  const mode = parsed.mode ?? 'pretty';
+  if (parsed.error) {
+    const result = { ok: false, errors: [parsed.error] };
+    printResult(mode, result, 2);
+    if (parsed.usage && mode === 'pretty') {
+      process.stderr.write(`${parsed.usage}\n`);
+    }
+    process.exit(2);
+  }
+  let rootPath = parsed.datasetPath;
   // If the argument looks like a GitHub URL, instruct the user to clone it.
   const githubRe = /^https?:\/\/github\.com\//i;
-  if (githubRe.test(arg)) {
-    console.error('Validation of remote GitHub URLs is not supported by this script. Clone the repository locally and provide its path instead.');
-    process.exit(1);
+  if (githubRe.test(rootPath)) {
+    const result = {
+      ok: false,
+      errors: [
+        makeError(
+          'E_USAGE',
+          'Validation of remote GitHub URLs is not supported by this script. Clone the repository locally and provide its path instead.'
+        )
+      ]
+    };
+    printResult(mode, result, 2);
+    process.exit(2);
   }
-  if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
-    console.error(`Dataset path ${rootPath} does not exist or is not a directory`);
-    process.exit(1);
-  }
-  const result = validateDataset(rootPath);
-  if (result.errors.length === 0) {
-    console.log('Validation passed: dataset is valid.');
-  } else {
-    console.error('Validation failed with the following errors:');
-    for (const err of result.errors) {
-      console.error(' - ' + err.message);
+  try {
+    if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
+      const result = {
+        ok: false,
+        errors: [
+          makeError('E_USAGE', `Dataset path ${rootPath} does not exist or is not a directory`)
+        ]
+      };
+      printResult(mode, result, 2);
+      process.exit(2);
     }
-    process.exit(1);
+    const result = validateDataset(rootPath);
+    const ok = result.errors.length === 0;
+    printResult(mode, { ok, errors: result.errors }, ok ? 0 : 1);
+    process.exit(ok ? 0 : 1);
+  } catch (error) {
+    const message = error?.message ? error.message : String(error);
+    const result = {
+      ok: false,
+      errors: [
+        makeError('E_INTERNAL', `Unexpected error: ${message}`)
+      ]
+    };
+    printResult(mode, result, 2);
+    process.exit(2);
   }
 }
 

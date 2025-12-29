@@ -1,14 +1,14 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-const usage = `Usage: graphdown validate <datasetPath>
-       graphdown <datasetPath>`;
+const usage = `Usage: graphdown validate <datasetPath> [--json|--pretty]
+       graphdown <datasetPath> [--json|--pretty]`;
 
 const args = process.argv.slice(2);
 
 if (args.length === 0) {
   console.error(usage);
-  process.exit(1);
+  process.exit(2);
 }
 
 const [commandOrPath, ...rest] = args;
@@ -17,7 +17,7 @@ let forwardedArgs: string[];
 if (commandOrPath === 'validate') {
   if (rest.length === 0) {
     console.error(usage);
-    process.exit(1);
+    process.exit(2);
   }
   forwardedArgs = rest;
 } else {
@@ -31,13 +31,13 @@ const child = spawn(process.execPath, [validatorPath, ...forwardedArgs], {
 
 child.on('error', (error) => {
   console.error('Failed to run validator:', error.message);
-  process.exit(1);
+  process.exit(2);
 });
 
 child.on('close', (code, signal) => {
   if (signal) {
-    process.exitCode = 1;
+    process.exitCode = 2;
     return;
   }
-  process.exitCode = code ?? 1;
+  process.exitCode = code ?? 2;
 });

@@ -1,4 +1,6 @@
 export type ValidationErrorCode =
+  | 'E_INTERNAL'
+  | 'E_USAGE'
   | 'E_DIR_MISSING'
   | 'E_DATASET_FILE_COUNT'
   | 'E_FRONT_MATTER_MISSING'

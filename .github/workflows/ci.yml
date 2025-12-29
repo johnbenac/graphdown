@@ -22,3 +22,25 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+  validate-example-datasets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Validate research-lab-dataset (JSON)
+        run: |
+          rm -rf /tmp/research-lab-dataset
+          git clone --depth 1 https://github.com/johnbenac/research-lab-dataset.git /tmp/research-lab-dataset
+          node dist/cli.js validate /tmp/research-lab-dataset --json | node -e "let s='';process.stdin.on('data',c=>s+=c);process.stdin.on('end',()=>{const r=JSON.parse(s); if(!r.ok){console.error(r); process.exit(1);} });"
+      - name: Validate product-tracker-dataset (JSON)
+        run: |
+          rm -rf /tmp/product-tracker-dataset
+          git clone --depth 1 https://github.com/johnbenac/product-tracker-dataset.git /tmp/product-tracker-dataset
+          node dist/cli.js validate /tmp/product-tracker-dataset --json | node -e "let s='';process.stdin.on('data',c=>s+=c);process.stdin.on('end',()=>{const r=JSON.parse(s); if(!r.ok){console.error(r); process.exit(1);} });"

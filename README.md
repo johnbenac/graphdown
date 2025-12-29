@@ -49,6 +49,12 @@ npx graphdown validate <datasetPath>
 # Validate a local dataset
 node dist/cli.js validate ./my-dataset
 
+# Explicit human-readable output
+node dist/cli.js validate ./my-dataset --pretty
+
+# Machine-readable output
+node dist/cli.js validate ./my-dataset --json
+
 # Validate an example dataset
 node dist/cli.js validate ../product-tracker-dataset
 ```
@@ -62,10 +68,17 @@ Validation passed: dataset is valid.
 
 If there are errors:
 ```
-Validation failed with the following errors:
- - Missing required `datasets/` directory
- - Dataset id must be a string beginning with "dataset:"
+Validation failed with 2 error(s):
+ - [E_DIR_MISSING] Missing required `datasets/` directory
+   hint: Ensure dataset root contains datasets/, types/, and records/.
+ - [E_ID_PREFIX_INVALID] Dataset id must be a string beginning with "dataset:"
  ...
+```
+
+For machine-readable output, pass `--json`:
+
+```json
+{"ok":false,"errors":[{"code":"E_DIR_MISSING","message":"Missing required `datasets/` directory","file":null,"hint":"Ensure dataset root contains datasets/, types/, and records/."}]}
 ```
 
 ## Dataset Structure
