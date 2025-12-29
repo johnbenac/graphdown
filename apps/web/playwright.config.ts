@@ -14,6 +14,9 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       animations: "disabled",
+      // Allow small rendering differences between local and CI environments
+      // (fonts, antialiasing, etc.)
+      maxDiffPixelRatio: 0.05, // 5% tolerance
     },
   },
 });
