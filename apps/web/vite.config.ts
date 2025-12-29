@@ -1,10 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1];
+const pagesBase = process.env.PAGES_BASE;
+
+function normalizeBase(base: string | undefined): string {
+  if (!base) {
+    return "/";
+  }
+  const withLeading = base.startsWith("/") ? base : `/${base}`;
+  return withLeading.endsWith("/") ? withLeading : `${withLeading}/`;
+}
 
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS && repoName ? `/${repoName}/` : "/",
+  base: normalizeBase(pagesBase),
   plugins: [react()],
   server: {
     port: 5173,

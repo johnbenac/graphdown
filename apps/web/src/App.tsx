@@ -18,7 +18,10 @@ export const appRoutes = [
   },
 ];
 
-const router = createBrowserRouter(appRoutes);
+const baseUrl = import.meta.env.BASE_URL;
+const basename = baseUrl === "/" ? "/" : baseUrl.replace(/\/$/, "");
+
+const router = createBrowserRouter(appRoutes, { basename });
 
 export default function App() {
   return (
