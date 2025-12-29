@@ -20,12 +20,26 @@ export function parseYaml(yamlString: string): unknown {
     'except Exception as e:',
     '    print(json.dumps({"__error__": str(e)}))'
   ].join('\n');
-  const result = spawnSync('python', ['-c', script], {
-    input: yamlString,
-    encoding: 'utf-8'
-  });
+  const runPython = (command: string) =>
+    spawnSync(command, ['-c', script], {
+      input: yamlString,
+      encoding: 'utf8'
+    });
+  let result = runPython('python3');
+  if (result.error && (result.error as NodeJS.ErrnoException).code === 'ENOENT') {
+    result = runPython('python');
+    if (result.error && (result.error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error('Python not found; install python3 and PyYAML');
+    }
+  }
   if (result.error) {
     throw new Error(result.error.message);
+  }
+  if (result.status !== 0) {
+    const stderr = result.stderr?.trim();
+    throw new Error(
+      `Python YAML parse failed with exit code ${result.status}.${stderr ? ` Stderr: ${stderr}` : ''}`
+    );
   }
   let parsed: unknown;
   try {

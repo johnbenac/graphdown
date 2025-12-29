@@ -1,6 +1,6 @@
 export type RecordFields = Record<string, unknown>;
 
-export interface BaseRecord {
+export interface RecordEnvelope {
   id: string;
   datasetId: string;
   typeId: string;
@@ -9,29 +9,11 @@ export interface BaseRecord {
   fields: RecordFields;
 }
 
-export interface DatasetRecord extends BaseRecord {
-  typeId: 'sys:dataset';
-  fields: {
-    name: string;
-    description: string;
-    [k: string]: unknown;
-  };
-}
+export type DatasetRecord = RecordEnvelope & { typeId: 'sys:dataset' };
 
-export interface TypeRecord extends BaseRecord {
-  typeId: 'sys:type';
-  fields: {
-    recordTypeId: string;
-    displayName?: string;
-    pluralName?: string;
-    fieldDefs?: Record<string, unknown>;
-    [k: string]: unknown;
-  };
-}
+export type TypeRecord = RecordEnvelope & { typeId: 'sys:type' };
 
-export interface DataRecord extends BaseRecord {
-  // typeId is the record type directory name
-}
+export type DataRecord = RecordEnvelope;
 
 export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
