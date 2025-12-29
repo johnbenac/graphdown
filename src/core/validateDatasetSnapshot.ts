@@ -8,6 +8,7 @@ export type ValidateDatasetResult =
   | { ok: false; errors: ValidationError[] };
 
 const textDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
+const RECORDS_ROOT_ALLOWED_FILES = new Set(['.gitkeep', 'readme.md']);
 
 function decodeBytes(raw: Uint8Array): string {
   if (textDecoder) {
@@ -56,11 +57,11 @@ function requireString(
   key: string,
   file: string,
   label?: string
-): string | null {
+): string | undefined {
   const value = getString(yaml, key);
   if (!value) {
     errors.push(makeError('E_REQUIRED_FIELD_MISSING', `${label ?? key} is required`, file));
-    return null;
+    return undefined;
   }
   return value;
 }
@@ -79,6 +80,23 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
   if (!hasDir('records')) {
     return { ok: false, errors: [makeError('E_DIR_MISSING', 'Missing required `records/` directory')] };
+  }
+
+  for (const file of files) {
+    if (!file.startsWith('records/')) {
+      continue;
+    }
+    const parts = file.split('/');
+    const recordRootName = parts.length === 2 ? parts[1] : '';
+    if (recordRootName && !RECORDS_ROOT_ALLOWED_FILES.has(recordRootName.toLowerCase())) {
+      errors.push(
+        makeError(
+          'E_UNKNOWN_RECORD_DIR',
+          `Record files must be stored under records/<recordTypeId>/. Found ${file} directly under records/.`,
+          file
+        )
+      );
+    }
   }
 
   const datasetFiles = listMarkdownFiles(files, 'datasets', false);
