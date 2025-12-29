@@ -43,7 +43,19 @@ export type BuildGraphResult =
   | { ok: true; graph: Graph }
   | { ok: false; errors: ValidationError[] };
 
-const RECORD_TYPE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+export const RECORD_TYPE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+
+const textDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
+
+function decodeBytes(raw: Uint8Array): string {
+  if (textDecoder) {
+    return textDecoder.decode(raw);
+  }
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(raw).toString('utf8');
+  }
+  return String.fromCharCode(...raw);
+}
 
 class GraphImpl implements Graph {
   constructor(
@@ -203,7 +215,7 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     if (!raw) {
       continue;
     }
-    const text = Buffer.from(raw).toString('utf8');
+    const text = decodeBytes(raw);
     const parsed = parseMarkdownRecord(text, file);
     if (!parsed.ok) {
       errors.push(parsed.error);

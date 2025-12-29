@@ -106,6 +106,25 @@ a {
   gap: 1rem;
 }
 
+.input-field {
+  display: grid;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.input-field input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+.import-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 .file-input {
   border: 1px dashed #cbd5f5;
   padding: 1rem;
@@ -131,8 +150,140 @@ a {
   border-radius: 12px;
 }
 
+.import-error-panel {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.import-error-panel h2 {
+  margin: 0;
+  color: #991b1b;
+}
+
+.import-error-hint {
+  color: #92400e;
+}
+
+.import-error-details {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.import-error-group ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.import-progress {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.import-progress__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+}
+
+.import-progress__item.is-active {
+  border-color: #2563eb;
+  color: #1e3a8a;
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.import-progress__item.is-complete {
+  color: #10b981;
+}
+
+.import-progress__detail {
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.import-zip {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #ffffff;
+  display: grid;
+  gap: 0.75rem;
+}
+
 .dataset-summary {
   display: grid;
   gap: 0.5rem;
   color: #374151;
+}
+
+.dataset-browse {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.dataset-types ul,
+.dataset-records ul,
+.record-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.dataset-records {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #ffffff;
+}
+
+.record-group {
+  margin-bottom: 1rem;
+}
+
+.record-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.record-link.is-active {
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.record-details {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #ffffff;
+}
+
+.record-card pre {
+  background: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.record-links {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }

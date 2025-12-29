@@ -11,3 +11,4 @@ export * from './zipSnapshot';
 export * from './export';
 export * from './graph';
 export * from './graphFs';
+export * from './validateDatasetSnapshot';
