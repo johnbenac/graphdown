@@ -1,0 +1,26 @@
+import type { PersistStore } from "./PersistStore";
+
+export class MemoryStore implements PersistStore {
+  private data = new Map<string, unknown>();
+
+  async get<T>(key: string): Promise<T | undefined> {
+    return this.data.get(key) as T | undefined;
+  }
+
+  async set<T>(key: string, value: T): Promise<void> {
+    this.data.set(key, value);
+  }
+
+  async del(key: string): Promise<void> {
+    this.data.delete(key);
+  }
+
+  async clear(): Promise<void> {
+    this.data.clear();
+  }
+
+  async keys(prefix = ""): Promise<string[]> {
+    const keys = [...this.data.keys()];
+    return prefix ? keys.filter((key) => key.startsWith(prefix)) : keys;
+  }
+}

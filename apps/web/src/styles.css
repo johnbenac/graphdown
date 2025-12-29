@@ -122,3 +122,41 @@ a {
 .file-name {
   font-weight: 600;
 }
+
+.sidebar-stack {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.sidebar-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.sidebar-value {
+  font-weight: 600;
+}
+
+.sidebar-meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.dataset-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.dataset-meta {
+  color: #6b7280;
+  margin: 0.35rem 0;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-weight: 600;
+}

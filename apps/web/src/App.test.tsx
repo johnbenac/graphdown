@@ -1,30 +1,39 @@
 import { render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { appRoutes } from "./App";
+import DatasetProvider from "./state/DatasetProvider";
+
+const renderWithProviders = (router: ReturnType<typeof createMemoryRouter>) => {
+  render(
+    <DatasetProvider forceMemory>
+      <RouterProvider router={router} />
+    </DatasetProvider>,
+  );
+};
 
 describe("App routes", () => {
-  it("renders navigation links", () => {
+  it("renders navigation links", async () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ["/import"] });
-    render(<RouterProvider router={router} />);
+    renderWithProviders(router);
 
-    expect(screen.getByTestId("topnav")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Import" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Datasets" })).toBeInTheDocument();
+    expect(await screen.findByTestId("topnav")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Import" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Datasets" })).toBeInTheDocument();
   });
 
-  it("renders the import route", () => {
+  it("renders the import route", async () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ["/import"] });
-    render(<RouterProvider router={router} />);
+    renderWithProviders(router);
 
-    expect(screen.getByTestId("import-screen")).toBeInTheDocument();
-    expect(screen.getByText("Upload a dataset zip to browse.")).toBeInTheDocument();
+    expect(await screen.findByTestId("import-screen")).toBeInTheDocument();
+    expect(await screen.findByText("Upload a dataset zip to browse.")).toBeInTheDocument();
   });
 
-  it("renders the datasets route", () => {
+  it("renders the datasets route", async () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ["/datasets"] });
-    render(<RouterProvider router={router} />);
+    renderWithProviders(router);
 
-    expect(screen.getByTestId("dataset-screen")).toBeInTheDocument();
-    expect(screen.getByText("Import a dataset to begin")).toBeInTheDocument();
+    expect(await screen.findByTestId("dataset-screen")).toBeInTheDocument();
+    expect(await screen.findByText("Import a dataset to begin")).toBeInTheDocument();
   });
 });
