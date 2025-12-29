@@ -50,6 +50,12 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
             path: "types/note.md",
             name: "note.md",
             download_url: "https://example.com/types/note.md"
+          },
+          {
+            type: "file",
+            path: "types/task.md",
+            name: "task.md",
+            download_url: "https://example.com/types/task.md"
           }
         ])
       });
@@ -65,6 +71,12 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
             type: "dir",
             path: "records/note",
             name: "note",
+            download_url: null
+          },
+          {
+            type: "dir",
+            path: "records/task",
+            name: "task",
             download_url: null
           }
         ])
@@ -82,6 +94,22 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
             path: "records/note/record-1.md",
             name: "record-1.md",
             download_url: "https://example.com/records/note/record-1.md"
+          }
+        ])
+      });
+      return;
+    }
+
+    if (url.pathname === "/repos/owner/repo/contents/records/task") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            type: "file",
+            path: "records/task/record-1.md",
+            name: "record-1.md",
+            download_url: "https://example.com/records/task/record-1.md"
           }
         ])
       });
@@ -134,6 +162,25 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
       });
       return;
     }
+    if (url.endsWith("/types/task.md")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/plain",
+        body: [
+          "---",
+          "id: type:task",
+          "datasetId: dataset:demo",
+          "typeId: sys:type",
+          "createdAt: 2024-01-01",
+          "updatedAt: 2024-01-02",
+          "fields:",
+          "  recordTypeId: task",
+          "  pluralName: Tasks",
+          "---"
+        ].join("\n")
+      });
+      return;
+    }
     if (url.endsWith("/records/note/record-1.md")) {
       await route.fulfill({
         status: 200,
@@ -151,6 +198,23 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
       });
       return;
     }
+    if (url.endsWith("/records/task/record-1.md")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/plain",
+        body: [
+          "---",
+          "id: record:task-1",
+          "datasetId: dataset:demo",
+          "typeId: task",
+          "createdAt: 2024-01-01",
+          "updatedAt: 2024-01-02",
+          "fields: {}",
+          "---"
+        ].join("\n")
+      });
+      return;
+    }
 
     await route.fulfill({ status: 404 });
   });
@@ -160,8 +224,15 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
   await page.getByRole("button", { name: "Import from GitHub" }).click();
 
   await expect(page.locator(".import-progress")).toBeVisible();
-  await expect(page).toHaveURL(/\/datasets/);
+  await expect(page).toHaveURL(/\/datasets\/note/);
   await expect(page.getByTestId("dataset-screen")).toBeVisible();
+  await expect(page.getByTestId("type-nav")).toBeVisible();
+  await expect(page.getByRole("link", { name: /note/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /task/i })).toBeVisible();
+
+  await page.getByRole("link", { name: /task/i }).click();
+  await expect(page).toHaveURL(/\/datasets\/task/);
+  await expect(page.getByTestId("record-list")).toBeVisible();
 });
 
 test("shows an invalid URL error for malformed GitHub URLs", async ({ page }) => {
