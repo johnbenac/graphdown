@@ -21,12 +21,6 @@ Graphdown datasets are defined by the Graphdown Dataset Validity Specification.
 ## Requirements
 
 - **Node.js** (v20 or higher)
-- **Python 3** with PyYAML library
-
-Install PyYAML if needed:
-```bash
-pip install pyyaml
-```
 
 ## Usage
 
