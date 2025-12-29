@@ -170,6 +170,14 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
+  it("ignores non-markdown files placed directly under records/", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/.gitignore", encoder.encode("*\n"));
+    snapshot.files.set("records/notes.txt", encoder.encode("hello"));
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("reports unknown record directories", () => {
     const snapshot = snapshotFromEntries([
       [
