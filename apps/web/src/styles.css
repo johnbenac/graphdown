@@ -106,6 +106,64 @@ a {
   gap: 1rem;
 }
 
+.import-field {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.import-field input[type="text"] {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 1rem;
+}
+
+.import-advanced {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.import-advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.import-progress {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.import-progress__step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #4b5563;
+}
+
+.import-progress__step.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.import-progress__step.complete {
+  border-color: #16a34a;
+  background: #ecfdf3;
+  color: #065f46;
+}
+
 .file-input {
   border: 1px dashed #cbd5f5;
   padding: 1rem;
@@ -131,8 +189,119 @@ a {
   border-radius: 12px;
 }
 
+.import-error h2 {
+  margin-top: 0;
+}
+
+.import-error__hint {
+  color: #7f1d1d;
+  font-style: italic;
+}
+
+.import-error__meta {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.import-error__details {
+  display: grid;
+  gap: 1rem;
+}
+
+.import-error__group ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
 .dataset-summary {
   display: grid;
   gap: 0.5rem;
   color: #374151;
+}
+
+.dataset-browser {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.dataset-overview {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+.dataset-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.dataset-description {
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.dataset-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.dataset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.dataset-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.record-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.record-group h3 {
+  margin-bottom: 0.5rem;
+}
+
+.record-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2563eb;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.record-link.active {
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.record-details pre {
+  background: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.record-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.muted {
+  color: #6b7280;
 }

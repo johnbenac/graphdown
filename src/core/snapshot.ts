@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { RepoSnapshot } from './snapshotTypes';
+import { decodeUtf8 } from './text';
 
 export type { RepoSnapshot } from './snapshotTypes';
 
@@ -37,5 +38,5 @@ export function getTextFile(snapshot: RepoSnapshot, relPath: string): string {
   if (!contents) {
     throw new Error(`Missing file ${relPath}`);
   }
-  return Buffer.from(contents).toString('utf8');
+  return decodeUtf8(contents);
 }
