@@ -1,0 +1,2 @@
+Roundtrip asset content.
+Line two.
