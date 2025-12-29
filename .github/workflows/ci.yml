@@ -25,6 +25,8 @@ jobs:
 
   validate-example-datasets:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout graphdown
         uses: actions/checkout@v4
@@ -37,6 +39,16 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Validate research-lab-dataset (URL JSON)
+        run: |
+          set -euo pipefail
+          node dist/cli.js validate https://github.com/johnbenac/research-lab-dataset --json | node -e "let s='';process.stdin.on('data',c=>s+=c);process.stdin.on('end',()=>{const r=JSON.parse(s); if(!r.ok){console.error(r); process.exit(1);} });"
+          echo "research-lab-dataset (url): ok"
+      - name: Validate product-tracker-dataset (URL JSON)
+        run: |
+          set -euo pipefail
+          node dist/cli.js validate https://github.com/johnbenac/product-tracker-dataset --json | node -e "let s='';process.stdin.on('data',c=>s+=c);process.stdin.on('end',()=>{const r=JSON.parse(s); if(!r.ok){console.error(r); process.exit(1);} });"
+          echo "product-tracker-dataset (url): ok"
       - name: Validate research-lab-dataset (JSON)
         run: |
           set -euo pipefail
