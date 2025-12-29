@@ -291,6 +291,7 @@ function parseArgs(args) {
   let datasetPath;
   let json = false;
   let pretty = false;
+  let error;
 
   for (const arg of args) {
     if (arg === '--json') {
@@ -302,23 +303,30 @@ function parseArgs(args) {
       continue;
     }
     if (arg.startsWith('--')) {
-      return { error: `Unknown option: ${arg}` };
+      error = `Unknown option: ${arg}`;
+      break;
     }
     if (!datasetPath) {
       datasetPath = arg;
       continue;
     }
-    return { error: `Unexpected argument: ${arg}` };
+    error = `Unexpected argument: ${arg}`;
+    break;
   }
 
-  if (!datasetPath) {
-    return { error: 'Missing dataset path.' };
+  if (!error && !datasetPath) {
+    error = 'Missing dataset path.';
   }
-  if (json && pretty) {
-    return { error: 'Cannot use --json and --pretty together.' };
+  if (!error && json && pretty) {
+    error = 'Cannot use --json and --pretty together.';
   }
 
-  return { datasetPath, json, pretty };
+  return {
+    datasetPath,
+    json,
+    pretty,
+    error
+  };
 }
 
 function printUsage(message) {
@@ -330,17 +338,30 @@ function printUsage(message) {
 
 function main() {
   const parsed = parseArgs(process.argv.slice(2));
+  const outputMode = parsed.json ? 'json' : 'pretty';
   if (parsed.error) {
-    printUsage(parsed.error);
+    const error = makeError('E_INTERNAL', parsed.error);
+    if (outputMode === 'json') {
+      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+    } else {
+      printUsage(parsed.error);
+    }
     process.exit(2);
   }
-  const { datasetPath, json, pretty } = parsed;
-  const outputMode = json ? 'json' : 'pretty';
+  const { datasetPath } = parsed;
   let rootPath = datasetPath;
   // If the argument looks like a GitHub URL, instruct the user to clone it.
   const githubRe = /^https?:\/\/github\.com\//i;
   if (githubRe.test(datasetPath)) {
-    console.error('Validation of remote GitHub URLs is not supported by this script. Clone the repository locally and provide its path instead.');
+    const error = makeError(
+      'E_GITHUB_URL_UNSUPPORTED',
+      'Validation of remote GitHub URLs is not supported. Clone the repository locally and provide its path instead.'
+    );
+    if (outputMode === 'json') {
+      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+    } else {
+      process.stderr.write(formatPretty([error]));
+    }
     process.exit(2);
   }
   if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {

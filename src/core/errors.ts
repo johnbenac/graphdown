@@ -13,6 +13,7 @@ export type ValidationErrorCode =
   | 'E_DUPLICATE_ID'
   | 'E_DUPLICATE_RECORD_TYPE_ID'
   | 'E_DATASET_FIELDS_MISSING'
+  | 'E_GITHUB_URL_UNSUPPORTED'
   | 'E_INTERNAL';
 
 export interface ValidationError {
