@@ -275,9 +275,64 @@ a {
   color: #374151;
 }
 
+.dataset-view {
+  display: grid;
+  gap: 1rem;
+}
+
+.dataset-header {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.dataset-header__eyebrow {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 .dataset-browse {
   display: grid;
   gap: 1.5rem;
+}
+
+.type-nav {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.type-nav__header {
+  font-weight: 600;
+  color: #111827;
+}
+
+.type-nav__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.type-nav__link {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  text-decoration: none;
+}
+
+.type-nav__link.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.type-nav__count {
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .dataset-types ul,
