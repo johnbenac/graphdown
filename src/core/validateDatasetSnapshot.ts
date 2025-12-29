@@ -50,17 +50,34 @@ function listRecordDirs(files: string[]): string[] {
   return [...dirs].sort((a, b) => a.localeCompare(b));
 }
 
+const ALLOWED_RECORDS_ROOT_FILES = new Set(['.gitkeep', 'readme.md']);
+
+function isAllowedRecordsRootFile(path: string): boolean {
+  if (!path.startsWith('records/')) {
+    return false;
+  }
+  const parts = path.split('/');
+  if (parts.length !== 2) {
+    return false;
+  }
+  const name = parts[1];
+  if (!name) {
+    return false;
+  }
+  return ALLOWED_RECORDS_ROOT_FILES.has(name.toLowerCase());
+}
+
 function requireString(
   errors: ValidationError[],
   yaml: Record<string, unknown>,
   key: string,
   file: string,
   label?: string
-): string | null {
+): string | undefined {
   const value = getString(yaml, key);
   if (!value) {
     errors.push(makeError('E_REQUIRED_FIELD_MISSING', `${label ?? key} is required`, file));
-    return null;
+    return undefined;
   }
   return value;
 }
@@ -79,6 +96,22 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
   if (!hasDir('records')) {
     return { ok: false, errors: [makeError('E_DIR_MISSING', 'Missing required `records/` directory')] };
+  }
+
+  for (const file of files) {
+    if (!file.startsWith('records/')) {
+      continue;
+    }
+    const parts = file.split('/');
+    if (parts.length === 2 && !isAllowedRecordsRootFile(file)) {
+      errors.push(
+        makeError(
+          'E_UNKNOWN_RECORD_DIR',
+          `Record files must be stored under records/<recordTypeId>/. Found ${file} directly under records/.`,
+          file
+        )
+      );
+    }
   }
 
   const datasetFiles = listMarkdownFiles(files, 'datasets', false);
