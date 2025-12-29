@@ -26,7 +26,9 @@ describe("App routes", () => {
     );
 
     expect(await screen.findByTestId("import-screen")).toBeInTheDocument();
-    expect(screen.getByText("Upload a dataset zip to browse.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Paste a GitHub repository URL to import a dataset.")
+    ).toBeInTheDocument();
   });
 
   it("renders the datasets route", async () => {

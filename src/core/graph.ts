@@ -45,6 +45,15 @@ export type BuildGraphResult =
 
 const RECORD_TYPE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
+const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
+
+function decodeBytes(bytes: Uint8Array): string {
+  if (decoder) {
+    return decoder.decode(bytes);
+  }
+  return Buffer.from(bytes).toString('utf8');
+}
+
 class GraphImpl implements Graph {
   constructor(
     public nodesById: Map<string, GraphNode>,
@@ -203,7 +212,7 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     if (!raw) {
       continue;
     }
-    const text = Buffer.from(raw).toString('utf8');
+    const text = decodeBytes(raw);
     const parsed = parseMarkdownRecord(text, file);
     if (!parsed.ok) {
       errors.push(parsed.error);
