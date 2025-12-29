@@ -1,6 +1,7 @@
 # Node.js
 node_modules/
 dist/
+apps/web/dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
