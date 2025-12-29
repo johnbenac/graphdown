@@ -36,6 +36,8 @@ jobs:
 
       - name: Build web app
         run: npm --workspace apps/web run build
+        env:
+          PAGES_BASE: /${{ github.event.repository.name }}/
 
       - name: Disable Jekyll
         run: touch apps/web/dist/.nojekyll
