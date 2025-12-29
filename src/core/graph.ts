@@ -5,6 +5,7 @@ import type { RepoSnapshot } from './snapshotTypes';
 import { extractWikiLinks } from './wikiLinks';
 import { parseYamlObject } from './yaml';
 import { getString, isObject } from './types';
+import { decodeUtf8 } from './encoding';
 
 export type GraphNodeKind = 'dataset' | 'type' | 'record';
 
@@ -203,7 +204,7 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     if (!raw) {
       continue;
     }
-    const text = Buffer.from(raw).toString('utf8');
+    const text = decodeUtf8(raw);
     const parsed = parseMarkdownRecord(text, file);
     if (!parsed.ok) {
       errors.push(parsed.error);

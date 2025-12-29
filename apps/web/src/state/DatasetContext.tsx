@@ -1,17 +1,64 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { ValidationError } from "../../../../src/core/errors";
+import type { Graph } from "../../../../src/core/graph";
 import { buildGraphFromSnapshot } from "../../../../src/core/graph";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
+import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
+import { parseGitHubUrl } from "../import/github/parseGitHubUrl";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
 import type { LoadedDataset } from "../persistence/types";
 import { FORMAT_VERSIONS } from "../persistence/versions";
 import { createPersistStore } from "../storage/createPersistStore";
 
+type ImportErrorCategory =
+  | "invalid_url"
+  | "not_found"
+  | "auth_required"
+  | "rate_limited"
+  | "dataset_invalid"
+  | "network"
+  | "unknown";
+
+export type ImportErrorState =
+  | {
+      category: Exclude<ImportErrorCategory, "dataset_invalid">;
+      title: string;
+      message: string;
+      hint?: string;
+      status?: number;
+    }
+  | {
+      category: "dataset_invalid";
+      title: string;
+      message: string;
+      errors: ValidationError[];
+    };
+
+export type ImportPhase =
+  | "idle"
+  | "validating_url"
+  | "fetching_repo"
+  | "listing_files"
+  | "downloading_files"
+  | "validating_dataset"
+  | "building_graph"
+  | "persisting"
+  | "done";
+
+export type ImportProgress =
+  | { phase: "idle" }
+  | { phase: Exclude<ImportPhase, "downloading_files">; detail?: string }
+  | { phase: "downloading_files"; completed: number; total: number; detail?: string };
+
 type DatasetContextValue = {
   status: "idle" | "loading" | "ready" | "error";
+  progress: ImportProgress;
   activeDataset?: LoadedDataset;
-  error?: string;
-  importDataset: (file: File) => Promise<void>;
+  error?: ImportErrorState;
+  importDatasetZip: (file: File) => Promise<void>;
+  importDatasetFromGitHub: (url: string) => Promise<void>;
   clearPersistence: () => Promise<void>;
 };
 
@@ -27,16 +74,40 @@ function createDatasetId() {
 async function parseGraph(snapshot: RepoSnapshot) {
   const result = buildGraphFromSnapshot(snapshot);
   if (!result.ok) {
-    const errorMessages = result.errors.map((error) => error.message).join("\n");
-    throw new Error(`Graph parsing failed:\n${errorMessages}`);
+    return { ok: false, errors: result.errors } as const;
   }
-  return result.graph;
+  return { ok: true, graph: result.graph } as const;
+}
+
+function toUnknownError(message: string, error?: unknown): ImportErrorState {
+  if (error && typeof error === "object" && "category" in error) {
+    return error as ImportErrorState;
+  }
+  return {
+    category: "unknown",
+    title: "Import failed",
+    message
+  };
+}
+
+function toNetworkError(error: unknown): ImportErrorState {
+  const message = error instanceof Error ? error.message : "Network request failed.";
+  return {
+    category: "network",
+    title: "Network error",
+    message
+  };
+}
+
+function isImportErrorState(value: unknown): value is ImportErrorState {
+  return !!value && typeof value === "object" && "category" in value;
 }
 
 export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<DatasetContextValue["status"]>("idle");
   const [activeDataset, setActiveDataset] = useState<LoadedDataset | undefined>(undefined);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<ImportErrorState | undefined>(undefined);
+  const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
 
   const store = useMemo(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -45,13 +116,25 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const persistence = useMemo(
-    () => createPersistence({ store, parseGraph, logger: console }),
+    () =>
+      createPersistence({
+        store,
+        parseGraph: async (snapshot) => {
+          const result = await parseGraph(snapshot);
+          if (!result.ok) {
+            throw new Error(result.errors.map((err) => err.message).join("\n"));
+          }
+          return result.graph;
+        },
+        logger: console
+      }),
     [store]
   );
 
   const loadActive = useCallback(async () => {
     setStatus("loading");
     setError(undefined);
+    setProgress({ phase: "idle" });
     try {
       const dataset = await persistence.loadActiveDataset();
       setActiveDataset(dataset);
@@ -60,7 +143,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       console.warn("Failed to load persisted dataset.", err);
       setActiveDataset(undefined);
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Failed to load dataset.");
+      setError({
+        category: "unknown",
+        title: "Failed to load dataset",
+        message: err instanceof Error ? err.message : "Failed to load dataset."
+      });
     }
   }, [persistence]);
 
@@ -78,36 +165,155 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     };
   }, [persistence]);
 
-  const importDataset = useCallback(
+  const saveDataset = useCallback(
+    async (input: {
+      repoSnapshot: RepoSnapshot;
+      parsedGraph: Graph;
+      label?: string;
+      source: string;
+    }) => {
+      const datasetId = createDatasetId();
+      const now = Date.now();
+      const meta = {
+        id: datasetId,
+        createdAt: now,
+        updatedAt: now,
+        snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
+        graphFormatVersion: FORMAT_VERSIONS.graph,
+        uiStateFormatVersion: FORMAT_VERSIONS.uiState,
+        label: input.label,
+        source: input.source
+      };
+      await persistence.saveDataset({
+        datasetId,
+        meta,
+        repoSnapshot: input.repoSnapshot,
+        parsedGraph: input.parsedGraph
+      });
+      await persistence.setActiveDatasetId(datasetId);
+      setActiveDataset({ meta, repoSnapshot: input.repoSnapshot, parsedGraph: input.parsedGraph });
+    },
+    [persistence]
+  );
+
+  const importDatasetZip = useCallback(
     async (file: File) => {
       setStatus("loading");
       setError(undefined);
+      setProgress({ phase: "listing_files", detail: file.name });
       try {
         const repoSnapshot = await readZipSnapshot(file);
-        const parsedGraph = await parseGraph(repoSnapshot);
-        const datasetId = createDatasetId();
-        const now = Date.now();
-        const meta = {
-          id: datasetId,
-          createdAt: now,
-          updatedAt: now,
-          snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
-          graphFormatVersion: FORMAT_VERSIONS.graph,
-          uiStateFormatVersion: FORMAT_VERSIONS.uiState,
+        setProgress({ phase: "validating_dataset" });
+        const validation = validateDatasetSnapshot(repoSnapshot);
+        if (!validation.ok) {
+          setStatus("error");
+          setError({
+            category: "dataset_invalid",
+            title: "Dataset invalid",
+            message: "The dataset failed validation.",
+            errors: validation.errors
+          });
+          return;
+        }
+        setProgress({ phase: "building_graph" });
+        const graphResult = await parseGraph(repoSnapshot);
+        if (!graphResult.ok) {
+          setStatus("error");
+          setError({
+            category: "dataset_invalid",
+            title: "Dataset invalid",
+            message: "The dataset could not be parsed.",
+            errors: graphResult.errors
+          });
+          return;
+        }
+        setProgress({ phase: "persisting" });
+        await saveDataset({
+          repoSnapshot,
+          parsedGraph: graphResult.graph,
           label: file.name,
           source: "import"
-        };
-        await persistence.saveDataset({ datasetId, meta, repoSnapshot, parsedGraph });
-        await persistence.setActiveDatasetId(datasetId);
-        setActiveDataset({ meta, repoSnapshot, parsedGraph });
+        });
+        setProgress({ phase: "done" });
         setStatus("ready");
       } catch (err) {
         console.warn("Failed to import dataset.", err);
         setStatus("error");
-        setError(err instanceof Error ? err.message : "Failed to import dataset.");
+        setError(toUnknownError("Failed to import dataset.", err));
       }
     },
-    [persistence]
+    [saveDataset]
+  );
+
+  const importDatasetFromGitHub = useCallback(
+    async (url: string) => {
+      setStatus("loading");
+      setError(undefined);
+      setProgress({ phase: "validating_url" });
+
+      const parsed = parseGitHubUrl(url);
+      if (!parsed.ok) {
+        setStatus("error");
+        setError({
+          category: "invalid_url",
+          title: "Invalid GitHub URL",
+          message: parsed.message,
+          hint: parsed.hint
+        });
+        return;
+      }
+
+      try {
+        const repoSnapshot = await loadGitHubSnapshot({
+          ...parsed.value,
+          onProgress: setProgress
+        });
+        setProgress({ phase: "validating_dataset" });
+        const validation = validateDatasetSnapshot(repoSnapshot);
+        if (!validation.ok) {
+          setStatus("error");
+          setError({
+            category: "dataset_invalid",
+            title: "Dataset invalid",
+            message: "The dataset failed validation.",
+            errors: validation.errors
+          });
+          return;
+        }
+        setProgress({ phase: "building_graph" });
+        const graphResult = await parseGraph(repoSnapshot);
+        if (!graphResult.ok) {
+          setStatus("error");
+          setError({
+            category: "dataset_invalid",
+            title: "Dataset invalid",
+            message: "The dataset could not be parsed.",
+            errors: graphResult.errors
+          });
+          return;
+        }
+        setProgress({ phase: "persisting" });
+        await saveDataset({
+          repoSnapshot,
+          parsedGraph: graphResult.graph,
+          label: parsed.value.canonicalRepoUrl,
+          source: "github"
+        });
+        setProgress({ phase: "done" });
+        setStatus("ready");
+      } catch (err) {
+        console.warn("Failed to import GitHub dataset.", err);
+        setStatus("error");
+        if (isImportErrorState(err)) {
+          setError(err);
+        } else if (err instanceof TypeError) {
+          setError(toNetworkError(err));
+        } else {
+          setError(toUnknownError("Failed to import dataset.", err));
+        }
+      }
+    },
+    [saveDataset]
   );
 
   const clearPersistence = useCallback(async () => {
@@ -117,7 +323,17 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   }, [persistence]);
 
   return (
-    <DatasetContext.Provider value={{ status, activeDataset, error, importDataset, clearPersistence }}>
+    <DatasetContext.Provider
+      value={{
+        status,
+        progress,
+        activeDataset,
+        error,
+        importDatasetZip,
+        importDatasetFromGitHub,
+        clearPersistence
+      }}
+    >
       {children}
     </DatasetContext.Provider>
   );
