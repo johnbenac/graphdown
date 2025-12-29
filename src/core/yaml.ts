@@ -20,12 +20,30 @@ export function parseYaml(yamlString: string): unknown {
     'except Exception as e:',
     '    print(json.dumps({"__error__": str(e)}))'
   ].join('\n');
-  const result = spawnSync('python', ['-c', script], {
-    input: yamlString,
-    encoding: 'utf-8'
-  });
-  if (result.error) {
-    throw new Error(result.error.message);
+  const candidates = ['python3', 'python'];
+  let result;
+  let sawMissingPython = false;
+  for (const command of candidates) {
+    result = spawnSync(command, ['-c', script], {
+      input: yamlString,
+      encoding: 'utf8'
+    });
+    if (result.error) {
+      if ('code' in result.error && result.error.code === 'ENOENT') {
+        sawMissingPython = true;
+        continue;
+      }
+      throw new Error(result.error.message);
+    }
+    if (result.status !== 0) {
+      const stderr = result.stderr.trim();
+      const details = stderr ? `: ${stderr}` : '';
+      throw new Error(`YAML parse failed via ${command}${details}`);
+    }
+    break;
+  }
+  if (!result || (result.error && sawMissingPython)) {
+    throw new Error('Python not found; install python3 and PyYAML');
   }
   let parsed: unknown;
   try {
