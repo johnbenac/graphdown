@@ -161,6 +161,16 @@ describe("validateDatasetSnapshot", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("reports records placed directly under records/", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/record-1.md", encoder.encode("---\nid: record:bad\n---"));
+    const result = validateDatasetSnapshot(snapshot);
+    if (result.ok) {
+      throw new Error("Expected validation errors");
+    }
+    expect(result.errors.map((error) => error.code)).toContain("E_UNKNOWN_RECORD_DIR");
+  });
+
   it("reports unknown record directories", () => {
     const snapshot = snapshotFromEntries([
       [
