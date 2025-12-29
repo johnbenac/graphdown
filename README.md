@@ -43,6 +43,19 @@ You can also invoke it as a package (once published or via `npm link`):
 npx graphdown validate <datasetPath>
 ```
 
+Choose the output mode:
+
+```bash
+# Human mode (default)
+graphdown validate ./my-dataset
+
+# Explicit human mode
+graphdown validate ./my-dataset --pretty
+
+# Machine-readable mode
+graphdown validate ./my-dataset --json
+```
+
 ### Examples
 
 ```bash
@@ -62,10 +75,12 @@ Validation passed: dataset is valid.
 
 If there are errors:
 ```
-Validation failed with the following errors:
- - Missing required `datasets/` directory
- - Dataset id must be a string beginning with "dataset:"
- ...
+Validation failed with 2 error(s):
+ - [E_DIR_MISSING] Missing required `datasets/` directory
+   hint: Ensure dataset root contains datasets/, types/, and records/.
+ - [E_FRONT_MATTER_MISSING] Front matter error: Missing YAML front matter delimiter
+   file: datasets/dataset--name.md
+   hint: Add YAML front matter delimited by --- at the top of the file.
 ```
 
 ## Dataset Structure
