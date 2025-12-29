@@ -34,13 +34,13 @@ npm run build
 Run the CLI locally:
 
 ```bash
-node dist/cli.js validate <datasetPath>
+node dist/cli.js validate <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]
 ```
 
 You can also invoke it as a package (once published or via `npm link`):
 
 ```bash
-npx graphdown validate <datasetPath>
+npx graphdown validate <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]
 ```
 
 Choose the output mode:
@@ -64,6 +64,9 @@ node dist/cli.js validate ./my-dataset
 
 # Validate an example dataset
 node dist/cli.js validate ../product-tracker-dataset
+
+# Validate a GitHub dataset
+node dist/cli.js validate https://github.com/johnbenac/product-tracker-dataset --json
 ```
 
 ### Output

@@ -9,6 +9,13 @@ const hintMap: Partial<Record<ValidationErrorCode, string>> = {
     'Close YAML front matter with a second ---.',
   E_GITHUB_URL_UNSUPPORTED:
     'Clone the repository and validate the local folder path instead.',
+  E_GITHUB_URL_INVALID_FORMAT:
+    'Supported: github.com/<owner>/<repo> or github.com/<owner>/<repo>/tree/<ref>/<subdir>.',
+  E_GITHUB_NOT_FOUND: 'Check repo name; if private, provide GITHUB_TOKEN.',
+  E_GITHUB_AUTH_REQUIRED: 'Set GITHUB_TOKEN env var (or make repo public).',
+  E_GITHUB_RATE_LIMITED: 'Set GITHUB_TOKEN; wait until reset.',
+  E_GITHUB_REF_NOT_FOUND: 'Use --ref <ref> or a /tree/<ref>/ URL.',
+  E_GITHUB_FETCH_FAILED: 'Re-run; if persistent open an issue.',
   E_USAGE: 'Provide a dataset path and valid flags.',
   E_INTERNAL: 'Re-run with NODE_DEBUG=graphdown or open an issue.'
 };

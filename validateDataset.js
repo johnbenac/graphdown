@@ -20,6 +20,8 @@ const fs = require('fs');
 const path = require('path');
 const { extractFrontMatter, parseYamlObject, makeError } = require('./dist/core');
 const { formatJson, formatPretty } = require('./dist/cli/output');
+const { parseGitHubRepoUrl } = require('./dist/github/url');
+const { fetchGitHubSnapshotToTempDir } = require('./dist/github/fetch');
 
 
 /**
@@ -291,15 +293,42 @@ function parseArgs(args) {
   let datasetPath;
   let json = false;
   let pretty = false;
+  let ref;
+  let subdir;
   let error;
 
-  for (const arg of args) {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
     if (arg === '--json') {
       json = true;
       continue;
     }
     if (arg === '--pretty') {
       pretty = true;
+      continue;
+    }
+    if (arg === '--ref' || arg.startsWith('--ref=')) {
+      const value = arg === '--ref' ? args[index + 1] : arg.slice('--ref='.length);
+      if (arg === '--ref') {
+        index += 1;
+      }
+      if (!value) {
+        error = 'Missing value for --ref.';
+        break;
+      }
+      ref = value;
+      continue;
+    }
+    if (arg === '--subdir' || arg.startsWith('--subdir=')) {
+      const value = arg === '--subdir' ? args[index + 1] : arg.slice('--subdir='.length);
+      if (arg === '--subdir') {
+        index += 1;
+      }
+      if (!value) {
+        error = 'Missing value for --subdir.';
+        break;
+      }
+      subdir = value;
       continue;
     }
     if (arg.startsWith('--')) {
@@ -321,57 +350,86 @@ function parseArgs(args) {
     error = 'Cannot use --json and --pretty together.';
   }
 
-  return { datasetPath, json, pretty, error };
+  return { datasetPath, json, pretty, ref, subdir, error };
 }
 
 function printUsage(message) {
   if (message) {
     console.error(message);
   }
-  console.error('Usage: node validateDataset.js <datasetPath> [--json|--pretty]');
+  console.error(
+    'Usage: node validateDataset.js <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]'
+  );
 }
 
-function main() {
+async function main() {
   const parsed = parseArgs(process.argv.slice(2));
   const outputMode = parsed.json ? 'json' : 'pretty';
-  if (parsed.error) {
-    const error = makeError('E_USAGE', parsed.error);
-    if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
-    } else {
-      printUsage(parsed.error);
-    }
-    process.exit(2);
-  }
-  const { datasetPath } = parsed;
-  let rootPath = datasetPath;
-  // If the argument looks like a GitHub URL, instruct the user to clone it.
-  const githubRe = /^https?:\/\/github\.com\//i;
-  if (githubRe.test(datasetPath)) {
-    const error = makeError(
-      'E_GITHUB_URL_UNSUPPORTED',
-      'Validation of remote GitHub URLs is not supported. Clone the repository locally and provide its path instead.'
-    );
-    if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
-    } else {
-      process.stderr.write(formatPretty([error]));
-    }
-    process.exit(2);
-  }
-  if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
-    const error = makeError(
-      'E_INTERNAL',
-      `Dataset path ${rootPath} does not exist or is not a directory`
-    );
-    if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
-    } else {
-      process.stderr.write(formatPretty([error]));
-    }
-    process.exit(2);
-  }
+  let cleanup;
+
   try {
+    if (parsed.error) {
+      const error = makeError('E_USAGE', parsed.error);
+      if (outputMode === 'json') {
+        process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      } else {
+        printUsage(parsed.error);
+      }
+      process.exitCode = 2;
+      return;
+    }
+    const { datasetPath, ref, subdir } = parsed;
+    let rootPath = datasetPath;
+    // If the argument looks like a GitHub URL, fetch it.
+    const githubRe = /^https?:\/\/github\.com\/|^github\.com\//i;
+    if (githubRe.test(datasetPath)) {
+      const parsedUrl = parseGitHubRepoUrl(datasetPath);
+      if (!parsedUrl.ok) {
+        if (outputMode === 'json') {
+          process.stdout.write(formatJson({ ok: false, errors: [parsedUrl.error] }));
+        } else {
+          process.stderr.write(formatPretty([parsedUrl.error]));
+        }
+        process.exitCode = 2;
+        return;
+      }
+      const repoRef = { ...parsedUrl.value };
+      if (ref) {
+        repoRef.ref = ref;
+      }
+      if (subdir) {
+        repoRef.subdir = subdir;
+      }
+      const snapshot = await fetchGitHubSnapshotToTempDir(repoRef, {
+        token: process.env.GITHUB_TOKEN
+      });
+      if (!snapshot.ok) {
+        if (outputMode === 'json') {
+          process.stdout.write(formatJson({ ok: false, errors: snapshot.errors }));
+        } else {
+          process.stderr.write(formatPretty(snapshot.errors));
+        }
+        process.exitCode = 2;
+        return;
+      }
+      rootPath = snapshot.rootDir;
+      cleanup = snapshot.cleanup;
+    }
+
+    if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
+      const error = makeError(
+        'E_INTERNAL',
+        `Dataset path ${rootPath} does not exist or is not a directory`
+      );
+      if (outputMode === 'json') {
+        process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      } else {
+        process.stderr.write(formatPretty([error]));
+      }
+      process.exitCode = 2;
+      return;
+    }
+
     const result = validateDataset(rootPath);
     if (result.errors.length === 0) {
       if (outputMode === 'json') {
@@ -386,7 +444,7 @@ function main() {
     } else {
       process.stderr.write(formatPretty(result.errors));
     }
-    process.exit(1);
+    process.exitCode = 1;
   } catch (err) {
     const message = err && err.message ? err.message : String(err);
     const error = makeError('E_INTERNAL', `Unexpected error: ${message}`);
@@ -395,7 +453,11 @@ function main() {
     } else {
       process.stderr.write(formatPretty([error]));
     }
-    process.exit(2);
+    process.exitCode = 2;
+  } finally {
+    if (cleanup && !process.env.NODE_DEBUG?.includes('graphdown')) {
+      await cleanup();
+    }
   }
 }
 
