@@ -11,6 +11,9 @@ export default function TopNav() {
         <NavLink className="top-nav__link" to="/datasets">
           Datasets
         </NavLink>
+        <NavLink className="top-nav__link" to="/export">
+          Export
+        </NavLink>
       </div>
     </nav>
   );
