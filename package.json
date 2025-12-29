@@ -1,0 +1,28 @@
+{
+  "name": "graphdown",
+  "version": "0.1.0",
+  "description": "Graphdown dataset validator CLI",
+  "main": "dist/cli.js",
+  "type": "commonjs",
+  "bin": {
+    "graphdown": "dist/cli.js"
+  },
+  "repository": "https://github.com/johnbenac/graphdown",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/add-shebang.js",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "npm run build && node --test",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.js\" \"scripts/**/*.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}

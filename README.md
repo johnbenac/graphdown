@@ -18,12 +18,6 @@ This tool validates the structure and contents of Graphdown datasets - data stor
 ## Requirements
 
 - **Node.js** (v12 or higher)
-- **Python 3** with PyYAML library
-
-Install PyYAML if needed:
-```bash
-pip install pyyaml
-```
 
 ## Usage
 

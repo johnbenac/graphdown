@@ -18,7 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const yaml = require('js-yaml');
 
 /**
  * Extract YAML front matter and body from a Markdown file.  The YAML front
@@ -51,49 +51,32 @@ function extractFrontMatter(content) {
 }
 
 /**
- * Parse a YAML string into a JavaScript object using Python's PyYAML via
- * a subprocess.  This helper avoids shipping a full YAML parser in this
- * JavaScript file.  If parsing fails the returned object will contain an
- * `__error__` property describing the error.
+ * Parse a YAML string into a JavaScript object using js-yaml. If parsing
+ * fails the returned object will contain an `__error__` property describing
+ * the error.
  *
  * @param {string} yamlString The YAML content to parse
  * @returns {object} The parsed object or an error indicator
  */
-function parseYaml(yamlString) {
-  // Spawn a Python process to parse YAML safely
-  const result = spawnSync(
-    'python',
-    [
-      '-c',
-      [
-        'import yaml, json, sys, datetime',
-        '# Read YAML from stdin and convert any datetime objects to strings to allow JSON serialisation',
-        'def convert(value):',
-        '    if isinstance(value, (datetime.date, datetime.datetime)):',
-        '        return value.isoformat()',
-        '    elif isinstance(value, dict):',
-        '        return {k: convert(v) for k, v in value.items()}',
-        '    elif isinstance(value, list):',
-        '        return [convert(v) for v in value]',
-        '    else:',
-        '        return value',
-        'try:',
-        '    data = yaml.safe_load(sys.stdin.read())',
-        '    data = convert(data)',
-        '    print(json.dumps(data))',
-        'except Exception as e:',
-        '    print(json.dumps({"__error__": str(e)}))'
-      ].join('\n'),
-    ],
-    { input: yamlString, encoding: 'utf-8' }
-  );
-  if (result.error) {
-    return { __error__: result.error.message };
+function convertDates(value) {
+  if (value instanceof Date) {
+    return value.toISOString();
   }
+  if (Array.isArray(value)) {
+    return value.map(convertDates);
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, val]) => [key, convertDates(val)]));
+  }
+  return value;
+}
+
+function parseYaml(yamlString) {
   try {
-    return JSON.parse(result.stdout.trim() || 'null');
+    const parsed = yaml.load(yamlString);
+    return convertDates(parsed);
   } catch (err) {
-    return { __error__: 'Failed to parse YAML via Python: ' + err.message };
+    return { __error__: err.message };
   }
 }
 
