@@ -122,3 +122,35 @@ a {
 .file-name {
   font-weight: 600;
 }
+
+.error-text {
+  color: #b91c1c;
+  margin: 0;
+  font-weight: 600;
+}
+
+.dataset-summary {
+  display: grid;
+  gap: 0.5rem;
+  color: #1f2937;
+}
+
+.sidebar-title {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+}
+
+.sidebar-label {
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.sidebar-meta {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
