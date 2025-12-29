@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Graphdown dataset validator.",
   "license": "MIT",
-  "repository": "https://github.com/graphdown/graphdown",
+  "repository": "https://github.com/johnbenac/graphdown",
   "engines": {
     "node": ">=20"
   },
