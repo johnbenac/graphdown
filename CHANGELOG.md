@@ -1,3 +1,10 @@
+## [0.0.2](https://github.com/johnbenac/graphdown/compare/v0.0.1...v0.0.2) (2025-12-29)
+
+
+### Bug Fixes
+
+* **e2e:** add pixel difference tolerance for cross-environment screenshots ([0909361](https://github.com/johnbenac/graphdown/commit/0909361822a09527fad5741f7d768e46dcd82dab))
+
 ## [0.0.1](https://github.com/johnbenac/graphdown/compare/v0.0.0...v0.0.1) (2025-12-29)
 
 
