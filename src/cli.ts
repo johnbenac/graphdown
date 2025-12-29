@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-const usage = `Usage: graphdown validate <datasetPath> [--json|--pretty]
-       graphdown <datasetPath> [--json|--pretty]`;
+const usage = `Usage: graphdown validate <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]
+       graphdown <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]`;
 
 const args = process.argv.slice(2);
 

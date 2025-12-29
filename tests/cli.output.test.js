@@ -57,14 +57,14 @@ test('pretty output includes error codes', () => {
 test('json output for GitHub URL input is still JSON', () => {
   const result = spawnSync(
     process.execPath,
-    [cliPath, 'validate', 'https://github.com/foo/bar', '--json'],
+    [cliPath, 'validate', 'https://github.com/foo', '--json'],
     { encoding: 'utf8' }
   );
 
   assert.equal(result.status, 2);
   const payload = JSON.parse(result.stdout);
   assert.equal(payload.ok, false);
-  assert.equal(payload.errors[0].code, 'E_GITHUB_URL_UNSUPPORTED');
+  assert.equal(payload.errors[0].code, 'E_GITHUB_URL_INVALID_FORMAT');
 });
 
 test('json output for usage errors stays JSON', () => {
