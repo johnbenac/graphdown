@@ -22,6 +22,28 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Build web (typecheck + vite build)
+        run: npm run build:web
+      - name: Web unit tests (vitest)
+        run: npm run test:web
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+      - name: Install Playwright browser (Chromium)
+        run: npx playwright install --with-deps chromium
+      - name: Web E2E tests (Playwright)
+        run: npm run test:web:e2e
+      - name: Upload Playwright artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            apps/web/test-results
+            apps/web/playwright-report
+          if-no-files-found: ignore
 
   validate-example-datasets:
     runs-on: ubuntu-latest
