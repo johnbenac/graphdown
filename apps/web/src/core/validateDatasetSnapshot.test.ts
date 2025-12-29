@@ -195,6 +195,20 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
+  it("does not treat records/.gitkeep as a record type directory", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/.gitkeep", encoder.encode("keep"));
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("does not treat records/README.md as a record type directory", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/README.md", encoder.encode("docs"));
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("reports record type mismatches", () => {
     const snapshot = baseSnapshot();
     const record = snapshot.files.get("records/note/record-1.md");
@@ -215,5 +229,52 @@ describe("validateDatasetSnapshot", () => {
       snapshot.files.set("records/note/record-1.md", encoder.encode(replaced));
     }
     expect(getErrorCodes(snapshot)).toContain("E_DUPLICATE_ID");
+  });
+
+  it("reports missing required dataset fields", () => {
+    const snapshot = snapshotFromEntries([
+      [
+        "datasets/demo.md",
+        [
+          "---",
+          "id: dataset:demo",
+          "typeId: sys:dataset",
+          "createdAt: 2024-01-01",
+          "updatedAt: 2024-01-02",
+          "fields:",
+          "  name: Demo",
+          "  description: Demo dataset",
+          "---"
+        ].join("\n")
+      ],
+      [
+        "types/note.md",
+        [
+          "---",
+          "id: type:note",
+          "datasetId: dataset:demo",
+          "typeId: sys:type",
+          "createdAt: 2024-01-01",
+          "updatedAt: 2024-01-02",
+          "fields:",
+          "  recordTypeId: note",
+          "---"
+        ].join("\n")
+      ],
+      [
+        "records/note/record-1.md",
+        [
+          "---",
+          "id: record:1",
+          "datasetId: dataset:demo",
+          "typeId: note",
+          "createdAt: 2024-01-01",
+          "updatedAt: 2024-01-02",
+          "fields: {}",
+          "---"
+        ].join("\n")
+      ]
+    ]);
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 });
