@@ -203,7 +203,7 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     if (!raw) {
       continue;
     }
-    const text = Buffer.from(raw).toString('utf8');
+    const text = new TextDecoder('utf-8').decode(raw);
     const parsed = parseMarkdownRecord(text, file);
     if (!parsed.ok) {
       errors.push(parsed.error);

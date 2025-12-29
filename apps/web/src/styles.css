@@ -122,3 +122,14 @@ a {
 .file-name {
   font-weight: 600;
 }
+
+.warning-text {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.dataset-summary {
+  display: grid;
+  gap: 0.5rem;
+  color: #374151;
+}
