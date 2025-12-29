@@ -10,7 +10,7 @@ const cliPath = path.join(__dirname, '..', 'dist', 'cli.js');
 test('prints usage when no args are provided', () => {
   const result = spawnSync(process.execPath, [cliPath], { encoding: 'utf8' });
 
-  assert.notEqual(result.status, 0);
+  assert.equal(result.status, 2);
   const output = `${result.stdout}${result.stderr}`;
   assert.match(output, /Usage:/);
 });
@@ -24,7 +24,7 @@ test('fails when required dataset directories are missing', () => {
     });
 
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Missing required `datasets\/` directory/);
+    assert.match(result.stderr, /\[E_DIR_MISSING\]/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

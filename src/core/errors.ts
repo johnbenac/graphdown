@@ -12,7 +12,8 @@ export type ValidationErrorCode =
   | 'E_UNKNOWN_RECORD_DIR'
   | 'E_DUPLICATE_ID'
   | 'E_DUPLICATE_RECORD_TYPE_ID'
-  | 'E_DATASET_FIELDS_MISSING';
+  | 'E_DATASET_FIELDS_MISSING'
+  | 'E_INTERNAL';
 
 export interface ValidationError {
   code: ValidationErrorCode;
