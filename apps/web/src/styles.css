@@ -232,6 +232,57 @@ a {
   gap: 1.5rem;
 }
 
+.export-screen {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.export-content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.export-summary {
+  display: grid;
+  gap: 0.5rem;
+  color: #374151;
+}
+
+.export-options {
+  display: grid;
+  gap: 1rem;
+}
+
+.export-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.export-compare {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  background: #f9fafb;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.export-compare pre {
+  margin: 0;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
 .dataset-types ul,
 .dataset-records ul,
 .record-links ul {

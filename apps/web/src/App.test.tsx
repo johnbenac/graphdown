@@ -15,6 +15,7 @@ describe("App routes", () => {
     expect(await screen.findByTestId("topnav")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Import" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Datasets" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Export" })).toBeInTheDocument();
   });
 
   it("renders the import route", async () => {
@@ -39,5 +40,17 @@ describe("App routes", () => {
 
     expect(await screen.findByTestId("dataset-screen")).toBeInTheDocument();
     expect(await screen.findByText("Import a dataset to begin")).toBeInTheDocument();
+  });
+
+  it("renders the export route", async () => {
+    const router = createMemoryRouter(appRoutes, { initialEntries: ["/export"] });
+    render(
+      <DatasetProvider>
+        <RouterProvider router={router} />
+      </DatasetProvider>
+    );
+
+    expect(await screen.findByTestId("export-screen")).toBeInTheDocument();
+    expect(await screen.findByText("Import a dataset to export")).toBeInTheDocument();
   });
 });
