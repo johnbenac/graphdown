@@ -141,6 +141,35 @@ export function extractYamlRefs(fields: unknown): string[] {
   return [...refs];
 }
 
+export function extractWikiLinksFromFields(fields: unknown): string[] {
+  const results = new Set<string>();
+
+  const visit = (value: unknown) => {
+    if (typeof value === 'string') {
+      for (const id of extractWikiLinks(value)) {
+        results.add(id);
+      }
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        visit(item);
+      }
+      return;
+    }
+
+    if (isObject(value)) {
+      for (const child of Object.values(value)) {
+        visit(child);
+      }
+    }
+  };
+
+  visit(fields);
+  return [...results];
+}
+
 function getKindForFile(file: string): GraphNodeKind | null {
   if (file.startsWith('datasets/')) {
     return 'dataset';
@@ -244,9 +273,10 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
 
   for (const node of nodesById.values()) {
     const refTargets = extractYamlRefs(node.fields);
-    const wikiTargets = extractWikiLinks(node.body);
+    const bodyWikiTargets = extractWikiLinks(node.body);
+    const fieldWikiTargets = extractWikiLinksFromFields(node.fields);
     const targets = new Set<string>();
-    for (const target of [...refTargets, ...wikiTargets]) {
+    for (const target of [...refTargets, ...bodyWikiTargets, ...fieldWikiTargets]) {
       if (!target || target === node.id) {
         continue;
       }
