@@ -1,0 +1,37 @@
+{
+  "name": "graphdown",
+  "version": "0.0.0",
+  "description": "Validator for Graphdown Markdown-canonical datasets",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/graphdown/graphdown"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "graphdown": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "validateDataset.js",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build && node --test",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@types/node": "^22.5.4",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.3.0"
+  }
+}

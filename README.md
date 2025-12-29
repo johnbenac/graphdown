@@ -17,7 +17,7 @@ This tool validates the structure and contents of Graphdown datasets - data stor
 
 ## Requirements
 
-- **Node.js** (v12 or higher)
+- **Node.js** (v20 or higher)
 - **Python 3** with PyYAML library
 
 Install PyYAML if needed:
@@ -27,18 +27,39 @@ pip install pyyaml
 
 ## Usage
 
+Install dependencies and build the CLI:
+
 ```bash
-node validateDataset.js <datasetPath>
+npm ci
+npm run build
+```
+
+Run the CLI locally:
+
+```bash
+node dist/cli.js validate <datasetPath>
+```
+
+Use the shorthand form:
+
+```bash
+node dist/cli.js <datasetPath>
+```
+
+Once published or linked, you can also run:
+
+```bash
+npx graphdown validate <datasetPath>
 ```
 
 ### Examples
 
 ```bash
 # Validate a local dataset
-node validateDataset.js ./my-dataset
+node dist/cli.js validate ./my-dataset
 
 # Validate an example dataset
-node validateDataset.js ../product-tracker-dataset
+node dist/cli.js validate ../product-tracker-dataset
 ```
 
 ### Output
