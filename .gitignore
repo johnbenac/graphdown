@@ -22,3 +22,10 @@ pnpm-lock.yaml
 
 # OS
 Thumbs.db
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Test runner artifacts (Playwright/Vitest/etc.)
+test-results/
+playwright-report/
