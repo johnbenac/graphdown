@@ -7,6 +7,9 @@ const hintMap: Partial<Record<ValidationErrorCode, string>> = {
     'Add YAML front matter delimited by --- at the top of the file.',
   E_FRONT_MATTER_UNTERMINATED:
     'Close YAML front matter with a second ---.',
+  E_GITHUB_URL_UNSUPPORTED:
+    'Clone the repository and validate the local folder path instead.',
+  E_USAGE: 'Usage: graphdown validate <datasetPath> [--json|--pretty].',
   E_INTERNAL: 'Re-run with NODE_DEBUG=graphdown or open an issue.'
 };
 
