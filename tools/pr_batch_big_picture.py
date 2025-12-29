@@ -341,6 +341,23 @@ def filter_existing_files(files: List[str]) -> Tuple[List[str], List[str]]:
     return existing_files, deleted_files
 
 
+def filter_excluded_files(files: List[str]) -> Tuple[List[str], List[str]]:
+    """Filter files that should be excluded from documents."""
+    excluded_files: List[str] = []
+    included_files: List[str] = []
+
+    for file_path in files:
+        if Path(file_path).name == "package-lock.json":
+            excluded_files.append(file_path)
+        else:
+            included_files.append(file_path)
+
+    if excluded_files:
+        print(f"Skipping {len(excluded_files)} excluded file(s): {', '.join(excluded_files)}")
+
+    return included_files, excluded_files
+
+
 def checkout_pr_branch(pr_info: Dict[str, str], remote: str) -> str:
     """Checkout a specific PR branch, falling back to PR refs when needed."""
     branch_name = pr_info["branch"]
@@ -840,13 +857,21 @@ def main() -> None:
 
             print(f"Total changed files: {len(all_files)}")
 
+            included_files, _excluded_files = filter_excluded_files(all_files)
+            if not included_files:
+                print(
+                    f"No files to process for PR #{pr_info['number']} "
+                    "(all files were excluded)"
+                )
+                continue
+
             try:
                 local_branch = checkout_pr_branch(pr_info, args.remote)
             except subprocess.CalledProcessError:
                 print(f"Failed to checkout branch for PR #{pr_info['number']}")
                 continue
 
-            existing_files, deleted_files = filter_existing_files(all_files)
+            existing_files, deleted_files = filter_existing_files(included_files)
             if not existing_files and deleted_files:
                 print(
                     f"No existing files to process for PR #{pr_info['number']} "
