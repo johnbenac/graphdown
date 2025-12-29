@@ -6,4 +6,6 @@ export * from './ids';
 export * from './refs';
 export * from './wikiLinks';
 export * from './snapshot';
+export * from './zipSnapshot';
+export * from './export';
 export * from './graph';
