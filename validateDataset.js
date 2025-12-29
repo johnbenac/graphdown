@@ -3,10 +3,9 @@
  *
  * This script validates the structure and contents of a Markdown‑canonical dataset.
  * It can be invoked via `node validateDataset.js <datasetRoot>` where <datasetRoot>
- * is either a local folder on disk or a GitHub repository URL.  For simplicity
- * of demonstration, only local directories are supported natively.  To
- * validate a remote GitHub repository you should clone or download it first
- * and then provide the local path as the argument.
+ * is either a local folder on disk or a GitHub repository URL. Remote GitHub
+ * URLs are fetched to a temporary directory and validated using the same
+ * rules as local datasets.
  *
  * Validation rules are derived from the provided specification and are
  * documented in detail in the accompanying requirements document.  In brief,
@@ -20,6 +19,8 @@ const fs = require('fs');
 const path = require('path');
 const { extractFrontMatter, parseYamlObject, makeError } = require('./dist/core');
 const { formatJson, formatPretty } = require('./dist/cli/output');
+const { parseGitHubRepoUrl } = require('./dist/github/url');
+const { fetchGitHubSnapshotToTempDir } = require('./dist/github/fetch');
 
 
 /**
@@ -291,15 +292,44 @@ function parseArgs(args) {
   let datasetPath;
   let json = false;
   let pretty = false;
+  let ref;
+  let subdir;
   let error;
 
-  for (const arg of args) {
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
     if (arg === '--json') {
       json = true;
       continue;
     }
     if (arg === '--pretty') {
       pretty = true;
+      continue;
+    }
+    if (arg === '--ref') {
+      if (i + 1 >= args.length) {
+        error = 'Missing value for --ref.';
+        break;
+      }
+      ref = args[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--ref=')) {
+      ref = arg.slice('--ref='.length);
+      continue;
+    }
+    if (arg === '--subdir') {
+      if (i + 1 >= args.length) {
+        error = 'Missing value for --subdir.';
+        break;
+      }
+      subdir = args[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith('--subdir=')) {
+      subdir = arg.slice('--subdir='.length);
       continue;
     }
     if (arg.startsWith('--')) {
@@ -321,17 +351,19 @@ function parseArgs(args) {
     error = 'Cannot use --json and --pretty together.';
   }
 
-  return { datasetPath, json, pretty, error };
+  return { datasetPath, json, pretty, ref, subdir, error };
 }
 
 function printUsage(message) {
   if (message) {
     console.error(message);
   }
-  console.error('Usage: node validateDataset.js <datasetPath> [--json|--pretty]');
+  console.error(
+    'Usage: node validateDataset.js <datasetPath|githubUrl> [--json|--pretty] [--ref <ref>] [--subdir <path>]'
+  );
 }
 
-function main() {
+async function main() {
   const parsed = parseArgs(process.argv.slice(2));
   const outputMode = parsed.json ? 'json' : 'pretty';
   if (parsed.error) {
@@ -345,21 +377,39 @@ function main() {
   }
   const { datasetPath } = parsed;
   let rootPath = datasetPath;
-  // If the argument looks like a GitHub URL, instruct the user to clone it.
-  const githubRe = /^https?:\/\/github\.com\//i;
+  let cleanup;
+  const githubRe = /^(https?:\/\/github\.com\/|github\.com\/)/i;
   if (githubRe.test(datasetPath)) {
-    const error = makeError(
-      'E_GITHUB_URL_UNSUPPORTED',
-      'Validation of remote GitHub URLs is not supported. Clone the repository locally and provide its path instead.'
-    );
-    if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
-    } else {
-      process.stderr.write(formatPretty([error]));
+    const parsedUrl = parseGitHubRepoUrl(datasetPath);
+    if (!parsedUrl.ok) {
+      if (outputMode === 'json') {
+        process.stdout.write(formatJson({ ok: false, errors: [parsedUrl.error] }));
+      } else {
+        process.stderr.write(formatPretty([parsedUrl.error]));
+      }
+      process.exit(2);
     }
-    process.exit(2);
-  }
-  if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
+    const repoRef = { ...parsedUrl.value };
+    if (parsed.ref) {
+      repoRef.ref = parsed.ref;
+    }
+    if (parsed.subdir) {
+      repoRef.subdir = parsed.subdir;
+    }
+    const snapshot = await fetchGitHubSnapshotToTempDir(repoRef, {
+      token: process.env.GITHUB_TOKEN
+    });
+    if (!snapshot.ok) {
+      if (outputMode === 'json') {
+        process.stdout.write(formatJson({ ok: false, errors: snapshot.errors }));
+      } else {
+        process.stderr.write(formatPretty(snapshot.errors));
+      }
+      process.exit(2);
+    }
+    rootPath = snapshot.rootDir;
+    cleanup = snapshot.cleanup;
+  } else if (!fs.existsSync(rootPath) || !fs.statSync(rootPath).isDirectory()) {
     const error = makeError(
       'E_INTERNAL',
       `Dataset path ${rootPath} does not exist or is not a directory`
@@ -396,9 +446,26 @@ function main() {
       process.stderr.write(formatPretty([error]));
     }
     process.exit(2);
+  } finally {
+    if (cleanup && process.env.NODE_DEBUG !== 'graphdown') {
+      try {
+        await cleanup();
+      } catch {
+        // Swallow cleanup errors to preserve JSON output contracts.
+      }
+    }
   }
 }
 
 if (require.main === module) {
-  main();
+  main().catch((err) => {
+    const message = err && err.message ? err.message : String(err);
+    const error = makeError('E_INTERNAL', `Unexpected error: ${message}`);
+    if (process.argv.includes('--json')) {
+      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+    } else {
+      process.stderr.write(formatPretty([error]));
+    }
+    process.exit(2);
+  });
 }
