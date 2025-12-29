@@ -221,6 +221,60 @@ a {
   gap: 0.75rem;
 }
 
+.export-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.export-meta {
+  display: grid;
+  gap: 0.5rem;
+  color: #374151;
+}
+
+.export-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.export-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #ffffff;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.export-card p {
+  margin: 0;
+}
+
+.export-compare {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #f9fafb;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.export-compare summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.export-compare pre {
+  margin: 0;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.9rem;
+}
+
 .dataset-summary {
   display: grid;
   gap: 0.5rem;
