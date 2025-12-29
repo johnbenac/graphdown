@@ -1,0 +1,38 @@
+{
+  "name": "graphdown",
+  "version": "0.0.0",
+  "description": "Graphdown dataset validator CLI",
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/graphdown/graphdown"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "graphdown": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "validateDataset.js",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "tsc",
+    "test": "npm run build && node --test"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@types/node": "^20.14.9",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  }
+}
