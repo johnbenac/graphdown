@@ -1,7 +1,82 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { makeError } from "../../../../src/core/errors";
+import { buildGraphFromSnapshot } from "../../../../src/core/graph";
+import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 import { DatasetProvider, useDataset } from "./DatasetContext";
+import { readZipSnapshot } from "../import/readZipSnapshot";
+
+vi.mock("../../../../src/core/graph", async () => {
+  const actual = await vi.importActual<typeof import("../../../../src/core/graph")>(
+    "../../../../src/core/graph"
+  );
+  return {
+    ...actual,
+    buildGraphFromSnapshot: vi.fn(actual.buildGraphFromSnapshot)
+  };
+});
+
+vi.mock("../import/readZipSnapshot", () => ({
+  readZipSnapshot: vi.fn()
+}));
+
+const encoder = new TextEncoder();
+
+function createValidSnapshot(): RepoSnapshot {
+  return {
+    files: new Map([
+      [
+        "datasets/demo.md",
+        encoder.encode(
+          [
+            "---",
+            "id: dataset:demo",
+            "datasetId: dataset:demo",
+            "typeId: sys:dataset",
+            "createdAt: 2024-01-01",
+            "updatedAt: 2024-01-02",
+            "fields:",
+            "  name: Demo",
+            "  description: Demo dataset",
+            "---"
+          ].join("\n")
+        )
+      ],
+      [
+        "types/note.md",
+        encoder.encode(
+          [
+            "---",
+            "id: type:note",
+            "datasetId: dataset:demo",
+            "typeId: sys:type",
+            "createdAt: 2024-01-01",
+            "updatedAt: 2024-01-02",
+            "fields:",
+            "  recordTypeId: note",
+            "---"
+          ].join("\n")
+        )
+      ],
+      [
+        "records/note/record-1.md",
+        encoder.encode(
+          [
+            "---",
+            "id: record:1",
+            "datasetId: dataset:demo",
+            "typeId: note",
+            "createdAt: 2024-01-01",
+            "updatedAt: 2024-01-02",
+            "fields: {}",
+            "---"
+          ].join("\n")
+        )
+      ]
+    ])
+  };
+}
 
 function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
   const ctx = useDataset();
@@ -187,6 +262,38 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(3);
+    });
+  });
+
+  it("maps zip graph parsing failures to dataset_invalid", async () => {
+    const snapshot = createValidSnapshot();
+    const readZipMock = vi.mocked(readZipSnapshot);
+    readZipMock.mockResolvedValueOnce(snapshot);
+    const graphMock = vi.mocked(buildGraphFromSnapshot);
+    graphMock.mockReturnValueOnce({
+      ok: false,
+      errors: [makeError("E_REQUIRED_FIELD_MISSING", "Missing field", "records/note/record-1.md")]
+    });
+
+    let ctx: ReturnType<typeof useDataset> | null = null;
+    render(
+      <DatasetProvider>
+        <TestHarness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("ready");
+    });
+
+    await act(async () => {
+      await ctx?.importDatasetZip(new File([], "demo.zip"));
+    });
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("error");
+      expect(ctx?.error?.category).toBe("dataset_invalid");
+      expect(ctx?.error && "errors" in ctx.error ? ctx.error.errors.length : 0).toBe(1);
     });
   });
 });

@@ -172,9 +172,19 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "building_graph" });
-        const parsedGraph = await parseGraph(repoSnapshot);
+        const graphResult = buildGraphFromSnapshot(repoSnapshot);
+        if (!graphResult.ok) {
+          setStatus("error");
+          setError({
+            category: "dataset_invalid",
+            title: "Dataset invalid",
+            message: "Dataset records could not be parsed.",
+            errors: graphResult.errors
+          });
+          return;
+        }
         setProgress({ phase: "persisting" });
-        await saveDataset(file.name, repoSnapshot, parsedGraph);
+        await saveDataset(file.name, repoSnapshot, graphResult.graph);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {

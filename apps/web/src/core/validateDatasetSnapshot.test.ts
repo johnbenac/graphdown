@@ -147,6 +147,20 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_DATASET_FIELDS_MISSING");
   });
 
+  it("does not treat records/.gitkeep as a record type directory", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/.gitkeep", encoder.encode("keep"));
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("does not treat records/README.md as a record type directory", () => {
+    const snapshot = baseSnapshot();
+    snapshot.files.set("records/README.md", encoder.encode("docs"));
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("reports unknown record directories", () => {
     const snapshot = snapshotFromEntries([
       [
@@ -193,6 +207,17 @@ describe("validateDatasetSnapshot", () => {
       ]
     ]);
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
+  });
+
+  it("reports missing required fields on dataset records", () => {
+    const snapshot = baseSnapshot();
+    const dataset = snapshot.files.get("datasets/demo.md");
+    if (dataset) {
+      const text = new TextDecoder().decode(dataset);
+      const replaced = text.replace("datasetId: dataset:demo\n", "");
+      snapshot.files.set("datasets/demo.md", encoder.encode(replaced));
+    }
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
   it("reports record type mismatches", () => {

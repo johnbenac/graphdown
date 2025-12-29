@@ -37,7 +37,7 @@ export function mapGitHubError(response: Response, bodyMessage?: string | null):
       category: "auth_required",
       title: "Authentication required",
       message: bodyMessage || "GitHub requires authentication to access this repository.",
-      hint: "Try a public repository or authenticate with a GitHub token.",
+      hint: "This repository may be private. Graphdown currently imports public repositories only.",
       status
     };
   }
@@ -47,7 +47,7 @@ export function mapGitHubError(response: Response, bodyMessage?: string | null):
       category: "rate_limited",
       title: "GitHub rate limit exceeded",
       message: bodyMessage || "GitHub is rate limiting requests right now.",
-      hint: "Wait a few minutes and try again, or authenticate to raise your limit.",
+      hint: "Wait a few minutes and try again. Unauthenticated GitHub API imports have low rate limits.",
       status
     };
   }
@@ -57,7 +57,7 @@ export function mapGitHubError(response: Response, bodyMessage?: string | null):
       category: "auth_required",
       title: "Authentication required",
       message: bodyMessage || "GitHub denied access to this repository.",
-      hint: "The repo may be private or require authentication.",
+      hint: "This repository may be private. Graphdown currently imports public repositories only.",
       status
     };
   }
