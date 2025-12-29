@@ -1,6 +1,7 @@
 import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
 import ImportRoute from "./routes/ImportRoute";
 import DatasetRoute from "./routes/DatasetRoute";
+import { DatasetProvider } from "./state/DatasetContext";
 
 export const appRoutes = [
   {
@@ -20,5 +21,9 @@ export const appRoutes = [
 const router = createBrowserRouter(appRoutes);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <DatasetProvider>
+      <RouterProvider router={router} />
+    </DatasetProvider>
+  );
 }
