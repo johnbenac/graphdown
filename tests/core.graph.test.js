@@ -155,3 +155,80 @@ fields:
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test('includes wiki-links found inside YAML fields', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+
+  try {
+    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
+
+    fs.writeFileSync(
+      path.join(tempDir, 'datasets', 'dataset--demo.md'),
+      `---
+id: "dataset:demo"
+datasetId: "dataset:demo"
+typeId: "sys:dataset"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  name: "Demo Dataset"
+  description: "Temp dataset."
+---
+`
+    );
+
+    fs.writeFileSync(
+      path.join(tempDir, 'types', 'type--note.md'),
+      `---
+id: "type:note"
+datasetId: "dataset:demo"
+typeId: "sys:type"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  recordTypeId: "note"
+---
+`
+    );
+
+    fs.writeFileSync(
+      path.join(tempDir, 'records', 'note', 'record--1.md'),
+      `---
+id: "note:1"
+datasetId: "dataset:demo"
+typeId: "note"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  title: "Note 1"
+  description: "See [[note:2]]"
+---
+`
+    );
+
+    fs.writeFileSync(
+      path.join(tempDir, 'records', 'note', 'record--2.md'),
+      `---
+id: "note:2"
+datasetId: "dataset:demo"
+typeId: "note"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  title: "Note 2"
+---
+`
+    );
+
+    const result = buildGraphFromFs(tempDir);
+    assert.equal(result.ok, true);
+    const { graph } = result;
+
+    assert.deepEqual(graph.getLinksFrom('note:1'), ['note:2']);
+    assert.deepEqual(graph.getLinksTo('note:2'), ['note:1']);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
