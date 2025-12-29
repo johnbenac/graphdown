@@ -139,7 +139,7 @@ function validateDataset(root) {
   }
   // Fields map validation
   if (!datasetYaml.fields || typeof datasetYaml.fields !== 'object') {
-    pushError('E_DATASET_FIELDS_MISSING', 'Dataset file fields must be an object');
+    pushError('E_REQUIRED_FIELD_MISSING', 'Dataset file fields must be an object');
   } else {
     if (!datasetYaml.fields.name || !datasetYaml.fields.description) {
       pushError('E_DATASET_FIELDS_MISSING', 'Dataset fields must include `name` and `description`');
