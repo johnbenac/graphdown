@@ -1,9 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import type { RepoSnapshot } from './snapshotTypes';
 
-export interface RepoSnapshot {
-  files: Map<string, Uint8Array>;
-}
+export type { RepoSnapshot } from './snapshotTypes';
 
 function toPosixPath(filePath: string): string {
   return filePath.split(path.sep).join('/');

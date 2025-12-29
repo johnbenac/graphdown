@@ -122,3 +122,17 @@ a {
 .file-name {
   font-weight: 600;
 }
+
+.import-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+}
+
+.dataset-summary {
+  display: grid;
+  gap: 0.5rem;
+  color: #374151;
+}

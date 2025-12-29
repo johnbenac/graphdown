@@ -1,7 +1,7 @@
 import { extractFrontMatter } from './frontMatter';
 import { makeError, ValidationError } from './errors';
 import { normalizeRefs } from './refs';
-import { RepoSnapshot, loadRepoSnapshotFromFs } from './snapshot';
+import type { RepoSnapshot } from './snapshotTypes';
 import { extractWikiLinks } from './wikiLinks';
 import { parseYamlObject } from './yaml';
 import { getString, isObject } from './types';
@@ -301,9 +301,4 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     ok: true,
     graph: new GraphImpl(nodesById, typesByRecordTypeId, outgoing, incoming)
   };
-}
-
-export function buildGraphFromFs(rootDir: string): BuildGraphResult {
-  const snapshot = loadRepoSnapshotFromFs(rootDir);
-  return buildGraphFromSnapshot(snapshot);
 }
