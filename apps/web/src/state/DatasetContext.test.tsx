@@ -1,4 +1,5 @@
 import { act, render, waitFor } from "@testing-library/react";
+import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DatasetProvider, useDataset } from "./DatasetContext";
@@ -187,6 +188,35 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(3);
+    });
+  });
+});
+
+describe("DatasetContext zip import", () => {
+  it("reports dataset_invalid for invalid zip snapshots", async () => {
+    const zipBytes = zipSync({
+      "datasets/demo.md": new Uint8Array(strToU8("---\nid: dataset:demo\n---"))
+    });
+    const file = {
+      name: "demo.zip",
+      arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
+    } as File;
+
+    let ctx: ReturnType<typeof useDataset> | null = null;
+    render(
+      <DatasetProvider>
+        <TestHarness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await act(async () => {
+      await ctx?.importDatasetZip(file);
+    });
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("error");
+      expect(ctx?.error?.category).toBe("dataset_invalid");
+      expect(ctx?.error && "errors" in ctx.error).toBe(true);
     });
   });
 });
