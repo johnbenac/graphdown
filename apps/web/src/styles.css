@@ -1,0 +1,124 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #111827;
+  background-color: #f9fafb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.top-nav__links {
+  display: flex;
+  gap: 1rem;
+  font-weight: 500;
+}
+
+.top-nav__brand {
+  font-weight: 700;
+}
+
+.top-nav__link.active {
+  color: #2563eb;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.sidebar {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 360px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.panel h1,
+.panel h2,
+.panel h3 {
+  margin-top: 0;
+}
+
+.button {
+  border: none;
+  background: #111827;
+  color: white;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button.secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.empty-state {
+  display: grid;
+  gap: 0.75rem;
+  color: #4b5563;
+}
+
+.import-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.file-input {
+  border: 1px dashed #cbd5f5;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.file-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.file-name {
+  font-weight: 600;
+}

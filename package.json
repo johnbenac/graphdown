@@ -16,12 +16,20 @@
     "README.md",
     "CHANGELOG.md"
   ],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run build && node --test",
-    "build": "tsc && node scripts/add-shebang.js"
+    "build": "tsc && node scripts/add-shebang.js",
+    "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
+    "build:web": "npm --workspace apps/web run build",
+    "test:web": "npm --workspace apps/web run test",
+    "test:web:e2e": "npm --workspace apps/web run test:e2e",
+    "verify:web": "npm --workspace apps/web run verify"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
