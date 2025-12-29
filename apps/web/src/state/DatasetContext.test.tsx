@@ -1,6 +1,9 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { makeError } from "../../../../src/core/errors";
+import * as graphModule from "../../../../src/core/graph";
+import * as zipModule from "../import/readZipSnapshot";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 
 function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
@@ -188,5 +191,91 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(3);
     });
+  });
+
+  it("maps zip graph errors to dataset_invalid", async () => {
+    const snapshot = {
+      files: new Map<string, Uint8Array>([
+        [
+          "datasets/demo.md",
+          new TextEncoder().encode(
+            [
+              "---",
+              "id: dataset:demo",
+              "datasetId: dataset:demo",
+              "typeId: sys:dataset",
+              "createdAt: 2024-01-01",
+              "updatedAt: 2024-01-02",
+              "fields:",
+              "  name: Demo",
+              "  description: Demo dataset",
+              "---"
+            ].join("\n")
+          )
+        ],
+        [
+          "types/note.md",
+          new TextEncoder().encode(
+            [
+              "---",
+              "id: type:note",
+              "datasetId: dataset:demo",
+              "typeId: sys:type",
+              "createdAt: 2024-01-01",
+              "updatedAt: 2024-01-02",
+              "fields:",
+              "  recordTypeId: note",
+              "---"
+            ].join("\n")
+          )
+        ],
+        [
+          "records/note/record-1.md",
+          new TextEncoder().encode(
+            [
+              "---",
+              "id: record:1",
+              "datasetId: dataset:demo",
+              "typeId: note",
+              "createdAt: 2024-01-01",
+              "updatedAt: 2024-01-02",
+              "fields: {}",
+              "---"
+            ].join("\n")
+          )
+        ]
+      ])
+    };
+
+    const readZipSpy = vi.spyOn(zipModule, "readZipSnapshot").mockResolvedValue(snapshot);
+    const buildGraphSpy = vi.spyOn(graphModule, "buildGraphFromSnapshot").mockReturnValue({
+      ok: false,
+      errors: [makeError("E_REQUIRED_FIELD_MISSING", "Missing field", "records/note/record-1.md")]
+    });
+
+    let ctx: ReturnType<typeof useDataset> | null = null;
+    render(
+      <DatasetProvider>
+        <TestHarness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("ready");
+    });
+
+    await act(async () => {
+      await ctx?.importDatasetZip(new File([new Uint8Array()], "repo.zip"));
+    });
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("error");
+      expect(ctx?.error?.category).toBe("dataset_invalid");
+      expect("errors" in (ctx?.error ?? {})).toBe(true);
+      expect(buildGraphSpy).toHaveBeenCalled();
+    });
+
+    readZipSpy.mockRestore();
+    buildGraphSpy.mockRestore();
   });
 });

@@ -43,11 +43,26 @@ function listRecordDirs(files: string[]): string[] {
       continue;
     }
     const parts = file.split('/');
-    if (parts.length >= 2 && parts[1]) {
+    if (parts.length >= 3 && parts[1]) {
       dirs.add(parts[1]);
     }
   }
   return [...dirs].sort((a, b) => a.localeCompare(b));
+}
+
+function requireString(
+  errors: ValidationError[],
+  yaml: Record<string, unknown>,
+  key: string,
+  file: string,
+  label?: string
+): string | null {
+  const value = getString(yaml, key);
+  if (!value) {
+    errors.push(makeError('E_REQUIRED_FIELD_MISSING', `${label ?? key} is required`, file));
+    return null;
+  }
+  return value;
 }
 
 export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDatasetResult {
@@ -91,26 +106,24 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   const datasetYaml = parsedDataset.yaml;
-  const datasetId = getString(datasetYaml, 'id');
+  const datasetId = requireString(errors, datasetYaml, 'id', datasetFile, 'Dataset id');
 
-  if (!datasetId || !datasetId.startsWith('dataset:')) {
-    errors.push(
-      makeError('E_ID_PREFIX_INVALID', 'Dataset id must be a string beginning with "dataset:"', datasetFile)
-    );
+  if (datasetId && !datasetId.startsWith('dataset:')) {
+    errors.push(makeError('E_ID_PREFIX_INVALID', 'Dataset id must begin with "dataset:"', datasetFile));
   }
-  if (getString(datasetYaml, 'datasetId') !== datasetId) {
-    errors.push(
-      makeError('E_DATASET_ID_MISMATCH', 'Dataset file datasetId must equal its id', datasetFile)
-    );
+
+  const datasetDatasetId = requireString(errors, datasetYaml, 'datasetId', datasetFile, 'Dataset datasetId');
+  if (datasetId && datasetDatasetId && datasetDatasetId !== datasetId) {
+    errors.push(makeError('E_DATASET_ID_MISMATCH', 'Dataset file datasetId must equal its id', datasetFile));
   }
-  if (getString(datasetYaml, 'typeId') !== 'sys:dataset') {
+
+  const datasetTypeId = requireString(errors, datasetYaml, 'typeId', datasetFile, 'Dataset typeId');
+  if (datasetTypeId && datasetTypeId !== 'sys:dataset') {
     errors.push(makeError('E_TYPEID_MISMATCH', 'Dataset file typeId must be "sys:dataset"', datasetFile));
   }
-  if (!getString(datasetYaml, 'createdAt') || !getString(datasetYaml, 'updatedAt')) {
-    errors.push(
-      makeError('E_REQUIRED_FIELD_MISSING', 'Dataset file must have createdAt and updatedAt', datasetFile)
-    );
-  }
+
+  requireString(errors, datasetYaml, 'createdAt', datasetFile, 'Dataset createdAt');
+  requireString(errors, datasetYaml, 'updatedAt', datasetFile, 'Dataset updatedAt');
 
   if (!isObject(datasetYaml.fields)) {
     errors.push(makeError('E_REQUIRED_FIELD_MISSING', 'Dataset file fields must be an object', datasetFile));
@@ -140,31 +153,34 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       continue;
     }
     const yaml = parsed.yaml;
-    const id = getString(yaml, 'id');
-    if (!id || !id.startsWith('type:')) {
+    const id = requireString(errors, yaml, 'id', file, `Type file ${file} id`);
+    if (id && !id.startsWith('type:')) {
       errors.push(makeError('E_ID_PREFIX_INVALID', `Type file ${file} must have id beginning with "type:"`, file));
       continue;
     }
-    if (typeIds.has(id)) {
-      errors.push(makeError('E_DUPLICATE_ID', `Duplicate type id ${id}`, file));
+    if (id) {
+      if (typeIds.has(id)) {
+        errors.push(makeError('E_DUPLICATE_ID', `Duplicate type id ${id}`, file));
+      }
+      typeIds.add(id);
     }
-    typeIds.add(id);
 
-    if (getString(yaml, 'datasetId') !== datasetId) {
+    const typeDatasetId = requireString(errors, yaml, 'datasetId', file, `Type file ${file} datasetId`);
+    if (datasetId && typeDatasetId && typeDatasetId !== datasetId) {
       errors.push(
         makeError(
           'E_DATASET_ID_MISMATCH',
-          `Type file ${file} has datasetId ${getString(yaml, 'datasetId')} but dataset id is ${datasetId}`,
+          `Type file ${file} has datasetId ${typeDatasetId} but dataset id is ${datasetId}`,
           file
         )
       );
     }
-    if (getString(yaml, 'typeId') !== 'sys:type') {
+    const typeTypeId = requireString(errors, yaml, 'typeId', file, `Type file ${file} typeId`);
+    if (typeTypeId && typeTypeId !== 'sys:type') {
       errors.push(makeError('E_TYPEID_MISMATCH', `Type file ${file} typeId must be "sys:type"`, file));
     }
-    if (!getString(yaml, 'createdAt') || !getString(yaml, 'updatedAt')) {
-      errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Type file ${file} must have createdAt and updatedAt`, file));
-    }
+    requireString(errors, yaml, 'createdAt', file, `Type file ${file} createdAt`);
+    requireString(errors, yaml, 'updatedAt', file, `Type file ${file} updatedAt`);
 
     if (!isObject(yaml.fields)) {
       errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Type file ${file} fields must be an object`, file));
@@ -221,31 +237,29 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
         continue;
       }
       const yaml = parsed.yaml;
-      const id = getString(yaml, 'id');
-      if (!id) {
-        errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Record file ${file} missing id or id not a string`, file));
-      }
-      if (getString(yaml, 'datasetId') !== datasetId) {
+      const id = requireString(errors, yaml, 'id', file, `Record file ${file} id`);
+      const recordDatasetId = requireString(errors, yaml, 'datasetId', file, `Record file ${file} datasetId`);
+      if (datasetId && recordDatasetId && recordDatasetId !== datasetId) {
         errors.push(
           makeError(
             'E_DATASET_ID_MISMATCH',
-            `Record file ${file} datasetId mismatch: expected ${datasetId}, found ${getString(yaml, 'datasetId')}`,
+            `Record file ${file} datasetId mismatch: expected ${datasetId}, found ${recordDatasetId}`,
             file
           )
         );
       }
-      if (getString(yaml, 'typeId') !== dirName) {
+      const recordTypeId = requireString(errors, yaml, 'typeId', file, `Record file ${file} typeId`);
+      if (recordTypeId && recordTypeId !== dirName) {
         errors.push(
           makeError(
             'E_TYPEID_MISMATCH',
-            `Record file ${file} typeId ${getString(yaml, 'typeId')} does not match its containing directory name ${dirName}`,
+            `Record file ${file} typeId ${recordTypeId} does not match its containing directory name ${dirName}`,
             file
           )
         );
       }
-      if (!getString(yaml, 'createdAt') || !getString(yaml, 'updatedAt')) {
-        errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Record file ${file} must have createdAt and updatedAt`, file));
-      }
+      requireString(errors, yaml, 'createdAt', file, `Record file ${file} createdAt`);
+      requireString(errors, yaml, 'updatedAt', file, `Record file ${file} updatedAt`);
       if (!isObject(yaml.fields)) {
         errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Record file ${file} fields must be an object`, file));
       }

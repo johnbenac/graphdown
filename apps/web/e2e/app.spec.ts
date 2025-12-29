@@ -11,3 +11,142 @@ test("datasets screen renders", async ({ page }) => {
   await expect(page.getByTestId("dataset-screen")).toBeVisible();
   await expect(page).toHaveScreenshot("datasets.png");
 });
+
+test("imports a GitHub repo successfully", async ({ page }) => {
+  await page.route("https://api.github.com/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/repos/owner/repo") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ default_branch: "main" })
+      });
+      return;
+    }
+
+    if (url.pathname === "/repos/owner/repo/contents/datasets") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            type: "file",
+            path: "datasets/demo.md",
+            name: "demo.md",
+            download_url: "https://example.com/datasets/demo.md"
+          }
+        ])
+      });
+      return;
+    }
+
+    if (url.pathname === "/repos/owner/repo/contents/types") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            type: "file",
+            path: "types/note.md",
+            name: "note.md",
+            download_url: "https://example.com/types/note.md"
+          }
+        ])
+      });
+      return;
+    }
+
+    if (url.pathname === "/repos/owner/repo/contents/records") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            type: "dir",
+            path: "records/note",
+            name: "note",
+            download_url: null
+          }
+        ])
+      });
+      return;
+    }
+
+    if (url.pathname === "/repos/owner/repo/contents/records/note") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            type: "file",
+            path: "records/note/record-1.md",
+            name: "record-1.md",
+            download_url: "https://example.com/records/note/record-1.md"
+          }
+        ])
+      });
+      return;
+    }
+
+    await route.fulfill({ status: 404 });
+  });
+
+  await page.route("https://example.com/**", async (route) => {
+    const url = new URL(route.request().url());
+    const responses: Record<string, string> = {
+      "/datasets/demo.md": [
+        "---",
+        "id: dataset:demo",
+        "datasetId: dataset:demo",
+        "typeId: sys:dataset",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        "fields:",
+        "  name: Demo",
+        "  description: Demo dataset",
+        "---"
+      ].join("\n"),
+      "/types/note.md": [
+        "---",
+        "id: type:note",
+        "datasetId: dataset:demo",
+        "typeId: sys:type",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        "fields:",
+        "  recordTypeId: note",
+        "---"
+      ].join("\n"),
+      "/records/note/record-1.md": [
+        "---",
+        "id: record:1",
+        "datasetId: dataset:demo",
+        "typeId: note",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        "fields: {}",
+        "---"
+      ].join("\n")
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: "text/plain",
+      body: responses[url.pathname] ?? ""
+    });
+  });
+
+  await page.goto("/import");
+  await page.getByLabel("GitHub URL").fill("https://github.com/owner/repo");
+  await page.getByRole("button", { name: "Import from GitHub" }).click();
+
+  await expect(page.locator(".import-progress")).toBeVisible();
+  await expect(page).toHaveURL(/\\/datasets$/);
+  await expect(page.getByTestId("dataset-screen")).toBeVisible();
+});
+
+test("shows an invalid URL error for malformed GitHub URLs", async ({ page }) => {
+  await page.goto("/import");
+  await page.getByLabel("GitHub URL").fill("github.com/owner/repo");
+  await page.getByRole("button", { name: "Import from GitHub" }).click();
+  await expect(page.getByRole("heading", { name: "Invalid GitHub URL" })).toBeVisible();
+});
