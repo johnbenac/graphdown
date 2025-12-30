@@ -157,6 +157,26 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "updatedAt: 2024-01-02",
           "fields:",
           "  recordTypeId: note",
+          "  displayName: Note",
+          "  pluralName: Notes",
+          "  bodyField: content",
+          "  fieldDefs:",
+          "    - name: content",
+          "      kind: string",
+          "    - name: title",
+          "      kind: string",
+          "      required: true",
+          "    - name: estimate",
+          "      kind: number",
+          "    - name: status",
+          "      kind: enum",
+          "      options: [todo, doing, done]",
+          "    - name: due",
+          "      kind: date",
+          "    - name: assignee",
+          "      kind: ref",
+          "    - name: watchers",
+          "      kind: ref[]",
           "---"
         ].join("\n")
       });
@@ -192,8 +212,17 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "typeId: note",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",
-          "fields: {}",
-          "---"
+          "fields:",
+          "  title: Original title",
+          "  estimate: 5",
+          "  status: todo",
+          "  due: 2024-02-01",
+          "  assignee:",
+          "    ref: record:task-1",
+          "  watchers:",
+          "    refs: [record:task-1]",
+          "---",
+          "This is the note body."
         ].join("\n")
       });
       return;
@@ -233,6 +262,21 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
   await page.getByRole("link", { name: /task/i }).click();
   await expect(page).toHaveURL(/\/datasets\/task/);
   await expect(page.getByTestId("record-list")).toBeVisible();
+
+  await page.getByRole("link", { name: /note/i }).click();
+  await expect(page).toHaveURL(/\/datasets\/note/);
+  await page.getByRole("button", { name: "record:1" }).click();
+  await page.getByTestId("edit-record").click();
+  await page.getByLabel("title").fill("Updated title");
+  await page.getByTestId("save-record").click();
+  await expect(page.getByText("Updated title")).toBeVisible();
+
+  await page.getByTestId("create-record").click();
+  await page.getByLabel("Record ID").fill("record:new");
+  await page.getByLabel("title").fill("New record title");
+  await page.getByLabel("content").fill("New record body");
+  await page.getByTestId("save-record").click();
+  await expect(page.getByRole("button", { name: "record:new" })).toBeVisible();
 });
 
 test("shows an invalid URL error for malformed GitHub URLs", async ({ page }) => {
