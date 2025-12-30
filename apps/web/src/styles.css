@@ -379,3 +379,81 @@ a {
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
+
+.record-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.record-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.record-fields {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.record-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.record-field dt {
+  font-weight: 600;
+}
+
+.record-field dd {
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.form-row label {
+  font-weight: 600;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-row textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: #991b1b;
+}
+
+.form-error ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}

@@ -1,7 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { buildGraphFromSnapshot } from "../../../../src/core/graph";
+import { buildGraphFromSnapshot, parseMarkdownRecord } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
+import { makeError } from "../../../../src/core/errors";
+import { serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import { isObject } from "../../../../src/core/types";
 import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
 import { GitHubImportError } from "../import/github/mapGitHubError";
@@ -60,6 +63,17 @@ type DatasetContextValue = {
   importDatasetZip: (file: File) => Promise<void>;
   importDatasetFromGitHub: (url: string) => Promise<void>;
   clearPersistence: () => Promise<void>;
+  updateRecord: (input: {
+    recordId: string;
+    nextFields: Record<string, unknown>;
+    nextBody: string;
+  }) => Promise<{ ok: true } | { ok: false; errors: ValidationError[] }>;
+  createRecord: (input: {
+    recordTypeId: string;
+    id: string;
+    fields: Record<string, unknown>;
+    body: string;
+  }) => Promise<{ ok: true; id: string } | { ok: false; errors: ValidationError[] }>;
 };
 
 const DatasetContext = createContext<DatasetContextValue | undefined>(undefined);
@@ -96,6 +110,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     () => createPersistence({ store, parseGraph, logger: console }),
     [store]
   );
+
+  const textEncoder = useMemo(() => new TextEncoder(), []);
+  const textDecoder = useMemo(() => new TextDecoder("utf-8"), []);
 
   const loadActive = useCallback(async () => {
     setStatus("loading");
@@ -151,6 +168,133 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setActiveDataset({ meta, repoSnapshot, parsedGraph });
     },
     [persistence]
+  );
+
+  const commitSnapshot = useCallback(
+    async (
+      nextSnapshot: RepoSnapshot
+    ): Promise<{ ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> } | { ok: false; errors: ValidationError[] }> => {
+      if (!activeDataset) {
+        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset loaded.")] };
+      }
+      const validation = validateDatasetSnapshot(nextSnapshot);
+      if (!validation.ok) {
+        return { ok: false, errors: validation.errors };
+      }
+      const graphResult = buildGraphFromSnapshot(nextSnapshot);
+      if (!graphResult.ok) {
+        return { ok: false, errors: graphResult.errors };
+      }
+      const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
+      const datasetId = activeDataset.meta.id;
+      await persistence.saveDataset({
+        datasetId,
+        meta: nextMeta,
+        repoSnapshot: nextSnapshot,
+        parsedGraph: graphResult.graph
+      });
+      setActiveDataset({ meta: nextMeta, repoSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
+      return { ok: true, parsedGraph: graphResult.graph };
+    },
+    [activeDataset, persistence]
+  );
+
+  const updateRecord = useCallback(
+    async (input: {
+      recordId: string;
+      nextFields: Record<string, unknown>;
+      nextBody: string;
+    }): Promise<{ ok: true } | { ok: false; errors: ValidationError[] }> => {
+      if (!activeDataset) {
+        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset loaded.")] };
+      }
+      const node = activeDataset.parsedGraph.nodesById.get(input.recordId);
+      if (!node || node.kind !== "record") {
+        return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] };
+      }
+      const fileBytes = activeDataset.repoSnapshot.files.get(node.file);
+      if (!fileBytes) {
+        return { ok: false, errors: [makeError("E_INTERNAL", "Record file missing from snapshot.")] };
+      }
+      const text = textDecoder.decode(fileBytes);
+      const parsed = parseMarkdownRecord(text, node.file);
+      if (!parsed.ok) {
+        return { ok: false, errors: [parsed.error] };
+      }
+      const existingFields = isObject(parsed.yaml.fields) ? parsed.yaml.fields : {};
+      const mergedFields: Record<string, unknown> = { ...existingFields, ...input.nextFields };
+      const normalizedFields: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(mergedFields)) {
+        if (value !== undefined) {
+          normalizedFields[key] = value;
+        }
+      }
+      const nextYaml = {
+        ...parsed.yaml,
+        fields: normalizedFields,
+        updatedAt: new Date().toISOString()
+      };
+      const serialized = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
+      const nextSnapshot: RepoSnapshot = {
+        files: new Map(activeDataset.repoSnapshot.files)
+      };
+      nextSnapshot.files.set(node.file, textEncoder.encode(serialized));
+      const result = await commitSnapshot(nextSnapshot);
+      if (!result.ok) {
+        return { ok: false, errors: result.errors };
+      }
+      return { ok: true };
+    },
+    [activeDataset, commitSnapshot, textDecoder, textEncoder]
+  );
+
+  const createRecord = useCallback(
+    async (input: {
+      recordTypeId: string;
+      id: string;
+      fields: Record<string, unknown>;
+      body: string;
+    }): Promise<{ ok: true; id: string } | { ok: false; errors: ValidationError[] }> => {
+      if (!activeDataset) {
+        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset loaded.")] };
+      }
+      const graph = activeDataset.parsedGraph;
+      if (!graph.typesByRecordTypeId.has(input.recordTypeId)) {
+        return { ok: false, errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.")] };
+      }
+      const datasetNode = [...graph.nodesById.values()].find((node) => node.kind === "dataset");
+      if (!datasetNode) {
+        return { ok: false, errors: [makeError("E_INTERNAL", "Dataset record missing.")] };
+      }
+      const safeId = input.id.replace(/[^A-Za-z0-9_-]+/g, "-");
+      const baseName = safeId ? `record--${safeId}.md` : `record-${Date.now()}.md`;
+      let filePath = `records/${input.recordTypeId}/${baseName}`;
+      let counter = 2;
+      while (activeDataset.repoSnapshot.files.has(filePath)) {
+        filePath = `records/${input.recordTypeId}/${baseName.replace(".md", `-${counter}.md`)}`;
+        counter += 1;
+      }
+      const now = new Date().toISOString();
+      const yaml = {
+        id: input.id,
+        datasetId: datasetNode.id,
+        typeId: input.recordTypeId,
+        createdAt: now,
+        updatedAt: now,
+        fields: input.fields
+      };
+      const serialized = serializeMarkdownRecord({ yaml, body: input.body ?? "" });
+      const nextSnapshot: RepoSnapshot = {
+        files: new Map(activeDataset.repoSnapshot.files)
+      };
+      nextSnapshot.files.set(filePath, textEncoder.encode(serialized));
+      const result = await commitSnapshot(nextSnapshot);
+      if (!result.ok) {
+        return { ok: false, errors: result.errors };
+      }
+      return { ok: true, id: input.id };
+    },
+    [activeDataset, commitSnapshot, textEncoder]
   );
 
   const importDatasetZip = useCallback(
@@ -303,7 +447,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         error,
         importDatasetZip,
         importDatasetFromGitHub,
-        clearPersistence
+        clearPersistence,
+        updateRecord,
+        createRecord
       }}
     >
       {children}
