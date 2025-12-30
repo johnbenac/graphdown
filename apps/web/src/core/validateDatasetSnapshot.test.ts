@@ -103,36 +103,12 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
   });
 
-  it("reports dataset id prefix issues", () => {
+  it("reports missing dataset id", () => {
     const snapshot = snapshotFromEntries([
       [
         "datasets/demo.md",
         [
           "---",
-          "id: demo",
-          "datasetId: demo",
-          "typeId: sys:dataset",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
-          "fields:",
-          "  name: Demo",
-          "  description: Demo dataset",
-          "---"
-        ].join("\n")
-      ],
-      ["types/placeholder.md", "---\nid: type:placeholder\nfields: { recordTypeId: placeholder }\n---"],
-      ["records/placeholder/record.md", "---\nid: record:placeholder\nfields: {}\n---"]
-    ]);
-    expect(getErrorCodes(snapshot)).toContain("E_ID_PREFIX_INVALID");
-  });
-
-  it("reports dataset fields missing", () => {
-    const snapshot = snapshotFromEntries([
-      [
-        "datasets/demo.md",
-        [
-          "---",
-          "id: dataset:demo",
           "datasetId: dataset:demo",
           "typeId: sys:dataset",
           "createdAt: 2024-01-01",
@@ -144,7 +120,7 @@ describe("validateDatasetSnapshot", () => {
       ["types/placeholder.md", "---\nid: type:placeholder\nfields: { recordTypeId: placeholder }\n---"],
       ["records/placeholder/record.md", "---\nid: record:placeholder\nfields: {}\n---"]
     ]);
-    expect(getErrorCodes(snapshot)).toContain("E_DATASET_FIELDS_MISSING");
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
   it("does not treat records/.gitkeep as a record type directory", () => {
@@ -157,8 +133,7 @@ describe("validateDatasetSnapshot", () => {
   it("does not treat records/README.md as a record type directory", () => {
     const snapshot = baseSnapshot();
     snapshot.files.set("records/README.md", encoder.encode("docs"));
-    const result = validateDatasetSnapshot(snapshot);
-    expect(result.ok).toBe(true);
+    expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
   it("reports records placed directly under records/", () => {

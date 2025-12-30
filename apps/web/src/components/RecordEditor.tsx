@@ -18,7 +18,7 @@ type RecordEditorProps = {
 };
 
 function getFieldLabel(field: FieldDef) {
-  return field.label ?? field.name;
+  return typeof field.label === "string" ? field.label : field.name;
 }
 
 function getBodyValue(record: GraphNode, bodyField?: string) {
@@ -255,6 +255,9 @@ export default function RecordEditor({
           }
           const value = fieldValues[field.name] ?? "";
           if (field.kind === "enum") {
+            const enumOptions = Array.isArray(field.options)
+              ? field.options.filter((option): option is string => typeof option === "string")
+              : [];
             return (
               <div key={field.name} className="form-row">
                 <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
@@ -264,7 +267,7 @@ export default function RecordEditor({
                   onChange={(event) => updateFieldValue(field.name, event.target.value)}
                 >
                   <option value="">Select…</option>
-                  {field.options?.map((option) => (
+                  {enumOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
