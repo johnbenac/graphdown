@@ -17,3 +17,9 @@ export function extractFrontMatter(markdown: string): { yaml: string; body: stri
   const bodyLines = lines.slice(endIndex + 1).join('\n');
   return { yaml: yamlLines, body: bodyLines };
 }
+
+export function buildFrontMatter(yaml: string, body: string): string {
+  const normalizedBody = body.replace(/\r\n/g, '\n');
+  const normalizedYaml = yaml.trimEnd();
+  return `---\n${normalizedYaml}\n---\n${normalizedBody}\n`;
+}
