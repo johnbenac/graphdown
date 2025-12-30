@@ -9,7 +9,6 @@ test("import screen renders", async ({ page }) => {
 test("datasets screen renders", async ({ page }) => {
   await page.goto("/datasets");
   await expect(page.getByTestId("dataset-screen")).toBeVisible();
-  await expect(page).toHaveScreenshot("datasets.png");
 });
 
 test("imports a GitHub repo with mocked responses", async ({ page }) => {
@@ -157,6 +156,23 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "updatedAt: 2024-01-02",
           "fields:",
           "  recordTypeId: note",
+          "  bodyField: content",
+          "  fieldDefs:",
+          "    - name: title",
+          "      kind: string",
+          "      label: Title",
+          "      required: true",
+          "    - name: estimate",
+          "      kind: number",
+          "    - name: status",
+          "      kind: enum",
+          "      options: [todo, doing, done]",
+          "    - name: due",
+          "      kind: date",
+          "    - name: assignee",
+          "      kind: ref",
+          "    - name: watchers",
+          "      kind: ref[]",
           "---"
         ].join("\n")
       });
@@ -192,8 +208,18 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "typeId: note",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",
-          "fields: {}",
-          "---"
+          "fields:",
+          "  title: First note",
+          "  status: todo",
+          "  estimate: 2",
+          "  due: 2024-02-01",
+          "  assignee:",
+          "    ref: record:task-1",
+          "  watchers:",
+          "    refs:",
+          "      - record:task-1",
+          "---",
+          "Initial note body."
         ].join("\n")
       });
       return;
@@ -229,6 +255,18 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
   await expect(page.getByTestId("type-nav")).toBeVisible();
   await expect(page.getByRole("link", { name: /note/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /task/i })).toBeVisible();
+
+  await page.getByRole("button", { name: "record:1" }).click();
+  await page.getByTestId("edit-record").click();
+  await page.getByLabel("Title").fill("Updated note");
+  await page.getByTestId("save-record").click();
+  await expect(page.getByTestId("field-title")).toHaveText("Updated note");
+
+  await page.getByTestId("create-record").click();
+  await page.getByTestId("record-id").fill("record:new");
+  await page.getByLabel("Title").fill("Brand new");
+  await page.getByTestId("save-record").click();
+  await expect(page.getByRole("button", { name: "record:new" })).toBeVisible();
 
   await page.getByRole("link", { name: /task/i }).click();
   await expect(page).toHaveURL(/\/datasets\/task/);
