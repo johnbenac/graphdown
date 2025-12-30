@@ -2,12 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
+import RecordEditor from "../components/RecordEditor";
+import RecordViewer from "../components/RecordViewer";
 import TypeNav, { getTypeLabel } from "../components/TypeNav";
+import { parseTypeSchema } from "../schema/typeSchema";
 import { useDataset } from "../state/DatasetContext";
 
 export default function DatasetRoute() {
   const { activeDataset, status } = useDataset();
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [editorMode, setEditorMode] = useState<"view" | "edit" | "create">("view");
+  const [previousRecordId, setPreviousRecordId] = useState<string | null>(null);
   const { recordTypeId } = useParams();
   const navigate = useNavigate();
 
@@ -40,6 +45,9 @@ export default function DatasetRoute() {
   const selectedTypeId =
     recordTypeId && graph?.typesByRecordTypeId.has(recordTypeId) ? recordTypeId : null;
   const selectedTypeDef = selectedTypeId ? graph?.typesByRecordTypeId.get(selectedTypeId) ?? null : null;
+  const schemaResult = selectedTypeDef ? parseTypeSchema(selectedTypeDef.fields) : null;
+  const schema = schemaResult && schemaResult.ok ? schemaResult.schema : undefined;
+  const schemaError = schemaResult && !schemaResult.ok ? schemaResult.message : undefined;
 
   const recordsForSelectedType = useMemo(() => {
     if (!graph || !selectedTypeId) {
@@ -53,6 +61,10 @@ export default function DatasetRoute() {
   useEffect(() => {
     if (!selectedTypeId) {
       setSelectedRecordId(null);
+      setEditorMode("view");
+      return;
+    }
+    if (editorMode === "create") {
       return;
     }
     if (selectedRecordId && recordsForSelectedType.some((record) => record.id === selectedRecordId)) {
@@ -60,7 +72,12 @@ export default function DatasetRoute() {
     }
     const firstRecordId = recordsForSelectedType[0]?.id ?? null;
     setSelectedRecordId(firstRecordId);
-  }, [recordsForSelectedType, selectedRecordId, selectedTypeId]);
+  }, [recordsForSelectedType, selectedRecordId, selectedTypeId, editorMode]);
+
+  useEffect(() => {
+    setEditorMode("view");
+    setPreviousRecordId(null);
+  }, [selectedTypeId]);
 
   const selectedRecord = selectedRecordId ? graph?.nodesById.get(selectedRecordId) ?? null : null;
   const outgoingLinks = selectedRecord ? graph?.getLinksFrom(selectedRecord.id) ?? [] : [];
@@ -104,7 +121,22 @@ export default function DatasetRoute() {
               </div>
 
               <div className="dataset-records" data-testid="record-list">
-                <h2>Records</h2>
+                <div className="record-list__header">
+                  <h2>Records</h2>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    data-testid="create-record"
+                    disabled={!selectedTypeDef}
+                    onClick={() => {
+                      setPreviousRecordId(selectedRecordId);
+                      setSelectedRecordId(null);
+                      setEditorMode("create");
+                    }}
+                  >
+                    New record
+                  </button>
+                </div>
                 {recordsForSelectedType.length ? (
                   <ul>
                     {recordsForSelectedType.map((record) => (
@@ -114,7 +146,10 @@ export default function DatasetRoute() {
                           className={
                             record.id === selectedRecordId ? "record-link is-active" : "record-link"
                           }
-                          onClick={() => setSelectedRecordId(record.id)}
+                          onClick={() => {
+                            setSelectedRecordId(record.id);
+                            setEditorMode("view");
+                          }}
                         >
                           {record.id}
                         </button>
@@ -127,46 +162,60 @@ export default function DatasetRoute() {
               </div>
 
               <div className="record-details" data-testid="record-details">
-                <h2>Record details</h2>
-                {selectedRecord ? (
-                  <div className="record-card">
-                    <p>
-                      <strong>{selectedRecord.id}</strong>
-                    </p>
-                    <p>Type: {selectedRecord.typeId}</p>
-                    <p>Created: {selectedRecord.createdAt}</p>
-                    <p>Updated: {selectedRecord.updatedAt}</p>
-                    <div>
-                      <h3>Fields</h3>
-                      <pre>{JSON.stringify(selectedRecord.fields, null, 2)}</pre>
-                    </div>
-                    <div>
-                      <h3>Body</h3>
-                      <pre>{selectedRecord.body || "(no body)"}</pre>
-                    </div>
-                    <div className="record-links">
-                      <div>
-                        <h3>Outgoing links</h3>
-                        <ul>
-                          {outgoingLinks.length ? (
-                            outgoingLinks.map((link) => <li key={link}>{link}</li>)
-                          ) : (
-                            <li>None</li>
-                          )}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3>Incoming links</h3>
-                        <ul>
-                          {incomingLinks.length ? (
-                            incomingLinks.map((link) => <li key={link}>{link}</li>)
-                          ) : (
-                            <li>None</li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+                <div className="record-details__header">
+                  <h2>Record details</h2>
+                  {selectedRecord && editorMode === "view" ? (
+                    <button
+                      type="button"
+                      className="button secondary"
+                      data-testid="edit-record"
+                      onClick={() => setEditorMode("edit")}
+                    >
+                      Edit
+                    </button>
+                  ) : null}
+                </div>
+                {editorMode === "create" && selectedTypeDef && graph ? (
+                  <RecordEditor
+                    mode="create"
+                    schema={schema}
+                    schemaError={schemaError}
+                    typeDef={selectedTypeDef}
+                    graph={graph}
+                    onCancel={() => {
+                      setEditorMode("view");
+                      setSelectedRecordId(previousRecordId);
+                    }}
+                    onComplete={(newId) => {
+                      setEditorMode("view");
+                      setSelectedRecordId(newId);
+                    }}
+                  />
+                ) : selectedRecord && selectedTypeDef && graph ? (
+                  editorMode === "edit" ? (
+                    <RecordEditor
+                      mode="edit"
+                      schema={schema}
+                      schemaError={schemaError}
+                      record={selectedRecord}
+                      typeDef={selectedTypeDef}
+                      graph={graph}
+                      onCancel={() => setEditorMode("view")}
+                      onComplete={(id) => {
+                        setEditorMode("view");
+                        setSelectedRecordId(id);
+                      }}
+                    />
+                  ) : (
+                    <RecordViewer
+                      record={selectedRecord}
+                      typeDef={selectedTypeDef}
+                      schema={schema}
+                      schemaError={schemaError}
+                      outgoingLinks={outgoingLinks}
+                      incomingLinks={incomingLinks}
+                    />
+                  )
                 ) : (
                   <p>Select a record to view details.</p>
                 )}

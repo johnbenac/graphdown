@@ -1,4 +1,4 @@
-import { parse } from 'yaml';
+import { parse, stringify } from 'yaml';
 
 export function parseYaml(yamlString: string): unknown {
   try {
@@ -15,4 +15,17 @@ export function parseYamlObject(yamlString: string): Record<string, unknown> {
     throw new Error('YAML front matter is not a valid object');
   }
   return parsed as Record<string, unknown>;
+}
+
+export function stringifyYaml(value: unknown): string {
+  try {
+    return stringify(value);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(message);
+  }
+}
+
+export function stringifyYamlObject(obj: Record<string, unknown>): string {
+  return stringifyYaml(obj).trimEnd();
 }
