@@ -50,23 +50,6 @@ function listRecordDirs(files: string[]): string[] {
   return [...dirs].sort((a, b) => a.localeCompare(b));
 }
 
-const ALLOWED_RECORDS_ROOT_FILES = new Set(['.gitkeep', 'readme.md']);
-
-function isAllowedRecordsRootFile(path: string): boolean {
-  if (!path.startsWith('records/')) {
-    return false;
-  }
-  const parts = path.split('/');
-  if (parts.length !== 2) {
-    return false;
-  }
-  const name = parts[1];
-  if (!name) {
-    return false;
-  }
-  return ALLOWED_RECORDS_ROOT_FILES.has(name.toLowerCase());
-}
-
 function requireString(
   errors: ValidationError[],
   yaml: Record<string, unknown>,
@@ -105,7 +88,7 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
     const parts = file.split('/');
     const isRootLevel = parts.length === 2;
     const isMarkdown = file.toLowerCase().endsWith('.md');
-    if (isRootLevel && isMarkdown && !isAllowedRecordsRootFile(file)) {
+    if (isRootLevel && isMarkdown) {
       errors.push(
         makeError(
           'E_UNKNOWN_RECORD_DIR',
@@ -143,12 +126,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   const datasetYaml = parsedDataset.yaml;
   const datasetId = requireString(errors, datasetYaml, 'id', datasetFile, 'Dataset id');
 
-  if (datasetId && !datasetId.startsWith('dataset:')) {
-    errors.push(
-      makeError('E_ID_PREFIX_INVALID', 'Dataset id must be a string beginning with "dataset:"', datasetFile)
-    );
-  }
-
   const datasetDatasetId = requireString(
     errors,
     datasetYaml,
@@ -172,14 +149,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
 
   if (!isObject(datasetYaml.fields)) {
     errors.push(makeError('E_REQUIRED_FIELD_MISSING', 'Dataset file fields must be an object', datasetFile));
-  } else {
-    const name = getString(datasetYaml.fields, 'name');
-    const description = getString(datasetYaml.fields, 'description');
-    if (!name?.trim() || !description?.trim()) {
-      errors.push(
-        makeError('E_DATASET_FIELDS_MISSING', 'Dataset fields must include `name` and `description`', datasetFile)
-      );
-    }
   }
 
   const typeFiles = listMarkdownFiles(files, 'types', true);
