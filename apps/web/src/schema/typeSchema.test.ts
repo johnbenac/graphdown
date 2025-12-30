@@ -19,8 +19,24 @@ describe("parseTypeSchema", () => {
     }
   });
 
-  it("errors when fieldDefs is a non-array, non-null value", () => {
-    const result = parseTypeSchema({ recordTypeId: "note", fieldDefs: {} });
+  it("accepts map-shaped fieldDefs", () => {
+    const result = parseTypeSchema({
+      recordTypeId: "note",
+      fieldDefs: { title: { kind: "string", required: true } }
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.schema.fields).toEqual([
+        expect.objectContaining({ name: "title", kind: "string", required: true })
+      ]);
+    }
+  });
+
+  it("errors when fieldDefs is an array", () => {
+    const result = parseTypeSchema({
+      recordTypeId: "note",
+      fieldDefs: [{ name: "title", kind: "string" }]
+    });
     expect(result.ok).toBe(false);
   });
 });

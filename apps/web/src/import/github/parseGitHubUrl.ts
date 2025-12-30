@@ -2,6 +2,7 @@ export type ParsedGitHubUrl = {
   owner: string;
   repo: string;
   ref?: string;
+  subdir?: string;
   canonicalRepoUrl: string;
 };
 
@@ -28,14 +29,17 @@ export function parseGitHubUrl(input: string): ParseResult {
     return { ok: false, message: 'Enter a GitHub repository URL.' };
   }
 
+  const normalized = trimmed.includes('://') ? trimmed : `https://${trimmed}`;
+
   let url: URL;
   try {
-    url = new URL(trimmed);
+    url = new URL(normalized);
   } catch {
     return {
       ok: false,
-      message: 'GitHub URL must include the full https://github.com/owner/repo format.',
-      hint: 'Example: https://github.com/owner/repo'
+      message:
+        'GitHub URL must be a GitHub repository URL like https://github.com/owner/repo or github.com/owner/repo (optionally with /tree/<ref>/<subdir>).',
+      hint: 'Example: https://github.com/owner/repo or github.com/owner/repo'
     };
   }
 
@@ -80,18 +84,14 @@ export function parseGitHubUrl(input: string): ParseResult {
       if (!ref) {
         return { ok: false, message: 'GitHub URL is missing the branch or tag after /tree/.' };
       }
-      if (segments.length > 4) {
-        return {
-          ok: false,
-          message: 'GitHub URL cannot include a subdirectory path. Use the repo root.'
-        };
-      }
+      const subdir = segments.length > 4 ? segments.slice(4).join('/') : undefined;
       return {
         ok: true,
         value: {
           owner,
           repo,
           ref,
+          subdir,
           canonicalRepoUrl: `https://github.com/${owner}/${repo}`
         }
       };

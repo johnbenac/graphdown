@@ -260,6 +260,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           owner: parsed.value.owner,
           repo: parsed.value.repo,
           ref: parsed.value.ref,
+          subdir: parsed.value.subdir,
           onProgress: (progress) => setProgress(progress)
         });
 

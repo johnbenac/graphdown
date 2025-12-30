@@ -119,53 +119,13 @@ describe("DatasetContext GitHub import", () => {
       )
       .mockResolvedValueOnce(
         new Response(
-          JSON.stringify([
-            {
-              type: "file",
-              path: "datasets/demo.md",
-              name: "demo.md",
-              download_url: "https://example.com/datasets/demo.md"
-            }
-          ]),
-          { status: 200, headers: { "Content-Type": "application/json" } }
-        )
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify([
-            {
-              type: "file",
-              path: "types/note.md",
-              name: "note.md",
-              download_url: "https://example.com/types/note.md"
-            }
-          ]),
-          { status: 200, headers: { "Content-Type": "application/json" } }
-        )
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify([
-            {
-              type: "dir",
-              path: "records/note",
-              name: "note",
-              download_url: null
-            }
-          ]),
-          { status: 200, headers: { "Content-Type": "application/json" } }
-        )
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify([
-            {
-              type: "file",
-              path: "records/note/record-1.md",
-              name: "record-1.md",
-              download_url: "https://example.com/records/note/record-1.md"
-            }
-          ]),
+          JSON.stringify({
+            tree: [
+              { path: "datasets/demo.md", type: "blob" },
+              { path: "types/note.md", type: "blob" },
+              { path: "records/note/record-1.md", type: "blob" }
+            ]
+          }),
           { status: 200, headers: { "Content-Type": "application/json" } }
         )
       )
