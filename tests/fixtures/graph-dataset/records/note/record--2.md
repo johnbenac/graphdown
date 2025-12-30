@@ -6,7 +6,7 @@ createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
 fields:
   title: "Second note"
-  ref: "note:1"
+  ref: "[[note:1]]"
 ---
 
 # Second Note

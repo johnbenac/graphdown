@@ -4,15 +4,17 @@ import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
 
-type GitHubContentItem = {
-  type: "file" | "dir";
-  path: string;
-  name: string;
-  download_url: string | null;
-};
-
 type GitHubRepoMetadata = {
   default_branch: string;
+};
+
+type GitHubTreeItem = {
+  path: string;
+  type: "blob" | "tree";
+};
+
+type GitHubTreeResponse = {
+  tree: GitHubTreeItem[];
 };
 
 async function readResponseMessage(response: Response): Promise<string | null> {
@@ -38,74 +40,44 @@ async function fetchJson<T>(url: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function listDirectory(path: string, ref: string): Promise<GitHubContentItem[]> {
-  const url = new URL(`${API_BASE}/repos/${path}`);
-  url.searchParams.set("ref", ref);
+const ALLOWED_ROOTS = ["datasets/", "types/", "records/"];
 
-  const response = await fetch(url.toString(), {
-    headers: { Accept: "application/vnd.github+json" }
-  });
-
-  if (response.status === 404) {
-    return [];
+function isAllowedPath(path: string): boolean {
+  if (!path.toLowerCase().endsWith(".md")) {
+    return false;
   }
-
-  if (!response.ok) {
-    const message = await readResponseMessage(response);
-    throw new GitHubImportError(mapGitHubError(response, message));
-  }
-
-  const data = await response.json();
-  if (Array.isArray(data)) {
-    return data as GitHubContentItem[];
-  }
-  return [];
-}
-
-async function listMarkdownFilesRecursively(
-  owner: string,
-  repo: string,
-  path: string,
-  ref: string
-): Promise<Array<{ path: string; downloadUrl: string }>> {
-  const items = await listDirectory(`${owner}/${repo}/contents/${path}`, ref);
-  const results: Array<{ path: string; downloadUrl: string }> = [];
-
-  for (const item of items) {
-    if (item.type === "dir") {
-      results.push(...(await listMarkdownFilesRecursively(owner, repo, item.path, ref)));
-      continue;
-    }
-    if (item.type === "file" && item.name.toLowerCase().endsWith(".md") && item.download_url) {
-      results.push({ path: item.path, downloadUrl: item.download_url });
-    }
-  }
-
-  return results;
+  return ALLOWED_ROOTS.some((root) => path.startsWith(root));
 }
 
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
+  subdir?: string;
   onProgress?: (progress: ImportProgress) => void;
 }): Promise<RepoSnapshot> {
-  const { owner, repo, ref, onProgress } = input;
+  const { owner, repo, ref, subdir, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
   const repoMetadata = await fetchJson<GitHubRepoMetadata>(`${API_BASE}/repos/${owner}/${repo}`);
   const resolvedRef = ref ?? repoMetadata.default_branch;
 
   onProgress?.({ phase: "listing_files" });
-  const datasetItems = await listDirectory(`${owner}/${repo}/contents/datasets`, resolvedRef);
-  const datasetFiles = datasetItems
-    .filter((item) => item.type === "file" && item.name.toLowerCase().endsWith(".md") && item.download_url)
-    .map((item) => ({ path: item.path, downloadUrl: item.download_url! }));
+  const tree = await fetchJson<GitHubTreeResponse>(
+    `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
+  );
 
-  const typeFiles = await listMarkdownFilesRecursively(owner, repo, "types", resolvedRef);
-  const recordFiles = await listMarkdownFilesRecursively(owner, repo, "records", resolvedRef);
-
-  const allFiles = [...datasetFiles, ...typeFiles, ...recordFiles];
+  const prefix = subdir ? `${subdir.replace(/^\/+|\/+$/g, "")}/` : "";
+  const allFiles = tree.tree
+    .filter((item) => item.type === "blob")
+    .map((item) => item.path)
+    .filter((path) => (prefix ? path.startsWith(prefix) : true))
+    .map((path) => (prefix ? path.slice(prefix.length) : path))
+    .filter((path) => isAllowedPath(path))
+    .map((path) => ({
+      path,
+      downloadUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${resolvedRef}/${prefix}${path}`
+    }));
   const files = new Map<string, Uint8Array>();
 
   onProgress?.({ phase: "downloading_files", completed: 0, total: allFiles.length });

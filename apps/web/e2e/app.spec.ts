@@ -24,94 +24,19 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
       return;
     }
 
-    if (url.pathname === "/repos/owner/repo/contents/datasets") {
+    if (url.pathname === "/repos/owner/repo/git/trees/main" && url.searchParams.get("recursive") === "1") {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "file",
-            path: "datasets/demo.md",
-            name: "demo.md",
-            download_url: "https://example.com/datasets/demo.md"
-          }
-        ])
-      });
-      return;
-    }
-
-    if (url.pathname === "/repos/owner/repo/contents/types") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "file",
-            path: "types/note.md",
-            name: "note.md",
-            download_url: "https://example.com/types/note.md"
-          },
-          {
-            type: "file",
-            path: "types/task.md",
-            name: "task.md",
-            download_url: "https://example.com/types/task.md"
-          }
-        ])
-      });
-      return;
-    }
-
-    if (url.pathname === "/repos/owner/repo/contents/records") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "dir",
-            path: "records/note",
-            name: "note",
-            download_url: null
-          },
-          {
-            type: "dir",
-            path: "records/task",
-            name: "task",
-            download_url: null
-          }
-        ])
-      });
-      return;
-    }
-
-    if (url.pathname === "/repos/owner/repo/contents/records/note") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "file",
-            path: "records/note/record-1.md",
-            name: "record-1.md",
-            download_url: "https://example.com/records/note/record-1.md"
-          }
-        ])
-      });
-      return;
-    }
-
-    if (url.pathname === "/repos/owner/repo/contents/records/task") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "file",
-            path: "records/task/record-1.md",
-            name: "record-1.md",
-            download_url: "https://example.com/records/task/record-1.md"
-          }
-        ])
+        body: JSON.stringify({
+          tree: [
+            { path: "datasets/demo.md", type: "blob" },
+            { path: "types/note.md", type: "blob" },
+            { path: "types/task.md", type: "blob" },
+            { path: "records/note/record-1.md", type: "blob" },
+            { path: "records/task/record-1.md", type: "blob" }
+          ]
+        })
       });
       return;
     }
@@ -123,7 +48,7 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
     });
   });
 
-  await page.route("**/example.com/**", async (route) => {
+  await page.route("**/raw.githubusercontent.com/**", async (route) => {
     const url = route.request().url();
     if (url.endsWith("/datasets/demo.md")) {
       await route.fulfill({
@@ -161,19 +86,18 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "  pluralName: Notes",
           "  bodyField: content",
           "  fieldDefs:",
-          "    - name: title",
+          "    title:",
           "      kind: string",
           "      required: true",
-          "    - name: estimate",
+          "    estimate:",
           "      kind: number",
-          "    - name: status",
+          "    status:",
           "      kind: enum",
-          "      options: [todo, doing, done]",
-          "    - name: due",
+          "    due:",
           "      kind: date",
-          "    - name: assignee",
+          "    assignee:",
           "      kind: ref",
-          "    - name: watchers",
+          "    watchers:",
           "      kind: ref[]",
           "---"
         ].join("\n")
@@ -215,11 +139,9 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
           "  estimate: 3",
           "  status: todo",
           "  due: 2024-01-10",
-          "  assignee:",
-          "    ref: record:task-1",
+          "  assignee: \"[[record:task-1]]\"",
           "  watchers:",
-          "    refs:",
-          "      - record:task-1",
+          "    - \"[[record:task-1]]\"",
           "---",
           "This is the note body."
         ].join("\n")
@@ -276,11 +198,9 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
 
 test("shows an invalid URL error for malformed GitHub URLs", async ({ page }) => {
   await page.goto("/import?storage=memory");
-  await page.getByLabel("GitHub URL").fill("github.com/owner/repo");
+  await page.getByLabel("GitHub URL").fill("https://example.com/owner/repo");
   await page.getByRole("button", { name: "Import from GitHub" }).click();
 
   await expect(page.getByRole("heading", { name: "Invalid GitHub URL" })).toBeVisible();
-  await expect(
-    page.getByText("GitHub URL must include the full https://github.com/owner/repo format.")
-  ).toBeVisible();
+  await expect(page.getByText("Only github.com URLs are supported.")).toBeVisible();
 });

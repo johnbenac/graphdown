@@ -13,6 +13,11 @@ describe("parseGitHubUrl", () => {
     }
   });
 
+  it("accepts scheme-less repo URLs", () => {
+    const result = parseGitHubUrl("github.com/owner/repo");
+    expect(result.ok).toBe(true);
+  });
+
   it("accepts repo URLs with trailing slash and .git", () => {
     const slashResult = parseGitHubUrl("https://github.com/owner/repo/");
     expect(slashResult.ok).toBe(true);
@@ -32,14 +37,22 @@ describe("parseGitHubUrl", () => {
     }
   });
 
+  it("accepts tree URLs with subdir", () => {
+    const result = parseGitHubUrl("https://github.com/owner/repo/tree/main/path/to/dataset");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.ref).toBe("main");
+      expect(result.value.subdir).toBe("path/to/dataset");
+    }
+  });
+
   it("rejects invalid URLs", () => {
     const invalidInputs = [
       "",
-      "github.com/owner/repo",
       "https://example.com/owner/repo",
       "https://github.com/owner",
       "https://github.com/owner/repo/blob/main/readme.md",
-      "https://github.com/owner/repo/tree/main/path"
+      "https://github.com/owner/repo/tree"
     ];
 
     for (const input of invalidInputs) {
