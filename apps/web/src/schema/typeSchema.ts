@@ -25,7 +25,7 @@ export function parseTypeSchema(
 ): ParseSchemaResult {
   const bodyField = typeof fields?.bodyField === "string" ? fields.bodyField : undefined;
   const rawDefs = fields?.fieldDefs;
-  if (rawDefs === undefined) {
+  if (rawDefs == null) {
     return { ok: true, schema: { bodyField, fields: [] } };
   }
   if (!Array.isArray(rawDefs)) {
