@@ -1,10 +1,14 @@
-# Graphdown Validator
+# Graphdown
 
-A validator for Markdown-canonical datasets following the Graphdown specification.
+A toolkit for working with Markdown-canonical datasets following the Graphdown specification.
 
 ## Overview
 
-This tool validates the structure and contents of Graphdown datasets - data stored as Markdown files with YAML front matter, organized into a graph-like structure with types and records.
+Graphdown provides tools for validating, browsing, and editing datasets stored as Markdown files with YAML front matter, organized into a graph-like structure with types and records.
+
+This project includes:
+- **CLI validator** - Validate dataset structure and consistency
+- **Web application** - Browse and edit datasets in your browser
 
 ## Specification
 
