@@ -3,16 +3,24 @@ import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
+const RAW_BASE = "https://raw.githubusercontent.com";
 
-type GitHubContentItem = {
-  type: "file" | "dir";
+type GitHubTreeItem = {
   path: string;
-  name: string;
-  download_url: string | null;
+  type: "blob" | "tree" | "commit";
+};
+
+type GitHubTreeResponse = {
+  tree: GitHubTreeItem[];
 };
 
 type GitHubRepoMetadata = {
   default_branch: string;
+};
+
+type GitHubFile = {
+  path: string;
+  repoPath: string;
 };
 
 async function readResponseMessage(response: Response): Promise<string | null> {
@@ -38,49 +46,47 @@ async function fetchJson<T>(url: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function listDirectory(path: string, ref: string): Promise<GitHubContentItem[]> {
-  const url = new URL(`${API_BASE}/repos/${path}`);
-  url.searchParams.set("ref", ref);
-
-  const response = await fetch(url.toString(), {
-    headers: { Accept: "application/vnd.github+json" }
-  });
-
-  if (response.status === 404) {
-    return [];
+function normalizeSubdir(subdir?: string): string | null {
+  if (!subdir) {
+    return null;
   }
-
-  if (!response.ok) {
-    const message = await readResponseMessage(response);
-    throw new GitHubImportError(mapGitHubError(response, message));
-  }
-
-  const data = await response.json();
-  if (Array.isArray(data)) {
-    return data as GitHubContentItem[];
-  }
-  return [];
+  const trimmed = subdir.replace(/^\/+|\/+$/g, "");
+  return trimmed ? trimmed : null;
 }
 
-async function listMarkdownFilesRecursively(
-  owner: string,
-  repo: string,
-  path: string,
-  ref: string
-): Promise<Array<{ path: string; downloadUrl: string }>> {
-  const items = await listDirectory(`${owner}/${repo}/contents/${path}`, ref);
-  const results: Array<{ path: string; downloadUrl: string }> = [];
+function getSnapshotPath(path: string, subdir: string | null): string | null {
+  if (!subdir) {
+    return path;
+  }
+  const prefix = `${subdir}/`;
+  if (!path.startsWith(prefix)) {
+    return null;
+  }
+  return path.slice(prefix.length);
+}
 
-  for (const item of items) {
-    if (item.type === "dir") {
-      results.push(...(await listMarkdownFilesRecursively(owner, repo, item.path, ref)));
+function isDatasetPath(path: string): boolean {
+  return path.startsWith("datasets/") || path.startsWith("types/") || path.startsWith("records/");
+}
+
+function listMarkdownFiles(
+  tree: GitHubTreeItem[],
+  subdir: string | null
+): GitHubFile[] {
+  const results: GitHubFile[] = [];
+  for (const item of tree) {
+    if (item.type !== "blob") {
       continue;
     }
-    if (item.type === "file" && item.name.toLowerCase().endsWith(".md") && item.download_url) {
-      results.push({ path: item.path, downloadUrl: item.download_url });
+    if (!item.path.toLowerCase().endsWith(".md")) {
+      continue;
     }
+    const snapshotPath = getSnapshotPath(item.path, subdir);
+    if (!snapshotPath || !isDatasetPath(snapshotPath)) {
+      continue;
+    }
+    results.push({ path: snapshotPath, repoPath: item.path });
   }
-
   return results;
 }
 
@@ -88,31 +94,30 @@ export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
+  subdir?: string;
   onProgress?: (progress: ImportProgress) => void;
 }): Promise<RepoSnapshot> {
-  const { owner, repo, ref, onProgress } = input;
+  const { owner, repo, ref, subdir, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
   const repoMetadata = await fetchJson<GitHubRepoMetadata>(`${API_BASE}/repos/${owner}/${repo}`);
   const resolvedRef = ref ?? repoMetadata.default_branch;
+  const normalizedSubdir = normalizeSubdir(subdir);
 
   onProgress?.({ phase: "listing_files" });
-  const datasetItems = await listDirectory(`${owner}/${repo}/contents/datasets`, resolvedRef);
-  const datasetFiles = datasetItems
-    .filter((item) => item.type === "file" && item.name.toLowerCase().endsWith(".md") && item.download_url)
-    .map((item) => ({ path: item.path, downloadUrl: item.download_url! }));
-
-  const typeFiles = await listMarkdownFilesRecursively(owner, repo, "types", resolvedRef);
-  const recordFiles = await listMarkdownFilesRecursively(owner, repo, "records", resolvedRef);
-
-  const allFiles = [...datasetFiles, ...typeFiles, ...recordFiles];
+  const treeResponse = await fetchJson<GitHubTreeResponse>(
+    `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
+  );
+  const allFiles = listMarkdownFiles(treeResponse.tree ?? [], normalizedSubdir);
   const files = new Map<string, Uint8Array>();
 
   onProgress?.({ phase: "downloading_files", completed: 0, total: allFiles.length });
 
   let completed = 0;
   for (const file of allFiles) {
-    const response = await fetch(file.downloadUrl);
+    const response = await fetch(
+      `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`
+    );
     if (!response.ok) {
       const message = await readResponseMessage(response);
       throw new GitHubImportError(mapGitHubError(response, message));

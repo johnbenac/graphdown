@@ -1,14 +1,11 @@
 import { cleanId } from "../../../../src/core/ids";
 import { isObject } from "../../../../src/core/types";
 
-export type FieldKind = "string" | "number" | "enum" | "date" | "ref" | "ref[]";
-
 export type FieldDef = {
   name: string;
-  kind: FieldKind;
-  label?: string;
+  kind: string;
   required?: boolean;
-  options?: string[];
+  [key: string]: unknown;
 };
 
 export type TypeSchema = {
@@ -18,8 +15,6 @@ export type TypeSchema = {
 
 export type ParseSchemaResult = { ok: true; schema: TypeSchema } | { ok: false; message: string };
 
-const allowedKinds = new Set<FieldKind>(["string", "number", "enum", "date", "ref", "ref[]"]);
-
 export function parseTypeSchema(
   fields: Record<string, unknown> | undefined
 ): ParseSchemaResult {
@@ -28,31 +23,24 @@ export function parseTypeSchema(
   if (rawDefs == null) {
     return { ok: true, schema: { bodyField, fields: [] } };
   }
-  if (!Array.isArray(rawDefs)) {
-    return { ok: false, message: "fieldDefs must be an array of field definitions." };
+  if (!isObject(rawDefs)) {
+    return { ok: false, message: "fieldDefs must be a map of field definitions." };
   }
   const parsed: FieldDef[] = [];
-  for (const item of rawDefs) {
+  for (const [name, item] of Object.entries(rawDefs)) {
     if (!isObject(item)) {
       return { ok: false, message: "Each field definition must be an object." };
     }
-    const name = typeof item.name === "string" ? item.name : undefined;
-    const kind = typeof item.kind === "string" ? (item.kind as FieldKind) : undefined;
-    if (!name || !kind || !allowedKinds.has(kind)) {
-      return { ok: false, message: "Each field definition requires a valid name and kind." };
+    const kind = typeof item.kind === "string" ? item.kind : undefined;
+    if (!name || !kind) {
+      return { ok: false, message: "Each field definition requires a name and kind." };
     }
-    const options = Array.isArray(item.options)
-      ? item.options.filter((value) => typeof value === "string")
-      : undefined;
-    if (kind === "enum" && (!options || options.length === 0)) {
-      return { ok: false, message: `Enum field "${name}" must define string options.` };
-    }
+    const { kind: _kind, required, ...rest } = item;
     parsed.push({
+      ...rest,
       name,
       kind,
-      label: typeof item.label === "string" ? item.label : undefined,
-      required: typeof item.required === "boolean" ? item.required : undefined,
-      options
+      ...(typeof required === "boolean" ? { required } : {})
     });
   }
   return { ok: true, schema: { bodyField, fields: parsed } };
