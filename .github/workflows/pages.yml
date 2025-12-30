@@ -30,6 +30,7 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        id: pages
 
       - name: Install dependencies
         run: npm ci
@@ -37,7 +38,7 @@ jobs:
       - name: Build web app
         run: npm --workspace apps/web run build
         env:
-          PAGES_BASE: /${{ github.event.repository.name }}/
+          PAGES_BASE: ${{ steps.pages.outputs.base_path }}
 
       - name: Disable Jekyll
         run: touch apps/web/dist/.nojekyll
