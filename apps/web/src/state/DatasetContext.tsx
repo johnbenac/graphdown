@@ -334,20 +334,22 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const commitSnapshot = useCallback(
     async (
       nextSnapshot: RepoSnapshot
-    ): Promise<{ ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> } | { ok: false; errors: ValidationError[] }> => {
+    ): Promise<
+      { ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> } | { ok: false; errors: ValidationError[] }
+    > => {
       const validation = validateDatasetSnapshot(nextSnapshot);
       if (!validation.ok) {
-        return { ok: false, errors: validation.errors };
+        return { ok: false, errors: validation.errors } as const;
       }
       const graphResult = buildGraphFromSnapshot(nextSnapshot);
       if (!graphResult.ok) {
-        return { ok: false, errors: graphResult.errors };
+        return { ok: false, errors: graphResult.errors } as const;
       }
       if (!activeDataset) {
         return {
           ok: false,
           errors: [makeError("E_INTERNAL", "No active dataset is loaded.")]
-        };
+        } as const;
       }
       const datasetId = activeDataset.meta.id;
       const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
@@ -358,34 +360,34 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         parsedGraph: graphResult.graph
       });
       setActiveDataset({ meta: nextMeta, repoSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
-      return { ok: true, parsedGraph: graphResult.graph };
+      return { ok: true, parsedGraph: graphResult.graph } as const;
     },
     [activeDataset, persistence]
   );
 
-  const updateRecord = useCallback(
+  const updateRecord = useCallback<DatasetContextValue["updateRecord"]>(
     async (input: {
       recordId: string;
       nextFields: Record<string, unknown>;
       nextBody: string;
     }) => {
       if (!activeDataset?.parsedGraph) {
-        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] };
+        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
       const node = activeDataset.parsedGraph.nodesById.get(input.recordId);
       if (!node || node.kind !== "record") {
-        return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] };
+        return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
       const currentBytes = activeDataset.repoSnapshot.files.get(node.file);
       if (!currentBytes) {
         return {
           ok: false,
           errors: [makeError("E_INTERNAL", "Record file missing from snapshot.", node.file)]
-        };
+        } as const;
       }
       const parsed = parseMarkdownRecord(decodeBytes(currentBytes), node.file);
       if (!parsed.ok) {
-        return { ok: false, errors: [parsed.error] };
+        return { ok: false, errors: [parsed.error] } as const;
       }
       const existingFields = isObject(parsed.yaml.fields) ? parsed.yaml.fields : {};
       const mergedFields: Record<string, unknown> = { ...existingFields, ...input.nextFields };
@@ -405,39 +407,39 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const nextSnapshot = { ...activeDataset.repoSnapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
-        return { ok: false, errors: commitResult.errors };
+        return { ok: false, errors: commitResult.errors } as const;
       }
-      return { ok: true };
+      return { ok: true } as const;
     },
     [activeDataset, commitSnapshot]
   );
 
-  const createRecord = useCallback(
+  const createRecord = useCallback<DatasetContextValue["createRecord"]>(
     async (input: { recordTypeId: string; id: string; fields: Record<string, unknown>; body: string }) => {
       if (!activeDataset?.parsedGraph) {
-        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] };
+        return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
       const trimmedId = input.id.trim();
       if (!trimmedId) {
-        return { ok: false, errors: [makeError("E_USAGE", "Record ID is required.")] };
+        return { ok: false, errors: [makeError("E_USAGE", "Record ID is required.")] } as const;
       }
       if (!activeDataset.parsedGraph.typesByRecordTypeId.has(input.recordTypeId)) {
         return {
           ok: false,
           errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.", input.recordTypeId)]
-        };
+        } as const;
       }
       if (activeDataset.parsedGraph.nodesById.has(trimmedId)) {
         return {
           ok: false,
           errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedId} already exists.`)]
-        };
+        } as const;
       }
       const datasetNode = [...activeDataset.parsedGraph.nodesById.values()].find(
         (node) => node.kind === "dataset"
       );
       if (!datasetNode) {
-        return { ok: false, errors: [makeError("E_INTERNAL", "Dataset record is missing.")] };
+        return { ok: false, errors: [makeError("E_INTERNAL", "Dataset record is missing.")] } as const;
       }
       const safeId = trimmedId.replace(/[^A-Za-z0-9_-]+/g, "-");
       let filePath = `records/${input.recordTypeId}/record--${safeId}.md`;
@@ -467,9 +469,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const nextSnapshot = { ...activeDataset.repoSnapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
-        return { ok: false, errors: commitResult.errors };
+        return { ok: false, errors: commitResult.errors } as const;
       }
-      return { ok: true, id: trimmedId };
+      return { ok: true, id: trimmedId } as const;
     },
     [activeDataset, commitSnapshot]
   );
