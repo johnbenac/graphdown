@@ -20,6 +20,7 @@
     "apps/*"
   ],
   "scripts": {
+    "postinstall": "npm --workspace apps/web run playwright:install",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
