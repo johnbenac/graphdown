@@ -11,8 +11,12 @@ type RecordViewerProps = {
   incomingLinks: string[];
 };
 
-function getFieldLabel(field: FieldDef) {
-  return field.label ?? field.name;
+function getFieldLabel(field: FieldDef): string {
+  const label = field.label;
+  if (typeof label === "string" || typeof label === "number") {
+    return String(label);
+  }
+  return field.name;
 }
 
 function getBodyValue(record: GraphNode, bodyField?: string) {
