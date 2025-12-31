@@ -3,7 +3,7 @@ const test = require('node:test');
 
 const { extractFrontMatter } = require('../dist/core');
 
-test('extractFrontMatter returns yaml and body for valid front matter', () => {
+test('FR-MD-020: extracts yaml and body for valid front matter', () => {
   const content = ['---', 'id: dataset:demo', '---', 'Body text'].join('\n');
   const result = extractFrontMatter(content);
 
@@ -11,7 +11,7 @@ test('extractFrontMatter returns yaml and body for valid front matter', () => {
   assert.equal(result.body, 'Body text');
 });
 
-test('extractFrontMatter throws when front matter is missing', () => {
+test('FR-MD-020: missing YAML front matter fails parsing', () => {
   assert.throws(
     () => extractFrontMatter('no front matter here'),
     /Missing YAML front matter delimiter at top of file/
