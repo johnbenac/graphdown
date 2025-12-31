@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseTypeSchema } from "./typeSchema";
 
 describe("parseTypeSchema", () => {
-  it("treats missing fieldDefs as empty schema", () => {
+  it("TYPE-004: missing fieldDefs yields an empty schema", () => {
     const result = parseTypeSchema({ recordTypeId: "note" });
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -11,7 +11,7 @@ describe("parseTypeSchema", () => {
     }
   });
 
-  it("treats null fieldDefs as empty schema", () => {
+  it("TYPE-004: null fieldDefs yields an empty schema", () => {
     const result = parseTypeSchema({ recordTypeId: "note", fieldDefs: null });
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -19,7 +19,7 @@ describe("parseTypeSchema", () => {
     }
   });
 
-  it("accepts map-shaped fieldDefs", () => {
+  it("TYPE-004: fieldDefs map is accepted", () => {
     const result = parseTypeSchema({
       recordTypeId: "note",
       fieldDefs: {
@@ -34,7 +34,7 @@ describe("parseTypeSchema", () => {
     }
   });
 
-  it("errors when fieldDefs is an array", () => {
+  it("TYPE-004: fieldDefs array is rejected", () => {
     const result = parseTypeSchema({
       recordTypeId: "note",
       fieldDefs: [{ name: "title", kind: "string" }]
