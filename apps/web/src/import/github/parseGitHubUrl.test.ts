@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseGitHubUrl } from "./parseGitHubUrl";
 
 describe("parseGitHubUrl", () => {
-  it("accepts basic repo URLs", () => {
+  it("GH-001: accepts https repo URLs", () => {
     const result = parseGitHubUrl("https://github.com/owner/repo");
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -13,7 +13,7 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("accepts repo URLs with trailing slash and .git", () => {
+  it("GH-001: accepts repo URLs with trailing slash and .git", () => {
     const slashResult = parseGitHubUrl("https://github.com/owner/repo/");
     expect(slashResult.ok).toBe(true);
 
@@ -24,7 +24,7 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("accepts tree ref URLs", () => {
+  it("GH-001: accepts /tree/<ref> URLs", () => {
     const result = parseGitHubUrl("https://github.com/owner/repo/tree/main");
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -32,7 +32,7 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("accepts scheme-less repo URLs", () => {
+  it("GH-001: accepts scheme-less repo URLs", () => {
     const result = parseGitHubUrl("github.com/owner/repo");
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -41,14 +41,20 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("rejects invalid URLs", () => {
+  it("GH-005: rejects /tree/<ref>/<subdir> URLs", () => {
+    const result = parseGitHubUrl(
+      "https://github.com/owner/repo/tree/main/path/to/dataset"
+    );
+    expect(result.ok).toBe(false);
+  });
+
+  it("GH-001: rejects malformed, non-github, or unsupported URLs", () => {
     const invalidInputs = [
       "",
       "https://example.com/owner/repo",
       "https://github.com/owner",
       "https://github.com/owner/repo/blob/main/readme.md",
       "https://github.com/owner/repo/tree",
-      "https://github.com/owner/repo/tree/main/path/to/dataset"
     ];
 
     for (const input of invalidInputs) {

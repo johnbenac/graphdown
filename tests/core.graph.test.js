@@ -8,7 +8,7 @@ const { buildGraphFromFs } = require('../dist/core');
 
 const fixtureRoot = path.join(__dirname, 'fixtures', 'graph-dataset');
 
-test('builds graph and answers outgoing links', () => {
+test('REL-002: extracts outgoing links from record content', () => {
   const result = buildGraphFromFs(fixtureRoot);
 
   assert.equal(result.ok, true);
@@ -17,7 +17,7 @@ test('builds graph and answers outgoing links', () => {
   assert.deepEqual(graph.getLinksFrom('note:2'), ['note:1']);
 });
 
-test('answers incoming links', () => {
+test('REL-002: computes incoming links from extracted relationships', () => {
   const result = buildGraphFromFs(fixtureRoot);
 
   assert.equal(result.ok, true);
@@ -26,7 +26,7 @@ test('answers incoming links', () => {
   assert.deepEqual(graph.getLinksTo('note:2'), ['note:1']);
 });
 
-test('resolves type for record', () => {
+test("TYPE-001: resolves a record's type via type records", () => {
   const result = buildGraphFromFs(fixtureRoot);
 
   assert.equal(result.ok, true);
@@ -37,7 +37,7 @@ test('resolves type for record', () => {
   assert.equal(type.recordTypeId, 'note');
 });
 
-test('includes wiki-links found inside YAML fields', () => {
+test('REL-002: extracts wiki-links from YAML field strings', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
@@ -114,7 +114,7 @@ fields:
   }
 });
 
-test('enforces global unique ids', () => {
+test('VAL-002: enforces global id uniqueness', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
@@ -173,7 +173,7 @@ fields:
   }
 });
 
-test('enforces stable recordTypeId format', () => {
+test('TYPE-002: recordTypeId must be directory-safe', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
