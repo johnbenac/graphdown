@@ -104,16 +104,26 @@ function validateDataset(root) {
     pushError('E_DIR_MISSING', 'Missing required `records/` directory');
     return { errors };
   }
-  // Validate dataset record (exactly one .md file in datasets/)
-  const datasetFiles = fs.readdirSync(datasetsDir).filter(fn => fn.toLowerCase().endsWith('.md'));
-  if (datasetFiles.length !== 1) {
-    pushError(
-      'E_DATASET_FILE_COUNT',
-      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
-    );
+  // Validate dataset record (exactly one .md file directly in datasets/)
+  const datasetFilesRecursive = listMarkdownFiles(datasetsDir)
+    .map((filePath) => path.relative(root, filePath).split(path.sep).join('/'))
+    .sort((a, b) => a.localeCompare(b));
+  const datasetFiles = datasetFilesRecursive.filter((filePath) => {
+    const rest = filePath.slice('datasets/'.length);
+    return rest.length > 0 && !rest.includes('/');
+  });
+  const nestedDatasetFiles = datasetFilesRecursive.filter((filePath) => !datasetFiles.includes(filePath));
+  if (datasetFiles.length !== 1 || nestedDatasetFiles.length > 0) {
+    const message =
+      datasetFilesRecursive.length === 0
+        ? 'Expected exactly one Markdown file in datasets/, found 0'
+        : `Dataset manifest must be a single Markdown file directly under datasets/. Found: ${datasetFilesRecursive.join(
+            ', '
+          )}`;
+    pushError('E_DATASET_FILE_COUNT', message);
     return { errors };
   }
-  const datasetPath = path.join(datasetsDir, datasetFiles[0]);
+  const datasetPath = path.join(root, datasetFiles[0]);
   const datasetDoc = readMarkdownFile(datasetPath);
   if (datasetDoc.error) {
     pushError(

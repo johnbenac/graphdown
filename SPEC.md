@@ -160,7 +160,7 @@ Obsidian-style link syntax: `[[some-id]]`
 <!-- req:id=LAYOUT-001 title="Required directories" -->
 ### LAYOUT-001 — Required directories
 
-A Dataset root **MUST** contain:
+A Dataset root (the repository root) **MUST** contain:
 
 * `datasets/`
 * `types/`
@@ -183,8 +183,8 @@ A **record file** is any file that:
 <!-- req:id=LAYOUT-003 title="Exactly one dataset record" -->
 ### LAYOUT-003 — Exactly one dataset record
 
-`datasets/` **MUST** contain exactly one dataset record file (`.md`).
-Subdirectories under `datasets/` are allowed, but the total count of dataset record files must still be exactly one.
+`datasets/` **MUST** contain exactly one dataset record file (`.md`) stored directly under `datasets/`.
+Subdirectories under `datasets/` are **not** allowed. Any Markdown file found under `datasets/**/` is invalid, and import/validation **MUST** fail while listing all dataset record paths discovered.
 
 <!-- req:id=LAYOUT-004 title="Type records location" -->
 ### LAYOUT-004 — Type records location

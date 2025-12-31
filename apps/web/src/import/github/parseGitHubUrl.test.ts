@@ -41,21 +41,13 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("accepts tree URLs with subdirectories", () => {
-    const result = parseGitHubUrl("https://github.com/owner/repo/tree/main/path/to/dataset");
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.value.ref).toBe("main");
-      expect(result.value.subdir).toBe("path/to/dataset");
-    }
-  });
-
   it("rejects invalid URLs", () => {
     const invalidInputs = [
       "",
       "https://example.com/owner/repo",
       "https://github.com/owner",
       "https://github.com/owner/repo/blob/main/readme.md",
+      "https://github.com/owner/repo/tree/main/path/to/dataset",
       "https://github.com/owner/repo/tree"
     ];
 

@@ -85,6 +85,22 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_DATASET_FILE_COUNT");
   });
 
+  it("reports nested dataset manifests", () => {
+    const snapshot = snapshotFromEntries([
+      ["datasets/demo.md", "---\nid: dataset:demo\n---"],
+      ["datasets/archive/old.md", "---\nid: dataset:old\n---"],
+      ["types/.keep", "placeholder"],
+      ["records/.keep", "placeholder"]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const error = result.errors.find((item) => item.code === "E_DATASET_FILE_COUNT");
+      expect(error?.message).toContain("datasets/demo.md");
+      expect(error?.message).toContain("datasets/archive/old.md");
+    }
+  });
+
   it("reports missing YAML front matter", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "No front matter"],

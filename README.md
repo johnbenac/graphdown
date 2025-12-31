@@ -129,6 +129,9 @@ Markdown content goes here.
 For the authoritative validity rules, refer to the Graphdown Dataset Validity Specification:
 [`docs/spec/dataset-validity.md`](docs/spec/dataset-validity.md).
 
+The dataset lives at the repository root. Imports and validation require exactly one
+Markdown dataset manifest directly under `datasets/` (no nested `datasets/**` manifests).
+
 ## Example Datasets
 
 See the companion repositories for working examples:

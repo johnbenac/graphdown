@@ -99,16 +99,19 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
     }
   }
 
+  const datasetFilesRecursive = listMarkdownFiles(files, 'datasets', true);
   const datasetFiles = listMarkdownFiles(files, 'datasets', false);
-  if (datasetFiles.length !== 1) {
+  const nestedDatasetFiles = datasetFilesRecursive.filter((file) => !datasetFiles.includes(file));
+  if (datasetFiles.length !== 1 || nestedDatasetFiles.length > 0) {
+    const message =
+      datasetFilesRecursive.length === 0
+        ? 'Expected exactly one Markdown file in datasets/, found 0'
+        : `Dataset manifest must be a single Markdown file directly under datasets/. Found: ${datasetFilesRecursive.join(
+            ', '
+          )}`;
     return {
       ok: false,
-      errors: [
-        makeError(
-          'E_DATASET_FILE_COUNT',
-          `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
-        )
-      ]
+      errors: [makeError('E_DATASET_FILE_COUNT', message)]
     };
   }
 
