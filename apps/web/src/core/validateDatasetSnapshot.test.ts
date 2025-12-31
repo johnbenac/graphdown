@@ -85,6 +85,18 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_DATASET_FILE_COUNT");
   });
 
+  it("reports nested dataset manifests", () => {
+    const snapshot = snapshotFromEntries([
+      ["datasets/one.md", "---\nid: dataset:one\n---"],
+      ["datasets/archive/two.md", "---\nid: dataset:two\n---"],
+      ["types/.keep", "placeholder"],
+      ["records/.keep", "placeholder"]
+    ]);
+    const codes = getErrorCodes(snapshot);
+    expect(codes).toContain("E_DATASET_SUBDIR_UNSUPPORTED");
+    expect(codes).toContain("E_DATASET_FILE_COUNT");
+  });
+
   it("reports missing YAML front matter", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "No front matter"],

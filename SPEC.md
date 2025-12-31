@@ -183,8 +183,9 @@ A **record file** is any file that:
 <!-- req:id=LAYOUT-003 title="Exactly one dataset record" -->
 ### LAYOUT-003 — Exactly one dataset record
 
-`datasets/` **MUST** contain exactly one dataset record file (`.md`).
-Subdirectories under `datasets/` are allowed, but the total count of dataset record files must still be exactly one.
+`datasets/` **MUST** contain exactly one dataset record file (`.md`) stored directly under `datasets/`.
+Dataset manifests **MUST NOT** be nested under `datasets/**/` subdirectories, and validators/importers **MUST** fail if any
+additional dataset manifest paths are found.
 
 <!-- req:id=LAYOUT-004 title="Type records location" -->
 ### LAYOUT-004 — Type records location
@@ -500,7 +501,7 @@ Import MUST accept:
 
 * `github.com/<owner>/<repo>`
 * `https://github.com/<owner>/<repo>`
-* `github.com/<owner>/<repo>/tree/<ref>/<optional/subdir>`
+* `github.com/<owner>/<repo>/tree/<ref>`
 
 <!-- req:id=GH-002 title="Default ref resolution" -->
 ### GH-002 — Default ref resolution
@@ -515,10 +516,10 @@ Importer MUST:
 * list files recursively via GitHub tree API (`?recursive=1`)
 * fetch contents via `raw.githubusercontent.com`
 
-<!-- req:id=GH-005 title="Subdirectory scoping" -->
-### GH-005 — Subdirectory scoping
+<!-- req:id=GH-005 title="Reject subdirectory URLs" -->
+### GH-005 — Reject subdirectory URLs
 
-If a subdirectory is specified, importer MUST scope listing/reads to that subdirectory, treating it as the Dataset root.
+Importer **MUST** reject URLs that specify a subdirectory after `/tree/<ref>/` and instruct users to import from the repository root.
 
 <!-- req:id=GH-008 title="Public repo import requires no auth" -->
 ### GH-008 — Public repo import requires no auth

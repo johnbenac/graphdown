@@ -94,7 +94,7 @@ Example layout:
 ```
 dataset-root/
 ├── datasets/
-│   └── dataset--name.md          # Exactly one dataset definition
+│   └── dataset--name.md          # Exactly one dataset definition (no nested manifests)
 ├── types/
 │   ├── type--foo.md               # Type definitions
 │   └── type--bar.md

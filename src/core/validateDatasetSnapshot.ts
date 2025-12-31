@@ -100,16 +100,34 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   const datasetFiles = listMarkdownFiles(files, 'datasets', false);
-  if (datasetFiles.length !== 1) {
-    return {
-      ok: false,
-      errors: [
+  const allDatasetFiles = listMarkdownFiles(files, 'datasets', true);
+  const nestedDatasetFiles = allDatasetFiles.filter((file) => {
+    const rest = file.slice('datasets/'.length);
+    return rest.includes('/');
+  });
+  const datasetErrors: ValidationError[] = [];
+  if (nestedDatasetFiles.length > 0) {
+    for (const file of nestedDatasetFiles) {
+      datasetErrors.push(
         makeError(
-          'E_DATASET_FILE_COUNT',
-          `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
+          'E_DATASET_SUBDIR_UNSUPPORTED',
+          `Dataset manifest must live directly under datasets/. Found nested file ${file}.`,
+          file
         )
-      ]
-    };
+      );
+    }
+  }
+  if (allDatasetFiles.length !== 1 || datasetFiles.length !== 1) {
+    const listed = allDatasetFiles.length ? allDatasetFiles.join(', ') : 'none';
+    datasetErrors.push(
+      makeError(
+        'E_DATASET_FILE_COUNT',
+        `Expected exactly one dataset manifest in datasets/. Found ${allDatasetFiles.length}: ${listed}`
+      )
+    );
+  }
+  if (datasetErrors.length) {
+    return { ok: false, errors: [...errors, ...datasetErrors] };
   }
 
   const datasetFile = datasetFiles[0];
