@@ -23,6 +23,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "postinstall": "npm --workspace apps/web run install:playwright",
     "test": "npm run build && node --test",
     "build": "tsc && node scripts/add-shebang.js",
     "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
