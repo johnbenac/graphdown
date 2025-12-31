@@ -6,7 +6,7 @@ const API_BASE = "https://api.github.com";
 const RAW_BASE = "https://raw.githubusercontent.com";
 
 type GitHubRepoMetadata = {
-  default_branch: string;
+  default_branch?: string;
 };
 
 type GitHubTreeEntry = {
@@ -71,7 +71,7 @@ export async function loadGitHubSnapshot(input: {
 
   onProgress?.({ phase: "fetching_repo" });
   const repoMetadata = await fetchJson<GitHubRepoMetadata>(`${API_BASE}/repos/${owner}/${repo}`);
-  const resolvedRef = ref ?? repoMetadata.default_branch;
+  const resolvedRef = ref ?? repoMetadata.default_branch ?? "main";
 
   onProgress?.({ phase: "listing_files" });
   const treeResponse = await fetchJson<GitHubTreeResponse>(

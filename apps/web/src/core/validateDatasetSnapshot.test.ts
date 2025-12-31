@@ -61,6 +61,60 @@ function baseSnapshot(): RepoSnapshot {
   ]);
 }
 
+function snapshotWithRequiredFieldDefs(recordFields: string): RepoSnapshot {
+  return snapshotFromEntries([
+    [
+      "datasets/demo.md",
+      [
+        "---",
+        "id: dataset:demo",
+        "datasetId: dataset:demo",
+        "typeId: sys:dataset",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        "fields:",
+        "  name: Demo",
+        "  description: Demo dataset",
+        "---",
+        "Dataset body"
+      ].join("\n")
+    ],
+    [
+      "types/note.md",
+      [
+        "---",
+        "id: type:note",
+        "datasetId: dataset:demo",
+        "typeId: sys:type",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        "fields:",
+        "  recordTypeId: note",
+        "  fieldDefs:",
+        "    title:",
+        "      kind: string",
+        "      required: true",
+        "---",
+        "Type body"
+      ].join("\n")
+    ],
+    [
+      "records/note/record-1.md",
+      [
+        "---",
+        "id: record:1",
+        "datasetId: dataset:demo",
+        "typeId: note",
+        "createdAt: 2024-01-01",
+        "updatedAt: 2024-01-02",
+        recordFields,
+        "---",
+        "Record body"
+      ].join("\n")
+    ]
+  ]);
+}
+
 function getErrorCodes(snapshot: RepoSnapshot) {
   const result = validateDatasetSnapshot(snapshot);
   if (result.ok) {
@@ -244,5 +298,25 @@ describe("validateDatasetSnapshot", () => {
       snapshot.files.set("records/note/record-1.md", encoder.encode(replaced));
     }
     expect(getErrorCodes(snapshot)).toContain("E_DUPLICATE_ID");
+  });
+
+  it("VAL-005: missing required fields fails validation", () => {
+    const snapshot = snapshotWithRequiredFieldDefs("fields: {}");
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
+  });
+
+  it("VAL-005: null required field fails validation", () => {
+    const snapshot = snapshotWithRequiredFieldDefs(
+      ["fields:", "  title: null"].join("\n")
+    );
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
+  });
+
+  it("VAL-005: present required field passes validation", () => {
+    const snapshot = snapshotWithRequiredFieldDefs(
+      ["fields:", "  title: Present"].join("\n")
+    );
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 });

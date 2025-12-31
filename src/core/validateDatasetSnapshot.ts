@@ -171,6 +171,7 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
 
   const typeFiles = listMarkdownFiles(files, 'types', true);
   const recordTypeIdMap = new Map<string, { id?: string; file: string }>();
+  const requiredFieldsByRecordTypeId = new Map<string, string[]>();
   const typeIds = new Set<string>();
   const typeRecords: Array<{ id?: string; file: string }> = [];
 
@@ -240,6 +241,23 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       );
     } else {
       recordTypeIdMap.set(recordTypeId, { id, file });
+      const fieldDefs = isObject((yaml.fields as Record<string, unknown>).fieldDefs)
+        ? (yaml.fields as Record<string, unknown>).fieldDefs
+        : undefined;
+      if (fieldDefs && !Array.isArray(fieldDefs)) {
+        const required: string[] = [];
+        for (const [fieldName, def] of Object.entries(fieldDefs)) {
+          if (!isObject(def)) {
+            continue;
+          }
+          if (def.required === true) {
+            required.push(fieldName);
+          }
+        }
+        if (required.length) {
+          requiredFieldsByRecordTypeId.set(recordTypeId, required);
+        }
+      }
     }
 
     typeRecords.push({ id, file });
@@ -295,6 +313,24 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       requireString(errors, yaml, 'updatedAt', file, 'Record updatedAt');
       if (!isObject(yaml.fields)) {
         errors.push(makeError('E_REQUIRED_FIELD_MISSING', `Record file ${file} fields must be an object`, file));
+      } else {
+        const requiredFields = requiredFieldsByRecordTypeId.get(dirName) ?? [];
+        for (const fieldName of requiredFields) {
+          const value = (yaml.fields as Record<string, unknown>)[fieldName];
+          const missing =
+            value === undefined ||
+            value === null ||
+            (typeof value === 'string' && value.trim().length === 0);
+          if (missing) {
+            errors.push(
+              makeError(
+                'E_REQUIRED_FIELD_MISSING',
+                `Record file ${file} is missing required field "${fieldName}" from type definition`,
+                file
+              )
+            );
+          }
+        }
       }
 
       recordEntries.push({ id, file });
