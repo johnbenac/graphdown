@@ -41,23 +41,12 @@ async function fetchJson<T>(url: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-function normalizeSubdir(subdir?: string): string {
-  if (!subdir) {
-    return "";
-  }
-  return subdir.replace(/^\/+|\/+$/g, "");
-}
-
 function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
 }
 
 function isDatasetFile(path: string): boolean {
-  if (!path.startsWith("datasets/")) {
-    return false;
-  }
-  const rest = path.slice("datasets/".length);
-  return rest.length > 0 && !rest.includes("/");
+  return path.startsWith("datasets/");
 }
 
 function isTypeFile(path: string): boolean {
@@ -72,10 +61,9 @@ export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
-  subdir?: string;
   onProgress?: (progress: ImportProgress) => void;
 }): Promise<RepoSnapshot> {
-  const { owner, repo, ref, subdir, onProgress } = input;
+  const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
   const repoMetadata = await fetchJson<GitHubRepoMetadata>(`${API_BASE}/repos/${owner}/${repo}`);
@@ -86,18 +74,13 @@ export async function loadGitHubSnapshot(input: {
     `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
   );
 
-  const normalizedSubdir = normalizeSubdir(subdir);
-  const subdirPrefix = normalizedSubdir ? `${normalizedSubdir}/` : "";
   const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
 
   for (const entry of treeResponse.tree) {
     if (entry.type !== "blob" || !isMarkdownFile(entry.path)) {
       continue;
     }
-    if (subdirPrefix && !entry.path.startsWith(subdirPrefix)) {
-      continue;
-    }
-    const snapshotPath = subdirPrefix ? entry.path.slice(subdirPrefix.length) : entry.path;
+    const snapshotPath = entry.path;
     if (!snapshotPath) {
       continue;
     }

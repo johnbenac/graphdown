@@ -3,6 +3,7 @@ import { ValidationError, ValidationErrorCode } from '../core/errors';
 const hintMap: Partial<Record<ValidationErrorCode, string>> = {
   E_DIR_MISSING: 'Ensure dataset root contains datasets/, types/, and records/.',
   E_DATASET_FILE_COUNT: 'datasets/ must contain exactly one .md dataset file.',
+  E_DATASET_FILE_LOCATION: 'Dataset manifest must be directly under datasets/ (no subdirectories).',
   E_FRONT_MATTER_MISSING:
     'Add YAML front matter delimited by --- at the top of the file.',
   E_FRONT_MATTER_UNTERMINATED:

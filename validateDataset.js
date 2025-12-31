@@ -104,22 +104,36 @@ function validateDataset(root) {
     pushError('E_DIR_MISSING', 'Missing required `records/` directory');
     return { errors };
   }
-  // Validate dataset record (exactly one .md file in datasets/)
-  const datasetFiles = fs.readdirSync(datasetsDir).filter(fn => fn.toLowerCase().endsWith('.md'));
+  // Validate dataset record (exactly one .md file directly in datasets/)
+  const datasetFiles = listMarkdownFiles(datasetsDir).map((file) => path.relative(root, file));
+  const rootDatasetFiles = fs
+    .readdirSync(datasetsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.md'))
+    .map((entry) => path.posix.join('datasets', entry.name));
   if (datasetFiles.length !== 1) {
+    const detail = datasetFiles.length === 0 ? '' : ` Found dataset files: ${datasetFiles.join(', ')}.`;
     pushError(
       'E_DATASET_FILE_COUNT',
-      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
+      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}.${detail}`.trim()
     );
     return { errors };
   }
-  const datasetPath = path.join(datasetsDir, datasetFiles[0]);
+  const datasetRelPath = datasetFiles[0];
+  if (!rootDatasetFiles.includes(datasetRelPath)) {
+    pushError(
+      'E_DATASET_FILE_LOCATION',
+      `Dataset manifest must be stored directly under datasets/. Found ${datasetRelPath}.`,
+      datasetRelPath
+    );
+    return { errors };
+  }
+  const datasetPath = path.join(root, datasetRelPath);
   const datasetDoc = readMarkdownFile(datasetPath);
   if (datasetDoc.error) {
     pushError(
       datasetDoc.code || 'E_YAML_INVALID',
-      `Dataset file error in ${datasetFiles[0]}: ${datasetDoc.error}`,
-      datasetFiles[0]
+      `Dataset file error in ${datasetRelPath}: ${datasetDoc.error}`,
+      datasetRelPath
     );
     return { errors };
   }

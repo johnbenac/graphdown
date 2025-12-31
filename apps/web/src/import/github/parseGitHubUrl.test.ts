@@ -41,13 +41,9 @@ describe("parseGitHubUrl", () => {
     }
   });
 
-  it("accepts tree URLs with subdirectories", () => {
+  it("rejects tree URLs with subdirectories", () => {
     const result = parseGitHubUrl("https://github.com/owner/repo/tree/main/path/to/dataset");
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.value.ref).toBe("main");
-      expect(result.value.subdir).toBe("path/to/dataset");
-    }
+    expect(result.ok).toBe(false);
   });
 
   it("rejects invalid URLs", () => {
@@ -56,7 +52,8 @@ describe("parseGitHubUrl", () => {
       "https://example.com/owner/repo",
       "https://github.com/owner",
       "https://github.com/owner/repo/blob/main/readme.md",
-      "https://github.com/owner/repo/tree"
+      "https://github.com/owner/repo/tree",
+      "https://github.com/owner/repo/tree/main/path/to/dataset"
     ];
 
     for (const input of invalidInputs) {

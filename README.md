@@ -89,12 +89,14 @@ Validation failed with 2 error(s):
 
 ## Dataset Structure
 
+The dataset root is the repository root. The `datasets/` directory must contain exactly one `.md` file directly under it (no nested subdirectories).
+
 Example layout:
 
 ```
-dataset-root/
+dataset-root/ (repository root)
 ├── datasets/
-│   └── dataset--name.md          # Exactly one dataset definition
+│   └── dataset--name.md          # Exactly one dataset definition (directly under datasets/)
 ├── types/
 │   ├── type--foo.md               # Type definitions
 │   └── type--bar.md

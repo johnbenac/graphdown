@@ -99,20 +99,34 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
     }
   }
 
-  const datasetFiles = listMarkdownFiles(files, 'datasets', false);
+  const datasetFiles = listMarkdownFiles(files, 'datasets', true);
+  const rootDatasetFiles = listMarkdownFiles(files, 'datasets', false);
   if (datasetFiles.length !== 1) {
+    const detail =
+      datasetFiles.length === 0 ? '' : ` Found dataset files: ${datasetFiles.join(', ')}.`;
     return {
       ok: false,
       errors: [
         makeError(
           'E_DATASET_FILE_COUNT',
-          `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
+          `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}.${detail}`.trim()
         )
       ]
     };
   }
 
   const datasetFile = datasetFiles[0];
+  if (!rootDatasetFiles.includes(datasetFile)) {
+    return {
+      ok: false,
+      errors: [
+        makeError(
+          'E_DATASET_FILE_LOCATION',
+          `Dataset manifest must be stored directly under datasets/. Found ${datasetFile}.`
+        )
+      ]
+    };
+  }
   const datasetRaw = snapshot.files.get(datasetFile);
   if (!datasetRaw) {
     return { ok: false, errors: [makeError('E_INTERNAL', `Missing dataset file ${datasetFile}`)] };
