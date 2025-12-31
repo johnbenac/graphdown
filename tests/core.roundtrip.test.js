@@ -73,7 +73,7 @@ function writeTempZip(zipBytes) {
   return { tempDir, zipPath };
 }
 
-test('round-trips dataset-only zip export/import', () => {
+test('EXP-002: dataset-only zip export/import round-trips', () => {
   const snapshot1 = loadRepoSnapshotFromFs(fixtureRoot);
   const graph1 = buildGraph(snapshot1);
 
@@ -91,7 +91,7 @@ test('round-trips dataset-only zip export/import', () => {
   }
 });
 
-test('round-trips whole-repo zip export/import with stable bytes', () => {
+test('EXP-005: whole-repo zip export preserves content bytes', () => {
   const snapshot1 = loadRepoSnapshotFromFs(fixtureRoot);
   const graph1 = buildGraph(snapshot1);
 

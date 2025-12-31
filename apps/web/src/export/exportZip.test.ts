@@ -19,7 +19,7 @@ async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<RepoSnapshot
 }
 
 describe("exportZip", () => {
-  it("round-trips whole snapshot exports", async () => {
+  it("EXP-003: whole-repo export round-trips snapshot files", async () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "---\nid: dataset:demo\n---"],
       ["types/note.md", "---\nid: type:note\n---"],
@@ -42,7 +42,7 @@ describe("exportZip", () => {
     }
   });
 
-  it("exports dataset-only markdown for datasets, types, and records", async () => {
+  it("EXP-002: dataset-only export includes only dataset/type/record markdown", async () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "---\nid: dataset:demo\n---"],
       ["types/note.md", "---\nid: type:note\n---"],

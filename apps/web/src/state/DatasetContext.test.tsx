@@ -13,7 +13,7 @@ function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>
 }
 
 describe("DatasetContext GitHub import", () => {
-  it("maps a 404 repo metadata response to not_found", async () => {
+    it("ERR-002: maps GitHub 404 repo responses to not_found", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     fetchMock.mockResolvedValueOnce(
@@ -40,7 +40,7 @@ describe("DatasetContext GitHub import", () => {
     });
   });
 
-  it("maps a rate limit response to rate_limited", async () => {
+    it("ERR-002: maps GitHub rate limits to rate_limited", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     fetchMock.mockResolvedValueOnce(
@@ -70,7 +70,7 @@ describe("DatasetContext GitHub import", () => {
     });
   });
 
-  it("imports a valid repo snapshot", async () => {
+    it("GH-003: imports a repo snapshot via tree listing + raw fetch", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -153,7 +153,7 @@ describe("DatasetContext GitHub import", () => {
 });
 
 describe("DatasetContext zip import", () => {
-  it("reports dataset_invalid for invalid zip snapshots", async () => {
+    it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
     const zipBytes = zipSync({
       "datasets/demo.md": new Uint8Array(strToU8("---\nid: dataset:demo\n---"))
     });

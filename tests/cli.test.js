@@ -15,7 +15,7 @@ test('prints usage when no args are provided', () => {
   assert.match(output, /Usage:/);
 });
 
-test('fails when required dataset directories are missing', () => {
+test('LAYOUT-001: missing required directories fails validation', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-'));
 
   try {

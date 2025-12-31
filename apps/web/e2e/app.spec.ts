@@ -12,7 +12,7 @@ test("datasets screen renders", async ({ page }) => {
   await expect(page).toHaveScreenshot("datasets.png");
 });
 
-test("imports a GitHub repo with mocked responses", async ({ page }) => {
+  test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ page }) => {
   await page.route("**/api.github.com/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/repos/owner/repo") {
@@ -196,7 +196,7 @@ test("imports a GitHub repo with mocked responses", async ({ page }) => {
   await expect(page.getByTestId("record-list")).toBeVisible();
 });
 
-test("shows an invalid URL error for malformed GitHub URLs", async ({ page }) => {
+  test("ERR-002: shows invalid_url category for unsupported GitHub URLs (e2e)", async ({ page }) => {
   await page.goto("/import?storage=memory");
   await page.getByLabel("GitHub URL").fill("https://github.com/owner/repo/blob/main/readme.md");
   await page.getByRole("button", { name: "Import from GitHub" }).click();
