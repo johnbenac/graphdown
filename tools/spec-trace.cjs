@@ -8,7 +8,8 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const SPEC_PATH = path.join(REPO_ROOT, 'SPEC.md');
 
 const REQ_LINE_REGEX =
-  /(?:@--|<!--)\s*req:id=([A-Za-z0-9-]+)\s+title="([^"]+)"\s*(?:--|-->)/;
+  /(?:@--|<!--)\s*req:id=([A-Za-z0-9-]+)\s+title="([^"]+)"([^>-]*)(?:--|-->)/;
+const REQ_ATTR_REGEX = /([a-zA-Z0-9_]+)=("([^"]*)"|([^\s"->]+))/g;
 
 // Matches: it("TITLE", ...) / test("TITLE", ...) / it.only("TITLE", ...) / test.skip("TITLE", ...)
 const TEST_TITLE_REGEX = /\b(?:it|test)(?:\.only|\.skip)?\s*\(\s*(['"])(.*?)\1/g;
@@ -29,6 +30,9 @@ const SKIP_DIR_NAMES = new Set([
 const PLAYWRIGHT_SNAPSHOT_DIR_POSIX = toPosixPath(
   path.join('apps', 'web', 'e2e', 'app.spec.ts-snapshots'),
 );
+const ENFORCE_TESTABLE =
+  process.env.TRACE_ENFORCE_TESTABLE &&
+  process.env.TRACE_ENFORCE_TESTABLE.toLowerCase() === 'true';
 
 function toPosixPath(filePath) {
   return filePath.split(path.sep).join('/');
@@ -58,7 +62,7 @@ function readSpecRequirements(specPath) {
   const content = fs.readFileSync(specPath, 'utf8');
   const lines = content.split(/\r?\n/);
 
-  const specReqs = new Map(); // id -> { title, order }
+  const specReqs = new Map(); // id -> { title, order, testable, verify }
   const order = []; // [id...]
   const duplicates = [];
 
@@ -74,13 +78,30 @@ function readSpecRequirements(specPath) {
     const match = line.match(REQ_LINE_REGEX);
     if (!match) return;
 
-    const [, id, title] = match;
+    const [, id, title, rawAttrs] = match;
+    const attrs = {};
+    if (rawAttrs && rawAttrs.trim().length > 0) {
+      REQ_ATTR_REGEX.lastIndex = 0;
+      let attrMatch;
+      while ((attrMatch = REQ_ATTR_REGEX.exec(rawAttrs)) !== null) {
+        const key = attrMatch[1];
+        const value = attrMatch[3] ?? attrMatch[4] ?? '';
+        attrs[key] = value;
+      }
+    }
+
+    const testable =
+      attrs.testable === undefined
+        ? undefined
+        : attrs.testable.toLowerCase() === 'true';
+    const verify = attrs.verify;
+
     if (specReqs.has(id)) {
       duplicates.push({ id, line: index + 1 });
       return;
     }
 
-    specReqs.set(id, { title, order: order.length });
+    specReqs.set(id, { title, order: order.length, testable, verify });
     order.push(id);
   });
 
@@ -217,7 +238,28 @@ function collectUnknownReferences(references, specReqs) {
   return unknown;
 }
 
-function writeMatrix(outputDir, generatedAt, specReqs, order, references, unknownRefs) {
+function collectMissingTestable(specReqs, references) {
+  const missing = [];
+  for (const [id, spec] of specReqs.entries()) {
+    if (spec.testable !== true) continue;
+    const tests = references.get(id);
+    if (!tests || tests.length === 0) {
+      missing.push({ id, title: spec.title });
+    }
+  }
+  missing.sort((a, b) => a.id.localeCompare(b.id));
+  return missing;
+}
+
+function writeMatrix(
+  outputDir,
+  generatedAt,
+  specReqs,
+  order,
+  references,
+  unknownRefs,
+  missingTestable,
+) {
   fs.mkdirSync(outputDir, { recursive: true });
 
   const requirements = order.map((id) => {
@@ -225,6 +267,8 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references, unknow
     return {
       id,
       title: spec.title,
+      testable: spec.testable ?? null,
+      verify: spec.verify ?? null,
       tests: references.get(id) ?? [],
     };
   });
@@ -233,6 +277,7 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references, unknow
     generatedAt,
     requirements,
     unknownReferences: unknownRefs,
+    missingTestable: missingTestable,
   };
 
   const markdownLines = [
@@ -250,8 +295,26 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references, unknow
     markdownLines.push('');
   }
 
+  if (missingTestable.length > 0) {
+    markdownLines.push('## Testable requirements with no tests');
+    missingTestable.forEach((req) => {
+      markdownLines.push(`- ${req.id} — ${req.title}`);
+    });
+    markdownLines.push('');
+  }
+
   requirements.forEach((req) => {
-    markdownLines.push(`## ${req.id} — ${req.title}`);
+    const metaParts = [];
+    if (req.testable !== null && req.testable !== undefined) {
+      metaParts.push(`testable=${req.testable}`);
+    }
+    if (req.verify) {
+      metaParts.push(`verify=${req.verify}`);
+    }
+    const meta =
+      metaParts.length > 0 ? ` (${metaParts.join(', ')})` : '';
+
+    markdownLines.push(`## ${req.id} — ${req.title}${meta}`);
     markdownLines.push(`Tests (${req.tests.length}):`);
     if (req.tests.length === 0) {
       markdownLines.push('- (none)');
@@ -280,6 +343,19 @@ function reportUnknownIds(unknownRefs) {
   process.exit(1);
 }
 
+function reportMissingTestable(missingTestable) {
+  if (!ENFORCE_TESTABLE) return;
+  if (missingTestable.length === 0) return;
+
+  console.error(
+    'Testable requirements are missing test references (set TRACE_ENFORCE_TESTABLE=false to skip this gate):',
+  );
+  missingTestable.forEach((req) => {
+    console.error(`- ${req.id} — ${req.title}`);
+  });
+  process.exit(1);
+}
+
 function main() {
   if (!fs.existsSync(SPEC_PATH)) {
     console.error(`SPEC.md not found at ${SPEC_PATH}`);
@@ -290,15 +366,25 @@ function main() {
   const testFiles = collectTestFiles();
   const references = extractReferencedRequirements(testFiles);
   const unknownRefs = collectUnknownReferences(references, specReqs);
+  const missingTestable = collectMissingTestable(specReqs, references);
 
   const outputDir = parseOutputDir();
   const generatedAt = new Date().toISOString();
 
   // Write artifacts even if we’re going to fail (so CI can upload them).
-  writeMatrix(outputDir, generatedAt, specReqs, order, references, unknownRefs);
+  writeMatrix(
+    outputDir,
+    generatedAt,
+    specReqs,
+    order,
+    references,
+    unknownRefs,
+    missingTestable,
+  );
 
   // Fail only on unknown IDs (not on missing coverage).
   reportUnknownIds(unknownRefs);
+  reportMissingTestable(missingTestable);
 
   console.log(
     `Spec trace completed. Matrix written to ${toPosixPath(
