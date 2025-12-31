@@ -8,8 +8,10 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "pretest:e2e": "npm run playwright:install-deps",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
+    "playwright:install-deps": "playwright install-deps",
     "playwright:install": "playwright install --with-deps",
     "verify": "npm run test && npm run test:e2e"
   },
