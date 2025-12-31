@@ -31,7 +31,8 @@
     "build:web": "npm --workspace apps/web run build",
     "test:web": "npm --workspace apps/web run test",
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
-    "verify:web": "npm --workspace apps/web run verify"
+    "verify:web": "npm --workspace apps/web run verify",
+    "spec:trace": "node tools/spec-trace.cjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",

@@ -34,6 +34,16 @@ jobs:
         run: npm run build:web
       - name: Web unit tests (vitest)
         run: npm run test:web
+      - name: Spec trace
+        id: spec_trace
+        run: npm run spec:trace
+      - name: Upload spec verification matrix
+        if: always() && steps.spec_trace.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-verification-matrix
+          path: artifacts/spec-trace/**
+          if-no-files-found: error
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:

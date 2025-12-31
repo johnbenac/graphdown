@@ -1,36 +1,85 @@
+#!/usr/bin/env node
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 
+const REPO_ROOT = path.resolve(__dirname, '..');
+const SPEC_PATH = path.join(REPO_ROOT, 'SPEC.md');
+
 const REQ_LINE_REGEX =
   /(?:@--|<!--)\s*req:id=([A-Za-z0-9-]+)\s+title="([^"]+)"\s*(?:--|-->)/;
-const TEST_TITLE_REGEX = /\b(?:it|test)\s*\(\s*(['"])(.*?)\1/g;
+
+// Matches: it("TITLE", ...) / test("TITLE", ...) / it.only("TITLE", ...) / test.skip("TITLE", ...)
+const TEST_TITLE_REGEX = /\b(?:it|test)(?:\.only|\.skip)?\s*\(\s*(['"])(.*?)\1/g;
+
+// Pattern A: "REQ-ID-001: rest of title"
 const REQ_PREFIX_REGEX = /^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d{3}):\s/;
+
+const SKIP_DIR_NAMES = new Set([
+  '.git',
+  'node_modules',
+  'dist',
+  'artifacts',
+  'test-results',
+  'playwright-report',
+  'app.spec.ts-snapshots',
+]);
+
+const PLAYWRIGHT_SNAPSHOT_DIR_POSIX = toPosixPath(
+  path.join('apps', 'web', 'e2e', 'app.spec.ts-snapshots'),
+);
 
 function toPosixPath(filePath) {
   return filePath.split(path.sep).join('/');
 }
 
+function parseOutputDir() {
+  const args = process.argv.slice(2);
+  if (args.length === 0) {
+    return path.join(REPO_ROOT, 'artifacts', 'spec-trace');
+  }
+
+  const writeIndex = args.indexOf('--write');
+  if (writeIndex !== -1) {
+    const next = args[writeIndex + 1];
+    if (!next) {
+      console.error('Missing output directory after --write');
+      process.exit(1);
+    }
+    return path.resolve(REPO_ROOT, next);
+  }
+
+  console.error('Usage: node tools/spec-trace.cjs [--write <outputDir>]');
+  process.exit(1);
+}
+
 function readSpecRequirements(specPath) {
   const content = fs.readFileSync(specPath, 'utf8');
   const lines = content.split(/\r?\n/);
-  const specReqs = new Map();
-  const order = [];
+
+  const specReqs = new Map(); // id -> { title, order }
+  const order = []; // [id...]
   const duplicates = [];
 
   let inCodeBlock = false;
+
   lines.forEach((line, index) => {
     if (line.trim().startsWith('```')) {
       inCodeBlock = !inCodeBlock;
       return;
     }
     if (inCodeBlock) return;
+
     const match = line.match(REQ_LINE_REGEX);
     if (!match) return;
+
     const [, id, title] = match;
     if (specReqs.has(id)) {
       duplicates.push({ id, line: index + 1 });
       return;
     }
+
     specReqs.set(id, { title, order: order.length });
     order.push(id);
   });
@@ -47,9 +96,12 @@ function readSpecRequirements(specPath) {
 }
 
 function shouldSkipDir(fullPath, name) {
-  if (['node_modules', 'dist', '.git'].includes(name)) return true;
-  const snapshotDir = path.join('apps', 'web', 'e2e', 'app.spec.ts-snapshots');
-  if (toPosixPath(fullPath).includes(snapshotDir)) return true;
+  if (SKIP_DIR_NAMES.has(name)) return true;
+
+  // Also skip if path contains the snapshots dir (handles nested paths robustly)
+  const posix = toPosixPath(fullPath);
+  if (posix.includes(PLAYWRIGHT_SNAPSHOT_DIR_POSIX)) return true;
+
   return false;
 }
 
@@ -59,58 +111,74 @@ function walkDir(rootDir, onFile) {
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((entry) => {
       const fullPath = path.join(rootDir, entry.name);
+
       if (entry.isDirectory()) {
         if (shouldSkipDir(fullPath, entry.name)) return;
         walkDir(fullPath, onFile);
-      } else if (entry.isFile()) {
+        return;
+      }
+
+      if (entry.isFile()) {
         onFile(fullPath);
       }
     });
 }
 
-function collectTestFiles(repoRoot) {
+function collectTestFiles() {
   const targets = [
     {
-      dir: path.join(repoRoot, 'apps', 'web', 'src'),
+      dir: path.join(REPO_ROOT, 'apps', 'web', 'src'),
       match: (filePath) => /\.test\.tsx?$/.test(filePath),
     },
     {
-      dir: path.join(repoRoot, 'apps', 'web', 'e2e'),
+      dir: path.join(REPO_ROOT, 'apps', 'web', 'e2e'),
       match: (filePath) => /\.spec\.ts$/.test(filePath),
     },
     {
-      dir: path.join(repoRoot, 'tests'),
+      dir: path.join(REPO_ROOT, 'tests'),
       match: (filePath) => /\.test\.js$/.test(filePath),
     },
   ];
 
   const files = [];
+
   targets.forEach((target) => {
     if (!fs.existsSync(target.dir)) return;
+
     walkDir(target.dir, (filePath) => {
       if (target.match(filePath)) {
         files.push(filePath);
       }
     });
   });
+
+  // Deterministic output
+  files.sort((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
   return files;
 }
 
-function extractReferencedRequirements(repoRoot, testFiles) {
-  const references = new Map();
+function extractReferencedRequirements(testFiles) {
+  const references = new Map(); // reqId -> [{ reqId, testTitle, filePath }...]
 
   testFiles.forEach((filePath) => {
     const content = fs.readFileSync(filePath, 'utf8');
+
+    // Important: TEST_TITLE_REGEX is /g, so reset state per file.
+    TEST_TITLE_REGEX.lastIndex = 0;
+
     let match;
     while ((match = TEST_TITLE_REGEX.exec(content)) !== null) {
       const title = match[2];
       const prefixMatch = title.match(REQ_PREFIX_REGEX);
       if (!prefixMatch) continue;
+
       const reqId = prefixMatch[1];
-      const relativePath = toPosixPath(path.relative(repoRoot, filePath));
+      const relativePath = toPosixPath(path.relative(REPO_ROOT, filePath));
+
       if (!references.has(reqId)) {
         references.set(reqId, []);
       }
+
       references.get(reqId).push({
         reqId,
         testTitle: title,
@@ -119,24 +187,37 @@ function extractReferencedRequirements(repoRoot, testFiles) {
     }
   });
 
+  // Deterministic per-req ordering
+  for (const [, tests] of references.entries()) {
+    tests.sort(
+      (a, b) =>
+        a.filePath.localeCompare(b.filePath) ||
+        a.testTitle.localeCompare(b.testTitle),
+    );
+  }
+
   return references;
 }
 
-function parseOutputDir(repoRoot) {
-  const args = process.argv.slice(2);
-  const writeIndex = args.indexOf('--write');
-  if (writeIndex !== -1) {
-    const next = args[writeIndex + 1];
-    if (!next) {
-      console.error('Missing output directory after --write');
-      process.exit(1);
-    }
-    return path.resolve(repoRoot, next);
+function collectUnknownReferences(references, specReqs) {
+  const unknown = [];
+
+  for (const [reqId, tests] of references.entries()) {
+    if (specReqs.has(reqId)) continue;
+    tests.forEach((t) => unknown.push(t));
   }
-  return path.join(repoRoot, 'artifacts', 'spec-trace');
+
+  unknown.sort(
+    (a, b) =>
+      a.reqId.localeCompare(b.reqId) ||
+      a.filePath.localeCompare(b.filePath) ||
+      a.testTitle.localeCompare(b.testTitle),
+  );
+
+  return unknown;
 }
 
-function writeMatrix(outputDir, generatedAt, specReqs, order, references) {
+function writeMatrix(outputDir, generatedAt, specReqs, order, references, unknownRefs) {
   fs.mkdirSync(outputDir, { recursive: true });
 
   const requirements = order.map((id) => {
@@ -151,6 +232,7 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references) {
   const jsonOutput = {
     generatedAt,
     requirements,
+    unknownReferences: unknownRefs,
   };
 
   const markdownLines = [
@@ -159,6 +241,14 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references) {
     `Generated: ${generatedAt}`,
     '',
   ];
+
+  if (unknownRefs.length > 0) {
+    markdownLines.push('## Unknown requirement IDs referenced by tests');
+    unknownRefs.forEach((ref) => {
+      markdownLines.push(`- ${ref.reqId} (${ref.filePath}: "${ref.testTitle}")`);
+    });
+    markdownLines.push('');
+  }
 
   requirements.forEach((req) => {
     markdownLines.push(`## ${req.id} — ${req.title}`);
@@ -180,41 +270,41 @@ function writeMatrix(outputDir, generatedAt, specReqs, order, references) {
   fs.writeFileSync(path.join(outputDir, 'matrix.md'), markdownLines.join('\n'));
 }
 
-function reportUnknownIds(references, specReqs) {
-  const unknownEntries = [];
-  for (const [reqId, tests] of references.entries()) {
-    if (!specReqs.has(reqId)) {
-      tests.forEach((test) => unknownEntries.push(test));
-    }
-  }
-
-  if (unknownEntries.length === 0) return;
+function reportUnknownIds(unknownRefs) {
+  if (unknownRefs.length === 0) return;
 
   console.error('Unknown requirement IDs referenced by tests:');
-  unknownEntries.forEach((entry) => {
+  unknownRefs.forEach((entry) => {
     console.error(`- ${entry.reqId} (${entry.filePath}: "${entry.testTitle}")`);
   });
   process.exit(1);
 }
 
 function main() {
-  const repoRoot = process.cwd();
-  const specPath = path.join(repoRoot, 'SPEC.md');
-  if (!fs.existsSync(specPath)) {
-    console.error(`SPEC.md not found at ${specPath}`);
+  if (!fs.existsSync(SPEC_PATH)) {
+    console.error(`SPEC.md not found at ${SPEC_PATH}`);
     process.exit(1);
   }
 
-  const { specReqs, order } = readSpecRequirements(specPath);
-  const testFiles = collectTestFiles(repoRoot);
-  const references = extractReferencedRequirements(repoRoot, testFiles);
-  const outputDir = parseOutputDir(repoRoot);
+  const { specReqs, order } = readSpecRequirements(SPEC_PATH);
+  const testFiles = collectTestFiles();
+  const references = extractReferencedRequirements(testFiles);
+  const unknownRefs = collectUnknownReferences(references, specReqs);
+
+  const outputDir = parseOutputDir();
   const generatedAt = new Date().toISOString();
 
-  writeMatrix(outputDir, generatedAt, specReqs, order, references);
-  reportUnknownIds(references, specReqs);
+  // Write artifacts even if we’re going to fail (so CI can upload them).
+  writeMatrix(outputDir, generatedAt, specReqs, order, references, unknownRefs);
 
-  console.log(`Spec trace completed. Matrix written to ${toPosixPath(outputDir)}.`);
+  // Fail only on unknown IDs (not on missing coverage).
+  reportUnknownIds(unknownRefs);
+
+  console.log(
+    `Spec trace completed. Matrix written to ${toPosixPath(
+      path.relative(REPO_ROOT, outputDir),
+    )}.`,
+  );
 }
 
 main();
