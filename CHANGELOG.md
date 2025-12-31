@@ -1,3 +1,10 @@
+# [0.1.0](https://github.com/johnbenac/graphdown/compare/v0.0.2...v0.1.0) (2025-12-31)
+
+
+### Features
+
+* enforce VAL-005 and GH-002; add tests and trace owners ([97c20ee](https://github.com/johnbenac/graphdown/commit/97c20eec7eec092a6f79380862555491ebcd8af0)), closes [#002](https://github.com/johnbenac/graphdown/issues/002) [#002](https://github.com/johnbenac/graphdown/issues/002)
+
 ## [0.0.2](https://github.com/johnbenac/graphdown/compare/v0.0.1...v0.0.2) (2025-12-29)
 
 
