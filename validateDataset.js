@@ -104,16 +104,28 @@ function validateDataset(root) {
     pushError('E_DIR_MISSING', 'Missing required `records/` directory');
     return { errors };
   }
-  // Validate dataset record (exactly one .md file in datasets/)
-  const datasetFiles = fs.readdirSync(datasetsDir).filter(fn => fn.toLowerCase().endsWith('.md'));
-  if (datasetFiles.length !== 1) {
+  // Validate dataset record (exactly one .md file in datasets/, no subdirectories)
+  const allDatasetFiles = listMarkdownFiles(datasetsDir).map(filePath => path.relative(root, filePath));
+  const datasetFiles = allDatasetFiles.filter(filePath => path.dirname(filePath) === 'datasets');
+  const nestedDatasetFiles = allDatasetFiles.filter(filePath => path.dirname(filePath) !== 'datasets');
+  if (nestedDatasetFiles.length > 0) {
+    for (const filePath of nestedDatasetFiles) {
+      pushError(
+        'E_DATASET_SUBDIR_UNSUPPORTED',
+        `Dataset manifest must live directly under datasets/. Found nested file ${filePath}.`,
+        filePath
+      );
+    }
+  }
+  if (allDatasetFiles.length !== 1 || datasetFiles.length !== 1) {
+    const listed = allDatasetFiles.length ? allDatasetFiles.join(', ') : 'none';
     pushError(
       'E_DATASET_FILE_COUNT',
-      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
+      `Expected exactly one dataset manifest in datasets/. Found ${allDatasetFiles.length}: ${listed}`
     );
     return { errors };
   }
-  const datasetPath = path.join(datasetsDir, datasetFiles[0]);
+  const datasetPath = path.join(root, datasetFiles[0]);
   const datasetDoc = readMarkdownFile(datasetPath);
   if (datasetDoc.error) {
     pushError(
