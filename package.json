@@ -25,6 +25,7 @@
     "format:check": "prettier --check .",
     "test": "npm run build && node --test",
     "build": "tsc && node scripts/add-shebang.js",
+    "postinstall": "npm --workspace apps/web run playwright:install",
     "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
     "build:web": "npm --workspace apps/web run build",
     "test:web": "npm --workspace apps/web run test",
