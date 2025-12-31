@@ -3,7 +3,7 @@ import { parseMarkdownRecord } from "../../../../src/core/graph";
 import { serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
 
 describe("serializeMarkdownRecord", () => {
-  it("round trips updated yaml and body content", () => {
+  it("FR-MD-022: serializer preserves raw Markdown body and updated YAML", () => {
     const input = [
       "---",
       "id: record:1",

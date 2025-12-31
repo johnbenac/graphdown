@@ -3,15 +3,15 @@ const test = require('node:test');
 
 const { parseYamlObject } = require('../dist/core');
 
-test('parseYamlObject parses YAML objects', () => {
+test('FR-MD-020: parses YAML objects', () => {
   assert.deepEqual(parseYamlObject('a: 1'), { a: 1 });
 });
 
-test('parseYamlObject throws on invalid YAML', () => {
+test('FR-MD-020: invalid YAML fails parsing', () => {
   assert.throws(() => parseYamlObject('a: [1, 2'), /./);
 });
 
-test('parseYamlObject throws when YAML is not an object', () => {
+test('FR-MD-020: non-object YAML front matter is invalid', () => {
   assert.throws(
     () => parseYamlObject('- a\n- b'),
     /YAML front matter is not a valid object/

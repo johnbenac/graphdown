@@ -70,12 +70,12 @@ function getErrorCodes(snapshot: RepoSnapshot) {
 }
 
 describe("validateDatasetSnapshot", () => {
-  it("reports missing required directories", () => {
+  it("LAYOUT-001: missing required directories fails validation", () => {
     const snapshot = snapshotFromEntries([]);
     expect(getErrorCodes(snapshot)).toContain("E_DIR_MISSING");
   });
 
-  it("reports dataset file count issues", () => {
+  it("LAYOUT-003: multiple dataset manifests in datasets/ fails validation", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/one.md", "---\nid: dataset:one\n---"],
       ["datasets/two.md", "---\nid: dataset:two\n---"],
@@ -85,7 +85,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_DATASET_FILE_COUNT");
   });
 
-  it("reports nested dataset manifests", () => {
+  it("LAYOUT-003: nested dataset manifests under datasets/** are rejected", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/one.md", "---\nid: dataset:one\n---"],
       ["datasets/archive/two.md", "---\nid: dataset:two\n---"],
@@ -97,7 +97,7 @@ describe("validateDatasetSnapshot", () => {
     expect(codes).toContain("E_DATASET_FILE_COUNT");
   });
 
-  it("reports missing YAML front matter", () => {
+  it("FR-MD-020: missing YAML front matter fails validation", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "No front matter"],
       ["types/placeholder.md", "---\nid: type:placeholder\nfields: {}\n---"],
@@ -106,7 +106,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_MISSING");
   });
 
-  it("reports invalid YAML", () => {
+  it("FR-MD-020: invalid YAML fails validation", () => {
     const snapshot = snapshotFromEntries([
       ["datasets/demo.md", "---\nfoo: [\n---"],
       ["types/placeholder.md", "---\nid: type:placeholder\nfields: {}\n---"],
@@ -115,7 +115,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
   });
 
-  it("reports missing dataset id", () => {
+  it("FR-MD-021: missing required id field fails validation", () => {
     const snapshot = snapshotFromEntries([
       [
         "datasets/demo.md",
@@ -135,20 +135,20 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
-  it("does not treat records/.gitkeep as a record type directory", () => {
+  it("LAYOUT-002: ignores non-markdown files under records/", () => {
     const snapshot = baseSnapshot();
     snapshot.files.set("records/.gitkeep", encoder.encode("keep"));
     const result = validateDatasetSnapshot(snapshot);
     expect(result.ok).toBe(true);
   });
 
-  it("does not treat records/README.md as a record type directory", () => {
+  it("LAYOUT-005: markdown files must live under records/<recordTypeId>/", () => {
     const snapshot = baseSnapshot();
     snapshot.files.set("records/README.md", encoder.encode("docs"));
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
-  it("reports records placed directly under records/", () => {
+  it("LAYOUT-005: record files directly under records/ are invalid", () => {
     const snapshot = baseSnapshot();
     snapshot.files.set(
       "records/record-1.md",
@@ -157,7 +157,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
-  it("ignores non-markdown files placed directly under records/", () => {
+  it("LAYOUT-002: ignores non-markdown files placed under records/", () => {
     const snapshot = baseSnapshot();
     snapshot.files.set("records/.gitignore", encoder.encode("*\n"));
     snapshot.files.set("records/notes.txt", encoder.encode("hello"));
@@ -165,7 +165,7 @@ describe("validateDatasetSnapshot", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("reports unknown record directories", () => {
+  it("VAL-001: unknown record type directories fail validation", () => {
     const snapshot = snapshotFromEntries([
       [
         "datasets/demo.md",
@@ -213,7 +213,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
   });
 
-  it("reports missing datasetId on dataset record", () => {
+  it("FR-MD-021: missing datasetId fails validation", () => {
     const snapshot = baseSnapshot();
     const dataset = snapshot.files.get("datasets/demo.md");
     if (dataset) {
@@ -224,7 +224,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
-  it("reports record type mismatches", () => {
+  it("VAL-004: record typeId must match records/<recordTypeId>/ directory", () => {
     const snapshot = baseSnapshot();
     const record = snapshot.files.get("records/note/record-1.md");
     if (record) {
@@ -235,7 +235,7 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
   });
 
-  it("reports duplicate ids", () => {
+  it("VAL-002: ids must be globally unique", () => {
     const snapshot = baseSnapshot();
     const record = snapshot.files.get("records/note/record-1.md");
     if (record) {

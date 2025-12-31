@@ -22,7 +22,7 @@ test('json output for valid dataset', () => {
   assert.deepEqual(payload.errors, []);
 });
 
-test('json output for invalid dataset includes stable fields', () => {
+test('ERR-001: json output includes stable error fields', () => {
   const result = spawnSync(
     process.execPath,
     [cliPath, 'validate', invalidDataset, '--json'],
@@ -42,7 +42,7 @@ test('json output for invalid dataset includes stable fields', () => {
   }
 });
 
-test('pretty output includes error codes', () => {
+test('ERR-001: pretty output includes stable error codes', () => {
   const result = spawnSync(
     process.execPath,
     [cliPath, 'validate', invalidDataset, '--pretty'],
