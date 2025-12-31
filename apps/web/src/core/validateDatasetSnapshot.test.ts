@@ -69,6 +69,14 @@ function getErrorCodes(snapshot: RepoSnapshot) {
   return result.errors.map((error) => error.code);
 }
 
+function getErrors(snapshot: RepoSnapshot) {
+  const result = validateDatasetSnapshot(snapshot);
+  if (result.ok) {
+    return [];
+  }
+  return result.errors;
+}
+
 describe("validateDatasetSnapshot", () => {
   it("reports missing required directories", () => {
     const snapshot = snapshotFromEntries([]);
@@ -83,6 +91,20 @@ describe("validateDatasetSnapshot", () => {
       ["records/.keep", "placeholder"]
     ]);
     expect(getErrorCodes(snapshot)).toContain("E_DATASET_FILE_COUNT");
+  });
+
+  it("rejects nested dataset manifests and lists conflicting paths", () => {
+    const snapshot = snapshotFromEntries([
+      ["datasets/demo.md", "---\nid: dataset:demo\n---"],
+      ["datasets/archive/old.md", "---\nid: dataset:old\n---"],
+      ["types/.keep", "placeholder"],
+      ["records/.keep", "placeholder"]
+    ]);
+    const errors = getErrors(snapshot);
+    expect(errors.some((error) => error.code === "E_DATASET_FILE_COUNT")).toBe(true);
+    const message = errors.find((error) => error.code === "E_DATASET_FILE_COUNT")?.message ?? "";
+    expect(message).toContain("datasets/demo.md");
+    expect(message).toContain("datasets/archive/old.md");
   });
 
   it("reports missing YAML front matter", () => {

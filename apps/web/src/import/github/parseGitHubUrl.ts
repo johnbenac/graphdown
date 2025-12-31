@@ -2,7 +2,6 @@ export type ParsedGitHubUrl = {
   owner: string;
   repo: string;
   ref?: string;
-  subdir?: string;
   canonicalRepoUrl: string;
 };
 
@@ -39,7 +38,7 @@ export function parseGitHubUrl(input: string): ParseResult {
       return {
         ok: false,
         message:
-          'GitHub URL must be a repository URL like https://github.com/owner/repo or github.com/owner/repo (optionally with /tree/<ref>/<subdir>).',
+          'GitHub URL must be a repository URL like https://github.com/owner/repo or github.com/owner/repo (optionally with /tree/<ref>).',
         hint: 'Example: https://github.com/owner/repo'
       };
     }
@@ -86,14 +85,18 @@ export function parseGitHubUrl(input: string): ParseResult {
       if (!ref) {
         return { ok: false, message: 'GitHub URL is missing the branch or tag after /tree/.' };
       }
-      const subdir = segments.length > 4 ? segments.slice(4).join('/') : undefined;
+      if (segments.length > 4) {
+        return {
+          ok: false,
+          message: 'GitHub URL must point to the repository root; subdirectories are not supported.'
+        };
+      }
       return {
         ok: true,
         value: {
           owner,
           repo,
           ref,
-          subdir,
           canonicalRepoUrl: `https://github.com/${owner}/${repo}`
         }
       };

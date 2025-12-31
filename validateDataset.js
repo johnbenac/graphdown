@@ -104,12 +104,18 @@ function validateDataset(root) {
     pushError('E_DIR_MISSING', 'Missing required `records/` directory');
     return { errors };
   }
-  // Validate dataset record (exactly one .md file in datasets/)
+  // Validate dataset record (exactly one .md file in datasets/, no nested dataset manifests)
   const datasetFiles = fs.readdirSync(datasetsDir).filter(fn => fn.toLowerCase().endsWith('.md'));
-  if (datasetFiles.length !== 1) {
+  const rootDatasetPaths = datasetFiles.map((file) => `datasets/${file}`);
+  const allDatasetPaths = listMarkdownFiles(datasetsDir).map((filePath) =>
+    path.relative(root, filePath).split(path.sep).join('/')
+  );
+  const nestedDatasetPaths = allDatasetPaths.filter((filePath) => !rootDatasetPaths.includes(filePath));
+  if (rootDatasetPaths.length !== 1 || nestedDatasetPaths.length > 0) {
+    const listed = allDatasetPaths.length ? allDatasetPaths.join(', ') : 'none';
     pushError(
       'E_DATASET_FILE_COUNT',
-      `Expected exactly one Markdown file in datasets/, found ${datasetFiles.length}`
+      `Expected exactly one dataset manifest at datasets/*.md with no nested datasets; found ${allDatasetPaths.length}: ${listed}`
     );
     return { errors };
   }

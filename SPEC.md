@@ -183,8 +183,14 @@ A **record file** is any file that:
 <!-- req:id=LAYOUT-003 title="Exactly one dataset record" -->
 ### LAYOUT-003 — Exactly one dataset record
 
-`datasets/` **MUST** contain exactly one dataset record file (`.md`).
-Subdirectories under `datasets/` are allowed, but the total count of dataset record files must still be exactly one.
+`datasets/` **MUST** contain exactly one dataset record file (`.md`) directly under `datasets/`.
+Nested dataset manifests under `datasets/**` are **not** allowed. Import/validation **MUST** fail if more than one
+dataset manifest is found and list all conflicting paths.
+
+<!-- req:id=LAYOUT-006 title="Dataset root is the repository root" -->
+### LAYOUT-006 — Dataset root is the repository root
+
+The dataset root **MUST** be the repository root. Importers **MUST NOT** treat subdirectories as dataset roots.
 
 <!-- req:id=LAYOUT-004 title="Type records location" -->
 ### LAYOUT-004 — Type records location

@@ -182,8 +182,16 @@ export function extractWikiLinksFromFields(fields: unknown): string[] {
   return [...results];
 }
 
+function isRootDatasetFile(file: string): boolean {
+  if (!file.startsWith('datasets/')) {
+    return false;
+  }
+  const rest = file.slice('datasets/'.length);
+  return rest.length > 0 && !rest.includes('/');
+}
+
 function getKindForFile(file: string): GraphNodeKind | null {
-  if (file.startsWith('datasets/')) {
+  if (isRootDatasetFile(file)) {
     return 'dataset';
   }
   if (file.startsWith('types/')) {

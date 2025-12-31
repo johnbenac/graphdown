@@ -94,7 +94,7 @@ Example layout:
 ```
 dataset-root/
 ├── datasets/
-│   └── dataset--name.md          # Exactly one dataset definition
+│   └── dataset--name.md          # Exactly one dataset definition (no nested datasets/)
 ├── types/
 │   ├── type--foo.md               # Type definitions
 │   └── type--bar.md
@@ -104,6 +104,8 @@ dataset-root/
     └── bar/
         └── record-2.md
 ```
+
+The dataset root is the repository root; subdirectory imports are not supported.
 
 ### File Format
 
