@@ -24,6 +24,15 @@ jobs:
         run: npm run build
       - name: Build web (typecheck + vite build)
         run: npm run build:web
+      - name: Generate spec verification matrix
+        run: npm run spec:trace
+      - name: Upload spec verification matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-verification-matrix
+          path: artifacts/spec-trace/**
+          if-no-files-found: error
       - name: Web unit tests (vitest)
         run: npm run test:web
       - name: Cache Playwright browsers
