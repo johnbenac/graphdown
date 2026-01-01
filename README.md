@@ -96,8 +96,8 @@ Body content with links like [[example:other]].
 - Export helpers generate zips for the full snapshot or dataset-only Markdown (`exportWholeRepoZip`, `exportDatasetOnlyZip`).
 
 ## Example datasets
-- https://github.com/johnbenac/product-tracker-dataset (golden reference)
-- https://github.com/johnbenac/research-lab-dataset (golden reference)
+- https://github.com/johnbenac/product-tracker-dataset
+- https://github.com/johnbenac/research-lab-dataset
 
 ## Development
 - Run all Node tests: `npm test` (builds first).
