@@ -15,7 +15,13 @@ test('GOV-002: spec-trace output matches committed matrix', () => {
   try {
     const result = generateSpecTrace({ outputDir: tempDir, writeFiles: true, generatedAt: 'normalized' });
     regenerated = result.matrixData;
-    committed = JSON.parse(fs.readFileSync(path.join(repoRoot, 'artifacts', 'spec-trace', 'matrix.json'), 'utf8'));
+    const baselinePath = path.join(repoRoot, 'artifacts', 'spec-trace', 'matrix.json');
+    if (!fs.existsSync(baselinePath)) {
+      throw new Error(
+        'Baseline matrix artifact is missing. Run "npm run spec:trace" and commit artifacts/spec-trace/matrix.{json,md}.'
+      );
+    }
+    committed = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
     committed.generatedAt = 'normalized';
 
     assert.deepStrictEqual(regenerated, committed);

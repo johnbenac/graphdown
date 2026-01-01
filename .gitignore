@@ -31,5 +31,9 @@ Thumbs.db
 test-results/
 playwright-report/
 
-# Spec trace artifacts
-artifacts/
+# Spec trace artifacts (keep matrix outputs committed)
+artifacts/*
+!artifacts/spec-trace/
+artifacts/spec-trace/*
+!artifacts/spec-trace/matrix.json
+!artifacts/spec-trace/matrix.md
