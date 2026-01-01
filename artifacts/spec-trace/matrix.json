@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T07:54:12.779Z",
+  "generatedAt": "2026-01-01T08:44:00.652Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -906,7 +906,18 @@
       "title": "Universal raw CRUD fallback (required)",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "UI-RAW-001",
+          "testTitle": "UI-RAW-001: raw mode edits and saves fields outside the schema and bypasses kind semantics",
+          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+        },
+        {
+          "reqId": "UI-RAW-001",
+          "testTitle": "UI-RAW-001: unknown schema kinds load and save raw values",
+          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+        }
+      ]
     },
     {
       "id": "NFR-030",

@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
+import { isObject } from "../../../../src/core/types";
 import { useDataset } from "../state/DatasetContext";
 import type { FieldDef, TypeSchema } from "../schema/typeSchema";
 import { readRef, readRefs, writeRef, writeRefs } from "../schema/typeSchema";
@@ -47,6 +48,8 @@ export default function RecordEditor({
   const [recordId, setRecordId] = useState("");
   const [errors, setErrors] = useState<ValidationError[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [rawMode, setRawMode] = useState(false);
+  const [rawFieldsText, setRawFieldsText] = useState("{}");
 
   const schemaFields = schema?.fields ?? [];
   const bodyField = schema?.bodyField;
@@ -83,7 +86,17 @@ export default function RecordEditor({
             nextValues[field.name] = readRefs(value).join("\n");
             break;
           default:
-            nextValues[field.name] = "";
+            if (value === undefined || value === null) {
+              nextValues[field.name] = "";
+            } else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+              nextValues[field.name] = String(value);
+            } else {
+              try {
+                nextValues[field.name] = JSON.stringify(value, null, 2);
+              } catch {
+                nextValues[field.name] = String(value);
+              }
+            }
         }
       }
       setFieldValues(nextValues);
@@ -102,10 +115,35 @@ export default function RecordEditor({
       setBodyValue("");
       setRecordId("");
     }
+    setRawMode(false);
+    const currentFields = record?.fields ?? {};
+    setRawFieldsText(JSON.stringify(currentFields, null, 2));
     setErrors(null);
   }, [mode, record, schema, schemaFields, bodyField]);
 
   const listId = `record-id-options-${typeDef.recordTypeId}`;
+
+  const buildRawFieldsFromState = () => {
+    const merged: Record<string, unknown> = { ...(record?.fields ?? {}) };
+    for (const field of schemaFields) {
+      if (field.name === bodyField) {
+        continue;
+      }
+      const value = fieldValues[field.name];
+      if (value !== undefined) {
+        merged[field.name] = value;
+      }
+    }
+    return merged;
+  };
+
+  const toggleRawMode = () => {
+    if (!rawMode) {
+      const merged = buildRawFieldsFromState();
+      setRawFieldsText(JSON.stringify(merged, null, 2));
+    }
+    setRawMode((prev) => !prev);
+  };
 
   const updateFieldValue = (name: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [name]: value }));
@@ -118,53 +156,75 @@ export default function RecordEditor({
       return;
     }
     const trimmedId = recordId.trim();
-    const nextFields: Record<string, unknown> = {};
     const nextErrors: ValidationError[] = [];
 
     if (mode === "create" && !trimmedId) {
       nextErrors.push(makeError("E_USAGE", "Record ID is required."));
     }
 
-    for (const field of schemaFields) {
-      if (field.name === bodyField) {
-        continue;
-      }
-      const rawValue = fieldValues[field.name] ?? "";
-      const trimmed = rawValue.trim();
-      if (field.required && !trimmed) {
-        nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} is required.`));
-        continue;
-      }
-      switch (field.kind) {
-        case "number":
-          if (!trimmed) {
-            nextFields[field.name] = undefined;
-            break;
+    const nextFields: Record<string, unknown> = {};
+
+    if (rawMode) {
+      const rawText = rawFieldsText.trim();
+      if (!rawText) {
+        Object.assign(nextFields, {});
+      } else {
+        try {
+          const parsed = JSON.parse(rawText);
+          if (!isObject(parsed) || Array.isArray(parsed)) {
+            nextErrors.push(makeError("E_USAGE", "Raw fields must be a JSON object."));
+          } else {
+            Object.assign(nextFields, parsed as Record<string, unknown>);
           }
-          {
-            const parsed = Number(trimmed);
-            if (Number.isNaN(parsed)) {
-              nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} must be a number.`));
+        } catch (err) {
+          nextErrors.push(
+            makeError("E_USAGE", `Raw fields JSON is invalid: ${err instanceof Error ? err.message : String(err)}`)
+          );
+        }
+      }
+    } else {
+      for (const field of schemaFields) {
+        if (field.name === bodyField) {
+          continue;
+        }
+        const rawValue = fieldValues[field.name] ?? "";
+        const trimmed = rawValue.trim();
+        if (field.required && !trimmed) {
+          nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} is required.`));
+          continue;
+        }
+        switch (field.kind) {
+          case "number":
+            if (!trimmed) {
+              nextFields[field.name] = undefined;
               break;
             }
-            nextFields[field.name] = parsed;
-          }
-          break;
-        case "enum":
-        case "string":
-        case "date":
-          nextFields[field.name] = trimmed || undefined;
-          break;
-        case "ref":
-          nextFields[field.name] = writeRef(trimmed);
-          break;
-        case "ref[]":
-          nextFields[field.name] = writeRefs(
-            trimmed ? trimmed.split("\n").map((line) => line.trim()).filter(Boolean) : []
-          );
-          break;
-        default:
-          break;
+            {
+              const parsed = Number(trimmed);
+              if (Number.isNaN(parsed)) {
+                nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} must be a number.`));
+                break;
+              }
+              nextFields[field.name] = parsed;
+            }
+            break;
+          case "enum":
+          case "string":
+          case "date":
+            nextFields[field.name] = trimmed || undefined;
+            break;
+          case "ref":
+            nextFields[field.name] = writeRef(trimmed);
+            break;
+          case "ref[]":
+            nextFields[field.name] = writeRefs(
+              trimmed ? trimmed.split("\n").map((line) => line.trim()).filter(Boolean) : []
+            );
+            break;
+          default:
+            nextFields[field.name] = trimmed || undefined;
+            break;
+        }
       }
     }
 
@@ -238,6 +298,27 @@ export default function RecordEditor({
           />
         </div>
       ) : null}
+      <div className="form-row">
+        <div className="form-row__inline">
+          <label htmlFor="raw-fields">Raw fields editor (JSON)</label>
+          <button type="button" onClick={toggleRawMode} className="button secondary" data-testid="toggle-raw-fields">
+            {rawMode ? "Use form inputs" : "Edit raw fields"}
+          </button>
+        </div>
+        {rawMode ? (
+          <textarea
+            id="raw-fields"
+            data-testid="raw-fields-editor"
+            value={rawFieldsText}
+            onChange={(event) => setRawFieldsText(event.target.value)}
+            rows={12}
+          />
+        ) : (
+          <p className="hint">
+            Use “Edit raw fields” to view or edit every field as JSON (including fields not defined in the schema).
+          </p>
+        )}
+      </div>
       {schema ? (
         schemaFields.map((field) => {
           if (field.name === bodyField) {
@@ -249,6 +330,7 @@ export default function RecordEditor({
                   value={bodyValue}
                   onChange={(event) => setBodyValue(event.target.value)}
                   rows={6}
+                  disabled={rawMode}
                 />
               </div>
             );
@@ -265,6 +347,7 @@ export default function RecordEditor({
                   id={`field-${field.name}`}
                   value={value}
                   onChange={(event) => updateFieldValue(field.name, event.target.value)}
+                  disabled={rawMode}
                 >
                   <option value="">Select…</option>
                   {enumOptions.map((option) => (
@@ -286,6 +369,7 @@ export default function RecordEditor({
                   list={listId}
                   value={value}
                   onChange={(event) => updateFieldValue(field.name, event.target.value)}
+                  disabled={rawMode}
                 />
               </div>
             );
@@ -300,6 +384,7 @@ export default function RecordEditor({
                   onChange={(event) => updateFieldValue(field.name, event.target.value)}
                   rows={4}
                   placeholder="one id per line"
+                  disabled={rawMode}
                 />
               </div>
             );
@@ -312,6 +397,7 @@ export default function RecordEditor({
                 type={field.kind === "number" ? "number" : field.kind === "date" ? "date" : "text"}
                 value={value}
                 onChange={(event) => updateFieldValue(field.name, event.target.value)}
+                disabled={rawMode}
               />
             </div>
           );
@@ -327,6 +413,7 @@ export default function RecordEditor({
             value={bodyValue}
             onChange={(event) => setBodyValue(event.target.value)}
             rows={6}
+            disabled={rawMode}
           />
         </div>
       ) : null}
@@ -338,6 +425,7 @@ export default function RecordEditor({
             value={bodyValue}
             onChange={(event) => setBodyValue(event.target.value)}
             rows={6}
+            disabled={rawMode}
           />
         </div>
       ) : null}

@@ -42,7 +42,17 @@ function formatFieldValue(field: FieldDef, value: unknown): string | string[] {
     case "ref[]":
       return readRefs(value);
     default:
-      return "";
+      if (value === undefined || value === null) {
+        return "";
+      }
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        return String(value);
+      }
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return String(value);
+      }
   }
 }
 
@@ -99,7 +109,11 @@ export default function RecordViewer({
                     <div className="record-field__value">(empty)</div>
                   )
                 ) : (
-                  <div className="record-field__value">{value || "(empty)"}</div>
+                  value && value.includes && value.includes("\n") ? (
+                    <pre className="record-field__value">{value}</pre>
+                  ) : (
+                    <div className="record-field__value">{value || "(empty)"}</div>
+                  )
                 )}
               </div>
             ))}
