@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/johnbenac/graphdown/compare/v0.2.0...v0.3.0) (2026-01-01)
+
+
+### Features
+
+* add composition validation and GH-008 coverage ([47e266b](https://github.com/johnbenac/graphdown/commit/47e266b8ae836e8992924a2d44f19d33bd1310f1)), closes [#008](https://github.com/johnbenac/graphdown/issues/008)
+
 # [0.2.0](https://github.com/johnbenac/graphdown/compare/v0.1.0...v0.2.0) (2025-12-31)
 
 
