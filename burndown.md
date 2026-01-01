@@ -1,17 +1,16 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T05:54:47.890Z
+Generated: 2026-01-01T06:11:01.799Z
 Source: artifacts/spec-trace/matrix.json
 
 - Requirements: 61
-- Covered: 36
-- Missing: 25
-- Coverage: 59.0%
+- Covered: 37
+- Missing: 24
+- Coverage: 60.7%
 
 The following requirements currently have **no referenced tests**:
 
-## EXT (2)
-- EXT-001 — Minimal reserved vocabulary
+## EXT (1)
 - EXT-002 — `fields` is open
 
 ## GOV (1)
