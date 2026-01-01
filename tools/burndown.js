@@ -94,7 +94,7 @@ function buildMarkdown(matrix) {
 function main() {
   const matrix = loadMatrix(MATRIX_PATH);
   const markdown = buildMarkdown(matrix);
-  fs.writeFileSync(OUTPUT_PATH, markdown);
+  fs.writeFileSync(OUTPUT_PATH, `${markdown}\n`);
   console.log(`Burndown written to ${path.relative(REPO_ROOT, OUTPUT_PATH)}`);
 }
 

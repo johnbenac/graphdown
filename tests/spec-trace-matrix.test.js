@@ -11,6 +11,8 @@ test('GOV-002: spec-trace output matches committed matrix', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-trace-'));
   let committed;
   let regenerated;
+  let committedMd;
+  let regeneratedMd;
 
   try {
     const result = generateSpecTrace({ outputDir: tempDir, writeFiles: true, generatedAt: 'normalized' });
@@ -21,10 +23,23 @@ test('GOV-002: spec-trace output matches committed matrix', () => {
         'Baseline matrix artifact is missing. Run "npm run spec:trace" and commit artifacts/spec-trace/matrix.{json,md}.'
       );
     }
+    const baselineMdPath = path.join(repoRoot, 'artifacts', 'spec-trace', 'matrix.md');
+    if (!fs.existsSync(baselineMdPath)) {
+      throw new Error(
+        'Baseline matrix markdown is missing. Run "npm run spec:trace" and commit artifacts/spec-trace/matrix.{json,md}.'
+      );
+    }
+
     committed = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
     committed.generatedAt = 'normalized';
 
+    committedMd = fs.readFileSync(baselineMdPath, 'utf8');
+    regeneratedMd = fs.readFileSync(path.join(tempDir, 'matrix.md'), 'utf8');
+
+    const normalizeMd = (text) => text.replace(/^Generated: .+$/m, 'Generated: normalized');
+
     assert.deepStrictEqual(regenerated, committed);
+    assert.strictEqual(normalizeMd(regeneratedMd), normalizeMd(committedMd));
   } catch (error) {
     const context = {
       committedRequirements: committed?.requirements?.length,

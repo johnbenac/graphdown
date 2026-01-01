@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T06:34:03.003Z
+Generated: 2026-01-01T06:47:47.996Z
 Source: artifacts/spec-trace/matrix.json
 
 - Requirements (testable): 61
