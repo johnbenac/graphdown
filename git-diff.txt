@@ -1,0 +1,624 @@
+diff --git a/SPEC.md b/SPEC.md
+index fe9b257..fe403b9 100644
+--- a/SPEC.md
++++ b/SPEC.md
+@@ -119,10 +119,12 @@ If you want those semantics, that’s plugin territory (or dataset-author toolin
+ This standard does not require defenses against malicious datasets (e.g., injection attempts). The spec is about interoperability and determinism, not adversarial threat models.
+ 
+ <!-- req:id=NR-LINK-001 title="No requirement that links resolve" -->
+-### NR-LINK-001 — No requirement that links resolve
++### NR-LINK-001 — No requirement that links resolve (except composition constraints)
+ 
+ Wiki-links MAY point to non-existent record IDs (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
+ 
++Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet.
++
+ ---
+ 
+ ## 3. Terminology
+@@ -190,7 +192,9 @@ additional dataset manifest paths are found.
+ <!-- req:id=LAYOUT-004 title="Type records location" -->
+ ### LAYOUT-004 — Type records location
+ 
+-Type records **MUST** be stored under `types/`. Nesting is allowed.
++Type records **MUST** be stored under `types/`.
++
++Validators/importers **MUST** discover type records **recursively** under `types/`. Subdirectory names are organizational only and carry no semantic meaning.
+ 
+ <!-- req:id=LAYOUT-005 title="Data records location" -->
+ ### LAYOUT-005 — Data records location
+@@ -199,6 +203,8 @@ Data records **MUST** be stored under:
+ 
+ * `records/<recordTypeId>/.../*.md`
+ 
++Validators/importers **MUST** discover data records **recursively** under `records/<recordTypeId>/`. Subdirectory names are organizational only and carry no semantic meaning.
++
+ Nesting under the type directory is allowed.
+ 
+ ---
+@@ -354,6 +360,26 @@ A type record MAY specify:
+ This declares the *conceptual* name of the record’s Markdown body field (for labeling / UX purposes).
+ Core MUST NOT require `bodyField` to exist.
+ 
++<!-- req:id=TYPE-COMP-001 title="Optional type composition metadata" -->
++### TYPE-COMP-001 — Optional type composition metadata
++
++A type record MAY declare compositional requirements under:
++
++* `fields.composition`
++
++If present, `fields.composition` MUST be a map keyed by component name.
++
++Each component value MUST be an object containing:
++
++* `recordTypeId` (string; required; MUST satisfy TYPE-002 pattern)
++
++It MAY include:
++
++* `min` (integer >= 0; default 1)
++* `max` (integer >= `min`)
++
++Core MUST treat any other keys inside component objects as opaque.
++
+ ---
+ 
+ ## 8. Relationships and linking
+@@ -404,6 +430,18 @@ When Graphdown itself creates a new relationship via UI (“link/unlink”), it
+ 
+ This is the Obsidian-compatibility invariant: Graphdown-authored relationships are always visible to Obsidian as links.
+ 
++<!-- req:id=REL-007 title="Only wiki-links are recognized as relationships in core" -->
++### REL-007 — Only wiki-links are recognized as relationships in core
++
++Core MUST recognize relationships **only** via wiki-link tokens `[[target-record-id]]` as defined in REL-001/REL-002.
++
++Core MUST NOT infer relationships from:
++
++* bare IDs (e.g., `record:abc` without `[[...]]`), or
++* structured YAML shapes such as `{ ref: ... }` or `{ refs: [...] }` within `fields`.
++
++Such shapes MAY exist as opaque user data per EXT-002, but they have no relationship semantics in core.
++
+ ---
+ 
+ ## 9. Import-time validity and integrity rules
+@@ -466,6 +504,23 @@ Beyond VAL-005, core MUST NOT validate field values against:
+ 
+ Those are not validity rules in this standard.
+ 
++<!-- req:id=VAL-COMP-001 title="Composition referenced record types must exist" -->
++### VAL-COMP-001 — Composition referenced record types must exist
++
++If a type declares `fields.composition`, then every referenced `recordTypeId` MUST have a corresponding type definition in the dataset. Import MUST fail otherwise.
++
++<!-- req:id=VAL-COMP-002 title="Composition requirements must be satisfied by outgoing wiki-links" -->
++### VAL-COMP-002 — Composition requirements must be satisfied by outgoing wiki-links
++
++If a type declares `fields.composition`, then for each data record of that type:
++
++* outgoing relationships MUST include at least `min` links to existing data records whose `typeId` equals the component `recordTypeId`
++* if `max` is specified, outgoing relationships MUST include no more than `max` such links
++
++Outgoing relationships are extracted from record bodies and from string values anywhere within `fields` per REL-002, and normalized per REL-003.
++
++Unresolved links do not count toward satisfying composition requirements.
++
+ ---
+ 
+ ## 10. Error reporting requirements
+diff --git a/apps/web/src/schema/typeSchema.test.ts b/apps/web/src/schema/typeSchema.test.ts
+index 235c62f..ed18307 100644
+--- a/apps/web/src/schema/typeSchema.test.ts
++++ b/apps/web/src/schema/typeSchema.test.ts
+@@ -1,6 +1,6 @@
+ import { describe, expect, it } from "vitest";
+ 
+-import { parseTypeSchema } from "./typeSchema";
++import { parseTypeSchema, readRef, readRefs, writeRef, writeRefs } from "./typeSchema";
+ 
+ describe("parseTypeSchema", () => {
+   it("TYPE-004: missing fieldDefs yields an empty schema", () => {
+@@ -42,3 +42,20 @@ describe("parseTypeSchema", () => {
+     expect(result.ok).toBe(false);
+   });
+ });
++
++describe("ref helpers", () => {
++  it("REL-005/REL-007: writeRef writes wiki-links", () => {
++    expect(writeRef("record:1")).toBe("[[record:1]]");
++    expect(writeRef("")).toBeUndefined();
++  });
++
++  it("REL-005/REL-007: writeRefs writes wiki-link arrays", () => {
++    expect(writeRefs(["record:1", "record:2"])).toEqual(["[[record:1]]", "[[record:2]]"]);
++    expect(writeRefs([])).toBeUndefined();
++  });
++
++  it("REL-007: readRef/readRefs return cleaned ids from legacy shapes", () => {
++    expect(readRef({ ref: "[[record:1]]" })).toBe("record:1");
++    expect(readRefs({ refs: ["[[record:1]]", "record:2"] })).toEqual(["record:1", "record:2"]);
++  });
++});
+diff --git a/apps/web/src/schema/typeSchema.ts b/apps/web/src/schema/typeSchema.ts
+index bcea36b..689e32b 100644
+--- a/apps/web/src/schema/typeSchema.ts
++++ b/apps/web/src/schema/typeSchema.ts
+@@ -58,17 +58,9 @@ function normalizeId(value: unknown): string | null {
+ }
+ 
+ export function readRef(value: unknown): string {
+-  const direct = normalizeId(value);
+-  if (direct) {
+-    return direct;
+-  }
+-  if (isObject(value)) {
+-    const inner = normalizeId(value.ref);
+-    if (inner) {
+-      return inner;
+-    }
+-  }
+-  return "";
++  const normalized =
++    normalizeId(value) || (isObject(value) ? normalizeId(value.ref) : null);
++  return normalized ?? "";
+ }
+ 
+ export function readRefs(value: unknown): string[] {
+@@ -84,18 +76,18 @@ export function readRefs(value: unknown): string[] {
+   return single ? [single] : [];
+ }
+ 
+-export function writeRef(id: string): { ref: string } | undefined {
++export function writeRef(id: string): string | undefined {
+   const cleaned = normalizeId(id);
+   if (!cleaned) {
+     return undefined;
+   }
+-  return { ref: cleaned };
++  return `[[${cleaned}]]`;
+ }
+ 
+-export function writeRefs(ids: string[]): { refs: string[] } | undefined {
++export function writeRefs(ids: string[]): string[] | undefined {
+   const cleaned = ids.map((id) => normalizeId(id)).filter((id): id is string => Boolean(id));
+   if (!cleaned.length) {
+     return undefined;
+   }
+-  return { refs: cleaned };
++  return cleaned.map((value) => `[[${value}]]`);
+ }
+diff --git a/src/cli.ts b/src/cli.ts
+index 3e1b4dd..4a48d78 100644
+--- a/src/cli.ts
++++ b/src/cli.ts
+@@ -1,4 +1,4 @@
+-import { spawn } from 'node:child_process';
++import fs from 'node:fs';
+ import path from 'node:path';
+ 
+ const usage = `Usage: graphdown validate <datasetPath> [--json|--pretty]
+@@ -7,7 +7,7 @@ const usage = `Usage: graphdown validate <datasetPath> [--json|--pretty]
+ const args = process.argv.slice(2);
+ 
+ if (args.length === 0) {
+-  console.error(usage);
++  fs.writeFileSync(2, `${usage}\n`);
+   process.exit(2);
+ }
+ 
+@@ -16,7 +16,7 @@ let forwardedArgs: string[];
+ 
+ if (commandOrPath === 'validate') {
+   if (rest.length === 0) {
+-    console.error(usage);
++    fs.writeFileSync(2, `${usage}\n`);
+     process.exit(2);
+   }
+   forwardedArgs = rest;
+@@ -25,19 +25,13 @@ if (commandOrPath === 'validate') {
+ }
+ 
+ const validatorPath = path.resolve(__dirname, '..', 'validateDataset.js');
+-const child = spawn(process.execPath, [validatorPath, ...forwardedArgs], {
+-  stdio: 'inherit'
+-});
++// validateDataset.js is CommonJS; import dynamically to avoid bundling differences.
++// eslint-disable-next-line @typescript-eslint/no-var-requires
++const validatorModule = require(validatorPath) as { main?: (argv?: string[]) => void };
+ 
+-child.on('error', (error) => {
+-  console.error('Failed to run validator:', error.message);
++if (typeof validatorModule.main === 'function') {
++  validatorModule.main(forwardedArgs);
++} else {
++  fs.writeFileSync(2, 'Failed to load validator module.\n');
+   process.exit(2);
+-});
+-
+-child.on('close', (code, signal) => {
+-  if (signal) {
+-    process.exitCode = 1;
+-    return;
+-  }
+-  process.exitCode = code ?? 1;
+-});
++}
+diff --git a/src/core/errors.ts b/src/core/errors.ts
+index afaafa9..bb45d11 100644
+--- a/src/core/errors.ts
++++ b/src/core/errors.ts
+@@ -15,6 +15,9 @@ export type ValidationErrorCode =
+   | 'E_DUPLICATE_RECORD_TYPE_ID'
+   | 'E_RECORD_TYPE_ID_INVALID'
+   | 'E_DATASET_FIELDS_MISSING'
++  | 'E_COMPOSITION_SCHEMA_INVALID'
++  | 'E_COMPOSITION_UNKNOWN_TYPE'
++  | 'E_COMPOSITION_CONSTRAINT_VIOLATION'
+   | 'E_GITHUB_URL_UNSUPPORTED'
+   | 'E_USAGE'
+   | 'E_INTERNAL';
+diff --git a/src/core/graph.ts b/src/core/graph.ts
+index d98d33b..a794cf4 100644
+--- a/src/core/graph.ts
++++ b/src/core/graph.ts
+@@ -1,6 +1,5 @@
+ import { extractFrontMatter } from './frontMatter';
+ import { makeError, ValidationError } from './errors';
+-import { normalizeRefs } from './refs';
+ import type { RepoSnapshot } from './snapshotTypes';
+ import { extractWikiLinks } from './wikiLinks';
+ import { parseYamlObject } from './yaml';
+@@ -125,34 +124,6 @@ export function parseMarkdownRecord(
+   }
+ }
+ 
+-export function extractYamlRefs(fields: unknown): string[] {
+-  const refs = new Set<string>();
+-
+-  const visit = (value: unknown) => {
+-    if (Array.isArray(value)) {
+-      for (const item of value) {
+-        visit(item);
+-      }
+-      return;
+-    }
+-    if (!isObject(value)) {
+-      return;
+-    }
+-    for (const [key, child] of Object.entries(value)) {
+-      if (key === 'ref' || key === 'refs') {
+-        for (const ref of normalizeRefs(child)) {
+-          refs.add(ref);
+-        }
+-      } else {
+-        visit(child);
+-      }
+-    }
+-  };
+-
+-  visit(fields);
+-  return [...refs];
+-}
+-
+ export function extractWikiLinksFromFields(fields: unknown): string[] {
+   const results = new Set<string>();
+ 
+@@ -284,11 +255,10 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
+   }
+ 
+   for (const node of nodesById.values()) {
+-    const refTargets = extractYamlRefs(node.fields);
+     const bodyWikiTargets = extractWikiLinks(node.body);
+     const fieldWikiTargets = extractWikiLinksFromFields(node.fields);
+     const targets = new Set<string>();
+-    for (const target of [...refTargets, ...bodyWikiTargets, ...fieldWikiTargets]) {
++    for (const target of [...bodyWikiTargets, ...fieldWikiTargets]) {
+       if (!target || target === node.id) {
+         continue;
+       }
+diff --git a/src/core/validateDatasetSnapshot.ts b/src/core/validateDatasetSnapshot.ts
+index 1167e2c..06a290a 100644
+--- a/src/core/validateDatasetSnapshot.ts
++++ b/src/core/validateDatasetSnapshot.ts
+@@ -1,12 +1,20 @@
+ import { makeError, type ValidationError } from './errors';
+-import { parseMarkdownRecord, RECORD_TYPE_ID_PATTERN } from './graph';
++import { extractWikiLinksFromFields, parseMarkdownRecord, RECORD_TYPE_ID_PATTERN } from './graph';
+ import type { RepoSnapshot } from './snapshotTypes';
+ import { getString, isObject } from './types';
++import { extractWikiLinks } from './wikiLinks';
+ 
+ export type ValidateDatasetResult =
+   | { ok: true; datasetRecordPath: string; datasetId: string }
+   | { ok: false; errors: ValidationError[] };
+ 
++type CompositionRequirement = {
++  name: string;
++  recordTypeId: string;
++  min: number;
++  max?: number;
++};
++
+ const textDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
+ 
+ function decodeBytes(raw: Uint8Array): string {
+@@ -171,6 +179,7 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
+ 
+   const typeFiles = listMarkdownFiles(files, 'types', true);
+   const recordTypeIdMap = new Map<string, { id?: string; file: string }>();
++  const compositionByRecordTypeId = new Map<string, CompositionRequirement[]>();
+   const requiredFieldsByRecordTypeId = new Map<string, string[]>();
+   const typeIds = new Set<string>();
+   const typeRecords: Array<{ id?: string; file: string }> = [];
+@@ -241,6 +250,79 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
+       );
+     } else {
+       recordTypeIdMap.set(recordTypeId, { id, file });
++      const compositionRaw = (yaml.fields as Record<string, unknown>).composition;
++      if (compositionRaw !== undefined && compositionRaw !== null) {
++        if (!isObject(compositionRaw) || Array.isArray(compositionRaw)) {
++          errors.push(
++            makeError(
++              'E_COMPOSITION_SCHEMA_INVALID',
++              `Type file ${file} fields.composition must be a map keyed by component name.`,
++              file
++            )
++          );
++        } else {
++          const parsedComponents: CompositionRequirement[] = [];
++          for (const [name, value] of Object.entries(compositionRaw)) {
++            if (!isObject(value) || Array.isArray(value)) {
++              errors.push(
++                makeError(
++                  'E_COMPOSITION_SCHEMA_INVALID',
++                  `Type file ${file} composition.${name} must be an object.`,
++                  file
++                )
++              );
++              continue;
++            }
++            const componentTypeId = getString(value, 'recordTypeId');
++            if (!componentTypeId || !RECORD_TYPE_ID_PATTERN.test(componentTypeId)) {
++              errors.push(
++                makeError(
++                  'E_COMPOSITION_SCHEMA_INVALID',
++                  `Type file ${file} composition.${name}.recordTypeId must match the recordTypeId pattern.`,
++                  file
++                )
++              );
++              continue;
++            }
++            const minRaw = (value as Record<string, unknown>).min;
++            let min = 1;
++            if (minRaw !== undefined) {
++              if (typeof minRaw === 'number' && Number.isInteger(minRaw) && minRaw >= 0) {
++                min = minRaw;
++              } else {
++                errors.push(
++                  makeError(
++                    'E_COMPOSITION_SCHEMA_INVALID',
++                    `Type file ${file} composition.${name}.min must be an integer >= 0.`,
++                    file
++                  )
++                );
++                continue;
++              }
++            }
++            const maxRaw = (value as Record<string, unknown>).max;
++            let max: number | undefined;
++            if (maxRaw !== undefined) {
++              if (typeof maxRaw === 'number' && Number.isInteger(maxRaw) && maxRaw >= min) {
++                max = maxRaw;
++              } else {
++                errors.push(
++                  makeError(
++                    'E_COMPOSITION_SCHEMA_INVALID',
++                    `Type file ${file} composition.${name}.max must be an integer >= min.`,
++                    file
++                  )
++                );
++                continue;
++              }
++            }
++            parsedComponents.push({ name, recordTypeId: componentTypeId, min, max });
++          }
++          if (parsedComponents.length) {
++            compositionByRecordTypeId.set(recordTypeId, parsedComponents);
++          }
++        }
++      }
+       const fieldDefs = isObject((yaml.fields as Record<string, unknown>).fieldDefs)
+         ? (yaml.fields as Record<string, unknown>).fieldDefs
+         : undefined;
+@@ -263,8 +345,25 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
+     typeRecords.push({ id, file });
+   }
+ 
++  for (const [parentTypeId, components] of compositionByRecordTypeId.entries()) {
++    const parentFile = recordTypeIdMap.get(parentTypeId)?.file;
++    for (const component of components) {
++      if (!recordTypeIdMap.has(component.recordTypeId)) {
++        errors.push(
++          makeError(
++            'E_COMPOSITION_UNKNOWN_TYPE',
++            `Type ${parentTypeId} composition "${component.name}" references unknown recordTypeId ${component.recordTypeId}.`,
++            parentFile
++          )
++        );
++      }
++    }
++  }
++
+   const recordDirs = listRecordDirs(files);
+-  const recordEntries: Array<{ id?: string; file: string }> = [];
++  const recordEntries: Array<{ id?: string; file: string; recordTypeId: string }> = [];
++  const recordTypeById = new Map<string, string>();
++  const outgoingByRecordId = new Map<string, Set<string>>();
+ 
+   for (const dirName of recordDirs) {
+     if (!recordTypeIdMap.has(dirName)) {
+@@ -333,7 +432,22 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
+         }
+       }
+ 
+-      recordEntries.push({ id, file });
++      if (id) {
++        recordTypeById.set(id, dirName);
++        if (compositionByRecordTypeId.has(dirName)) {
++          const targets = new Set<string>();
++          for (const target of extractWikiLinksFromFields(yaml.fields)) {
++            targets.add(target);
++          }
++          for (const target of extractWikiLinks(parsed.body)) {
++            targets.add(target);
++          }
++          targets.delete(id);
++          outgoingByRecordId.set(id, targets);
++        }
++      }
++
++      recordEntries.push({ id, file, recordTypeId: dirName });
+     }
+   }
+ 
+@@ -357,6 +471,40 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
+     recordDuplicate(record.id, record.file);
+   }
+ 
++  for (const record of recordEntries) {
++    if (!record.id) {
++      continue;
++    }
++    const components = compositionByRecordTypeId.get(record.recordTypeId);
++    if (!components || components.length === 0) {
++      continue;
++    }
++    const outgoing = outgoingByRecordId.get(record.id) ?? new Set<string>();
++    for (const component of components) {
++      const matches = [...outgoing].filter(
++        (targetId) => recordTypeById.get(targetId) === component.recordTypeId
++      );
++      if (matches.length < component.min) {
++        errors.push(
++          makeError(
++            'E_COMPOSITION_CONSTRAINT_VIOLATION',
++            `Record ${record.id} must link to at least ${component.min} ${component.recordTypeId} record(s) for component "${component.name}". Found ${matches.length}.`,
++            record.file
++          )
++        );
++      }
++      if (component.max !== undefined && matches.length > component.max) {
++        errors.push(
++          makeError(
++            'E_COMPOSITION_CONSTRAINT_VIOLATION',
++            `Record ${record.id} must link to at most ${component.max} ${component.recordTypeId} record(s) for component "${component.name}". Found ${matches.length}.`,
++            record.file
++          )
++        );
++      }
++    }
++  }
++
+   if (errors.length) {
+     return { ok: false, errors };
+   }
+diff --git a/validateDataset.js b/validateDataset.js
+index ee9cbb3..13b4205 100644
+--- a/validateDataset.js
++++ b/validateDataset.js
+@@ -336,20 +336,28 @@ function parseArgs(args) {
+   return { datasetPath, json, pretty, error };
+ }
+ 
++function writeStdout(text) {
++  fs.writeFileSync(1, text);
++}
++
++function writeStderr(text) {
++  fs.writeFileSync(2, text);
++}
++
+ function printUsage(message) {
+   if (message) {
+-    console.error(message);
++    writeStderr(`${message}\n`);
+   }
+-  console.error('Usage: node validateDataset.js <datasetPath> [--json|--pretty]');
++  writeStderr('Usage: node validateDataset.js <datasetPath> [--json|--pretty]\n');
+ }
+ 
+-function main() {
+-  const parsed = parseArgs(process.argv.slice(2));
++function main(argv) {
++  const parsed = parseArgs(argv ?? process.argv.slice(2));
+   const outputMode = parsed.json ? 'json' : 'pretty';
+   if (parsed.error) {
+     const error = makeError('E_USAGE', parsed.error);
+     if (outputMode === 'json') {
+-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
++      writeStdout(formatJson({ ok: false, errors: [error] }));
+     } else {
+       printUsage(parsed.error);
+     }
+@@ -365,9 +373,9 @@ function main() {
+       'Validation of remote GitHub URLs is not supported. Clone the repository locally and provide its path instead.'
+     );
+     if (outputMode === 'json') {
+-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
++      writeStdout(formatJson({ ok: false, errors: [error] }));
+     } else {
+-      process.stderr.write(formatPretty([error]));
++      writeStderr(formatPretty([error]));
+     }
+     process.exit(2);
+   }
+@@ -377,9 +385,9 @@ function main() {
+       `Dataset path ${rootPath} does not exist or is not a directory`
+     );
+     if (outputMode === 'json') {
+-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
++      writeStdout(formatJson({ ok: false, errors: [error] }));
+     } else {
+-      process.stderr.write(formatPretty([error]));
++      writeStderr(formatPretty([error]));
+     }
+     process.exit(2);
+   }
+@@ -387,25 +395,25 @@ function main() {
+     const result = validateDataset(rootPath);
+     if (result.errors.length === 0) {
+       if (outputMode === 'json') {
+-        process.stdout.write(formatJson({ ok: true, errors: [] }));
++        writeStdout(formatJson({ ok: true, errors: [] }));
+       } else {
+-        console.log('Validation passed: dataset is valid.');
++        writeStdout('Validation passed: dataset is valid.\n');
+       }
+       return;
+     }
+     if (outputMode === 'json') {
+-      process.stdout.write(formatJson({ ok: false, errors: result.errors }));
++      writeStdout(formatJson({ ok: false, errors: result.errors }));
+     } else {
+-      process.stderr.write(formatPretty(result.errors));
++      writeStderr(formatPretty(result.errors));
+     }
+     process.exit(1);
+   } catch (err) {
+     const message = err && err.message ? err.message : String(err);
+     const error = makeError('E_INTERNAL', `Unexpected error: ${message}`);
+     if (outputMode === 'json') {
+-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
++      writeStdout(formatJson({ ok: false, errors: [error] }));
+     } else {
+-      process.stderr.write(formatPretty([error]));
++      writeStderr(formatPretty([error]));
+     }
+     process.exit(2);
+   }
+@@ -414,3 +422,5 @@ function main() {
+ if (require.main === module) {
+   main();
+ }
++
++module.exports = { main };

@@ -58,17 +58,9 @@ function normalizeId(value: unknown): string | null {
 }
 
 export function readRef(value: unknown): string {
-  const direct = normalizeId(value);
-  if (direct) {
-    return direct;
-  }
-  if (isObject(value)) {
-    const inner = normalizeId(value.ref);
-    if (inner) {
-      return inner;
-    }
-  }
-  return "";
+  const normalized =
+    normalizeId(value) || (isObject(value) ? normalizeId(value.ref) : null);
+  return normalized ?? "";
 }
 
 export function readRefs(value: unknown): string[] {
@@ -84,18 +76,18 @@ export function readRefs(value: unknown): string[] {
   return single ? [single] : [];
 }
 
-export function writeRef(id: string): { ref: string } | undefined {
+export function writeRef(id: string): string | undefined {
   const cleaned = normalizeId(id);
   if (!cleaned) {
     return undefined;
   }
-  return { ref: cleaned };
+  return `[[${cleaned}]]`;
 }
 
-export function writeRefs(ids: string[]): { refs: string[] } | undefined {
+export function writeRefs(ids: string[]): string[] | undefined {
   const cleaned = ids.map((id) => normalizeId(id)).filter((id): id is string => Boolean(id));
   if (!cleaned.length) {
     return undefined;
   }
-  return { refs: cleaned };
+  return cleaned.map((value) => `[[${value}]]`);
 }

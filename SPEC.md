@@ -119,9 +119,11 @@ If you want those semantics, that’s plugin territory (or dataset-author toolin
 This standard does not require defenses against malicious datasets (e.g., injection attempts). The spec is about interoperability and determinism, not adversarial threat models.
 
 <!-- req:id=NR-LINK-001 title="No requirement that links resolve" -->
-### NR-LINK-001 — No requirement that links resolve
+### NR-LINK-001 — No requirement that links resolve (except composition constraints)
 
 Wiki-links MAY point to non-existent record IDs (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
+
+Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet.
 
 ---
 
@@ -190,7 +192,9 @@ additional dataset manifest paths are found.
 <!-- req:id=LAYOUT-004 title="Type records location" -->
 ### LAYOUT-004 — Type records location
 
-Type records **MUST** be stored under `types/`. Nesting is allowed.
+Type records **MUST** be stored under `types/`.
+
+Validators/importers **MUST** discover type records **recursively** under `types/`. Subdirectory names are organizational only and carry no semantic meaning.
 
 <!-- req:id=LAYOUT-005 title="Data records location" -->
 ### LAYOUT-005 — Data records location
@@ -199,7 +203,7 @@ Data records **MUST** be stored under:
 
 * `records/<recordTypeId>/.../*.md`
 
-Nesting under the type directory is allowed.
+Validators/importers **MUST** discover data records **recursively** under `records/<recordTypeId>/`. Subdirectory names are organizational only and carry no semantic meaning.
 
 ---
 
@@ -354,6 +358,26 @@ A type record MAY specify:
 This declares the *conceptual* name of the record’s Markdown body field (for labeling / UX purposes).
 Core MUST NOT require `bodyField` to exist.
 
+<!-- req:id=TYPE-COMP-001 title="Optional type composition metadata" -->
+### TYPE-COMP-001 — Optional type composition metadata
+
+A type record MAY declare compositional requirements under:
+
+* `fields.composition`
+
+If present, `fields.composition` MUST be a map keyed by component name.
+
+Each component value MUST be an object containing:
+
+* `recordTypeId` (string; required; MUST satisfy TYPE-002 pattern)
+
+It MAY include:
+
+* `min` (integer >= 0; default 1)
+* `max` (integer >= `min`)
+
+Core MUST treat any other keys inside component objects as opaque.
+
 ---
 
 ## 8. Relationships and linking
@@ -403,6 +427,19 @@ Relationships are extracted for graph behavior, but the stored bytes are treated
 When Graphdown itself creates a new relationship via UI (“link/unlink”), it MUST write links using **wiki-link syntax** `[[id]]` (not bare IDs).
 
 This is the Obsidian-compatibility invariant: Graphdown-authored relationships are always visible to Obsidian as links.
+
+<!-- req:id=REL-007 title="Only wiki-links are recognized as relationships in core" -->
+### REL-007 — Only wiki-links are recognized as relationships in core
+
+Core MUST recognize relationships **only** via wiki-link tokens `[[target-record-id]]` as defined in REL-001/REL-002.
+
+Core MUST NOT infer relationships from:
+
+* the presence of `{ ref: ... }` / `{ refs: [...] }` wrappers or bare IDs (e.g., `{ ref: "record:abc" }`)
+
+Relationships are recognized only from wiki-link tokens `[[...]]`, regardless of where the string occurs within `fields`.
+
+Such shapes MAY exist as opaque user data per EXT-002, but they have no relationship semantics in core.
 
 ---
 
@@ -465,6 +502,25 @@ Beyond VAL-005, core MUST NOT validate field values against:
 * money shapes, etc.
 
 Those are not validity rules in this standard.
+
+<!-- req:id=VAL-COMP-001 title="Composition referenced record types must exist" -->
+### VAL-COMP-001 — Composition referenced record types must exist
+
+If a type declares `fields.composition`, then every referenced `recordTypeId` MUST have a corresponding type definition in the dataset. Import MUST fail otherwise.
+
+<!-- req:id=VAL-COMP-002 title="Composition requirements must be satisfied by outgoing wiki-links" -->
+### VAL-COMP-002 — Composition requirements must be satisfied by outgoing wiki-links
+
+If a type declares `fields.composition`, then for each data record of that type:
+
+* outgoing relationships MUST include at least `min` links to existing data records whose `typeId` equals the component `recordTypeId`
+* if `max` is specified, outgoing relationships MUST include no more than `max` such links
+
+Outgoing relationships are extracted from record bodies and from string values anywhere within `fields` per REL-002, and normalized per REL-003.
+
+Unresolved links do not count toward satisfying composition requirements.
+
+Counts are based on **distinct target record IDs**; repeating the same link target multiple times does not increase the count.
 
 ---
 

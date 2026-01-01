@@ -1,11 +1,19 @@
 import { makeError, type ValidationError } from './errors';
-import { parseMarkdownRecord, RECORD_TYPE_ID_PATTERN } from './graph';
+import { extractWikiLinksFromFields, parseMarkdownRecord, RECORD_TYPE_ID_PATTERN } from './graph';
 import type { RepoSnapshot } from './snapshotTypes';
 import { getString, isObject } from './types';
+import { extractWikiLinks } from './wikiLinks';
 
 export type ValidateDatasetResult =
   | { ok: true; datasetRecordPath: string; datasetId: string }
   | { ok: false; errors: ValidationError[] };
+
+type CompositionRequirement = {
+  name: string;
+  recordTypeId: string;
+  min: number;
+  max?: number;
+};
 
 const textDecoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
 
@@ -171,6 +179,7 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
 
   const typeFiles = listMarkdownFiles(files, 'types', true);
   const recordTypeIdMap = new Map<string, { id?: string; file: string }>();
+  const compositionByRecordTypeId = new Map<string, CompositionRequirement[]>();
   const requiredFieldsByRecordTypeId = new Map<string, string[]>();
   const typeIds = new Set<string>();
   const typeRecords: Array<{ id?: string; file: string }> = [];
@@ -241,6 +250,79 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       );
     } else {
       recordTypeIdMap.set(recordTypeId, { id, file });
+      const compositionRaw = (yaml.fields as Record<string, unknown>).composition;
+      if (compositionRaw !== undefined) {
+        if (!isObject(compositionRaw) || Array.isArray(compositionRaw)) {
+          errors.push(
+            makeError(
+              'E_COMPOSITION_SCHEMA_INVALID',
+              `Type file ${file} fields.composition must be a map keyed by component name.`,
+              file
+            )
+          );
+        } else {
+          const parsedComponents: CompositionRequirement[] = [];
+          for (const [name, value] of Object.entries(compositionRaw)) {
+            if (!isObject(value) || Array.isArray(value)) {
+              errors.push(
+                makeError(
+                  'E_COMPOSITION_SCHEMA_INVALID',
+                  `Type file ${file} composition.${name} must be an object.`,
+                  file
+                )
+              );
+              continue;
+            }
+            const componentTypeId = getString(value, 'recordTypeId');
+            if (!componentTypeId || !RECORD_TYPE_ID_PATTERN.test(componentTypeId)) {
+              errors.push(
+                makeError(
+                  'E_COMPOSITION_SCHEMA_INVALID',
+                  `Type file ${file} composition.${name}.recordTypeId must match the recordTypeId pattern.`,
+                  file
+                )
+              );
+              continue;
+            }
+            const minRaw = (value as Record<string, unknown>).min;
+            let min = 1;
+            if (minRaw !== undefined) {
+              if (typeof minRaw === 'number' && Number.isInteger(minRaw) && minRaw >= 0) {
+                min = minRaw;
+              } else {
+                errors.push(
+                  makeError(
+                    'E_COMPOSITION_SCHEMA_INVALID',
+                    `Type file ${file} composition.${name}.min must be an integer >= 0.`,
+                    file
+                  )
+                );
+                continue;
+              }
+            }
+            const maxRaw = (value as Record<string, unknown>).max;
+            let max: number | undefined;
+            if (maxRaw !== undefined) {
+              if (typeof maxRaw === 'number' && Number.isInteger(maxRaw) && maxRaw >= min) {
+                max = maxRaw;
+              } else {
+                errors.push(
+                  makeError(
+                    'E_COMPOSITION_SCHEMA_INVALID',
+                    `Type file ${file} composition.${name}.max must be an integer >= min.`,
+                    file
+                  )
+                );
+                continue;
+              }
+            }
+            parsedComponents.push({ name, recordTypeId: componentTypeId, min, max });
+          }
+          if (parsedComponents.length) {
+            compositionByRecordTypeId.set(recordTypeId, parsedComponents);
+          }
+        }
+      }
       const fieldDefs = isObject((yaml.fields as Record<string, unknown>).fieldDefs)
         ? (yaml.fields as Record<string, unknown>).fieldDefs
         : undefined;
@@ -263,8 +345,25 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
     typeRecords.push({ id, file });
   }
 
+  for (const [parentTypeId, components] of compositionByRecordTypeId.entries()) {
+    const parentFile = recordTypeIdMap.get(parentTypeId)?.file;
+    for (const component of components) {
+      if (!recordTypeIdMap.has(component.recordTypeId)) {
+        errors.push(
+          makeError(
+            'E_COMPOSITION_UNKNOWN_TYPE',
+            `Type ${parentTypeId} composition "${component.name}" references unknown recordTypeId ${component.recordTypeId}.`,
+            parentFile
+          )
+        );
+      }
+    }
+  }
+
   const recordDirs = listRecordDirs(files);
-  const recordEntries: Array<{ id?: string; file: string }> = [];
+  const recordEntries: Array<{ id?: string; file: string; recordTypeId: string }> = [];
+  const recordTypeById = new Map<string, string>();
+  const outgoingByRecordId = new Map<string, Set<string>>();
 
   for (const dirName of recordDirs) {
     if (!recordTypeIdMap.has(dirName)) {
@@ -333,7 +432,22 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
         }
       }
 
-      recordEntries.push({ id, file });
+      if (id) {
+        recordTypeById.set(id, dirName);
+        if (compositionByRecordTypeId.has(dirName)) {
+          const targets = new Set<string>();
+          for (const target of extractWikiLinksFromFields(yaml.fields)) {
+            targets.add(target);
+          }
+          for (const target of extractWikiLinks(parsed.body)) {
+            targets.add(target);
+          }
+          targets.delete(id);
+          outgoingByRecordId.set(id, targets);
+        }
+      }
+
+      recordEntries.push({ id, file, recordTypeId: dirName });
     }
   }
 
@@ -355,6 +469,40 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
   for (const record of recordEntries) {
     recordDuplicate(record.id, record.file);
+  }
+
+  for (const record of recordEntries) {
+    if (!record.id) {
+      continue;
+    }
+    const components = compositionByRecordTypeId.get(record.recordTypeId);
+    if (!components || components.length === 0) {
+      continue;
+    }
+    const outgoing = outgoingByRecordId.get(record.id) ?? new Set<string>();
+    for (const component of components) {
+      const matches = [...outgoing].filter(
+        (targetId) => recordTypeById.get(targetId) === component.recordTypeId
+      );
+      if (matches.length < component.min) {
+        errors.push(
+          makeError(
+            'E_COMPOSITION_CONSTRAINT_VIOLATION',
+            `Record ${record.id} must link to at least ${component.min} ${component.recordTypeId} record(s) for component "${component.name}". Found ${matches.length}.`,
+            record.file
+          )
+        );
+      }
+      if (component.max !== undefined && matches.length > component.max) {
+        errors.push(
+          makeError(
+            'E_COMPOSITION_CONSTRAINT_VIOLATION',
+            `Record ${record.id} must link to at most ${component.max} ${component.recordTypeId} record(s) for component "${component.name}". Found ${matches.length}.`,
+            record.file
+          )
+        );
+      }
+    }
   }
 
   if (errors.length) {

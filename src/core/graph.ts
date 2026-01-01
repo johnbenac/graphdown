@@ -1,6 +1,5 @@
 import { extractFrontMatter } from './frontMatter';
 import { makeError, ValidationError } from './errors';
-import { normalizeRefs } from './refs';
 import type { RepoSnapshot } from './snapshotTypes';
 import { extractWikiLinks } from './wikiLinks';
 import { parseYamlObject } from './yaml';
@@ -123,34 +122,6 @@ export function parseMarkdownRecord(
     const code = message === 'YAML front matter is not a valid object' ? 'E_YAML_NOT_OBJECT' : 'E_YAML_INVALID';
     return { ok: false, error: makeError(code, message, file) };
   }
-}
-
-export function extractYamlRefs(fields: unknown): string[] {
-  const refs = new Set<string>();
-
-  const visit = (value: unknown) => {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        visit(item);
-      }
-      return;
-    }
-    if (!isObject(value)) {
-      return;
-    }
-    for (const [key, child] of Object.entries(value)) {
-      if (key === 'ref' || key === 'refs') {
-        for (const ref of normalizeRefs(child)) {
-          refs.add(ref);
-        }
-      } else {
-        visit(child);
-      }
-    }
-  };
-
-  visit(fields);
-  return [...refs];
 }
 
 export function extractWikiLinksFromFields(fields: unknown): string[] {
@@ -284,11 +255,10 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
   }
 
   for (const node of nodesById.values()) {
-    const refTargets = extractYamlRefs(node.fields);
     const bodyWikiTargets = extractWikiLinks(node.body);
     const fieldWikiTargets = extractWikiLinksFromFields(node.fields);
     const targets = new Set<string>();
-    for (const target of [...refTargets, ...bodyWikiTargets, ...fieldWikiTargets]) {
+    for (const target of [...bodyWikiTargets, ...fieldWikiTargets]) {
       if (!target || target === node.id) {
         continue;
       }

@@ -336,20 +336,28 @@ function parseArgs(args) {
   return { datasetPath, json, pretty, error };
 }
 
-function printUsage(message) {
-  if (message) {
-    console.error(message);
-  }
-  console.error('Usage: node validateDataset.js <datasetPath> [--json|--pretty]');
+function writeStdout(text) {
+  fs.writeFileSync(1, text);
 }
 
-function main() {
-  const parsed = parseArgs(process.argv.slice(2));
+function writeStderr(text) {
+  fs.writeFileSync(2, text);
+}
+
+function printUsage(message) {
+  if (message) {
+    writeStderr(`${message}\n`);
+  }
+  writeStderr('Usage: node validateDataset.js <datasetPath> [--json|--pretty]\n');
+}
+
+function main(argv) {
+  const parsed = parseArgs(argv ?? process.argv.slice(2));
   const outputMode = parsed.json ? 'json' : 'pretty';
   if (parsed.error) {
     const error = makeError('E_USAGE', parsed.error);
     if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      writeStdout(formatJson({ ok: false, errors: [error] }));
     } else {
       printUsage(parsed.error);
     }
@@ -365,9 +373,9 @@ function main() {
       'Validation of remote GitHub URLs is not supported. Clone the repository locally and provide its path instead.'
     );
     if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      writeStdout(formatJson({ ok: false, errors: [error] }));
     } else {
-      process.stderr.write(formatPretty([error]));
+      writeStderr(formatPretty([error]));
     }
     process.exit(2);
   }
@@ -377,9 +385,9 @@ function main() {
       `Dataset path ${rootPath} does not exist or is not a directory`
     );
     if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      writeStdout(formatJson({ ok: false, errors: [error] }));
     } else {
-      process.stderr.write(formatPretty([error]));
+      writeStderr(formatPretty([error]));
     }
     process.exit(2);
   }
@@ -387,25 +395,25 @@ function main() {
     const result = validateDataset(rootPath);
     if (result.errors.length === 0) {
       if (outputMode === 'json') {
-        process.stdout.write(formatJson({ ok: true, errors: [] }));
+        writeStdout(formatJson({ ok: true, errors: [] }));
       } else {
-        console.log('Validation passed: dataset is valid.');
+        writeStdout('Validation passed: dataset is valid.\n');
       }
       return;
     }
     if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: result.errors }));
+      writeStdout(formatJson({ ok: false, errors: result.errors }));
     } else {
-      process.stderr.write(formatPretty(result.errors));
+      writeStderr(formatPretty(result.errors));
     }
     process.exit(1);
   } catch (err) {
     const message = err && err.message ? err.message : String(err);
     const error = makeError('E_INTERNAL', `Unexpected error: ${message}`);
     if (outputMode === 'json') {
-      process.stdout.write(formatJson({ ok: false, errors: [error] }));
+      writeStdout(formatJson({ ok: false, errors: [error] }));
     } else {
-      process.stderr.write(formatPretty([error]));
+      writeStderr(formatPretty([error]));
     }
     process.exit(2);
   }
@@ -414,3 +422,5 @@ function main() {
 if (require.main === module) {
   main();
 }
+
+module.exports = { main };
