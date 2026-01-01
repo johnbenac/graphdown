@@ -53,3 +53,51 @@ test('EXT-001: allows arbitrary extra top-level keys on types and records', () =
 
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
+
+test('EXT-002: accepts arbitrary shapes within fields', () => {
+  const typeEntry = [
+    'types/gizmo.md',
+    [
+      '---',
+      'id: type:gizmo',
+      'typeId: sys:type',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields:',
+      '  recordTypeId: gizmo',
+      '---',
+      'Gizmo type'
+    ].join('\n')
+  ];
+
+  const recordEntry = [
+    'records/gizmo/gizmo-1.md',
+    [
+      '---',
+      'id: gizmo:1',
+      'typeId: gizmo',
+      'createdAt: 2024-01-03',
+      'updatedAt: 2024-01-04',
+      'fields:',
+      '  name: Gizmo One',
+      '  count: 3',
+      '  active: true',
+      '  nothing: null',
+      '  tags:',
+      '    - alpha',
+      '    - 2',
+      '    - { nested: yes }',
+      '  metadata:',
+      '    owner: qa',
+      '    notes:',
+      '      - { label: first, score: 10 }',
+      '      - { label: second, score: 20 }',
+      '---',
+      'Gizmo record'
+    ].join('\n')
+  ];
+
+  const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry, recordsPlaceholder]));
+
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+});
