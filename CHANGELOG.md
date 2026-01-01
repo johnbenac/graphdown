@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/johnbenac/graphdown/compare/v0.4.0...v0.4.1) (2026-01-01)
+
+
+### Bug Fixes
+
+* make gdhash deterministic and reject duplicates ([4ac411b](https://github.com/johnbenac/graphdown/commit/4ac411b61f1c5f85bf6d6829a7ae38ad38d98862))
+
 # [0.4.0](https://github.com/johnbenac/graphdown/compare/v0.3.0...v0.4.0) (2026-01-01)
 
 
