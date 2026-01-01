@@ -1,7 +1,7 @@
 import { unzipSync } from "fflate";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 
-const ROOT_DIRS = new Set(["datasets", "types", "records"]);
+const ROOT_DIRS = new Set(["types", "records"]);
 
 function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {

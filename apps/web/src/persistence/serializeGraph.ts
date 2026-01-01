@@ -24,9 +24,6 @@ class GraphImpl implements Graph {
     if (!node) {
       return null;
     }
-    if (node.kind === "dataset") {
-      return "sys:dataset";
-    }
     if (node.kind === "type") {
       const recordTypeId = typeof node.fields.recordTypeId === "string" ? node.fields.recordTypeId : null;
       return recordTypeId ?? null;

@@ -4,7 +4,7 @@
 - SPEC §8 (REL-001/002/003/004/005) defines relationships **between records only** via wiki-links or `ref`/`refs` values inside record YAML; no type-to-type link concept.
 - Type records (SPEC §7) describe schema per `recordTypeId`; `fieldDefs` may include `kind: ref` / `ref[]` with optional UI hints (`refTypeHints`), but these are **not enforced associations**—they guide UI.
 - Core graph builder (`src/core/graph.ts`) extracts links from record bodies/YAML; `GraphTypeDef` only stores `recordTypeId`, `typeRecordId`, `fields`; there is no type-level linking.
-- Validator (`src/core/validateDatasetSnapshot.ts`) enforces per-record invariants (id uniqueness, datasetId/typeId alignment, directory layout) and schema optionality; it does **not** validate type-to-type constraints.
+- Validator (`src/core/validateDatasetSnapshot.ts`) enforces per-record invariants (id uniqueness, typeId alignment, directory layout) and schema optionality; it does **not** validate type-to-type constraints.
 - Web UI (`apps/web/src/components/RecordEditor.tsx`, `RecordViewer.tsx`, `TypeNav.tsx`) renders per-record fields and links; there is no UI for type-level associations.
 - Golden datasets (`product-tracker-dataset`, `research-lab-dataset`) use record-level refs/wiki-links; type files include `refTypeHints` for UI but no cross-type linkage.
 

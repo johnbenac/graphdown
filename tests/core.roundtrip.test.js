@@ -26,8 +26,7 @@ function serializeGraph(graph) {
     nodes[id] = {
       file: node.file,
       kind: node.kind,
-      typeId: node.typeId,
-      datasetId: node.datasetId
+      typeId: node.typeId
     };
   }
 
@@ -73,7 +72,7 @@ function writeTempZip(zipBytes) {
   return { tempDir, zipPath };
 }
 
-test('EXP-002: dataset-only zip export/import round-trips', () => {
+test('EXP-002: record-only zip export/import round-trips', () => {
   const snapshot1 = loadRepoSnapshotFromFs(fixtureRoot);
   const graph1 = buildGraph(snapshot1);
 

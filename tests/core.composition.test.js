@@ -9,21 +9,6 @@ function snapshot(entries) {
   return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
-const datasetEntry = [
-  'datasets/demo.md',
-  [
-    '---',
-    'id: dataset:demo',
-    'datasetId: dataset:demo',
-    'typeId: sys:dataset',
-    'createdAt: 2024-01-01',
-    'updatedAt: 2024-01-02',
-    'fields: {}',
-    '---',
-    'Dataset'
-  ].join('\n')
-];
-
 const recordsPlaceholder = ['records/.keep', 'placeholder'];
 
 const engineTypeEntry = [
@@ -31,7 +16,6 @@ const engineTypeEntry = [
   [
     '---',
     'id: type:engine',
-    'datasetId: dataset:demo',
     'typeId: sys:type',
     'createdAt: 2024-01-01',
     'updatedAt: 2024-01-02',
@@ -47,7 +31,6 @@ const chassisTypeEntry = [
   [
     '---',
     'id: type:chassis',
-    'datasetId: dataset:demo',
     'typeId: sys:type',
     'createdAt: 2024-01-01',
     'updatedAt: 2024-01-02',
@@ -63,7 +46,6 @@ const carTypeWithComposition = [
   [
     '---',
     'id: type:car',
-    'datasetId: dataset:demo',
     'typeId: sys:type',
     'createdAt: 2024-01-01',
     'updatedAt: 2024-01-02',
@@ -87,7 +69,6 @@ const engineRecord = [
   [
     '---',
     'id: engine:1',
-    'datasetId: dataset:demo',
     'typeId: engine',
     'createdAt: 2024-01-03',
     'updatedAt: 2024-01-04',
@@ -103,7 +84,6 @@ const chassisRecord = [
   [
     '---',
     'id: chassis:1',
-    'datasetId: dataset:demo',
     'typeId: chassis',
     'createdAt: 2024-01-03',
     'updatedAt: 2024-01-04',
@@ -120,7 +100,6 @@ test('VAL-COMP-002: composition passes when required components are linked via w
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -135,7 +114,7 @@ test('VAL-COMP-002: composition passes when required components are linked via w
   ];
 
   const result = validateDatasetSnapshot(
-    snapshot([datasetEntry, carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecord])
+    snapshot([carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecord])
   );
 
   assert.equal(result.ok, true);
@@ -147,7 +126,6 @@ test('VAL-COMP-002: composition fails when required component links are missing'
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -161,7 +139,7 @@ test('VAL-COMP-002: composition fails when required component links are missing'
   ];
 
   const result = validateDatasetSnapshot(
-    snapshot([datasetEntry, carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecordMissing])
+    snapshot([carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecordMissing])
   );
 
   assert.equal(result.ok, false);
@@ -174,7 +152,6 @@ test('VAL-COMP-002: composition ignores links that resolve to the wrong type', (
     [
       '---',
       'id: type:person',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -190,7 +167,6 @@ test('VAL-COMP-002: composition ignores links that resolve to the wrong type', (
     [
       '---',
       'id: person:1',
-      'datasetId: dataset:demo',
       'typeId: person',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -206,7 +182,6 @@ test('VAL-COMP-002: composition ignores links that resolve to the wrong type', (
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -221,7 +196,6 @@ test('VAL-COMP-002: composition ignores links that resolve to the wrong type', (
 
   const result = validateDatasetSnapshot(
     snapshot([
-      datasetEntry,
       carTypeWithComposition,
       engineTypeEntry,
       chassisTypeEntry,
@@ -243,7 +217,6 @@ test('TYPE-COMP-001: composition schema rejects non-map composition shapes', () 
     [
       '---',
       'id: type:car',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -255,7 +228,7 @@ test('TYPE-COMP-001: composition schema rejects non-map composition shapes', () 
     ].join('\n')
   ];
 
-  const result = validateDatasetSnapshot(snapshot([datasetEntry, carTypeInvalid, recordsPlaceholder]));
+  const result = validateDatasetSnapshot(snapshot([carTypeInvalid, recordsPlaceholder]));
 
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.code === 'E_COMPOSITION_SCHEMA_INVALID'));
@@ -267,7 +240,6 @@ test('TYPE-COMP-001: composition schema rejects null composition', () => {
     [
       '---',
       'id: type:car',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -279,7 +251,7 @@ test('TYPE-COMP-001: composition schema rejects null composition', () => {
     ].join('\n')
   ];
 
-  const result = validateDatasetSnapshot(snapshot([datasetEntry, carTypeNull, recordsPlaceholder]));
+  const result = validateDatasetSnapshot(snapshot([carTypeNull, recordsPlaceholder]));
 
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.code === 'E_COMPOSITION_SCHEMA_INVALID'));
@@ -291,7 +263,6 @@ test('VAL-COMP-001: composition references must point at existing types', () => 
     [
       '---',
       'id: type:car',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -305,7 +276,7 @@ test('VAL-COMP-001: composition references must point at existing types', () => 
     ].join('\n')
   ];
 
-  const result = validateDatasetSnapshot(snapshot([datasetEntry, carTypeUnknownComponent, recordsPlaceholder]));
+  const result = validateDatasetSnapshot(snapshot([carTypeUnknownComponent, recordsPlaceholder]));
 
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.code === 'E_COMPOSITION_UNKNOWN_TYPE'));
@@ -317,7 +288,6 @@ test('REL-007: structured {ref} objects do not satisfy composition requirements'
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -331,7 +301,7 @@ test('REL-007: structured {ref} objects do not satisfy composition requirements'
   ];
 
   const result = validateDatasetSnapshot(
-    snapshot([datasetEntry, carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecordStructuredRef])
+    snapshot([carTypeWithComposition, engineTypeEntry, chassisTypeEntry, engineRecord, chassisRecord, carRecordStructuredRef])
   );
 
   assert.equal(result.ok, false);
@@ -344,7 +314,6 @@ test('VAL-COMP-002: duplicate links to the same target do not satisfy higher min
     [
       '---',
       'id: type:car',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -364,7 +333,6 @@ test('VAL-COMP-002: duplicate links to the same target do not satisfy higher min
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -379,7 +347,7 @@ test('VAL-COMP-002: duplicate links to the same target do not satisfy higher min
   ];
 
   const result = validateDatasetSnapshot(
-    snapshot([datasetEntry, carTypeMinTwo, engineTypeEntry, engineRecord, carRecordWithDuplicates])
+    snapshot([carTypeMinTwo, engineTypeEntry, engineRecord, carRecordWithDuplicates])
   );
 
   assert.equal(result.ok, false);
@@ -392,7 +360,6 @@ test('LAYOUT-004: nested type and record paths are accepted', () => {
     [
       '---',
       'id: type:car',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -411,7 +378,6 @@ test('LAYOUT-004: nested type and record paths are accepted', () => {
     [
       '---',
       'id: type:engine',
-      'datasetId: dataset:demo',
       'typeId: sys:type',
       'createdAt: 2024-01-01',
       'updatedAt: 2024-01-02',
@@ -427,7 +393,6 @@ test('LAYOUT-004: nested type and record paths are accepted', () => {
     [
       '---',
       'id: engine:1',
-      'datasetId: dataset:demo',
       'typeId: engine',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -443,7 +408,6 @@ test('LAYOUT-004: nested type and record paths are accepted', () => {
     [
       '---',
       'id: car:1',
-      'datasetId: dataset:demo',
       'typeId: car',
       'createdAt: 2024-01-03',
       'updatedAt: 2024-01-04',
@@ -456,7 +420,7 @@ test('LAYOUT-004: nested type and record paths are accepted', () => {
   ];
 
   const result = validateDatasetSnapshot(
-    snapshot([datasetEntry, nestedType, nestedEngineType, engineInSubdir, carInSubdir])
+    snapshot([nestedType, nestedEngineType, engineInSubdir, carInSubdir])
   );
 
   assert.equal(result.ok, true);

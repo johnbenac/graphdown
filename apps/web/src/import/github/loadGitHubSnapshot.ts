@@ -45,14 +45,6 @@ function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
 }
 
-function isDatasetFile(path: string): boolean {
-  if (!path.startsWith("datasets/")) {
-    return false;
-  }
-  const rest = path.slice("datasets/".length);
-  return rest.length > 0 && !rest.includes("/");
-}
-
 function isTypeFile(path: string): boolean {
   return path.startsWith("types/");
 }
@@ -88,7 +80,7 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) {
       continue;
     }
-    if (!isDatasetFile(snapshotPath) && !isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
+    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
       continue;
     }
     allFiles.push({ repoPath: entry.path, snapshotPath });

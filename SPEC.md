@@ -135,11 +135,10 @@ A **Dataset** is a Graphdown dataset/repository instance.
 
 ### Record
 
-A **record** is a Markdown file with YAML front matter and an optional Markdown body, stored in the Dataset’s record directories (defined below).
+A **record** is a Markdown file with YAML front matter and an optional Markdown body, stored in the Dataset’s record directories (`types/` and `records/`).
 
-### Dataset record, Type record, Data record
+### Type record, Data record
 
-* **Dataset record:** describes the Dataset itself.
 * **Type record:** defines a record type (schema-as-data).
 * **Data record:** a normal domain record belonging to a type.
 
@@ -157,6 +156,78 @@ Obsidian-style link syntax: `[[some-id]]`
 
 ---
 
+## 3.1 Dataset identity hashes
+
+A Dataset’s identity is computed from its record files, not from any human-managed dataset record.
+This standard defines two computed identity values:
+
+* **Schema fingerprint**: based on type records only (`types/`)
+* **Snapshot fingerprint**: based on type records + data records (`types/` + `records/`)
+
+No “records-only” fingerprint is defined in core.
+
+<!-- req:id=HASH-001 title="Canonical dataset hashing (gdhash-v1)" -->
+### HASH-001 — Canonical dataset hashing (gdhash-v1)
+
+Core implementations MUST be able to compute deterministic hashes over Graphdown record files.
+
+Unless a future version of this spec defines otherwise, the canonical hashing procedure is **gdhash-v1**:
+
+1. **Discover included record files**
+   * Record files are discovered per LAYOUT-002.
+
+2. **Normalize each included record file**
+   For each included record file:
+   * Read the entire file as bytes.
+   * Decode as UTF-8 text. Import MUST fail if UTF-8 decoding fails.
+   * For hashing only, normalize line endings by converting all `\r\n` and bare `\r` to `\n`.
+   * Parse YAML front matter and extract the record `id` (per FR-MD-021). Import MUST fail if parsing fails.
+
+3. **Sort**
+   Sort included records by their parsed `id` in ascending lexicographic order (by Unicode codepoint).
+
+4. **Build the byte stream**
+   Build the byte stream to hash as:
+
+   * prefix: the UTF-8 bytes of the literal string `graphdown:gdhash:v1` followed by a single NUL byte (`0x00`)
+   * then, for each record in sorted order, append:
+
+     * the record `id` as UTF-8 bytes, then NUL (`0x00`)
+     * the decimal byte length of the normalized file content (ASCII digits), then NUL (`0x00`)
+     * the normalized file content bytes
+     * NUL (`0x00`)
+
+5. **Digest**
+   Compute `SHA-256` over the resulting byte stream.
+
+The resulting digest MUST be encoded as lowercase hexadecimal.
+
+<!-- req:id=HASH-002 title="Schema fingerprint (types only)" -->
+### HASH-002 — Schema fingerprint (types only)
+
+Implementations MUST compute a **schema fingerprint** for a dataset.
+
+The schema fingerprint is the gdhash-v1 SHA-256 digest computed over **all record files under `types/`** (recursively), and over no other files.
+
+<!-- req:id=HASH-003 title="Snapshot fingerprint (types + data records)" -->
+### HASH-003 — Snapshot fingerprint (types + data records)
+
+Implementations MUST compute a **snapshot fingerprint** for a dataset.
+
+The snapshot fingerprint is the gdhash-v1 SHA-256 digest computed over:
+
+* all record files under `types/` (recursively), and
+* all record files under `records/` (recursively)
+
+and over no other files.
+
+<!-- req:id=HASH-004 title="No records-only fingerprint in core" -->
+### HASH-004 — No records-only fingerprint in core
+
+This standard defines no “records-only” fingerprint.
+
+Implementations MAY compute additional hashes for their own purposes, but core conformance MUST NOT depend on them, and they MUST NOT be presented as a Graphdown-standardized identity value.
+
 ## 4. Repository layout requirements
 
 <!-- req:id=LAYOUT-001 title="Required directories" -->
@@ -164,7 +235,6 @@ Obsidian-style link syntax: `[[some-id]]`
 
 A Dataset root **MUST** contain:
 
-* `datasets/`
 * `types/`
 * `records/`
 
@@ -176,18 +246,10 @@ A **record file** is any file that:
 * ends in `.md`, and
 * is located under one of:
 
-  * `datasets/`
   * `types/`
   * `records/`
 
 `.md` files outside those directories (e.g., a repo README) are **not** record files and are ignored by core validators/loaders.
-
-<!-- req:id=LAYOUT-003 title="Exactly one dataset record" -->
-### LAYOUT-003 — Exactly one dataset record
-
-`datasets/` **MUST** contain exactly one dataset record file (`.md`) stored directly under `datasets/`.
-Dataset manifests **MUST NOT** be nested under `datasets/**/` subdirectories, and validators/importers **MUST** fail if any
-additional dataset manifest paths are found.
 
 <!-- req:id=LAYOUT-004 title="Type records location" -->
 ### LAYOUT-004 — Type records location
@@ -233,7 +295,6 @@ Import/validation **MUST** fail if:
 Every record YAML object **MUST** define:
 
 * `id` (string; non-empty after trimming)
-* `datasetId` (string; non-empty after trimming)
 * `typeId` (string; non-empty after trimming)
 * `createdAt` (string; non-empty)
 * `updatedAt` (string; non-empty)
@@ -255,7 +316,7 @@ Core MUST treat the body as an uninterpreted string (except for link extraction;
 
 Core implementations SHALL recognize only these reserved top-level YAML keys:
 
-* `id`, `datasetId`, `typeId`, `createdAt`, `updatedAt`, `fields`
+* `id`, `typeId`, `createdAt`, `updatedAt`, `fields`
 
 All other top-level keys are **allowed** and MUST be treated as opaque data.
 
@@ -280,10 +341,11 @@ Core MUST NOT reject records because `fields` contains unfamiliar structures.
 
 A Dataset’s schema is defined by its **type records** under `types/`.
 
+All record files under `types/` are type records.
+
 Type records MUST satisfy:
 
 * `typeId` MUST equal `sys:type`
-* `datasetId` MUST equal the dataset record’s `id`
 * `fields.recordTypeId` MUST exist and be a string
 
 <!-- req:id=TYPE-002 title="`recordTypeId` directory compatibility" -->
@@ -445,14 +507,14 @@ Such shapes MAY exist as opaque user data per EXT-002, but they have no relation
 
 ## 9. Import-time validity and integrity rules
 
-<!-- req:id=VAL-001 title="Dataset/type/records must be internally consistent" -->
-### VAL-001 — Dataset/type/records must be internally consistent
+<!-- req:id=VAL-001 title="Type/records must be internally consistent" -->
+### VAL-001 — Type/records must be internally consistent
 
 Import MUST fail if:
 
 * required directories are missing (§4)
-* dataset record count is not exactly one (§4)
 * any record file fails record format requirements (§5)
+* any type record fails type requirements (§7)
 * record IDs are not globally unique (§9.2)
 * a data record’s `typeId` has no matching type definition (§9.3)
 * `records/<dir>/` exists with no corresponding `recordTypeId` (§9.3)
@@ -460,14 +522,7 @@ Import MUST fail if:
 <!-- req:id=VAL-002 title="Global ID uniqueness" -->
 ### VAL-002 — Global ID uniqueness
 
-All `id` values across dataset record, type records, and data records MUST be globally unique. Duplicates are fatal.
-
-<!-- req:id=VAL-003 title="Dataset identity consistency" -->
-### VAL-003 — Dataset identity consistency
-
-For all records:
-
-* `datasetId` MUST equal the dataset record `id`
+All `id` values across type records and data records MUST be globally unique. Duplicates are fatal.
 
 <!-- req:id=VAL-004 title="Data record directory/type consistency" -->
 ### VAL-004 — Data record directory/type consistency
@@ -591,15 +646,15 @@ Unauthenticated import from public repositories MUST work for MVP.
 
 Export MUST produce Markdown files suitable for committing to Git.
 
-<!-- req:id=EXP-002 title="Dataset-only export" -->
-### EXP-002 — Dataset-only export
+<!-- req:id=EXP-002 title="Record-only export" -->
+### EXP-002 — Record-only export
 
-Export MUST support exporting the Dataset subset:
+Export MUST support exporting the Graphdown record subset:
 
-* dataset record
 * type records
 * all data records
-  as a zip archive.
+
+as a zip archive.
 
 <!-- req:id=EXP-003 title="Whole-repo export" -->
 ### EXP-003 — Whole-repo export
@@ -708,27 +763,11 @@ A build is acceptable when:
 
 ## Appendix A. Minimal examples
 
-### Dataset record example
-
-```md
----
-id: dataset:demo
-datasetId: dataset:demo
-typeId: sys:dataset
-createdAt: 2025-01-01T00:00:00Z
-updatedAt: 2025-01-01T00:00:00Z
-fields:
-  name: Demo
----
-Welcome to the demo Dataset.
-```
-
 ### Type record example with map-shaped `fieldDefs`
 
 ```md
 ---
 id: type:ticket
-datasetId: dataset:demo
 typeId: sys:type
 createdAt: 2025-01-01T00:00:00Z
 updatedAt: 2025-01-01T00:00:00Z
@@ -749,7 +788,6 @@ fields:
 ```md
 ---
 id: ticket:one
-datasetId: dataset:demo
 typeId: ticket
 createdAt: 2025-01-02T00:00:00Z
 updatedAt: 2025-01-02T00:00:00Z

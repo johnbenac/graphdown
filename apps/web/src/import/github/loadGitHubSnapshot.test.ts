@@ -23,25 +23,20 @@ describe("loadGitHubSnapshot", () => {
       .mockResolvedValueOnce(
         jsonResponse({
           tree: [
-            { path: "datasets/demo.md", type: "blob" },
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" }
           ]
         })
       )
       // Raw file fetches
-      .mockResolvedValueOnce(new Response("---\nid: dataset:demo\n---", { status: 200 }))
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "datasetId: dataset:demo", "typeId: sys:type", "---"].join("\n"),
+          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
           { status: 200 }
         )
       )
       .mockResolvedValueOnce(
-        new Response(
-          ["---", "id: record:1", "datasetId: dataset:demo", "typeId: note", "---"].join("\n"),
-          { status: 200 }
-        )
+        new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
     await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
@@ -66,34 +61,25 @@ describe("loadGitHubSnapshot", () => {
       .mockResolvedValueOnce(
         jsonResponse({
           tree: [
-            { path: "datasets/demo.md", type: "blob" },
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" }
           ]
         })
       )
-      // Raw file fetches (dataset, type, record)
-      .mockResolvedValueOnce(new Response("---\nid: dataset:demo\n---", { status: 200 }))
+      // Raw file fetches (type, record)
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "datasetId: dataset:demo", "typeId: sys:type", "---"].join("\n"),
+          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
           { status: 200 }
         )
       )
       .mockResolvedValueOnce(
-        new Response(
-          ["---", "id: record:1", "datasetId: dataset:demo", "typeId: note", "---"].join("\n"),
-          { status: 200 }
-        )
+        new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
     const snapshot = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
-    expect([...snapshot.files.keys()].sort()).toEqual([
-      "datasets/demo.md",
-      "records/note/record-1.md",
-      "types/note.md"
-    ]);
+    expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
 
     const treeCall = fetchMock.mock.calls.find(
       ([url]) => typeof url === "string" && url.includes("/git/trees/")
@@ -103,6 +89,6 @@ describe("loadGitHubSnapshot", () => {
     const rawCall = fetchMock.mock.calls.find(
       ([url]) => typeof url === "string" && url.includes("/raw.githubusercontent.com/")
     );
-    expect(rawCall?.[0]).toContain("/main/datasets/demo.md");
+    expect(rawCall?.[0]).toContain("/main/types/note.md");
   });
 });

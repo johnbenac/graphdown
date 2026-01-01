@@ -1,14 +1,14 @@
 import { zipSync } from "fflate";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 
-const DATASET_PREFIXES = ["datasets/", "types/", "records/"];
+const RECORD_PREFIXES = ["types/", "records/"];
 
 function isDatasetRecordPath(filePath: string): boolean {
   const lowerPath = filePath.toLowerCase();
   if (!lowerPath.endsWith(".md")) {
     return false;
   }
-  return DATASET_PREFIXES.some((prefix) => filePath.startsWith(prefix));
+  return RECORD_PREFIXES.some((prefix) => filePath.startsWith(prefix));
 }
 
 function isGitPath(filePath: string): boolean {

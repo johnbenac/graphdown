@@ -2,14 +2,11 @@ export type RecordFields = Record<string, unknown>;
 
 export interface RecordEnvelope {
   id: string;
-  datasetId: string;
   typeId: string;
   createdAt: string;
   updatedAt: string;
   fields: RecordFields;
 }
-
-export type DatasetRecord = RecordEnvelope & { typeId: 'sys:dataset' };
 
 export type TypeRecord = RecordEnvelope & { typeId: 'sys:type' };
 
