@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/johnbenac/graphdown/compare/v0.5.0...v0.6.0) (2026-01-01)
+
+
+### Features
+
+* add raw field fallback for UI-RAW-001 ([c5c660d](https://github.com/johnbenac/graphdown/commit/c5c660dce97f09d1f6107861f35708c1ee53f2d9))
+
 # [0.5.0](https://github.com/johnbenac/graphdown/compare/v0.4.2...v0.5.0) (2026-01-01)
 
 
