@@ -31,7 +31,8 @@
     "build:web": "npm --workspace apps/web run build",
     "test:web": "npm --workspace apps/web run test",
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
-    "verify:web": "npm --workspace apps/web run verify"
+    "verify:web": "npm --workspace apps/web run verify",
+    "burndown": "node tools/burndown.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
