@@ -1,17 +1,14 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T05:35:27.934Z
+Generated: 2026-01-01T05:54:47.890Z
 Source: artifacts/spec-trace/matrix.json
 
-- Requirements: 62
+- Requirements: 61
 - Covered: 36
-- Missing: 26
-- Coverage: 58.1%
+- Missing: 25
+- Coverage: 59.0%
 
 The following requirements currently have **no referenced tests**:
-
-## EXP (1)
-- EXP-001 — Export is Markdown repositories
 
 ## EXT (2)
 - EXT-001 — Minimal reserved vocabulary

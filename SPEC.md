@@ -642,10 +642,8 @@ Unauthenticated import from public repositories MUST work for MVP.
 
 ## 12. Export requirements
 
-<!-- req:id=EXP-001 title="Export is Markdown repositories" -->
-### EXP-001 — Export is Markdown repositories
-
-Export MUST produce Markdown files suitable for committing to Git.
+Export produces repository snapshots as files (not a JSON/database dump). Graphdown record files remain
+Markdown with YAML front matter per §5 and are intended to be tracked in version control.
 
 <!-- req:id=EXP-002 title="Record-only export" -->
 ### EXP-002 — Record-only export
