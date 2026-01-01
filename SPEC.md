@@ -708,16 +708,20 @@ Specifically, after the initial page load, CRUD actions MUST NOT cause the top-l
 
 After a dataset is loaded, the UI MUST allow read-only navigation of already-loaded records while the browser is offline.
 
-<!-- req:id=UI-RAW-001 title="Universal raw CRUD fallback (required)" -->
-### UI-RAW-001 — Universal raw CRUD fallback (required)
+<!-- req:id=UI-RAW-001 title="Schema-agnostic record editor" testable=true -->
+### UI-RAW-001 — Schema-agnostic record editor
 
-Regardless of schema content, field kinds, or plugins, the UI MUST always be able to:
+The UI MUST provide a single, schema-agnostic editor that works without plugins and without interpreting `fieldDefs.kind`.
 
-* display record YAML `fields` in a raw, editable form
-* allow copy/paste editing of values as text
-* save edits back into Markdown record files
+The editor MUST let the user:
 
-Rich widgets are optional; raw CRUD is mandatory.
+* create/edit the record `id` (on create),
+* edit the record `fields` as a YAML map (key/value data),
+* edit the record Markdown body as raw text.
+
+The editor MUST NOT require any semantic understanding of field kinds (e.g., number/date/ref) to render or save edits. Optional UI conveniences are allowed, but they MUST NOT be required for CRUD.
+
+On save, the UI MUST validate the resulting dataset snapshot using core validation rules. If validation fails, the UI MUST NOT persist the change and MUST surface the validation errors.
 
 ---
 

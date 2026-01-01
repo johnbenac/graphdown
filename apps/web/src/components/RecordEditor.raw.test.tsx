@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "./RecordEditor";
 import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
-import type { TypeSchema } from "../schema/typeSchema";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();
@@ -33,14 +32,14 @@ const typeDef: GraphTypeDef = {
   file: "types/type--note.md"
 };
 
-describe("RecordEditor raw fallback (UI-RAW-001)", () => {
+describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockUpdateRecord.mockResolvedValue({ ok: true });
     mockCreateRecord.mockResolvedValue({ ok: true, id: "new-id" });
   });
 
-  it("UI-RAW-001: unknown schema kinds load and save raw values", async () => {
+  it("UI-RAW-001: edits arbitrary fields without kind semantics", async () => {
     const record: GraphNode = {
       id: "record:1",
       typeId: "note",
@@ -51,14 +50,11 @@ describe("RecordEditor raw fallback (UI-RAW-001)", () => {
       file: "records/note/record--1.md",
       kind: "record"
     };
-    const schema: TypeSchema = {
-      fields: [{ name: "weird", kind: "smoke-signal" }]
-    };
     render(
       <RecordEditor
         mode="edit"
         record={record}
-        schema={schema}
+        schema={undefined}
         typeDef={typeDef}
         graph={makeGraph(record)}
         onCancel={() => {}}
@@ -66,21 +62,21 @@ describe("RecordEditor raw fallback (UI-RAW-001)", () => {
       />
     );
 
-    const fieldInput = await screen.findByLabelText("weird");
-    expect(fieldInput).toHaveValue("before");
+    const fieldsEditor = await screen.findByTestId("fields-yaml-editor");
+    expect(fieldsEditor).toHaveValue("weird: before\n");
 
-    fireEvent.change(fieldInput, { target: { value: "after" } });
+    fireEvent.change(fieldsEditor, { target: { value: "weird: after\nother: 123" } });
     fireEvent.click(screen.getByTestId("save-record"));
 
     await waitFor(() => expect(mockUpdateRecord).toHaveBeenCalledTimes(1));
     expect(mockUpdateRecord).toHaveBeenCalledWith({
       recordId: record.id,
-      nextFields: { weird: "after" },
+      nextFields: { weird: "after", other: 123 },
       nextBody: "existing body"
     });
   });
 
-  it("UI-RAW-001: raw mode edits and saves fields outside the schema and bypasses kind semantics", async () => {
+  it("UI-RAW-001: edits fields outside any schema and persists them", async () => {
     const record: GraphNode = {
       id: "record:2",
       typeId: "note",
@@ -91,15 +87,11 @@ describe("RecordEditor raw fallback (UI-RAW-001)", () => {
       file: "records/note/record--2.md",
       kind: "record"
     };
-    const schema: TypeSchema = {
-      fields: [{ name: "count", kind: "number" }]
-    };
-
     render(
       <RecordEditor
         mode="edit"
         record={record}
-        schema={schema}
+        schema={undefined}
         typeDef={typeDef}
         graph={makeGraph(record)}
         onCancel={() => {}}
@@ -107,20 +99,9 @@ describe("RecordEditor raw fallback (UI-RAW-001)", () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId("toggle-raw-fields"));
-    const rawEditor = await screen.findByTestId("raw-fields-editor");
-    expect(rawEditor).toBeInTheDocument();
-
-    const updatedRaw = JSON.stringify(
-      {
-        count: "not-a-number",
-        extra: { nested: false },
-        another: ["x", "y"]
-      },
-      null,
-      2
-    );
-    fireEvent.change(rawEditor, { target: { value: updatedRaw } });
+    const fieldsEditor = await screen.findByTestId("fields-yaml-editor");
+    const updatedRaw = "count: not-a-number\nextra:\n  nested: false\nanother:\n  - x\n  - y\n";
+    fireEvent.change(fieldsEditor, { target: { value: updatedRaw } });
     fireEvent.click(screen.getByTestId("save-record"));
 
     await waitFor(() => expect(mockUpdateRecord).toHaveBeenCalledTimes(1));

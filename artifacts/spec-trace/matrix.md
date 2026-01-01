@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T08:44:00.652Z
+Generated: 2026-01-01T09:59:11.258Z
 
 ## Testable requirements with no tests
 - NFR-001 — No full reloads for CRUD
@@ -284,10 +284,10 @@ Tests (0):
 Tests (0):
 - (none)
 
-## UI-RAW-001 — Universal raw CRUD fallback (required)
+## UI-RAW-001 — Schema-agnostic record editor (testable=true)
 Tests (2):
-- apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: raw mode edits and saves fields outside the schema and bypasses kind semantics"
-- apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: unknown schema kinds load and save raw values"
+- apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: edits arbitrary fields without kind semantics"
+- apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: edits fields outside any schema and persists them"
 
 ## NFR-030 — Plugins must not require core modification (testable=false)
 Tests (0):

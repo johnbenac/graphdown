@@ -1,11 +1,11 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
+import YAML from "yaml";
 import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
 import { isObject } from "../../../../src/core/types";
 import { useDataset } from "../state/DatasetContext";
-import type { FieldDef, TypeSchema } from "../schema/typeSchema";
-import { readRef, readRefs, writeRef, writeRefs } from "../schema/typeSchema";
+import type { TypeSchema } from "../schema/typeSchema";
 
 type RecordEditorProps = {
   mode: "edit" | "create";
@@ -17,10 +17,6 @@ type RecordEditorProps = {
   onCancel: () => void;
   onComplete: (recordId: string) => void;
 };
-
-function getFieldLabel(field: FieldDef) {
-  return typeof field.label === "string" ? field.label : field.name;
-}
 
 function getBodyValue(record: GraphNode, bodyField?: string) {
   if (record.body) {
@@ -43,118 +39,30 @@ export default function RecordEditor({
   onComplete
 }: RecordEditorProps) {
   const { updateRecord, createRecord } = useDataset();
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [fieldsText, setFieldsText] = useState("{}");
   const [bodyValue, setBodyValue] = useState("");
   const [recordId, setRecordId] = useState("");
   const [errors, setErrors] = useState<ValidationError[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [rawMode, setRawMode] = useState(false);
-  const [rawFieldsText, setRawFieldsText] = useState("{}");
 
-  const schemaFields = schema?.fields ?? [];
   const bodyField = schema?.bodyField;
-  const bodyFieldDef = schemaFields.find((field) => field.name === bodyField);
-
-  const recordOptions = useMemo(() => {
-    return [...graph.nodesById.values()]
-      .filter((node) => node.kind === "record")
-      .map((node) => node.id)
-      .sort((a, b) => a.localeCompare(b));
-  }, [graph]);
 
   useEffect(() => {
-    if (mode === "edit" && record && schema) {
-      const nextValues: Record<string, string> = {};
-      for (const field of schemaFields) {
-        if (field.name === bodyField) {
-          continue;
-        }
-        const value = record.fields[field.name];
-        switch (field.kind) {
-          case "number":
-            nextValues[field.name] = value === undefined || value === null ? "" : String(value);
-            break;
-          case "enum":
-          case "string":
-          case "date":
-            nextValues[field.name] = typeof value === "string" || typeof value === "number" ? String(value) : "";
-            break;
-          case "ref":
-            nextValues[field.name] = readRef(value);
-            break;
-          case "ref[]":
-            nextValues[field.name] = readRefs(value).join("\n");
-            break;
-          default:
-            if (value === undefined || value === null) {
-              nextValues[field.name] = "";
-            } else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-              nextValues[field.name] = String(value);
-            } else {
-              try {
-                nextValues[field.name] = JSON.stringify(value, null, 2);
-              } catch {
-                nextValues[field.name] = String(value);
-              }
-            }
-        }
-      }
-      setFieldValues(nextValues);
+    if (mode === "edit" && record) {
       setBodyValue(getBodyValue(record, bodyField));
       setRecordId(record.id);
+      setFieldsText(YAML.stringify(record.fields ?? {}, { indent: 2 }));
     }
     if (mode === "create") {
-      const nextValues: Record<string, string> = {};
-      for (const field of schemaFields) {
-        if (field.name === bodyField) {
-          continue;
-        }
-        nextValues[field.name] = "";
-      }
-      setFieldValues(nextValues);
       setBodyValue("");
       setRecordId("");
+      setFieldsText("{}");
     }
-    setRawMode(false);
-    const currentFields = record?.fields ?? {};
-    setRawFieldsText(JSON.stringify(currentFields, null, 2));
     setErrors(null);
-  }, [mode, record, schema, schemaFields, bodyField]);
-
-  const listId = `record-id-options-${typeDef.recordTypeId}`;
-
-  const buildRawFieldsFromState = () => {
-    const merged: Record<string, unknown> = { ...(record?.fields ?? {}) };
-    for (const field of schemaFields) {
-      if (field.name === bodyField) {
-        continue;
-      }
-      const value = fieldValues[field.name];
-      if (value !== undefined) {
-        merged[field.name] = value;
-      }
-    }
-    return merged;
-  };
-
-  const toggleRawMode = () => {
-    if (!rawMode) {
-      const merged = buildRawFieldsFromState();
-      setRawFieldsText(JSON.stringify(merged, null, 2));
-    }
-    setRawMode((prev) => !prev);
-  };
-
-  const updateFieldValue = (name: string, value: string) => {
-    setFieldValues((prev) => ({ ...prev, [name]: value }));
-  };
+  }, [mode, record, bodyField]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!schema) {
-      setErrors([makeError("E_USAGE", "Schema is unavailable for this record type.")]);
-      return;
-    }
     const trimmedId = recordId.trim();
     const nextErrors: ValidationError[] = [];
 
@@ -163,73 +71,18 @@ export default function RecordEditor({
     }
 
     const nextFields: Record<string, unknown> = {};
-
-    if (rawMode) {
-      const rawText = rawFieldsText.trim();
-      if (!rawText) {
-        Object.assign(nextFields, {});
+    const rawText = fieldsText.trim();
+    try {
+      const parsed = rawText ? YAML.parse(rawText) : {};
+      if (!isObject(parsed) || Array.isArray(parsed)) {
+        nextErrors.push(makeError("E_USAGE", "Fields must be a YAML object."));
       } else {
-        try {
-          const parsed = JSON.parse(rawText);
-          if (!isObject(parsed) || Array.isArray(parsed)) {
-            nextErrors.push(makeError("E_USAGE", "Raw fields must be a JSON object."));
-          } else {
-            Object.assign(nextFields, parsed as Record<string, unknown>);
-          }
-        } catch (err) {
-          nextErrors.push(
-            makeError("E_USAGE", `Raw fields JSON is invalid: ${err instanceof Error ? err.message : String(err)}`)
-          );
-        }
+        Object.assign(nextFields, parsed as Record<string, unknown>);
       }
-    } else {
-      for (const field of schemaFields) {
-        if (field.name === bodyField) {
-          continue;
-        }
-        const rawValue = fieldValues[field.name] ?? "";
-        const trimmed = rawValue.trim();
-        if (field.required && !trimmed) {
-          nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} is required.`));
-          continue;
-        }
-        switch (field.kind) {
-          case "number":
-            if (!trimmed) {
-              nextFields[field.name] = undefined;
-              break;
-            }
-            {
-              const parsed = Number(trimmed);
-              if (Number.isNaN(parsed)) {
-                nextErrors.push(makeError("E_USAGE", `${getFieldLabel(field)} must be a number.`));
-                break;
-              }
-              nextFields[field.name] = parsed;
-            }
-            break;
-          case "enum":
-          case "string":
-          case "date":
-            nextFields[field.name] = trimmed || undefined;
-            break;
-          case "ref":
-            nextFields[field.name] = writeRef(trimmed);
-            break;
-          case "ref[]":
-            nextFields[field.name] = writeRefs(
-              trimmed ? trimmed.split("\n").map((line) => line.trim()).filter(Boolean) : []
-            );
-            break;
-          default:
-            nextFields[field.name] = trimmed || undefined;
-            break;
-        }
-      }
-    }
-
-    if (bodyField) {
-      nextFields[bodyField] = undefined;
+    } catch (err) {
+      nextErrors.push(
+        makeError("E_USAGE", `Fields YAML is invalid: ${err instanceof Error ? err.message : String(err)}`)
+      );
     }
 
     if (nextErrors.length) {
@@ -300,142 +153,28 @@ export default function RecordEditor({
       ) : null}
       <div className="form-row">
         <div className="form-row__inline">
-          <label htmlFor="raw-fields">Raw fields editor (JSON)</label>
-          <button type="button" onClick={toggleRawMode} className="button secondary" data-testid="toggle-raw-fields">
-            {rawMode ? "Use form inputs" : "Edit raw fields"}
-          </button>
+          <label htmlFor="fields-yaml">Fields (YAML)</label>
         </div>
-        {rawMode ? (
-          <textarea
-            id="raw-fields"
-            data-testid="raw-fields-editor"
-            value={rawFieldsText}
-            onChange={(event) => setRawFieldsText(event.target.value)}
-            rows={12}
-          />
-        ) : (
-          <p className="hint">
-            Use “Edit raw fields” to view or edit every field as JSON (including fields not defined in the schema).
-          </p>
-        )}
+        <textarea
+          id="fields-yaml"
+          data-testid="fields-yaml-editor"
+          value={fieldsText}
+          onChange={(event) => setFieldsText(event.target.value)}
+          rows={12}
+        />
+        <p className="hint">Edit the record fields as YAML key/value data. This editor is schema-agnostic.</p>
       </div>
-      {schema ? (
-        schemaFields.map((field) => {
-          if (field.name === bodyField) {
-            return (
-              <div key={field.name} className="form-row">
-                <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
-                <textarea
-                  id={`field-${field.name}`}
-                  value={bodyValue}
-                  onChange={(event) => setBodyValue(event.target.value)}
-                  rows={6}
-                  disabled={rawMode}
-                />
-              </div>
-            );
-          }
-          const value = fieldValues[field.name] ?? "";
-          if (field.kind === "enum") {
-            const enumOptions = Array.isArray(field.options)
-              ? field.options.filter((option): option is string => typeof option === "string")
-              : [];
-            return (
-              <div key={field.name} className="form-row">
-                <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
-                <select
-                  id={`field-${field.name}`}
-                  value={value}
-                  onChange={(event) => updateFieldValue(field.name, event.target.value)}
-                  disabled={rawMode}
-                >
-                  <option value="">Select…</option>
-                  {enumOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            );
-          }
-          if (field.kind === "ref") {
-            return (
-              <div key={field.name} className="form-row">
-                <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
-                <input
-                  id={`field-${field.name}`}
-                  type="text"
-                  list={listId}
-                  value={value}
-                  onChange={(event) => updateFieldValue(field.name, event.target.value)}
-                  disabled={rawMode}
-                />
-              </div>
-            );
-          }
-          if (field.kind === "ref[]") {
-            return (
-              <div key={field.name} className="form-row">
-                <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
-                <textarea
-                  id={`field-${field.name}`}
-                  value={value}
-                  onChange={(event) => updateFieldValue(field.name, event.target.value)}
-                  rows={4}
-                  placeholder="one id per line"
-                  disabled={rawMode}
-                />
-              </div>
-            );
-          }
-          return (
-            <div key={field.name} className="form-row">
-              <label htmlFor={`field-${field.name}`}>{getFieldLabel(field)}</label>
-              <input
-                id={`field-${field.name}`}
-                type={field.kind === "number" ? "number" : field.kind === "date" ? "date" : "text"}
-                value={value}
-                onChange={(event) => updateFieldValue(field.name, event.target.value)}
-                disabled={rawMode}
-              />
-            </div>
-          );
-        })
-      ) : (
-        <p>No schema fields defined for this record type.</p>
-      )}
-      {schema && bodyField && !bodyFieldDef ? (
-        <div className="form-row">
-          <label htmlFor={`field-${bodyField}`}>{bodyField}</label>
-          <textarea
-            id={`field-${bodyField}`}
-            value={bodyValue}
-            onChange={(event) => setBodyValue(event.target.value)}
-            rows={6}
-            disabled={rawMode}
-          />
-        </div>
-      ) : null}
-      {!bodyField ? (
-        <div className="form-row">
-          <label htmlFor="record-body">Body</label>
-          <textarea
-            id="record-body"
-            value={bodyValue}
-            onChange={(event) => setBodyValue(event.target.value)}
-            rows={6}
-            disabled={rawMode}
-          />
-        </div>
-      ) : null}
-      <datalist id={listId}>
-        {recordOptions.map((option) => (
-          <option key={option} value={option} />
-        ))}
-      </datalist>
+      <div className="form-row">
+        <label htmlFor="record-body">Body</label>
+        <textarea
+          id="record-body"
+          value={bodyValue}
+          onChange={(event) => setBodyValue(event.target.value)}
+          rows={6}
+        />
+      </div>
       <div className="form-actions">
-        <button type="submit" className="button" disabled={isSaving || !schema} data-testid="save-record">
+        <button type="submit" className="button" disabled={isSaving} data-testid="save-record">
           {isSaving ? "Saving..." : "Save"}
         </button>
         <button type="button" className="button secondary" onClick={onCancel} data-testid="cancel-edit">

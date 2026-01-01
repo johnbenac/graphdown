@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T08:44:00.652Z",
+  "generatedAt": "2026-01-01T09:59:11.258Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -903,18 +903,18 @@
     },
     {
       "id": "UI-RAW-001",
-      "title": "Universal raw CRUD fallback (required)",
-      "testable": null,
+      "title": "Schema-agnostic record editor",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "UI-RAW-001",
-          "testTitle": "UI-RAW-001: raw mode edits and saves fields outside the schema and bypasses kind semantics",
+          "testTitle": "UI-RAW-001: edits arbitrary fields without kind semantics",
           "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
         },
         {
           "reqId": "UI-RAW-001",
-          "testTitle": "UI-RAW-001: unknown schema kinds load and save raw values",
+          "testTitle": "UI-RAW-001: edits fields outside any schema and persists them",
           "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
         }
       ]
