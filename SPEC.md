@@ -7,6 +7,8 @@
 
 This document is the **only** authoritative specification for Graphdown. It **absorbs** and **replaces** any separate “dataset validity” documents. If there’s a conflict between documents, **this** one wins.
 
+Unless a future version defines otherwise, the canonical hashing procedure described here is **gdhash-v1**.
+
 This version introduces a breaking identity model: records are identified by `(typeId, recordId)` and record links use `[[typeId:recordId]]`.
 
 ## Normative language
@@ -98,15 +100,14 @@ These are not “maybe later” notes; they are **out of scope by design**, to p
 <!-- req:id=NR-UI-001 title="No standardized UI hints" testable=false -->
 ### NR-UI-001 — No standardized UI hints
 
-The Graphdown standard **does not define** any standardized “UI hints” keys, formats, or semantics in datasets.
+This standard defines no standardized “UI hints” keys, formats, or semantics inside `fields`.
 
-* A dataset **MAY** contain any keys whatsoever (including keys named `ui`, `widget`, `label`, etc.).
-* **But**: core behavior MUST NOT depend on them.
+Datasets MAY include arbitrary UI-hint-like keys inside `fields` (e.g. `ui`, `widget`, `label`), but core behavior MUST NOT depend on them and will ignore them.
 
 <!-- req:id=NR-UI-002 title="UI hint keys are ignored by core validation" testable=true -->
 ### NR-UI-002 — UI hint keys are ignored by core validation
 
-Core validation MUST treat all non-reserved keys as opaque, including keys commonly used as UI hints (e.g. `ui`, `widget`, `label`).
+Core validation MUST treat all non-reserved keys inside `fields` as opaque, including keys commonly used as UI hints (e.g. `ui`, `widget`, `label`).
 Datasets MUST NOT be rejected due to the presence, absence, or shape of such keys.
 
 (Plugins MAY interpret any dataset content; that is explicitly out-of-scope of core.)
@@ -264,10 +265,11 @@ Any other value MUST fail with error code `E_USAGE` and MUST NOT return a digest
 
 A **record file** is any file that:
 
-* ends in `.md`, and
-* begins with YAML front matter at byte 0 (the first three bytes are `---` followed by a line break).
+* ends in `.md`,
+* begins with YAML front matter at byte 0 (the first three bytes are `---` followed by a line break), and
+* whose parsed YAML object contains a `typeId` key.
 
-All other files are ignored by core. Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
+Files that do not meet these conditions are ignored by core. Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
 
 <!-- req:id=LAYOUT-002 title="One object per file" testable=true -->
 ### LAYOUT-002 — One object per file
@@ -468,7 +470,7 @@ Import MUST fail if:
 * identity uniqueness fails (§9.2)
 * a record object’s `typeId` has no matching type object (§9.3)
 
-<!-- req:id=VAL-002 title="Identity uniqueness rules" -->
+<!-- req:id=VAL-002 title="Identity uniqueness rules" testable=true -->
 ### VAL-002 — Identity uniqueness rules
 
 Type identity:
@@ -598,8 +600,8 @@ Markdown with YAML front matter per §5 and are intended to be tracked in versio
 
 Export MUST support exporting the Graphdown record subset:
 
-* type records
-* all data records
+* all type objects (FR-MD-021)
+* all record objects (FR-MD-023)
 
 as a zip archive.
 
@@ -611,7 +613,7 @@ Export MUST support exporting the entire repository snapshot (including non-reco
 <!-- req:id=EXP-004 title="Path stability" -->
 ### EXP-004 — Path stability
 
-When exporting records that were imported from specific paths, export MUST preserve those paths (unless the user explicitly relocates records).
+When exporting files that were imported from specific paths, export SHOULD preserve those paths (unless the user explicitly relocates files). Paths carry no semantic meaning but may be preserved for user convenience.
 
 <!-- req:id=EXP-005 title="Content preservation (no “reformat the universe”)" -->
 ### EXP-005 — Content preservation (no “reformat the universe”)
@@ -656,7 +658,7 @@ The UI MUST provide a single, schema-agnostic editor that works without plugins 
 
 The editor MUST let the user:
 
-* create/edit the record `id` (on create),
+* create/edit the record `recordId` (on create),
 * edit the record `fields` as a YAML map (key/value data),
 * edit the record Markdown body as raw text.
 
