@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/johnbenac/graphdown/compare/v0.6.0...v0.7.0) (2026-01-01)
+
+
+### Features
+
+* make UI editor schema-agnostic per UI-RAW-001 ([0aea8ac](https://github.com/johnbenac/graphdown/commit/0aea8ac1d246b37b44c06ee63c1e8f1a9a2649c1))
+
 # [0.6.0](https://github.com/johnbenac/graphdown/compare/v0.5.0...v0.6.0) (2026-01-01)
 
 
