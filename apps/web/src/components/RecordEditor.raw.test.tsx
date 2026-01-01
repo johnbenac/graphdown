@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "./RecordEditor";
-import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { GraphNode, GraphTypeDef } from "../../../../src/core/graph";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();
@@ -12,19 +12,6 @@ vi.mock("../state/DatasetContext", () => ({
     createRecord: mockCreateRecord
   })
 }));
-
-function makeGraph(record: GraphNode): Graph {
-  return {
-    nodesById: new Map([[record.id, record]]),
-    typesByRecordTypeId: new Map(),
-    outgoing: new Map(),
-    incoming: new Map(),
-    getLinksFrom: () => [],
-    getLinksTo: () => [],
-    getRecordTypeId: () => record.typeId,
-    getTypeForRecord: () => null
-  };
-}
 
 const typeDef: GraphTypeDef = {
   recordTypeId: "note",
@@ -56,7 +43,6 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
         record={record}
         schema={undefined}
         typeDef={typeDef}
-        graph={makeGraph(record)}
         onCancel={() => {}}
         onComplete={() => {}}
       />
@@ -93,7 +79,6 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
         record={record}
         schema={undefined}
         typeDef={typeDef}
-        graph={makeGraph(record)}
         onCancel={() => {}}
         onComplete={() => {}}
       />

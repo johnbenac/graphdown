@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T09:59:11.258Z
+Generated: 2026-01-01T11:06:50.092Z
 
 ## Testable requirements with no tests
 - NFR-001 — No full reloads for CRUD

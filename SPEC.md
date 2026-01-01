@@ -740,7 +740,7 @@ New field kinds shall be addable without rewriting the CRUD engine.
 This means:
 
 * core MUST treat kinds as opaque (§7)
-* core MUST always offer raw fallback (§13)
+* CRUD MUST remain possible without plugins (UI-RAW-001)
 
 Plugins MAY:
 

@@ -171,7 +171,6 @@ export default function DatasetRoute() {
                     schema={schema}
                     schemaError={schemaError}
                     typeDef={selectedTypeDef}
-                    graph={graph}
                     onCancel={() => {
                       setEditorMode("view");
                       setSelectedRecordId(previousRecordId);
@@ -189,7 +188,6 @@ export default function DatasetRoute() {
                       schemaError={schemaError}
                       record={selectedRecord}
                       typeDef={selectedTypeDef}
-                      graph={graph}
                       onCancel={() => setEditorMode("view")}
                       onComplete={(id) => {
                         setEditorMode("view");
@@ -200,8 +198,6 @@ export default function DatasetRoute() {
                     <RecordViewer
                       record={selectedRecord}
                       typeDef={selectedTypeDef}
-                      schema={schema}
-                      schemaError={schemaError}
                       outgoingLinks={outgoingLinks}
                       incomingLinks={incomingLinks}
                     />

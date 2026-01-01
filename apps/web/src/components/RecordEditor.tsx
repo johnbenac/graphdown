@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { GraphNode, GraphTypeDef } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
 import { isObject } from "../../../../src/core/types";
@@ -13,20 +13,9 @@ type RecordEditorProps = {
   schemaError?: string;
   record?: GraphNode | null;
   typeDef: GraphTypeDef;
-  graph: Graph;
   onCancel: () => void;
   onComplete: (recordId: string) => void;
 };
-
-function getBodyValue(record: GraphNode, bodyField?: string) {
-  if (record.body) {
-    return record.body;
-  }
-  if (bodyField && typeof record.fields[bodyField] === "string") {
-    return String(record.fields[bodyField]);
-  }
-  return "";
-}
 
 export default function RecordEditor({
   mode,
@@ -34,7 +23,6 @@ export default function RecordEditor({
   schemaError,
   record,
   typeDef,
-  graph,
   onCancel,
   onComplete
 }: RecordEditorProps) {
@@ -45,11 +33,9 @@ export default function RecordEditor({
   const [errors, setErrors] = useState<ValidationError[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const bodyField = schema?.bodyField;
-
   useEffect(() => {
     if (mode === "edit" && record) {
-      setBodyValue(getBodyValue(record, bodyField));
+      setBodyValue(record.body ?? "");
       setRecordId(record.id);
       setFieldsText(YAML.stringify(record.fields ?? {}, { indent: 2 }));
     }
@@ -59,7 +45,7 @@ export default function RecordEditor({
       setFieldsText("{}");
     }
     setErrors(null);
-  }, [mode, record, bodyField]);
+  }, [mode, record]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
