@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/johnbenac/graphdown/compare/v0.4.1...v0.4.2) (2026-01-01)
+
+
+### Bug Fixes
+
+* handle binary snapshots in commit batch tool ([253da37](https://github.com/johnbenac/graphdown/commit/253da372e4733d0640647994a3de1082b0832474))
+
 ## [0.4.1](https://github.com/johnbenac/graphdown/compare/v0.4.0...v0.4.1) (2026-01-01)
 
 
