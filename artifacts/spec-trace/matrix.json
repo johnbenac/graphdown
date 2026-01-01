@@ -1,0 +1,875 @@
+{
+  "generatedAt": "2026-01-01T06:34:03.003Z",
+  "requirements": [
+    {
+      "id": "GOV-001",
+      "title": "Spec-first changes",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "GOV-002",
+      "title": "Verification matrix must match spec",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GOV-002",
+          "testTitle": "GOV-002: spec-trace output matches committed matrix",
+          "filePath": "tests/spec-trace-matrix.test.js"
+        }
+      ]
+    },
+    {
+      "id": "P-001",
+      "title": "Repository-first, Markdown-canonical",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "P-002",
+      "title": "Dataset defines the model",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "P-003",
+      "title": "Universality and minimal assumptions",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-UI-001",
+      "title": "No standardized UI hints",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-UI-002",
+      "title": "Core must not interpret UI hints",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-SEM-001",
+      "title": "No semantic value typing in core",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-SEC-001",
+      "title": "No security hardening requirement",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-LINK-001",
+      "title": "No requirement that links resolve",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "HASH-001",
+      "title": "Canonical dataset hashing (gdhash-v1)",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: duplicate ids fail hashing",
+          "filePath": "tests/core.hash.test.js"
+        },
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: ids are ordered deterministically by UTF-8 bytes",
+          "filePath": "tests/core.hash.test.js"
+        },
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID",
+          "filePath": "tests/core.hash.test.js"
+        },
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: line ending normalization produces stable hashes",
+          "filePath": "tests/core.hash.test.js"
+        },
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: non-record files do not affect hashes",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
+    },
+    {
+      "id": "HASH-002",
+      "title": "Schema fingerprint (types only)",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "HASH-002",
+          "testTitle": "HASH-002: schema hash ignores type file paths",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
+    },
+    {
+      "id": "HASH-003",
+      "title": "Snapshot fingerprint (types + data records)",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "HASH-003",
+          "testTitle": "HASH-003: snapshot hash is path-independent for records",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
+    },
+    {
+      "id": "HASH-004",
+      "title": "No records-only fingerprint in core",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "LAYOUT-001",
+      "title": "Required directories",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-001",
+          "testTitle": "LAYOUT-001: missing required directories fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-001",
+          "testTitle": "LAYOUT-001: missing required directories fails validation",
+          "filePath": "tests/cli.test.js"
+        }
+      ]
+    },
+    {
+      "id": "LAYOUT-002",
+      "title": "What counts as a record file",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-002",
+          "testTitle": "LAYOUT-002: ignores non-markdown files placed under records/",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-002",
+          "testTitle": "LAYOUT-002: ignores non-markdown files under records/",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "LAYOUT-004",
+      "title": "Type records location",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-004",
+          "testTitle": "LAYOUT-004: nested type and record paths are accepted",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "LAYOUT-005",
+      "title": "Data records location",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-005",
+          "testTitle": "LAYOUT-005: markdown files must live under records/<recordTypeId>/",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-005",
+          "testTitle": "LAYOUT-005: record files directly under records/ are invalid",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "FR-MD-020",
+      "title": "YAML front matter is required",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: invalid YAML fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: missing YAML front matter fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: extracts yaml and body for valid front matter",
+          "filePath": "tests/core.frontMatter.test.js"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: missing YAML front matter fails parsing",
+          "filePath": "tests/core.frontMatter.test.js"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: invalid YAML fails parsing",
+          "filePath": "tests/core.yaml.test.js"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: non-object YAML front matter is invalid",
+          "filePath": "tests/core.yaml.test.js"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: parses YAML objects",
+          "filePath": "tests/core.yaml.test.js"
+        }
+      ]
+    },
+    {
+      "id": "FR-MD-021",
+      "title": "Required top-level fields",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "FR-MD-021",
+          "testTitle": "FR-MD-021: missing required id field fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "FR-MD-022",
+      "title": "Body is raw Markdown",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "FR-MD-022",
+          "testTitle": "FR-MD-022: serializer preserves raw Markdown body and updated YAML",
+          "filePath": "apps/web/src/core/markdownRecord.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "EXT-001",
+      "title": "Minimal reserved vocabulary",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXT-001",
+          "testTitle": "EXT-001: allows arbitrary extra top-level keys on types and records",
+          "filePath": "tests/ext.reserved-vocabulary.test.js"
+        }
+      ]
+    },
+    {
+      "id": "EXT-002",
+      "title": "`fields` is open",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXT-002",
+          "testTitle": "EXT-002: accepts arbitrary shapes within fields",
+          "filePath": "tests/ext.reserved-vocabulary.test.js"
+        }
+      ]
+    },
+    {
+      "id": "TYPE-001",
+      "title": "Type records are the schema source of truth",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "TYPE-001",
+          "testTitle": "TYPE-001: resolves a record's type via type records",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
+    },
+    {
+      "id": "TYPE-002",
+      "title": "`recordTypeId` directory compatibility",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "TYPE-002",
+          "testTitle": "TYPE-002: recordTypeId must be directory-safe",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
+    },
+    {
+      "id": "TYPE-003",
+      "title": "recordTypeId uniqueness",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "TYPE-003",
+          "testTitle": "TYPE-003: duplicate recordTypeId fails validation",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
+    },
+    {
+      "id": "TYPE-004",
+      "title": "Optional schema definition: `fieldDefs`",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "TYPE-004",
+          "testTitle": "TYPE-004: fieldDefs array is rejected",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        },
+        {
+          "reqId": "TYPE-004",
+          "testTitle": "TYPE-004: fieldDefs map is accepted",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        },
+        {
+          "reqId": "TYPE-004",
+          "testTitle": "TYPE-004: missing fieldDefs yields an empty schema",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        },
+        {
+          "reqId": "TYPE-004",
+          "testTitle": "TYPE-004: null fieldDefs yields an empty schema",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "TYPE-005",
+      "title": "Field definition minimum shape",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "TYPE-006",
+      "title": "Open world field kinds",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "TYPE-007",
+      "title": "Body semantics: `bodyField` (optional)",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "TYPE-COMP-001",
+      "title": "Optional type composition metadata",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "TYPE-COMP-001",
+          "testTitle": "TYPE-COMP-001: composition schema rejects non-map composition shapes",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "TYPE-COMP-001",
+          "testTitle": "TYPE-COMP-001: composition schema rejects null composition",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "REL-001",
+      "title": "Canonical relationship marker is Obsidian wiki-link syntax",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "REL-001",
+          "testTitle": "REL-001: extracts ids from wiki-link tokens",
+          "filePath": "tests/core.wikiLinks.test.js"
+        },
+        {
+          "reqId": "REL-001",
+          "testTitle": "REL-001: ignores wiki-link alias text",
+          "filePath": "tests/core.wikiLinks.test.js"
+        }
+      ]
+    },
+    {
+      "id": "REL-002",
+      "title": "Where relationships may appear",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "REL-002",
+          "testTitle": "REL-002: computes incoming links from extracted relationships",
+          "filePath": "tests/core.graph.test.js"
+        },
+        {
+          "reqId": "REL-002",
+          "testTitle": "REL-002: extracts outgoing links from record content",
+          "filePath": "tests/core.graph.test.js"
+        },
+        {
+          "reqId": "REL-002",
+          "testTitle": "REL-002: extracts wiki-links from YAML field strings",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
+    },
+    {
+      "id": "REL-003",
+      "title": "ID normalization for link resolution",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "REL-003",
+          "testTitle": "REL-003: cleanId returns null for blank strings",
+          "filePath": "tests/core.ids.test.js"
+        },
+        {
+          "reqId": "REL-003",
+          "testTitle": "REL-003: cleanId returns null for non-strings",
+          "filePath": "tests/core.ids.test.js"
+        },
+        {
+          "reqId": "REL-003",
+          "testTitle": "REL-003: cleanId trims whitespace",
+          "filePath": "tests/core.ids.test.js"
+        },
+        {
+          "reqId": "REL-003",
+          "testTitle": "REL-003: cleanId unwraps [[...]] tokens",
+          "filePath": "tests/core.ids.test.js"
+        }
+      ]
+    },
+    {
+      "id": "REL-004",
+      "title": "Preservation: do not rewrite link spellings",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "REL-005",
+      "title": "Creating links in Graphdown-authored edits",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "REL-007",
+      "title": "Only wiki-links are recognized as relationships in core",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "REL-007",
+          "testTitle": "REL-007: readRef/readRefs return cleaned ids from legacy shapes",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        },
+        {
+          "reqId": "REL-007",
+          "testTitle": "REL-007: structured {ref} objects do not satisfy composition requirements",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "VAL-001",
+      "title": "Type/records must be internally consistent",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-001",
+          "testTitle": "VAL-001: unknown record type directories fail validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "VAL-001",
+          "testTitle": "VAL-001: invalid datasets are reported as dataset_invalid",
+          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "VAL-002",
+      "title": "Global ID uniqueness",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-002",
+          "testTitle": "VAL-002: ids must be globally unique",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "VAL-002",
+          "testTitle": "VAL-002: enforces global id uniqueness",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
+    },
+    {
+      "id": "VAL-004",
+      "title": "Data record directory/type consistency",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-004",
+          "testTitle": "VAL-004: record typeId must match records/<recordTypeId>/ directory",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "VAL-005",
+      "title": "Required fields (schema-driven)",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-005",
+          "testTitle": "VAL-005: missing required fields fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "VAL-005",
+          "testTitle": "VAL-005: null required field fails validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "VAL-005",
+          "testTitle": "VAL-005: present required field passes validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "VAL-006",
+      "title": "No semantic validation of values",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-COMP-001",
+      "title": "Composition referenced record types must exist",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-COMP-001",
+          "testTitle": "VAL-COMP-001: composition references must point at existing types",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "VAL-COMP-002",
+      "title": "Composition requirements must be satisfied by outgoing wiki-links",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: composition fails when required component links are missing",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: composition ignores links that resolve to the wrong type",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: composition passes when required components are linked via wiki-links",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: duplicate links to the same target do not satisfy higher mins",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "ERR-001",
+      "title": "File-specific errors when possible",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "ERR-001",
+          "testTitle": "ERR-001: json output includes stable error fields",
+          "filePath": "tests/cli.output.test.js"
+        },
+        {
+          "reqId": "ERR-001",
+          "testTitle": "ERR-001: pretty output includes stable error codes",
+          "filePath": "tests/cli.output.test.js"
+        }
+      ]
+    },
+    {
+      "id": "ERR-002",
+      "title": "Clear failure categories for GitHub import",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "ERR-002",
+          "testTitle": "ERR-002: shows invalid_url category for unsupported GitHub URLs (e2e)",
+          "filePath": "apps/web/e2e/app.spec.ts"
+        },
+        {
+          "reqId": "ERR-002",
+          "testTitle": "ERR-002: maps GitHub 404 repo responses to not_found",
+          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+        },
+        {
+          "reqId": "ERR-002",
+          "testTitle": "ERR-002: maps GitHub rate limits to rate_limited",
+          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "GH-001",
+      "title": "Supported URL forms",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GH-001",
+          "testTitle": "GH-001: accepts /tree/<ref> URLs",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        },
+        {
+          "reqId": "GH-001",
+          "testTitle": "GH-001: accepts https repo URLs",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        },
+        {
+          "reqId": "GH-001",
+          "testTitle": "GH-001: accepts repo URLs with trailing slash and .git",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        },
+        {
+          "reqId": "GH-001",
+          "testTitle": "GH-001: accepts scheme-less repo URLs",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        },
+        {
+          "reqId": "GH-001",
+          "testTitle": "GH-001: rejects malformed, non-github, or unsupported URLs",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "GH-002",
+      "title": "Default ref resolution",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GH-002",
+          "testTitle": "GH-002: falls back to main when default_branch is missing",
+          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "GH-003",
+      "title": "Recursive listing + raw fetch",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GH-003",
+          "testTitle": "GH-003: imports GitHub repos via tree API + raw fetch (e2e)",
+          "filePath": "apps/web/e2e/app.spec.ts"
+        },
+        {
+          "reqId": "GH-003",
+          "testTitle": "GH-003: imports a repo snapshot via tree listing + raw fetch",
+          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "GH-005",
+      "title": "Reject subdirectory URLs",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GH-005",
+          "testTitle": "GH-005: rejects /tree/<ref>/<subdir> URLs",
+          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "GH-008",
+      "title": "Public repo import requires no auth",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "GH-008",
+          "testTitle": "GH-008: does not send Authorization headers for public fetches",
+          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "EXP-002",
+      "title": "Record-only export",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXP-002",
+          "testTitle": "EXP-002: record-only export includes only type/record markdown",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        },
+        {
+          "reqId": "EXP-002",
+          "testTitle": "EXP-002: record-only zip export/import round-trips",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
+    },
+    {
+      "id": "EXP-003",
+      "title": "Whole-repo export",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: whole-repo export round-trips snapshot files",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "EXP-004",
+      "title": "Path stability",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXP-004",
+          "testTitle": "EXP-004: export preserves original record paths",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "EXP-005",
+      "title": "Content preservation (no “reformat the universe”)",
+      "testable": null,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXP-005",
+          "testTitle": "EXP-005: whole-repo zip export preserves content bytes",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
+    },
+    {
+      "id": "UI-001",
+      "title": "Desktop + mobile usable",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "UI-004",
+      "title": "Consistent CRUD + relationship affordances",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NFR-001",
+      "title": "No full reloads for CRUD",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NFR-010",
+      "title": "Offline after initial load",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "UI-RAW-001",
+      "title": "Universal raw CRUD fallback (required)",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NFR-030",
+      "title": "Plugins must not require core modification",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NFR-031",
+      "title": "New field kinds without rewriting CRUD",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    }
+  ],
+  "unknownReferences": [],
+  "missingTestable": []
+}
