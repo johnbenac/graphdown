@@ -289,6 +289,17 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
   });
 
+  it("VAL-003: datasetId must be consistent across dataset and type files", () => {
+    const snapshot = baseSnapshot();
+    const typeFile = snapshot.files.get("types/note.md");
+    if (typeFile) {
+      const text = new TextDecoder().decode(typeFile);
+      const replaced = text.replace("datasetId: dataset:demo", "datasetId: dataset:other");
+      snapshot.files.set("types/note.md", encoder.encode(replaced));
+    }
+    expect(getErrorCodes(snapshot)).toContain("E_DATASET_ID_MISMATCH");
+  });
+
   it("VAL-002: ids must be globally unique", () => {
     const snapshot = baseSnapshot();
     const record = snapshot.files.get("records/note/record-1.md");
