@@ -184,7 +184,7 @@ Unless a future version of this spec defines otherwise, the canonical hashing pr
    * Parse YAML front matter and extract the record `id` (per FR-MD-021). Import MUST fail if parsing fails.
 
 3. **Sort**
-   Sort included records by their parsed `id` in ascending lexicographic order (by Unicode codepoint).
+   Sort included records by their parsed `id` in ascending lexicographic order of the UTF-8 encoded bytes of `id`.
 
 4. **Build the byte stream**
    Build the byte stream to hash as:

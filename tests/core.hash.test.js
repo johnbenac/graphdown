@@ -240,3 +240,31 @@ test('HASH-001: ids are ordered deterministically by UTF-8 bytes', () => {
 
   assert.equal(digest1, digest2);
 });
+
+test('HASH-002: schema hash ignores type file paths', () => {
+  const typeContent = [
+    '---',
+    'id: type:note',
+    'typeId: sys:type',
+    'createdAt: 2024-01-01',
+    'updatedAt: 2024-01-02',
+    'fields:',
+    '  recordTypeId: note',
+    '---',
+    'Type body'
+  ].join('\n');
+
+  const digestA = digest(computeGdHashV1(snapshot([['types/type--note.md', typeContent]]), 'schema'));
+  const digestB = digest(
+    computeGdHashV1(snapshot([['types/subdir/type--note.md', typeContent]]), 'schema')
+  );
+
+  assert.equal(digestA, digestB);
+});
+
+test('HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID', () => {
+  const badBytes = new Uint8Array([0xff, 0xfe]);
+  const result = computeGdHashV1({ files: new Map([['types/type--bad.md', badBytes]]) }, 'schema');
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.code === 'E_UTF8_INVALID'));
+});

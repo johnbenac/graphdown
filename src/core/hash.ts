@@ -19,7 +19,7 @@ function decodeUtf8Fatal(raw: Uint8Array, file: string, errors: ValidationError[
     }
     return decoder.decode(raw);
   } catch {
-    errors.push(makeError('E_INTERNAL', 'Invalid UTF-8 encoding', file));
+    errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', file));
     return null;
   }
 }
@@ -104,12 +104,12 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
   hash.update(Buffer.from('graphdown:gdhash:v1\0', 'utf8'));
 
   for (const entry of recordEntries) {
-    hash.update(Buffer.from(entry.idBytes));
-    hash.update(Buffer.from([0]));
+    hash.update(entry.idBytes);
+    hash.update(Uint8Array.of(0));
     hash.update(Buffer.from(String(entry.bytes.length), 'utf8'));
-    hash.update(Buffer.from([0]));
-    hash.update(Buffer.from(entry.bytes));
-    hash.update(Buffer.from([0]));
+    hash.update(Uint8Array.of(0));
+    hash.update(entry.bytes);
+    hash.update(Uint8Array.of(0));
   }
 
   const digest = hash.digest('hex');
