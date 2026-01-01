@@ -1,11 +1,13 @@
 
 # Graphdown Standard: Markdown Dataset Repositories
 
-**Spec Version:** 0.2 (Draft)
-**Last Updated:** 2025-12-30
+**Spec Version:** 0.3 (Draft)
+**Last Updated:** 2026-01-01
 **Status:** Normative / single source of truth
 
 This document is the **only** authoritative specification for Graphdown. It **absorbs** and **replaces** any separate “dataset validity” documents. If there’s a conflict between documents, **this** one wins.
+
+This version introduces a breaking identity model: records are identified by `(typeId, recordId)` and record links use `[[typeId:recordId]]`.
 
 ## Normative language
 
@@ -124,7 +126,7 @@ This standard does not require defenses against malicious datasets (e.g., inject
 <!-- req:id=NR-LINK-001 title="No requirement that links resolve" -->
 ### NR-LINK-001 — No requirement that links resolve (except composition constraints)
 
-Wiki-links MAY point to non-existent record IDs (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
+Wiki-links MAY point to non-existent record references `typeId:recordId` (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
 
 Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet.
 
@@ -136,26 +138,47 @@ Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP
 
 A **Dataset** is a Graphdown dataset/repository instance.
 
-### Record
+### Type object
 
-A **record** is a Markdown file with YAML front matter and an optional Markdown body, stored in the Dataset’s record directories (`types/` and `records/`).
+A **type object** is a record file whose YAML front matter defines a type (FR-MD-021).
 
-### Type record, Data record
+### Record object
 
-* **Type record:** defines a record type (schema-as-data).
-* **Data record:** a normal domain record belonging to a type.
+A **record object** is a record file whose YAML front matter defines a record instance (FR-MD-023).
 
-### Record ID
+### typeId
 
-`id` — globally unique identifier string across the Dataset.
+Stable identifier for a type object.
 
-### Record type ID
+### recordId
 
-`recordTypeId` — a stable identifier that names a type directory under `records/<recordTypeId>/`.
+Stable identifier for a record object **within its type**.
+
+### recordKey (computed)
+
+`typeId:recordId` — the globally unique record identity. Core treats `recordKey` as computed and MUST NOT store it as a separate YAML field.
+
+### Record reference
+
+A string equal to `recordKey`, used inside wiki-links.
 
 ### Wiki-link
 
-Obsidian-style link syntax: `[[some-id]]`
+Obsidian-style link syntax: `[[...]]` containing a record reference `typeId:recordId`.
+
+---
+
+<!-- req:id=ID-001 title="Identifier syntax is separator-safe" testable=true -->
+### ID-001 — Identifier syntax is separator-safe
+
+`typeId` and `recordId` MUST be strings and MUST be non-empty after trimming.
+
+`typeId` MUST match: `^[A-Za-z0-9][A-Za-z0-9_-]*$`
+
+`recordId` MUST match: `^[A-Za-z0-9][A-Za-z0-9_-]*$`
+
+`typeId` and `recordId` MUST NOT contain `:`.
+Colon is reserved as the separator in `typeId:recordId` record references.
 
 ---
 
@@ -164,8 +187,8 @@ Obsidian-style link syntax: `[[some-id]]`
 A Dataset’s identity is computed from its record files, not from any human-managed dataset record.
 This standard defines two computed identity values:
 
-* **Schema fingerprint**: based on type records only (`types/`)
-* **Snapshot fingerprint**: based on type records + data records (`types/` + `records/`)
+* **Schema fingerprint**: based on type objects only
+* **Snapshot fingerprint**: based on type objects + record objects
 
 No “records-only” fingerprint is defined in core.
 
@@ -174,21 +197,22 @@ No “records-only” fingerprint is defined in core.
 
 Core implementations MUST be able to compute deterministic hashes over Graphdown record files.
 
-Unless a future version of this spec defines otherwise, the canonical hashing procedure is **gdhash-v1**:
-
 1. **Discover included record files**
-   * Record files are discovered per LAYOUT-002.
+   * Record files are discovered per LAYOUT-001.
 
 2. **Normalize each included record file**
    For each included record file:
    * Read the entire file as bytes.
    * Decode as UTF-8 text. Import MUST fail if UTF-8 decoding fails.
    * For hashing only, normalize line endings by converting all `\r\n` and bare `\r` to `\n`.
-   * Parse YAML front matter and extract the record `id` (per FR-MD-021). Import MUST fail if parsing fails.
-   * If two included record files share the same trimmed `id`, hashing MUST fail.
+   * Parse YAML front matter (FR-MD-020/021/023). Import MUST fail if parsing fails or the YAML does not form a valid type object or record object.
+   * Determine the identity string:
+     * type objects: `identity = typeId`
+     * record objects: `identity = typeId:recordId`
+   * If two included record files share the same identity string, hashing MUST fail.
 
 3. **Sort**
-   Sort included records by their parsed `id` in ascending lexicographic order of the UTF-8 encoded bytes of `id`.
+   Sort included records by the UTF-8 bytes of the identity string in ascending lexicographic order.
 
 4. **Build the byte stream**
    Build the byte stream to hash as:
@@ -196,7 +220,7 @@ Unless a future version of this spec defines otherwise, the canonical hashing pr
    * prefix: the UTF-8 bytes of the literal string `graphdown:gdhash:v1` followed by a single NUL byte (`0x00`)
    * then, for each record in sorted order, append:
 
-     * the record `id` as UTF-8 bytes, then NUL (`0x00`)
+     * the identity string as UTF-8 bytes, then NUL (`0x00`)
      * the decimal byte length of the normalized file content (ASCII digits), then NUL (`0x00`)
      * the normalized file content bytes
      * NUL (`0x00`)
@@ -211,19 +235,14 @@ The resulting digest MUST be encoded as lowercase hexadecimal.
 
 Implementations MUST compute a **schema fingerprint** for a dataset.
 
-The schema fingerprint is the gdhash-v1 SHA-256 digest computed over **all record files under `types/`** (recursively), and over no other files.
+The schema fingerprint is the gdhash-v1 SHA-256 digest computed over **all type objects** (FR-MD-021), and over no other files.
 
-<!-- req:id=HASH-003 title="Snapshot fingerprint (types + data records)" -->
-### HASH-003 — Snapshot fingerprint (types + data records)
+<!-- req:id=HASH-003 title="Snapshot fingerprint (types + record objects)" -->
+### HASH-003 — Snapshot fingerprint (types + record objects)
 
 Implementations MUST compute a **snapshot fingerprint** for a dataset.
 
-The snapshot fingerprint is the gdhash-v1 SHA-256 digest computed over:
-
-* all record files under `types/` (recursively), and
-* all record files under `records/` (recursively)
-
-and over no other files.
+The snapshot fingerprint is the gdhash-v1 SHA-256 digest computed over **all type objects (FR-MD-021) and all record objects (FR-MD-023)**.
 
 <!-- req:id=HASH-004 title="Only schema and snapshot fingerprints are defined in core" testable=true -->
 ### HASH-004 — Only schema and snapshot fingerprints are defined in core
@@ -240,42 +259,22 @@ Any other value MUST fail with error code `E_USAGE` and MUST NOT return a digest
 
 ## 4. Repository layout requirements
 
-<!-- req:id=LAYOUT-001 title="Required directories" -->
-### LAYOUT-001 — Required directories
-
-A Dataset root **MUST** contain:
-
-* `types/`
-* `records/`
-
-<!-- req:id=LAYOUT-002 title="What counts as a record file" -->
-### LAYOUT-002 — What counts as a record file
+<!-- req:id=LAYOUT-001 title="Record files are discovered by content (not path)" testable=true -->
+### LAYOUT-001 — Record files are discovered by content (not path)
 
 A **record file** is any file that:
 
 * ends in `.md`, and
-* is located under one of:
+* begins with YAML front matter at byte 0 (the first three bytes are `---` followed by a line break).
 
-  * `types/`
-  * `records/`
+All other files are ignored by core. Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
 
-`.md` files outside those directories (e.g., a repo README) are **not** record files and are ignored by core validators/loaders.
+<!-- req:id=LAYOUT-002 title="One object per file" testable=true -->
+### LAYOUT-002 — One object per file
 
-<!-- req:id=LAYOUT-004 title="Type records location" -->
-### LAYOUT-004 — Type records location
+Each record file MUST contain exactly one YAML front matter block at the start of the file (per FR-MD-020). The remainder of the file is the record body (FR-MD-022).
 
-Type records **MUST** be stored under `types/`.
-
-Validators/importers **MUST** discover type records **recursively** under `types/`. Subdirectory names are organizational only and carry no semantic meaning.
-
-<!-- req:id=LAYOUT-005 title="Data records location" -->
-### LAYOUT-005 — Data records location
-
-Data records **MUST** be stored under:
-
-* `records/<recordTypeId>/.../*.md`
-
-Validators/importers **MUST** discover data records **recursively** under `records/<recordTypeId>/`. Subdirectory names are organizational only and carry no semantic meaning.
+Core MUST NOT support multiple record objects in a single file.
 
 ---
 
@@ -299,16 +298,28 @@ Import/validation **MUST** fail if:
 * YAML is invalid, or
 * YAML parses to a non-object (array/string/null).
 
-<!-- req:id=FR-MD-021 title="Required top-level fields" -->
-### FR-MD-021 — Required top-level fields
+<!-- req:id=FR-MD-021 title="Required top-level keys for type objects" testable=true -->
+### FR-MD-021 — Required top-level keys for type objects
 
-Every record YAML object **MUST** define:
+A YAML front matter object is a **type object** when it defines:
 
-* `id` (string; non-empty after trimming)
-* `typeId` (string; non-empty after trimming)
-* `createdAt` (string; non-empty)
-* `updatedAt` (string; non-empty)
+* `typeId` (string; MUST satisfy ID-001)
 * `fields` (object/map)
+
+A type object MUST NOT define `recordId`.
+
+A type object MUST NOT define any other top-level keys.
+
+<!-- req:id=FR-MD-023 title="Required top-level keys for record objects" testable=true -->
+### FR-MD-023 — Required top-level keys for record objects
+
+A YAML front matter object is a **record object** when it defines:
+
+* `typeId` (string; MUST satisfy ID-001)
+* `recordId` (string; MUST satisfy ID-001)
+* `fields` (object/map)
+
+A record object MUST NOT define any other top-level keys.
 
 <!-- req:id=FR-MD-022 title="Body is raw Markdown" -->
 ### FR-MD-022 — Body is raw Markdown
@@ -321,14 +332,16 @@ Core MUST treat the body as an uninterpreted string (except for link extraction;
 
 ## 6. Reserved keys and extensibility rules
 
-<!-- req:id=EXT-001 title="Minimal reserved vocabulary" -->
-### EXT-001 — Minimal reserved vocabulary
+<!-- req:id=EXT-001 title="Top-level vocabulary is fixed" testable=true -->
+### EXT-001 — Top-level vocabulary is fixed
 
-Core implementations SHALL recognize only these reserved top-level YAML keys:
+The only top-level YAML keys defined by this standard are:
 
-* `id`, `typeId`, `createdAt`, `updatedAt`, `fields`
+* `typeId`
+* `recordId`
+* `fields`
 
-All other top-level keys are **allowed** and MUST be treated as opaque data.
+All other top-level keys are forbidden.
 
 <!-- req:id=EXT-002 title="`fields` is open" -->
 ### EXT-002 — `fields` is open
@@ -346,149 +359,83 @@ Core MUST NOT reject records because `fields` contains unfamiliar structures.
 
 ## 7. Types and schema-as-data
 
-<!-- req:id=TYPE-001 title="Type records are the schema source of truth" -->
-### TYPE-001 — Type records are the schema source of truth
+<!-- req:id=TYPE-001 title="Types are defined by type objects" testable=true -->
+### TYPE-001 — Types are defined by type objects
 
-A Dataset’s schema is defined by its **type records** under `types/`.
+A dataset’s schema is defined by its type objects (FR-MD-021). Each type object defines exactly one type via its `typeId`.
 
-All record files under `types/` are type records.
+<!-- req:id=TYPE-002 title="typeId uniqueness" testable=true -->
+### TYPE-002 — typeId uniqueness
 
-Type records MUST satisfy:
+`typeId` values across all type objects MUST be globally unique.
 
-* `typeId` MUST equal `sys:type`
-* `fields.recordTypeId` MUST exist and be a string
+<!-- req:id=TYPE-004 title="fieldDefs shape" testable=true -->
+### TYPE-004 — fieldDefs shape
 
-<!-- req:id=TYPE-002 title="`recordTypeId` directory compatibility" -->
-### TYPE-002 — `recordTypeId` directory compatibility
+A type object is valid with or without `fields.fieldDefs`.
 
-`fields.recordTypeId` MUST be a stable directory-safe identifier.
+When present, `fields.fieldDefs` MUST be a map keyed by field name. Each field definition value MUST be an object.
 
-It MUST match:
+Core recognizes exactly one standard key inside a field definition object:
 
-* starts with an alphanumeric character, then
-* contains only alphanumerics, `_`, `-`
+* `required` (boolean)
 
-Example regex: `^[A-Za-z0-9][A-Za-z0-9_-]*$`
+All other keys inside field definition objects are allowed and MUST be treated as opaque by core.
 
-<!-- req:id=TYPE-003 title="recordTypeId uniqueness" -->
-### TYPE-003 — recordTypeId uniqueness
+<!-- req:id=TYPE-COMP-001 title="composition shape" testable=true -->
+### TYPE-COMP-001 — composition shape
 
-Each `fields.recordTypeId` MUST be unique across all type records.
+A type object is valid with or without `fields.composition`.
 
-<!-- req:id=TYPE-004 title="Optional schema definition: `fieldDefs`" -->
-### TYPE-004 — Optional schema definition: `fieldDefs`
+When present, `fields.composition` MUST be a map keyed by component name.
+Each component value MUST be an object that defines:
 
-A type record MAY define field schema under:
+* `typeId` (string; MUST satisfy ID-001)
+* `required` (boolean)
 
-* `fields.fieldDefs`
-
-If present, `fields.fieldDefs` MUST be a **map keyed by field name**:
-
-```yaml
-fields:
-  recordTypeId: ticket
-  fieldDefs:
-    title:
-      kind: string
-      required: true
-    status:
-      kind: enum
-```
-
-<!-- req:id=TYPE-005 title="Field definition minimum shape" -->
-### TYPE-005 — Field definition minimum shape
-
-Each field definition object MUST include:
-
-* `kind`: **string**
-
-It MAY include:
-
-* `required`: boolean
-
-It MAY include any other keys (constraints, metadata, hints, plugin-specific config).
-Core MUST treat any other keys as opaque.
-
-<!-- req:id=TYPE-006 title="Open world field kinds" -->
-### TYPE-006 — Open world field kinds
-
-`kind` is an **opaque identifier string**.
-
-Core implementations:
-
-* **MUST NOT** maintain a closed allowlist of kinds for validity.
-* **MUST NOT** reject a dataset because it contains unfamiliar `kind` strings.
-* **MUST NOT** require plugins to exist for a dataset to be valid.
-
-<!-- req:id=TYPE-007 title="Body semantics: `bodyField` (optional)" -->
-### TYPE-007 — Body semantics: `bodyField` (optional)
-
-A type record MAY specify:
-
-* `fields.bodyField: <string>`
-
-This declares the *conceptual* name of the record’s Markdown body field (for labeling / UX purposes).
-Core MUST NOT require `bodyField` to exist.
-
-<!-- req:id=TYPE-COMP-001 title="Optional type composition metadata" -->
-### TYPE-COMP-001 — Optional type composition metadata
-
-A type record MAY declare compositional requirements under:
-
-* `fields.composition`
-
-If present, `fields.composition` MUST be a map keyed by component name.
-
-Each component value MUST be an object containing:
-
-* `recordTypeId` (string; required; MUST satisfy TYPE-002 pattern)
-
-It MAY include:
-
-* `min` (integer >= 0; default 1)
-* `max` (integer >= `min`)
-
-Core MUST treat any other keys inside component objects as opaque.
+All other keys inside component objects are forbidden.
 
 ---
 
 ## 8. Relationships and linking
 
-<!-- req:id=REL-001 title="Canonical relationship marker is Obsidian wiki-link syntax" -->
-### REL-001 — Canonical relationship marker is Obsidian wiki-link syntax
+<!-- req:id=REL-001 title="Record relationships use composite wiki-links" testable=true -->
+### REL-001 — Record relationships use composite wiki-links
 
-A relationship is expressed canonically as a wiki-link token:
+A record-to-record relationship is expressed only as a wiki-link token of the form:
 
-* `[[target-record-id]]`
+`[[typeId:recordId]]`
 
-<!-- req:id=REL-002 title="Where relationships may appear" -->
-### REL-002 — Where relationships may appear
+Both `typeId` and `recordId` inside the token MUST satisfy ID-001.
 
-Wiki-links may appear in:
+<!-- req:id=REL-002 title="Where record relationships are extracted" testable=true -->
+### REL-002 — Where record relationships are extracted
 
-* record bodies, and/or
-* any string value anywhere within `fields` (including nested objects/arrays)
+Core MUST extract record relationship targets from:
 
-Core MUST be able to extract link targets from both locations.
+* the record body, and
+* any string value anywhere within the record `fields` map (including nested objects/arrays).
 
-<!-- req:id=REL-003 title="ID normalization for link resolution" -->
-### REL-003 — ID normalization for link resolution
+Core MUST NOT extract relationships from type objects.
 
-When interpreting a wiki-link, core MUST normalize link targets by:
+<!-- req:id=REL-003 title="Record reference normalization" testable=true -->
+### REL-003 — Record reference normalization
 
-* trimming surrounding whitespace
-* unwrapping `[[...]]` if present
-* treating empty/blank as null
+When interpreting a wiki-link token, core MUST:
 
-(This is the conceptual “cleanId” behavior.)
+* unwrap `[[...]]`
+* trim surrounding whitespace
+* require the inner text to match `typeId:recordId` where both parts satisfy ID-001
+
+Tokens that do not match this shape MUST be ignored for relationship extraction.
 
 <!-- req:id=REL-004 title="Preservation: do not rewrite link spellings" testable=false -->
 ### REL-004 — Preservation: do not rewrite link spellings
 
 Core implementations **MUST NOT** rewrite user-authored link spellings during import/export, including:
 
-* converting `[[id]]` → `id`
-* converting `id` → `[[id]]`
+* converting `[[typeId:recordId]]` → `typeId:recordId`
+* converting bare strings → `[[typeId:recordId]]`
 * “normalizing” casing, punctuation, or whitespace inside stored text
 
 Relationships are extracted for graph behavior, but the stored bytes are treated as user-authored text. (See EXP-005 for the export conformance rule.)
@@ -496,18 +443,14 @@ Relationships are extracted for graph behavior, but the stored bytes are treated
 <!-- req:id=REL-005 title="Graphdown-created relationships are serialized as wiki-links" testable=true -->
 ### REL-005 — Graphdown-created relationships are serialized as wiki-links
 
-When Graphdown creates a relationship through its editing API/UI, it MUST serialize the relationship using wiki-link syntax `[[id]]` in the persisted Markdown content.
+When Graphdown creates a relationship through its editing API/UI, it MUST serialize the relationship using wiki-link syntax `[[typeId:recordId]]` in the persisted Markdown content.
 
-<!-- req:id=REL-007 title="Only wiki-links are recognized as relationships in core" -->
-### REL-007 — Only wiki-links are recognized as relationships in core
+<!-- req:id=REL-007 title="Only composite wiki-links are relationships in core" testable=true -->
+### REL-007 — Only composite wiki-links are relationships in core
 
-Core MUST recognize relationships **only** via wiki-link tokens `[[target-record-id]]` as defined in REL-001/REL-002.
+Core MUST recognize relationships only from wiki-link tokens `[[typeId:recordId]]`.
 
-Core MUST NOT infer relationships from:
-
-* the presence of `{ ref: ... }` / `{ refs: [...] }` wrappers or bare IDs (e.g., `{ ref: "record:abc" }`)
-
-Relationships are recognized only from wiki-link tokens `[[...]]`, regardless of where the string occurs within `fields`.
+Core MUST NOT infer relationships from structured YAML shapes, bare IDs, or any other conventions.
 
 Such shapes MAY exist as opaque user data per EXT-002, but they have no relationship semantics in core.
 
@@ -520,31 +463,34 @@ Such shapes MAY exist as opaque user data per EXT-002, but they have no relation
 
 Import MUST fail if:
 
-* required directories are missing (§4)
 * any record file fails record format requirements (§5)
-* any type record fails type requirements (§7)
-* record IDs are not globally unique (§9.2)
-* a data record’s `typeId` has no matching type definition (§9.3)
-* `records/<dir>/` exists with no corresponding `recordTypeId` (§9.3)
+* any type object fails type requirements (§7)
+* identity uniqueness fails (§9.2)
+* a record object’s `typeId` has no matching type object (§9.3)
 
-<!-- req:id=VAL-002 title="Global ID uniqueness" -->
-### VAL-002 — Global ID uniqueness
+<!-- req:id=VAL-002 title="Identity uniqueness rules" -->
+### VAL-002 — Identity uniqueness rules
 
-All `id` values across type records and data records MUST be globally unique. Duplicates are fatal.
+Type identity:
+* `typeId` values across type objects MUST be unique (TYPE-002).
 
-<!-- req:id=VAL-004 title="Data record directory/type consistency" -->
-### VAL-004 — Data record directory/type consistency
+Record identity:
+* For record objects, the pair `(typeId, recordId)` MUST be unique across the dataset.
 
-For any data record at path `records/<recordTypeId>/.../x.md`:
+`recordId` alone is not required to be unique globally.
 
-* YAML `typeId` MUST equal `<recordTypeId>`
+<!-- req:id=VAL-003 title="Record objects must reference an existing type" testable=true -->
+### VAL-003 — Record objects must reference an existing type
+
+For every record object, its `typeId` MUST match exactly one type object `typeId`.
+Validation MUST fail otherwise.
 
 <!-- req:id=VAL-005 title="Required fields (schema-driven)" -->
 ### VAL-005 — Required fields (schema-driven)
 
-If a type defines `fields.fieldDefs`, then for each field where `required: true`:
+When a type object defines `fields.fieldDefs`, then for every field definition where `required: true`:
 
-* every record of that type MUST contain `fields.<fieldName>` with a value that is not:
+* every record object of that `typeId` MUST contain `fields.<fieldName>` with a value that is not:
 
   * missing,
   * null,
@@ -566,24 +512,19 @@ Beyond VAL-005, core MUST NOT validate field values against:
 
 Those are not validity rules in this standard.
 
-<!-- req:id=VAL-COMP-001 title="Composition referenced record types must exist" -->
-### VAL-COMP-001 — Composition referenced record types must exist
+<!-- req:id=VAL-COMP-001 title="Composition referenced types must exist" -->
+### VAL-COMP-001 — Composition referenced types must exist
 
-If a type declares `fields.composition`, then every referenced `recordTypeId` MUST have a corresponding type definition in the dataset. Import MUST fail otherwise.
+When a type object defines `fields.composition`, every referenced component `typeId` MUST match an existing type object. Validation MUST fail otherwise.
 
-<!-- req:id=VAL-COMP-002 title="Composition requirements must be satisfied by outgoing wiki-links" -->
-### VAL-COMP-002 — Composition requirements must be satisfied by outgoing wiki-links
+<!-- req:id=VAL-COMP-002 title="Required components must be satisfied by outgoing record links" -->
+### VAL-COMP-002 — Required components must be satisfied by outgoing record links
 
-If a type declares `fields.composition`, then for each data record of that type:
+When a type object defines `fields.composition`, then for every record object of that `typeId`:
 
-* outgoing relationships MUST include at least `min` links to existing data records whose `typeId` equals the component `recordTypeId`
-* if `max` is specified, outgoing relationships MUST include no more than `max` such links
+For each component where `required: true`, the record MUST contain at least one outgoing relationship link (REL-001/REL-002/REL-003) to an existing record object whose `typeId` equals the component `typeId`.
 
-Outgoing relationships are extracted from record bodies and from string values anywhere within `fields` per REL-002, and normalized per REL-003.
-
-Unresolved links do not count toward satisfying composition requirements.
-
-Counts are based on **distinct target record IDs**; repeating the same link target multiple times does not increase the count.
+Links that do not resolve to an existing record object do not satisfy composition.
 
 ---
 
@@ -735,11 +676,11 @@ The system shall be structured so plugins do not require modifying core code.
 <!-- req:id=NFR-031 title="New field kinds without rewriting CRUD" testable=false -->
 ### NFR-031 — New field kinds without rewriting CRUD
 
-New field kinds shall be addable without rewriting the CRUD engine.
+New schema shapes shall be addable without rewriting the CRUD engine.
 
 This means:
 
-* core MUST treat kinds as opaque (§7)
+* core MUST treat field definition keys as opaque beyond `required` (§7)
 * CRUD MUST remain possible without plugins (UI-RAW-001)
 
 Plugins MAY:
@@ -768,38 +709,35 @@ A build is acceptable when:
 
 ## Appendix A. Minimal examples
 
-### Type record example with map-shaped `fieldDefs`
+### Type object (composition + required fields)
 
 ```md
 ---
-id: type:ticket
-typeId: sys:type
-createdAt: 2025-01-01T00:00:00Z
-updatedAt: 2025-01-01T00:00:00Z
+typeId: car
 fields:
-  recordTypeId: ticket
-  bodyField: description
   fieldDefs:
-    title:
-      kind: smoke-signal
+    vin:
       required: true
-    tags:
-      kind: whatever
+    trim:
+      required: false
+  composition:
+    engine:
+      typeId: engine
+      required: true
+    roof_rack:
+      typeId: roof_rack
+      required: false
 ---
 ```
 
-### Data record with wiki-links in YAML and body
+### Record object (links satisfy composition)
 
 ```md
 ---
-id: ticket:one
-typeId: ticket
-createdAt: 2025-01-02T00:00:00Z
-updatedAt: 2025-01-02T00:00:00Z
+typeId: car
+recordId: car-001
 fields:
-  title: "[[project:alpha]] kickoff"
-  tags:
-    - "[[tag:import]]"
-    - "[[tag:relationships]]"
+  vin: "123"
+  trim: sport
 ---
-Blocked by [[ticket:two]].
+Has engine [[engine:e-9]].
