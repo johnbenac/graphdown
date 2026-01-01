@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/johnbenac/graphdown/compare/v0.3.0...v0.4.0) (2026-01-01)
+
+
+### Features
+
+* add gdhash-v1 hashing ([268d940](https://github.com/johnbenac/graphdown/commit/268d94048f59359ae4a51a23db49b20abd8e72e8))
+
 # [0.3.0](https://github.com/johnbenac/graphdown/compare/v0.2.0...v0.3.0) (2026-01-01)
 
 
