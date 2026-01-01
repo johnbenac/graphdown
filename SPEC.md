@@ -112,10 +112,10 @@ Datasets MUST NOT be rejected due to the presence, absence, or shape of such key
 
 (Plugins MAY interpret any dataset content; that is explicitly out-of-scope of core.)
 
-<!-- req:id=NR-SEM-001 title="No kind-based semantic validation of fields" testable=true -->
-### NR-SEM-001 — No kind-based semantic validation of fields
+<!-- req:id=NR-SEM-001 title="No semantic validation of fields" testable=true -->
+### NR-SEM-001 — No semantic validation of fields
 
-Core validation MUST NOT reject records based on semantic interpretation of `fields` values (e.g. enforcing booleans, dates, money objects, enums, or format constraints), including when a type record provides `fields.fieldDefs` with `kind` metadata.
+Core validation MUST NOT reject records based on semantic interpretation of `fields` values (e.g. enforcing booleans, dates, money objects, enums, or format constraints), regardless of any metadata present in type objects (including keys inside `fields.fieldDefs`).
 
 If you want those semantics, that’s plugin territory (or dataset-author tooling), not core.
 
@@ -654,7 +654,7 @@ After a dataset is loaded, the UI MUST allow read-only navigation of already-loa
 <!-- req:id=UI-RAW-001 title="Schema-agnostic record editor" testable=true -->
 ### UI-RAW-001 — Schema-agnostic record editor
 
-The UI MUST provide a single, schema-agnostic editor that works without plugins and without interpreting `fieldDefs.kind`.
+The UI MUST provide a single, schema-agnostic editor that works without plugins and without interpreting type schema beyond `required`.
 
 The editor MUST let the user:
 
