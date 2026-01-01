@@ -268,3 +268,25 @@ test('HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID', () => {
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.code === 'E_UTF8_INVALID'));
 });
+
+test('HASH-004: unknown hash scopes are rejected', () => {
+  const typeFile = [
+    'types/type--note.md',
+    [
+      '---',
+      'id: type:note',
+      'typeId: sys:type',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields:',
+      '  recordTypeId: note',
+      '---',
+      'Type body'
+    ].join('\n')
+  ];
+
+  const result = computeGdHashV1(snapshot([typeFile]), 'records');
+
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.code === 'E_USAGE'));
+});

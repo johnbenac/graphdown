@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T07:03:58.648Z",
+  "generatedAt": "2026-01-01T07:11:35.715Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -138,10 +138,16 @@
     },
     {
       "id": "HASH-004",
-      "title": "No records-only fingerprint in core",
-      "testable": null,
+      "title": "Only schema and snapshot fingerprints are defined in core",
+      "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "HASH-004",
+          "testTitle": "HASH-004: unknown hash scopes are rejected",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
     },
     {
       "id": "LAYOUT-001",

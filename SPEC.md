@@ -235,12 +235,18 @@ The snapshot fingerprint is the gdhash-v1 SHA-256 digest computed over:
 
 and over no other files.
 
-<!-- req:id=HASH-004 title="No records-only fingerprint in core" -->
-### HASH-004 — No records-only fingerprint in core
+<!-- req:id=HASH-004 title="Only schema and snapshot fingerprints are defined in core" testable=true -->
+### HASH-004 — Only schema and snapshot fingerprints are defined in core
 
-This standard defines no “records-only” fingerprint.
+Graphdown core defines exactly two standardized dataset fingerprint computations:
 
-Implementations MAY compute additional hashes for their own purposes, but core conformance MUST NOT depend on them, and they MUST NOT be presented as a Graphdown-standardized identity value.
+* schema fingerprint (HASH-002)
+* snapshot fingerprint (HASH-003)
+
+Core MUST NOT define or expose any additional standardized fingerprint computation.
+
+If the core hashing API accepts a `scope` selector, it MUST accept only `schema` and `snapshot`.
+Any other value MUST fail with error code `E_USAGE` and MUST NOT return a digest.
 
 ## 4. Repository layout requirements
 

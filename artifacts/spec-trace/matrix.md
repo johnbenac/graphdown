@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T07:03:58.648Z
+Generated: 2026-01-01T07:11:35.715Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -58,9 +58,9 @@ Tests (1):
 Tests (1):
 - tests/core.hash.test.js — "HASH-003: snapshot hash is path-independent for records"
 
-## HASH-004 — No records-only fingerprint in core
-Tests (0):
-- (none)
+## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
+Tests (1):
+- tests/core.hash.test.js — "HASH-004: unknown hash scopes are rejected"
 
 ## LAYOUT-001 — Required directories
 Tests (2):

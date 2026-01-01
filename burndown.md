@@ -1,17 +1,14 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T07:03:58.648Z
+Generated: 2026-01-01T07:11:35.715Z
 Source: artifacts/spec-trace/matrix.json
 
 - Requirements (testable): 61
-- Covered: 39
-- Missing: 22
-- Coverage: 63.9%
+- Covered: 40
+- Missing: 21
+- Coverage: 65.6%
 
 The following requirements currently have **no referenced tests**:
-
-## HASH (1)
-- HASH-004 — No records-only fingerprint in core
 
 ## NFR (4)
 - NFR-001 — No full reloads for CRUD

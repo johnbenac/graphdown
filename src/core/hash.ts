@@ -51,6 +51,10 @@ function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
 }
 
 export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashResult {
+  if (scope !== 'schema' && scope !== 'snapshot') {
+    return { ok: false, errors: [makeError('E_USAGE', `Unknown hash scope: ${String(scope)}`)] };
+  }
+
   const recordEntries: Array<{ id: string; idBytes: Uint8Array; file: string; bytes: Uint8Array }> = [];
   const errors: ValidationError[] = [];
   const seenIds = new Set<string>();
