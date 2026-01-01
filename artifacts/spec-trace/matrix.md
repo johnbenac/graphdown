@@ -1,6 +1,12 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T07:11:35.715Z
+Generated: 2026-01-01T07:33:01.753Z
+
+## Testable requirements with no tests
+- NFR-001 — No full reloads for CRUD
+- NFR-010 — Read-only offline after initial load
+- NR-SEM-001 — No kind-based semantic validation of fields
+- REL-005 — Graphdown-created relationships are serialized as wiki-links
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -10,37 +16,37 @@ Tests (0):
 Tests (1):
 - tests/spec-trace-matrix.test.js — "GOV-002: spec-trace output matches committed matrix"
 
-## P-001 — Repository-first, Markdown-canonical
+## P-001 — Repository-first, Markdown-canonical (testable=false)
 Tests (0):
 - (none)
 
-## P-002 — Dataset defines the model
+## P-002 — Dataset defines the model (testable=false)
 Tests (0):
 - (none)
 
-## P-003 — Universality and minimal assumptions
+## P-003 — Universality and minimal assumptions (testable=false)
 Tests (0):
 - (none)
 
-## NR-UI-001 — No standardized UI hints
+## NR-UI-001 — No standardized UI hints (testable=false)
 Tests (0):
 - (none)
 
-## NR-UI-002 — Core must not interpret UI hints
+## NR-UI-002 — UI hint keys are ignored by core validation (testable=true)
+Tests (1):
+- tests/core.gaps.test.js — "NR-UI-002: UI hint keys are ignored by validation"
+
+## NR-SEM-001 — No kind-based semantic validation of fields (testable=true)
 Tests (0):
 - (none)
 
-## NR-SEM-001 — No semantic value typing in core
-Tests (0):
-- (none)
-
-## NR-SEC-001 — No security hardening requirement
+## NR-SEC-001 — No security hardening requirement (testable=false)
 Tests (0):
 - (none)
 
 ## NR-LINK-001 — No requirement that links resolve
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.gaps.test.js — "NR-LINK-001: missing link targets do not fail validation"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (5):
@@ -127,16 +133,16 @@ Tests (4):
 - apps/web/src/schema/typeSchema.test.ts — "TYPE-004: null fieldDefs yields an empty schema"
 
 ## TYPE-005 — Field definition minimum shape
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.gaps.test.js — "TYPE-005: fieldDefs must declare kind"
 
 ## TYPE-006 — Open world field kinds
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.gaps.test.js — "TYPE-006: unknown kinds are accepted"
 
 ## TYPE-007 — Body semantics: `bodyField` (optional)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.gaps.test.js — "TYPE-007: bodyField is optional"
 
 ## TYPE-COMP-001 — Optional type composition metadata
 Tests (2):
@@ -161,11 +167,11 @@ Tests (4):
 - tests/core.ids.test.js — "REL-003: cleanId trims whitespace"
 - tests/core.ids.test.js — "REL-003: cleanId unwraps [[...]] tokens"
 
-## REL-004 — Preservation: do not rewrite link spellings
+## REL-004 — Preservation: do not rewrite link spellings (testable=false)
 Tests (0):
 - (none)
 
-## REL-005 — Creating links in Graphdown-authored edits
+## REL-005 — Graphdown-created relationships are serialized as wiki-links (testable=true)
 Tests (0):
 - (none)
 
@@ -195,8 +201,8 @@ Tests (3):
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: present required field passes validation"
 
 ## VAL-006 — No semantic validation of values
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.gaps.test.js — "VAL-006: semantic constraints are not enforced"
 
 ## VAL-COMP-001 — Composition referenced record types must exist
 Tests (1):
@@ -262,19 +268,19 @@ Tests (1):
 Tests (1):
 - tests/core.roundtrip.test.js — "EXP-005: whole-repo zip export preserves content bytes"
 
-## UI-001 — Desktop + mobile usable
+## UI-001 — Desktop + mobile usable (testable=false)
 Tests (0):
 - (none)
 
-## UI-004 — Consistent CRUD + relationship affordances
+## UI-004 — Consistent CRUD + relationship affordances (testable=false)
 Tests (0):
 - (none)
 
-## NFR-001 — No full reloads for CRUD
+## NFR-001 — No full reloads for CRUD (testable=true)
 Tests (0):
 - (none)
 
-## NFR-010 — Offline after initial load
+## NFR-010 — Read-only offline after initial load (testable=true)
 Tests (0):
 - (none)
 
@@ -282,10 +288,10 @@ Tests (0):
 Tests (0):
 - (none)
 
-## NFR-030 — Plugins must not require core modification
+## NFR-030 — Plugins must not require core modification (testable=false)
 Tests (0):
 - (none)
 
-## NFR-031 — New field kinds without rewriting CRUD
+## NFR-031 — New field kinds without rewriting CRUD (testable=false)
 Tests (0):
 - (none)

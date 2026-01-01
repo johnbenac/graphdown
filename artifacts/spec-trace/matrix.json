@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T07:11:35.715Z",
+  "generatedAt": "2026-01-01T07:33:01.753Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -24,49 +24,55 @@
     {
       "id": "P-001",
       "title": "Repository-first, Markdown-canonical",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "P-002",
       "title": "Dataset defines the model",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "P-003",
       "title": "Universality and minimal assumptions",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "NR-UI-001",
       "title": "No standardized UI hints",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "NR-UI-002",
-      "title": "Core must not interpret UI hints",
-      "testable": null,
+      "title": "UI hint keys are ignored by core validation",
+      "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "NR-UI-002",
+          "testTitle": "NR-UI-002: UI hint keys are ignored by validation",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "NR-SEM-001",
-      "title": "No semantic value typing in core",
-      "testable": null,
+      "title": "No kind-based semantic validation of fields",
+      "testable": true,
       "verify": null,
       "tests": []
     },
     {
       "id": "NR-SEC-001",
       "title": "No security hardening requirement",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
@@ -75,7 +81,13 @@
       "title": "No requirement that links resolve",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "NR-LINK-001",
+          "testTitle": "NR-LINK-001: missing link targets do not fail validation",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "HASH-001",
@@ -383,21 +395,39 @@
       "title": "Field definition minimum shape",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "TYPE-005",
+          "testTitle": "TYPE-005: fieldDefs must declare kind",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "TYPE-006",
       "title": "Open world field kinds",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "TYPE-006",
+          "testTitle": "TYPE-006: unknown kinds are accepted",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "TYPE-007",
       "title": "Body semantics: `bodyField` (optional)",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "TYPE-007",
+          "testTitle": "TYPE-007: bodyField is optional",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "TYPE-COMP-001",
@@ -489,14 +519,14 @@
     {
       "id": "REL-004",
       "title": "Preservation: do not rewrite link spellings",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "REL-005",
-      "title": "Creating links in Graphdown-authored edits",
-      "testable": null,
+      "title": "Graphdown-created relationships are serialized as wiki-links",
+      "testable": true,
       "verify": null,
       "tests": []
     },
@@ -595,7 +625,13 @@
       "title": "No semantic validation of values",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-006",
+          "testTitle": "VAL-006: semantic constraints are not enforced",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "VAL-COMP-001",
@@ -829,28 +865,28 @@
     {
       "id": "UI-001",
       "title": "Desktop + mobile usable",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "UI-004",
       "title": "Consistent CRUD + relationship affordances",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "NFR-001",
       "title": "No full reloads for CRUD",
-      "testable": null,
+      "testable": true,
       "verify": null,
       "tests": []
     },
     {
       "id": "NFR-010",
-      "title": "Offline after initial load",
-      "testable": null,
+      "title": "Read-only offline after initial load",
+      "testable": true,
       "verify": null,
       "tests": []
     },
@@ -864,18 +900,35 @@
     {
       "id": "NFR-030",
       "title": "Plugins must not require core modification",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     },
     {
       "id": "NFR-031",
       "title": "New field kinds without rewriting CRUD",
-      "testable": null,
+      "testable": false,
       "verify": null,
       "tests": []
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [
+    {
+      "id": "NFR-001",
+      "title": "No full reloads for CRUD"
+    },
+    {
+      "id": "NFR-010",
+      "title": "Read-only offline after initial load"
+    },
+    {
+      "id": "NR-SEM-001",
+      "title": "No kind-based semantic validation of fields"
+    },
+    {
+      "id": "REL-005",
+      "title": "Graphdown-created relationships are serialized as wiki-links"
+    }
+  ]
 }

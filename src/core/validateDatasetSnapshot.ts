@@ -246,7 +246,24 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
         const required: string[] = [];
         for (const [fieldName, def] of Object.entries(fieldDefs)) {
           if (!isObject(def)) {
+            errors.push(
+              makeError(
+                'E_REQUIRED_FIELD_MISSING',
+                `Type file ${file} fields.fieldDefs.${fieldName} must be an object`,
+                file
+              )
+            );
             continue;
+          }
+          const kind = getString(def, 'kind');
+          if (!kind) {
+            errors.push(
+              makeError(
+                'E_REQUIRED_FIELD_MISSING',
+                `Type file ${file} fields.fieldDefs.${fieldName}.kind must be a string`,
+                file
+              )
+            );
           }
           if (def.required === true) {
             required.push(fieldName);
