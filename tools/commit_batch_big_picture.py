@@ -47,6 +47,34 @@ def run_command_result(cmd: str) -> subprocess.CompletedProcess:
     )
 
 
+def run_command_bytes(cmd: str, check: bool = True) -> bytes:
+    """Run a shell command and return raw stdout bytes."""
+    result = subprocess.run(
+        cmd,
+        shell=True,
+        check=check,
+        capture_output=True,
+        text=False,
+    )
+    return result.stdout or b""
+
+
+def decode_file_snapshot(content: bytes) -> Tuple[str, bool]:
+    """Decode git show output while flagging probable binary content."""
+    if not content:
+        return "", False
+    if b"\0" in content:
+        return "# (binary file omitted from report)", True
+
+    control_bytes = sum(
+        1 for byte in content if byte < 9 or (13 < byte < 32)
+    )
+    if control_bytes / len(content) > 0.1:
+        return "# (binary file omitted from report)", True
+
+    return content.decode("utf-8", errors="replace"), False
+
+
 def resolve_commit(ref: str) -> str:
     """Resolve a commit ref to a full SHA."""
     cleaned = ref.strip()
@@ -521,22 +549,31 @@ def create_touched_files_compilation(
                 outf.write(f"# File: {file_path}\n")
                 outf.write(f"# Commit: {commit_short}\n\n")
 
+                before_binary = False
                 if parent:
                     try:
-                        before_contents = run_command(
+                        before_raw = run_command_bytes(
                             f"git show {shlex.quote(parent)}:{shlex.quote(file_path)}"
                         )
+                        before_contents, before_binary = decode_file_snapshot(before_raw)
                     except subprocess.CalledProcessError:
                         before_contents = "# (file did not exist before commit)"
                 else:
                     before_contents = "# (no parent commit)"
 
+                after_binary = False
                 try:
-                    after_contents = run_command(
+                    after_raw = run_command_bytes(
                         f"git show {shlex.quote(commit_sha)}:{shlex.quote(file_path)}"
                     )
+                    after_contents, after_binary = decode_file_snapshot(after_raw)
                 except subprocess.CalledProcessError:
                     after_contents = "# (file removed in commit)"
+
+                if before_binary or after_binary:
+                    print(
+                        f"Skipping binary file contents for {file_path} in commit {commit_short}"
+                    )
 
                 diff_output = run_command(
                     f"git show --pretty=format: {shlex.quote(commit_sha)} -- {shlex.quote(file_path)}"
