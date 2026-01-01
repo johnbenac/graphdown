@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/johnbenac/graphdown/compare/v0.4.2...v0.5.0) (2026-01-01)
+
+
+### Features
+
+* enforce hash scope constraints ([f1a4ccb](https://github.com/johnbenac/graphdown/commit/f1a4ccb2bb2df9e8b427fa83a7e80021a4194704))
+
 ## [0.4.2](https://github.com/johnbenac/graphdown/compare/v0.4.1...v0.4.2) (2026-01-01)
 
 
