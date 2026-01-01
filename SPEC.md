@@ -182,6 +182,7 @@ Unless a future version of this spec defines otherwise, the canonical hashing pr
    * Decode as UTF-8 text. Import MUST fail if UTF-8 decoding fails.
    * For hashing only, normalize line endings by converting all `\r\n` and bare `\r` to `\n`.
    * Parse YAML front matter and extract the record `id` (per FR-MD-021). Import MUST fail if parsing fails.
+   * If two included record files share the same trimmed `id`, hashing MUST fail.
 
 3. **Sort**
    Sort included records by their parsed `id` in ascending lexicographic order of the UTF-8 encoded bytes of `id`.
