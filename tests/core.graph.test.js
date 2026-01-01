@@ -232,3 +232,61 @@ fields:
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test('TYPE-003: duplicate recordTypeId fails validation', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+
+  try {
+    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
+
+    fs.writeFileSync(
+      path.join(tempDir, 'datasets', 'dataset--demo.md'),
+      `---
+id: "dataset:demo"
+datasetId: "dataset:demo"
+typeId: "sys:dataset"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  name: "Demo Dataset"
+---
+`
+    );
+
+    fs.writeFileSync(
+      path.join(tempDir, 'types', 'type--note.md'),
+      `---
+id: "type:note"
+datasetId: "dataset:demo"
+typeId: "sys:type"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  recordTypeId: "note"
+---
+`
+    );
+
+    fs.writeFileSync(
+      path.join(tempDir, 'types', 'type--note-duplicate.md'),
+      `---
+id: "type:note-duplicate"
+datasetId: "dataset:demo"
+typeId: "sys:type"
+createdAt: "2024-01-01T00:00:00Z"
+updatedAt: "2024-01-01T00:00:00Z"
+fields:
+  recordTypeId: "note"
+---
+`
+    );
+
+    const result = buildGraphFromFs(tempDir);
+
+    assert.equal(result.ok, false);
+    assert.ok(result.errors.some((error) => error.code === 'E_DUPLICATE_RECORD_TYPE_ID'));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
