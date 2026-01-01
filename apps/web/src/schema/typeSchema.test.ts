@@ -44,12 +44,12 @@ describe("parseTypeSchema", () => {
 });
 
 describe("ref helpers", () => {
-  it("REL-005/REL-007: writeRef writes wiki-links", () => {
+  it("REL-005: writeRef writes wiki-links", () => {
     expect(writeRef("record:1")).toBe("[[record:1]]");
     expect(writeRef("")).toBeUndefined();
   });
 
-  it("REL-005/REL-007: writeRefs writes wiki-link arrays", () => {
+  it("REL-005: writeRefs writes wiki-link arrays", () => {
     expect(writeRefs(["record:1", "record:2"])).toEqual(["[[record:1]]", "[[record:2]]"]);
     expect(writeRefs([])).toBeUndefined();
   });

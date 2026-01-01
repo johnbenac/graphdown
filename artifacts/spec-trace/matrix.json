@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T07:33:01.753Z",
+  "generatedAt": "2026-01-01T07:54:12.779Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -528,7 +528,18 @@
       "title": "Graphdown-created relationships are serialized as wiki-links",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "REL-005",
+          "testTitle": "REL-005: writeRef writes wiki-links",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        },
+        {
+          "reqId": "REL-005",
+          "testTitle": "REL-005: writeRefs writes wiki-link arrays",
+          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+        }
+      ]
     },
     {
       "id": "REL-007",
@@ -925,10 +936,6 @@
     {
       "id": "NR-SEM-001",
       "title": "No kind-based semantic validation of fields"
-    },
-    {
-      "id": "REL-005",
-      "title": "Graphdown-created relationships are serialized as wiki-links"
     }
   ]
 }

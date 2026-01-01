@@ -1,12 +1,11 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T07:33:01.753Z
+Generated: 2026-01-01T07:54:12.779Z
 
 ## Testable requirements with no tests
 - NFR-001 — No full reloads for CRUD
 - NFR-010 — Read-only offline after initial load
 - NR-SEM-001 — No kind-based semantic validation of fields
-- REL-005 — Graphdown-created relationships are serialized as wiki-links
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -172,8 +171,9 @@ Tests (0):
 - (none)
 
 ## REL-005 — Graphdown-created relationships are serialized as wiki-links (testable=true)
-Tests (0):
-- (none)
+Tests (2):
+- apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRef writes wiki-links"
+- apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRefs writes wiki-link arrays"
 
 ## REL-007 — Only wiki-links are recognized as relationships in core
 Tests (2):

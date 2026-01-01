@@ -1,12 +1,12 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T07:33:01.753Z
+Generated: 2026-01-01T07:54:12.779Z
 Source: artifacts/spec-trace/matrix.json
 
 - Requirements (testable): 51
-- Covered: 46
-- Missing: 5
-- Coverage: 90.2%
+- Covered: 47
+- Missing: 4
+- Coverage: 92.2%
 
 The following requirements currently have **no referenced tests**:
 
@@ -16,9 +16,6 @@ The following requirements currently have **no referenced tests**:
 
 ## NR (1)
 - NR-SEM-001 — No kind-based semantic validation of fields
-
-## REL (1)
-- REL-005 — Graphdown-created relationships are serialized as wiki-links
 
 ## UI (1)
 - UI-RAW-001 — Universal raw CRUD fallback (required)
