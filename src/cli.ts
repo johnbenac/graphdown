@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import path from 'node:path';
+import { main as validateMain } from './validateDatasetCli';
 
 const usage = `Usage: graphdown validate <datasetPath> [--json|--pretty]
        graphdown <datasetPath> [--json|--pretty]`;
@@ -24,14 +24,4 @@ if (commandOrPath === 'validate') {
   forwardedArgs = [commandOrPath, ...rest];
 }
 
-const validatorPath = path.resolve(__dirname, '..', 'validateDataset.js');
-// validateDataset.js is CommonJS; import dynamically to avoid bundling differences.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const validatorModule = require(validatorPath) as { main?: (argv?: string[]) => void };
-
-if (typeof validatorModule.main === 'function') {
-  validatorModule.main(forwardedArgs);
-} else {
-  fs.writeFileSync(2, 'Failed to load validator module.\n');
-  process.exit(2);
-}
+validateMain(forwardedArgs);
