@@ -33,9 +33,12 @@ function groupByPrefix(requirements) {
 }
 
 function buildMarkdown(matrix) {
-  const total = matrix.requirements.length;
-  const covered = matrix.requirements.filter((r) => r.tests.length > 0).length;
-  const missing = matrix.requirements.filter((r) => r.tests.length === 0);
+  const testable = matrix.requirements.filter((r) => r.testable !== false);
+  const nonTestable = matrix.requirements.filter((r) => r.testable === false);
+
+  const total = testable.length;
+  const covered = testable.filter((r) => r.tests.length > 0).length;
+  const missing = testable.filter((r) => r.tests.length === 0);
   const coveragePct = ((covered / total) * 100).toFixed(1);
 
   const lines = [];
@@ -44,10 +47,13 @@ function buildMarkdown(matrix) {
   lines.push(`Generated: ${matrix.generatedAt ?? new Date().toISOString()}`);
   lines.push(`Source: artifacts/spec-trace/matrix.json`);
   lines.push('');
-  lines.push(`- Requirements: ${total}`);
+  lines.push(`- Requirements (testable): ${total}`);
   lines.push(`- Covered: ${covered}`);
   lines.push(`- Missing: ${missing.length}`);
   lines.push(`- Coverage: ${coveragePct}%`);
+  if (nonTestable.length) {
+    lines.push(`- Non-testable (governance/manual): ${nonTestable.length}`);
+  }
   lines.push('');
 
   if (missing.length === 0) {
@@ -65,6 +71,19 @@ function buildMarkdown(matrix) {
       lines.push(`- ${req.id} — ${req.title}`);
     }
     lines.push('');
+  }
+
+  if (nonTestable.length) {
+    lines.push('The following requirements are marked non-testable (governance/process):');
+    lines.push('');
+    const groupedGovernance = groupByPrefix(nonTestable);
+    for (const [prefix, reqs] of groupedGovernance) {
+      lines.push(`## ${prefix} (${reqs.length})`);
+      for (const req of reqs) {
+        lines.push(`- ${req.id} — ${req.title}`);
+      }
+      lines.push('');
+    }
   }
 
   lines.push('_Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._');

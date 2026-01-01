@@ -1,17 +1,15 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T06:16:31.528Z
+Generated: 2026-01-01T06:29:21.449Z
 Source: artifacts/spec-trace/matrix.json
 
-- Requirements: 61
-- Covered: 38
-- Missing: 23
-- Coverage: 62.3%
+- Requirements (testable): 61
+- Covered: 39
+- Missing: 22
+- Coverage: 63.9%
+- Non-testable (governance/manual): 1
 
 The following requirements currently have **no referenced tests**:
-
-## GOV (1)
-- GOV-001 — Spec-first changes
 
 ## HASH (1)
 - HASH-004 — No records-only fingerprint in core
@@ -50,5 +48,10 @@ The following requirements currently have **no referenced tests**:
 
 ## VAL (1)
 - VAL-006 — No semantic validation of values
+
+The following requirements are marked non-testable (governance/process):
+
+## GOV (1)
+- GOV-001 — Spec-first changes
 
 _Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._

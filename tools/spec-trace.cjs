@@ -251,59 +251,53 @@ function collectMissingTestable(specReqs, references) {
   return missing;
 }
 
-function writeMatrix(
-  outputDir,
-  generatedAt,
-  specReqs,
-  order,
-  references,
-  unknownRefs,
-  missingTestable,
-) {
+function buildMatrixData(generatedAt, specReqs, order, references, unknownRefs, missingTestable) {
+  return {
+    generatedAt,
+    requirements: order.map((id) => {
+      const spec = specReqs.get(id);
+      return {
+        id,
+        title: spec.title,
+        testable: spec.testable ?? null,
+        verify: spec.verify ?? null,
+        tests: references.get(id) ?? [],
+      };
+    }),
+    unknownReferences: unknownRefs,
+    missingTestable,
+  };
+}
+
+function writeMatrix(outputDir, matrixData) {
   fs.mkdirSync(outputDir, { recursive: true });
 
-  const requirements = order.map((id) => {
-    const spec = specReqs.get(id);
-    return {
-      id,
-      title: spec.title,
-      testable: spec.testable ?? null,
-      verify: spec.verify ?? null,
-      tests: references.get(id) ?? [],
-    };
-  });
-
-  const jsonOutput = {
-    generatedAt,
-    requirements,
-    unknownReferences: unknownRefs,
-    missingTestable: missingTestable,
-  };
+  const jsonOutput = matrixData;
 
   const markdownLines = [
     '# Verification Matrix (SPEC.md ↔ tests)',
     '',
-    `Generated: ${generatedAt}`,
+    `Generated: ${matrixData.generatedAt}`,
     '',
   ];
 
-  if (unknownRefs.length > 0) {
+  if (matrixData.unknownReferences.length > 0) {
     markdownLines.push('## Unknown requirement IDs referenced by tests');
-    unknownRefs.forEach((ref) => {
+    matrixData.unknownReferences.forEach((ref) => {
       markdownLines.push(`- ${ref.reqId} (${ref.filePath}: "${ref.testTitle}")`);
     });
     markdownLines.push('');
   }
 
-  if (missingTestable.length > 0) {
+  if (matrixData.missingTestable.length > 0) {
     markdownLines.push('## Testable requirements with no tests');
-    missingTestable.forEach((req) => {
+    matrixData.missingTestable.forEach((req) => {
       markdownLines.push(`- ${req.id} — ${req.title}`);
     });
     markdownLines.push('');
   }
 
-  requirements.forEach((req) => {
+  matrixData.requirements.forEach((req) => {
     const metaParts = [];
     if (req.testable !== null && req.testable !== undefined) {
       metaParts.push(`testable=${req.testable}`);
@@ -356,10 +350,13 @@ function reportMissingTestable(missingTestable) {
   process.exit(1);
 }
 
-function main() {
+function generateSpecTrace({
+  outputDir = path.join(REPO_ROOT, 'artifacts', 'spec-trace'),
+  writeFiles = true,
+  generatedAt = new Date().toISOString(),
+} = {}) {
   if (!fs.existsSync(SPEC_PATH)) {
-    console.error(`SPEC.md not found at ${SPEC_PATH}`);
-    process.exit(1);
+    throw new Error(`SPEC.md not found at ${SPEC_PATH}`);
   }
 
   const { specReqs, order } = readSpecRequirements(SPEC_PATH);
@@ -368,12 +365,7 @@ function main() {
   const unknownRefs = collectUnknownReferences(references, specReqs);
   const missingTestable = collectMissingTestable(specReqs, references);
 
-  const outputDir = parseOutputDir();
-  const generatedAt = new Date().toISOString();
-
-  // Write artifacts even if we’re going to fail (so CI can upload them).
-  writeMatrix(
-    outputDir,
+  const matrixData = buildMatrixData(
     generatedAt,
     specReqs,
     order,
@@ -382,9 +374,28 @@ function main() {
     missingTestable,
   );
 
+  if (writeFiles) {
+    writeMatrix(outputDir, matrixData);
+  }
+
+  return {
+    matrixData,
+    specReqs,
+    order,
+    references,
+    unknownRefs,
+    missingTestable,
+    outputDir,
+  };
+}
+
+function main() {
+  const outputDir = parseOutputDir();
+  const { matrixData } = generateSpecTrace({ outputDir, writeFiles: true });
+
   // Fail only on unknown IDs (not on missing coverage).
-  reportUnknownIds(unknownRefs);
-  reportMissingTestable(missingTestable);
+  reportUnknownIds(matrixData.unknownReferences);
+  reportMissingTestable(matrixData.missingTestable);
 
   console.log(
     `Spec trace completed. Matrix written to ${toPosixPath(
@@ -393,4 +404,10 @@ function main() {
   );
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  generateSpecTrace,
+};
