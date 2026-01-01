@@ -5,11 +5,10 @@ import { extractWikiLinks } from './wikiLinks';
 import { parseYamlObject } from './yaml';
 import { getString, isObject } from './types';
 
-export type GraphNodeKind = 'dataset' | 'type' | 'record';
+export type GraphNodeKind = 'type' | 'record';
 
 export interface GraphNode {
   id: string;
-  datasetId: string;
   typeId: string;
   createdAt: string;
   updatedAt: string;
@@ -78,9 +77,6 @@ class GraphImpl implements Graph {
     const node = this.nodesById.get(id);
     if (!node) {
       return null;
-    }
-    if (node.kind === 'dataset') {
-      return 'sys:dataset';
     }
     if (node.kind === 'type') {
       const recordTypeId = getString(node.fields, 'recordTypeId');
@@ -154,9 +150,6 @@ export function extractWikiLinksFromFields(fields: unknown): string[] {
 }
 
 function getKindForFile(file: string): GraphNodeKind | null {
-  if (file.startsWith('datasets/')) {
-    return 'dataset';
-  }
   if (file.startsWith('types/')) {
     return 'type';
   }
@@ -197,7 +190,6 @@ export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult
     const fields = isObject(yaml.fields) ? yaml.fields : {};
     const node: GraphNode = {
       id: getString(yaml, 'id') ?? '',
-      datasetId: getString(yaml, 'datasetId') ?? '',
       typeId: getString(yaml, 'typeId') ?? '',
       createdAt: getString(yaml, 'createdAt') ?? '',
       updatedAt: getString(yaml, 'updatedAt') ?? '',

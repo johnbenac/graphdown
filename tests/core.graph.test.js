@@ -41,30 +41,13 @@ test('REL-002: extracts wiki-links from YAML field strings', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
-    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'datasets', 'dataset--demo.md'),
-      `---
-id: "dataset:demo"
-datasetId: "dataset:demo"
-typeId: "sys:dataset"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  name: "Demo Dataset"
-  description: "Temp dataset."
----
-`
-    );
 
     fs.writeFileSync(
       path.join(tempDir, 'types', 'type--note.md'),
       `---
 id: "type:note"
-datasetId: "dataset:demo"
 typeId: "sys:type"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -78,7 +61,6 @@ fields:
       path.join(tempDir, 'records', 'note', 'record--1.md'),
       `---
 id: "note:1"
-datasetId: "dataset:demo"
 typeId: "note"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -93,7 +75,6 @@ fields:
       path.join(tempDir, 'records', 'note', 'record--2.md'),
       `---
 id: "note:2"
-datasetId: "dataset:demo"
 typeId: "note"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -118,30 +99,13 @@ test('VAL-002: enforces global id uniqueness', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
-    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'datasets', 'dataset--demo.md'),
-      `---
-id: "dataset:demo"
-datasetId: "dataset:demo"
-typeId: "sys:dataset"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  name: "Demo Dataset"
-  description: "Dataset for graph tests."
----
-`
-    );
 
     fs.writeFileSync(
       path.join(tempDir, 'types', 'type--note.md'),
       `---
 id: "type:note"
-datasetId: "dataset:demo"
 typeId: "sys:type"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -153,7 +117,6 @@ fields:
 
     const recordContent = `---
 id: "note:1"
-datasetId: "dataset:demo"
 typeId: "note"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -177,30 +140,13 @@ test('TYPE-002: recordTypeId must be directory-safe', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
-    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'datasets', 'dataset--demo.md'),
-      `---
-id: "dataset:demo"
-datasetId: "dataset:demo"
-typeId: "sys:dataset"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  name: "Demo Dataset"
-  description: "Dataset for graph tests."
----
-`
-    );
 
     fs.writeFileSync(
       path.join(tempDir, 'types', 'type--note.md'),
       `---
 id: "type:note"
-datasetId: "dataset:demo"
 typeId: "sys:type"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -214,7 +160,6 @@ fields:
       path.join(tempDir, 'records', 'note', 'record--1.md'),
       `---
 id: "note:1"
-datasetId: "dataset:demo"
 typeId: "note"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -237,28 +182,12 @@ test('TYPE-003: duplicate recordTypeId fails validation', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
 
   try {
-    fs.mkdirSync(path.join(tempDir, 'datasets'), { recursive: true });
     fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'datasets', 'dataset--demo.md'),
-      `---
-id: "dataset:demo"
-datasetId: "dataset:demo"
-typeId: "sys:dataset"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  name: "Demo Dataset"
----
-`
-    );
 
     fs.writeFileSync(
       path.join(tempDir, 'types', 'type--note.md'),
       `---
 id: "type:note"
-datasetId: "dataset:demo"
 typeId: "sys:type"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"
@@ -272,7 +201,6 @@ fields:
       path.join(tempDir, 'types', 'type--note-duplicate.md'),
       `---
 id: "type:note-duplicate"
-datasetId: "dataset:demo"
 typeId: "sys:type"
 createdAt: "2024-01-01T00:00:00Z"
 updatedAt: "2024-01-01T00:00:00Z"

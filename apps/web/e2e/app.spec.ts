@@ -30,7 +30,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         contentType: "application/json",
         body: JSON.stringify({
           tree: [
-            { path: "datasets/demo.md", type: "blob" },
             { path: "types/note.md", type: "blob" },
             { path: "types/task.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
@@ -50,25 +49,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
 
   await page.route("**/raw.githubusercontent.com/**", async (route) => {
     const url = route.request().url();
-    if (url.endsWith("/datasets/demo.md")) {
-      await route.fulfill({
-        status: 200,
-        contentType: "text/plain",
-        body: [
-          "---",
-          "id: dataset:demo",
-          "datasetId: dataset:demo",
-          "typeId: sys:dataset",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
-          "fields:",
-          "  name: Demo",
-          "  description: Demo dataset",
-          "---"
-        ].join("\n")
-      });
-      return;
-    }
     if (url.endsWith("/types/note.md")) {
       await route.fulfill({
         status: 200,
@@ -76,7 +56,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         body: [
           "---",
           "id: type:note",
-          "datasetId: dataset:demo",
           "typeId: sys:type",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",
@@ -111,7 +90,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         body: [
           "---",
           "id: type:task",
-          "datasetId: dataset:demo",
           "typeId: sys:type",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",
@@ -130,7 +108,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         body: [
           "---",
           "id: record:1",
-          "datasetId: dataset:demo",
           "typeId: note",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",
@@ -155,7 +132,6 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         body: [
           "---",
           "id: record:task-1",
-          "datasetId: dataset:demo",
           "typeId: task",
           "createdAt: 2024-01-01",
           "updatedAt: 2024-01-02",

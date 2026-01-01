@@ -12,22 +12,23 @@ import { FORMAT_VERSIONS } from "./versions";
 const sampleSnapshot: RepoSnapshot = {
   files: new Map([
     [
-      "datasets/demo.md",
-      new TextEncoder().encode("---\nid: demo\ncreatedAt: 2024-01-01\nupdatedAt: 2024-01-01\n---\nDemo")
+      "types/note.md",
+      new TextEncoder().encode(
+        "---\nid: type:note\ntypeId: sys:type\ncreatedAt: 2024-01-01\nupdatedAt: 2024-01-01\nfields:\n  recordTypeId: note\n---\nDemo"
+      )
     ]
   ])
 };
 
 const sampleGraphNode: GraphNode = {
-  id: "demo",
-  datasetId: "demo",
-  typeId: "sys:dataset",
+  id: "type:note",
+  typeId: "sys:type",
   createdAt: "2024-01-01",
   updatedAt: "2024-01-01",
-  fields: {},
+  fields: { recordTypeId: "note" },
   body: "Demo",
-  file: "datasets/demo.md",
-  kind: "dataset"
+  file: "types/note.md",
+  kind: "type"
 };
 
 const samplePersistedGraph: PersistedGraph = {

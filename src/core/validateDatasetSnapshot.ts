@@ -5,7 +5,7 @@ import { getString, isObject } from './types';
 import { extractWikiLinks } from './wikiLinks';
 
 export type ValidateDatasetResult =
-  | { ok: true; datasetRecordPath: string; datasetId: string }
+  | { ok: true }
   | { ok: false; errors: ValidationError[] };
 
 type CompositionRequirement = {
@@ -79,9 +79,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
 
   const hasDir = (dir: string) => files.some((file) => file.startsWith(`${dir}/`));
 
-  if (!hasDir('datasets')) {
-    return { ok: false, errors: [makeError('E_DIR_MISSING', 'Missing required `datasets/` directory')] };
-  }
   if (!hasDir('types')) {
     return { ok: false, errors: [makeError('E_DIR_MISSING', 'Missing required `types/` directory')] };
   }
@@ -105,76 +102,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
         )
       );
     }
-  }
-
-  const datasetFiles = listMarkdownFiles(files, 'datasets', false);
-  const allDatasetFiles = listMarkdownFiles(files, 'datasets', true);
-  const nestedDatasetFiles = allDatasetFiles.filter((file) => {
-    const rest = file.slice('datasets/'.length);
-    return rest.includes('/');
-  });
-  const datasetErrors: ValidationError[] = [];
-  if (nestedDatasetFiles.length > 0) {
-    for (const file of nestedDatasetFiles) {
-      datasetErrors.push(
-        makeError(
-          'E_DATASET_SUBDIR_UNSUPPORTED',
-          `Dataset manifest must live directly under datasets/. Found nested file ${file}.`,
-          file
-        )
-      );
-    }
-  }
-  if (allDatasetFiles.length !== 1 || datasetFiles.length !== 1) {
-    const listed = allDatasetFiles.length ? allDatasetFiles.join(', ') : 'none';
-    datasetErrors.push(
-      makeError(
-        'E_DATASET_FILE_COUNT',
-        `Expected exactly one dataset manifest in datasets/. Found ${allDatasetFiles.length}: ${listed}`
-      )
-    );
-  }
-  if (datasetErrors.length) {
-    return { ok: false, errors: [...errors, ...datasetErrors] };
-  }
-
-  const datasetFile = datasetFiles[0];
-  const datasetRaw = snapshot.files.get(datasetFile);
-  if (!datasetRaw) {
-    return { ok: false, errors: [makeError('E_INTERNAL', `Missing dataset file ${datasetFile}`)] };
-  }
-
-  const parsedDataset = parseMarkdownRecord(decodeBytes(datasetRaw), datasetFile);
-  if (!parsedDataset.ok) {
-    return { ok: false, errors: [parsedDataset.error] };
-  }
-
-  const datasetYaml = parsedDataset.yaml;
-  const datasetId = requireString(errors, datasetYaml, 'id', datasetFile, 'Dataset id');
-
-  const datasetDatasetId = requireString(
-    errors,
-    datasetYaml,
-    'datasetId',
-    datasetFile,
-    'Dataset datasetId'
-  );
-  if (datasetId && datasetDatasetId && datasetDatasetId !== datasetId) {
-    errors.push(
-      makeError('E_DATASET_ID_MISMATCH', 'Dataset file datasetId must equal its id', datasetFile)
-    );
-  }
-
-  const datasetTypeId = requireString(errors, datasetYaml, 'typeId', datasetFile, 'Dataset typeId');
-  if (datasetTypeId && datasetTypeId !== 'sys:dataset') {
-    errors.push(makeError('E_TYPEID_MISMATCH', 'Dataset file typeId must be "sys:dataset"', datasetFile));
-  }
-
-  requireString(errors, datasetYaml, 'createdAt', datasetFile, 'Dataset createdAt');
-  requireString(errors, datasetYaml, 'updatedAt', datasetFile, 'Dataset updatedAt');
-
-  if (!isObject(datasetYaml.fields)) {
-    errors.push(makeError('E_REQUIRED_FIELD_MISSING', 'Dataset file fields must be an object', datasetFile));
   }
 
   const typeFiles = listMarkdownFiles(files, 'types', true);
@@ -204,17 +131,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
         errors.push(makeError('E_DUPLICATE_ID', `Duplicate type id ${id}`, file));
       }
       typeIds.add(id);
-    }
-
-    const typeDatasetId = requireString(errors, yaml, 'datasetId', file, 'Type datasetId');
-    if (datasetId && typeDatasetId && typeDatasetId !== datasetId) {
-      errors.push(
-        makeError(
-          'E_DATASET_ID_MISMATCH',
-          `Type file ${file} has datasetId ${typeDatasetId} but dataset id is ${datasetId}`,
-          file
-        )
-      );
     }
 
     const typeTypeId = requireString(errors, yaml, 'typeId', file, 'Type typeId');
@@ -388,16 +304,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
       }
       const yaml = parsed.yaml;
       const id = requireString(errors, yaml, 'id', file, 'Record id');
-      const recordDatasetId = requireString(errors, yaml, 'datasetId', file, 'Record datasetId');
-      if (datasetId && recordDatasetId && recordDatasetId !== datasetId) {
-        errors.push(
-          makeError(
-            'E_DATASET_ID_MISMATCH',
-            `Record file ${file} datasetId mismatch: expected ${datasetId}, found ${recordDatasetId}`,
-            file
-          )
-        );
-      }
       const recordTypeId = requireString(errors, yaml, 'typeId', file, 'Record typeId');
       if (recordTypeId && recordTypeId !== dirName) {
         errors.push(
@@ -463,7 +369,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
     seenIds.add(id);
   };
 
-  recordDuplicate(datasetId, datasetFile);
   for (const type of typeRecords) {
     recordDuplicate(type.id, type.file);
   }
@@ -510,8 +415,6 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   return {
-    ok: true,
-    datasetRecordPath: datasetFile,
-    datasetId: datasetId ?? ''
+    ok: true
   };
 }

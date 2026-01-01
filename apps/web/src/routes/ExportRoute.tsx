@@ -73,7 +73,7 @@ export default function ExportRoute() {
 
               <div className="export-card">
                 <h2>Dataset-only zip</h2>
-                <p>Exports only Markdown records under datasets/, types/, records/.</p>
+                <p>Exports only Markdown records under types/ and records/.</p>
                 <Button
                   type="button"
                   disabled={disabled}

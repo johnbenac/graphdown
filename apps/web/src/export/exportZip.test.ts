@@ -21,7 +21,6 @@ async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<RepoSnapshot
 describe("exportZip", () => {
   it("EXP-003: whole-repo export round-trips snapshot files", async () => {
     const snapshot = snapshotFromEntries([
-      ["datasets/demo.md", "---\nid: dataset:demo\n---"],
       ["types/note.md", "---\nid: type:note\n---"],
       ["records/note/record-1.md", "---\nid: record:1\n---"],
       ["assets/info.txt", "hello"],
@@ -31,7 +30,7 @@ describe("exportZip", () => {
     const exported = exportWholeSnapshotZip(snapshot);
     const imported = await readSnapshotFromZipBytes(exported);
 
-    expect(imported.files.size).toBe(4);
+    expect(imported.files.size).toBe(3);
     for (const [path, contents] of snapshot.files) {
       if (path.startsWith(".git/")) {
         expect(imported.files.has(path)).toBe(false);
@@ -42,22 +41,17 @@ describe("exportZip", () => {
     }
   });
 
-  it("EXP-002: dataset-only export includes only dataset/type/record markdown", async () => {
+  it("EXP-002: record-only export includes only type/record markdown", async () => {
     const snapshot = snapshotFromEntries([
-      ["datasets/demo.md", "---\nid: dataset:demo\n---"],
       ["types/note.md", "---\nid: type:note\n---"],
       ["records/note/record-1.md", "---\nid: record:1\n---"],
-      ["datasets/README.txt", "skip"],
+      ["types/README.txt", "skip"],
       ["assets/info.md", "skip"]
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
     const imported = await readSnapshotFromZipBytes(exported);
 
-    expect([...imported.files.keys()].sort()).toEqual([
-      "datasets/demo.md",
-      "records/note/record-1.md",
-      "types/note.md"
-    ]);
+    expect([...imported.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
   });
 });

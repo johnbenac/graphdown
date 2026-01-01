@@ -18,13 +18,6 @@ export default function DatasetRoute() {
 
   const graph = activeDataset?.parsedGraph;
 
-  const datasetNode = useMemo(() => {
-    if (!graph) {
-      return undefined;
-    }
-    return [...graph.nodesById.values()].find((node) => node.kind === "dataset");
-  }, [graph]);
-
   const sortedTypeIds = useMemo(() => {
     if (!graph) {
       return [];
@@ -108,15 +101,12 @@ export default function DatasetRoute() {
               <div className="dataset-summary">
                 <p>
                   <strong>
-                    {datasetNode?.fields?.name ? String(datasetNode.fields.name) : "Dataset"}
+                    {activeDataset.meta.label ?? activeDataset.meta.id}
                   </strong>
                 </p>
-                {datasetNode?.fields?.description ? (
-                  <p>{String(datasetNode.fields.description)}</p>
-                ) : null}
-                <p>ID: {datasetNode?.id ?? "Unknown"}</p>
-                <p>Created: {datasetNode?.createdAt ?? "Unknown"}</p>
-                <p>Updated: {datasetNode?.updatedAt ?? "Unknown"}</p>
+                <p>ID: {activeDataset.meta.id}</p>
+                <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
+                <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
                 <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
               </div>
 

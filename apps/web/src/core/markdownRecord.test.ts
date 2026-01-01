@@ -7,7 +7,6 @@ describe("serializeMarkdownRecord", () => {
     const input = [
       "---",
       "id: record:1",
-      "datasetId: dataset:demo",
       "typeId: note",
       "createdAt: 2024-01-01",
       "updatedAt: 2024-01-02",

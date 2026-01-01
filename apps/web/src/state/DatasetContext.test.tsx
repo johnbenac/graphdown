@@ -74,23 +74,9 @@ describe("DatasetContext GitHub import", () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    const datasetContent = [
-      "---",
-      "id: dataset:demo",
-      "datasetId: dataset:demo",
-      "typeId: sys:dataset",
-      "createdAt: 2024-01-01",
-      "updatedAt: 2024-01-02",
-      "fields:",
-      "  name: Demo",
-      "  description: Demo dataset",
-      "---"
-    ].join("\n");
-
     const typeContent = [
       "---",
       "id: type:note",
-      "datasetId: dataset:demo",
       "typeId: sys:type",
       "createdAt: 2024-01-01",
       "updatedAt: 2024-01-02",
@@ -102,7 +88,6 @@ describe("DatasetContext GitHub import", () => {
     const recordContent = [
       "---",
       "id: record:1",
-      "datasetId: dataset:demo",
       "typeId: note",
       "createdAt: 2024-01-01",
       "updatedAt: 2024-01-02",
@@ -121,7 +106,6 @@ describe("DatasetContext GitHub import", () => {
         new Response(
           JSON.stringify({
             tree: [
-              { path: "datasets/demo.md", type: "blob" },
               { path: "types/note.md", type: "blob" },
               { path: "records/note/record-1.md", type: "blob" }
             ]
@@ -129,7 +113,6 @@ describe("DatasetContext GitHub import", () => {
           { status: 200, headers: { "Content-Type": "application/json" } }
         )
       )
-      .mockResolvedValueOnce(new Response(datasetContent, { status: 200 }))
       .mockResolvedValueOnce(new Response(typeContent, { status: 200 }))
       .mockResolvedValueOnce(new Response(recordContent, { status: 200 }));
 
@@ -147,7 +130,7 @@ describe("DatasetContext GitHub import", () => {
     await waitFor(() => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
-      expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(3);
+      expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(2);
     });
   });
 });
@@ -155,7 +138,7 @@ describe("DatasetContext GitHub import", () => {
 describe("DatasetContext zip import", () => {
   it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
     const zipBytes = zipSync({
-      "datasets/demo.md": new Uint8Array(strToU8("---\nid: dataset:demo\n---"))
+      "types/note.md": new Uint8Array(strToU8("---\nid: type:note\nfields: { recordTypeId: note }\n---"))
     });
     const file = {
       name: "demo.zip",

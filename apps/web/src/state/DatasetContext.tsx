@@ -436,12 +436,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedId} already exists.`)]
         } as const;
       }
-      const datasetNode = [...activeDataset.parsedGraph.nodesById.values()].find(
-        (node) => node.kind === "dataset"
-      );
-      if (!datasetNode) {
-        return { ok: false, errors: [makeError("E_INTERNAL", "Dataset record is missing.")] } as const;
-      }
       const safeId = trimmedId.replace(/[^A-Za-z0-9_-]+/g, "-");
       let filePath = `records/${input.recordTypeId}/record--${safeId}.md`;
       let counter = 1;
@@ -458,7 +452,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
       const yaml: Record<string, unknown> = {
         id: trimmedId,
-        datasetId: datasetNode.id,
         typeId: input.recordTypeId,
         createdAt: now,
         updatedAt: now,

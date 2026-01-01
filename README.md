@@ -80,10 +80,10 @@ Validation passed: dataset is valid.
 If there are errors:
 ```
 Validation failed with 2 error(s):
- - [E_DIR_MISSING] Missing required `datasets/` directory
-   hint: Ensure dataset root contains datasets/, types/, and records/.
+ - [E_DIR_MISSING] Missing required `types/` directory
+   hint: Ensure dataset root contains types/ and records/.
  - [E_FRONT_MATTER_MISSING] Front matter error: Missing YAML front matter delimiter
-   file: datasets/dataset--name.md
+   file: types/type--name.md
    hint: Add YAML front matter delimited by --- at the top of the file.
 ```
 
@@ -93,8 +93,6 @@ Example layout:
 
 ```
 dataset-root/
-├── datasets/
-│   └── dataset--name.md          # Exactly one dataset definition (no nested manifests)
 ├── types/
 │   ├── type--foo.md               # Type definitions
 │   └── type--bar.md
@@ -111,23 +109,21 @@ All files must be Markdown with YAML front matter:
 
 ```markdown
 ---
-id: "dataset:example"
-datasetId: "dataset:example"
-typeId: "sys:dataset"
+id: "type:example"
+typeId: "sys:type"
 createdAt: 2025-12-28T00:00:00Z
 updatedAt: 2025-12-28T00:00:00Z
 fields:
-  name: "Example Dataset"
-  description: "An example dataset"
+  recordTypeId: "example"
 ---
 
-# Dataset Body
+# Type Body
 
 Markdown content goes here.
 ```
 
 For the authoritative validity rules, refer to the Graphdown Dataset Validity Specification:
-[`docs/spec/dataset-validity.md`](docs/spec/dataset-validity.md).
+[`SPEC.md`](SPEC.md).
 
 ## Example Datasets
 
