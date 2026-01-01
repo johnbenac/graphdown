@@ -170,3 +170,73 @@ test('HASH-001: non-record files do not affect hashes', () => {
 
   assert.equal(baseDigest, withReadmeDigest);
 });
+
+test('HASH-001: duplicate ids fail hashing', () => {
+  const typeFile = [
+    'types/type--note.md',
+    [
+      '---',
+      'id: type:note',
+      'typeId: sys:type',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields:',
+      '  recordTypeId: note',
+      '---',
+      'Type body'
+    ].join('\n')
+  ];
+
+  const dupTypeFile = [
+    'types/type--note-copy.md',
+    typeFile[1]
+  ];
+
+  const result = computeGdHashV1(snapshot([typeFile, dupTypeFile]), 'schema');
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((error) => error.code === 'E_DUPLICATE_ID'));
+});
+
+test('HASH-001: ids are ordered deterministically by UTF-8 bytes', () => {
+  const recordA = [
+    'records/note/a.md',
+    [
+      '---',
+      'id: a',
+      'typeId: note',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields: {}',
+      '---'
+    ].join('\n')
+  ];
+  const recordUmlaut = [
+    'records/note/u.md',
+    [
+      '---',
+      'id: ä',
+      'typeId: note',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields: {}',
+      '---'
+    ].join('\n')
+  ];
+  const recordZ = [
+    'records/note/z.md',
+    [
+      '---',
+      'id: z',
+      'typeId: note',
+      'createdAt: 2024-01-01',
+      'updatedAt: 2024-01-02',
+      'fields: {}',
+      '---'
+    ].join('\n')
+  ];
+
+  const digest1 = digest(computeGdHashV1(snapshot([recordZ, recordUmlaut, recordA]), 'snapshot'));
+  const digest2 = digest(computeGdHashV1(snapshot([recordUmlaut, recordA, recordZ]), 'snapshot'));
+
+  assert.equal(digest1, digest2);
+});

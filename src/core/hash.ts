@@ -9,6 +9,7 @@ export type HashScope = 'schema' | 'snapshot';
 type HashResult = { ok: true; digest: string } | { ok: false; errors: ValidationError[] };
 
 const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
+const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
 
 function decodeUtf8Fatal(raw: Uint8Array, file: string, errors: ValidationError[]): string | null {
   try {
@@ -38,9 +39,21 @@ function isRecordPath(path: string, scope: HashScope): boolean {
   return path.startsWith('types/') || path.startsWith('records/');
 }
 
+function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
+  const length = Math.min(a.length, b.length);
+  for (let i = 0; i < length; i++) {
+    if (a[i] !== b[i]) {
+      return a[i] < b[i] ? -1 : 1;
+    }
+  }
+  if (a.length === b.length) return 0;
+  return a.length < b.length ? -1 : 1;
+}
+
 export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashResult {
-  const recordEntries: Array<{ id: string; file: string; bytes: Uint8Array }> = [];
+  const recordEntries: Array<{ id: string; idBytes: Uint8Array; file: string; bytes: Uint8Array }> = [];
   const errors: ValidationError[] = [];
+  const seenIds = new Set<string>();
 
   const files = [...snapshot.files.keys()].filter((file) => isRecordPath(file, scope));
 
@@ -67,27 +80,38 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
       );
       continue;
     }
-    const contentBytes = new TextEncoder().encode(normalized);
-    recordEntries.push({ id, file, bytes: contentBytes });
+    if (seenIds.has(id)) {
+      errors.push(makeError('E_DUPLICATE_ID', `Duplicate id detected during hashing: ${id}`, file));
+      continue;
+    }
+    seenIds.add(id);
+    if (!encoder) {
+      errors.push(makeError('E_INTERNAL', 'TextEncoder not available for hashing', file));
+      continue;
+    }
+    const contentBytes = encoder.encode(normalized);
+    const idBytes = encoder.encode(id);
+    recordEntries.push({ id, idBytes, file, bytes: contentBytes });
   }
 
   if (errors.length) {
     return { ok: false, errors };
   }
 
-  recordEntries.sort((a, b) => a.id.localeCompare(b.id) || a.file.localeCompare(b.file));
+  recordEntries.sort((a, b) => lexCompareBytes(a.idBytes, b.idBytes));
 
-  const parts: Buffer[] = [Buffer.from('graphdown:gdhash:v1\0', 'utf8')];
+  const hash = createHash('sha256');
+  hash.update(Buffer.from('graphdown:gdhash:v1\0', 'utf8'));
 
   for (const entry of recordEntries) {
-    parts.push(Buffer.from(entry.id, 'utf8'));
-    parts.push(Buffer.from([0]));
-    parts.push(Buffer.from(String(entry.bytes.length), 'utf8'));
-    parts.push(Buffer.from([0]));
-    parts.push(Buffer.from(entry.bytes));
-    parts.push(Buffer.from([0]));
+    hash.update(Buffer.from(entry.idBytes));
+    hash.update(Buffer.from([0]));
+    hash.update(Buffer.from(String(entry.bytes.length), 'utf8'));
+    hash.update(Buffer.from([0]));
+    hash.update(Buffer.from(entry.bytes));
+    hash.update(Buffer.from([0]));
   }
 
-  const digest = createHash('sha256').update(Buffer.concat(parts)).digest('hex');
+  const digest = hash.digest('hex');
   return { ok: true, digest };
 }
