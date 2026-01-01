@@ -7,6 +7,7 @@ const path = require('path');
 const REPO_ROOT = path.resolve(__dirname, '..');
 const MATRIX_PATH = path.join(REPO_ROOT, 'artifacts', 'spec-trace', 'matrix.json');
 const OUTPUT_PATH = path.join(REPO_ROOT, 'burndown.md');
+const NON_TESTABLE_OUTPUT_PATH = path.join(REPO_ROOT, 'artifacts', 'spec-trace', 'non-testable.md');
 
 function loadMatrix(matrixPath) {
   if (!fs.existsSync(matrixPath)) {
@@ -34,7 +35,6 @@ function groupByPrefix(requirements) {
 
 function buildMarkdown(matrix) {
   const testable = matrix.requirements.filter((r) => r.testable !== false);
-  const nonTestable = matrix.requirements.filter((r) => r.testable === false);
 
   const total = testable.length;
   const covered = testable.filter((r) => r.tests.length > 0).length;
@@ -51,9 +51,6 @@ function buildMarkdown(matrix) {
   lines.push(`- Covered: ${covered}`);
   lines.push(`- Missing: ${missing.length}`);
   lines.push(`- Coverage: ${coveragePct}%`);
-  if (nonTestable.length) {
-    lines.push(`- Non-testable (governance/manual): ${nonTestable.length}`);
-  }
   lines.push('');
 
   if (missing.length === 0) {
@@ -73,20 +70,31 @@ function buildMarkdown(matrix) {
     lines.push('');
   }
 
-  if (nonTestable.length) {
-    lines.push('The following requirements are marked non-testable (governance/process):');
-    lines.push('');
-    const groupedGovernance = groupByPrefix(nonTestable);
-    for (const [prefix, reqs] of groupedGovernance) {
-      lines.push(`## ${prefix} (${reqs.length})`);
-      for (const req of reqs) {
-        lines.push(`- ${req.id} — ${req.title}`);
-      }
-      lines.push('');
-    }
+  lines.push('_Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._');
+
+  return lines.join('\n');
+}
+
+function buildNonTestableMarkdown(matrix) {
+  const nonTestable = matrix.requirements.filter((r) => r.testable === false);
+  const lines = [];
+  lines.push('# Non-testable requirements');
+  lines.push('');
+  lines.push('These governance/process requirements are marked `testable=false` and are excluded from coverage.');
+  lines.push('');
+  if (nonTestable.length === 0) {
+    lines.push('- (none)');
+    return lines.join('\n');
   }
 
-  lines.push('_Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._');
+  const grouped = groupByPrefix(nonTestable);
+  for (const [prefix, reqs] of grouped) {
+    lines.push(`## ${prefix} (${reqs.length})`);
+    for (const req of reqs) {
+      lines.push(`- ${req.id} — ${req.title}`);
+    }
+    lines.push('');
+  }
 
   return lines.join('\n');
 }
@@ -95,6 +103,9 @@ function main() {
   const matrix = loadMatrix(MATRIX_PATH);
   const markdown = buildMarkdown(matrix);
   fs.writeFileSync(OUTPUT_PATH, `${markdown}\n`);
+  const nonTestable = buildNonTestableMarkdown(matrix);
+  fs.mkdirSync(path.dirname(NON_TESTABLE_OUTPUT_PATH), { recursive: true });
+  fs.writeFileSync(NON_TESTABLE_OUTPUT_PATH, `${nonTestable}\n`);
   console.log(`Burndown written to ${path.relative(REPO_ROOT, OUTPUT_PATH)}`);
 }
 

@@ -1,13 +1,12 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T06:47:47.996Z
+Generated: 2026-01-01T07:03:58.648Z
 Source: artifacts/spec-trace/matrix.json
 
 - Requirements (testable): 61
 - Covered: 39
 - Missing: 22
 - Coverage: 63.9%
-- Non-testable (governance/manual): 1
 
 The following requirements currently have **no referenced tests**:
 
@@ -48,10 +47,5 @@ The following requirements currently have **no referenced tests**:
 
 ## VAL (1)
 - VAL-006 — No semantic validation of values
-
-The following requirements are marked non-testable (governance/process):
-
-## GOV (1)
-- GOV-001 — Spec-first changes
 
 _Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._
