@@ -1,11 +1,26 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-01T11:06:50.092Z
+Generated: 2026-01-02T08:44:19.668Z
 
 ## Testable requirements with no tests
+- BLOB-002 — BlobId format is deterministic
+- BLOB-LAYOUT-001 — Blob store paths are derived from BlobId
+- BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic
+- EXP-006 — Record-only export includes reachable blobs
+- GC-001 — Reachable blob set is computed from blob references
+- GC-002 — Unreferenced blobs are garbage and are excluded from record-only export
+- GC-003 — Garbage blobs do not make a dataset invalid
+- HASH-004 — Only schema and snapshot fingerprints are defined in core
+- HASH-005 — Blob content is committed by reference digests
+- LAYOUT-001 — Record files are discovered by content (not path)
+- LAYOUT-002 — One object per file
 - NFR-001 — No full reloads for CRUD
 - NFR-010 — Read-only offline after initial load
-- NR-SEM-001 — No kind-based semantic validation of fields
+- REL-002 — Where record relationships are extracted
+- TYPE-001 — Types are defined by type objects
+- TYPE-002 — typeId uniqueness
+- VAL-BLOB-001 — Blob references must resolve to matching blob bytes
+- VAL-BLOB-002 — Blob store files must match their path digest
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -33,11 +48,11 @@ Tests (0):
 
 ## NR-UI-002 — UI hint keys are ignored by core validation (testable=true)
 Tests (1):
-- tests/core.gaps.test.js — "NR-UI-002: UI hint keys are ignored by validation"
+- tests/core.gaps.test.js — "NR-UI-002: arbitrary keys inside fields are accepted"
 
-## NR-SEM-001 — No kind-based semantic validation of fields (testable=true)
-Tests (0):
-- (none)
+## NR-SEM-001 — No semantic validation of fields (testable=true)
+Tests (1):
+- tests/core.gaps.test.js — "NR-SEM-001: semantic shapes are ignored by validation"
 
 ## NR-SEC-001 — No security hardening requirement (testable=false)
 Tests (0):
@@ -45,46 +60,67 @@ Tests (0):
 
 ## NR-LINK-001 — No requirement that links resolve
 Tests (1):
-- tests/core.gaps.test.js — "NR-LINK-001: missing link targets do not fail validation"
+- tests/core.gaps.test.js — "NR-LINK-001: missing record links are allowed (except composition)"
+
+## ID-001 — Identifier syntax is separator-safe (testable=true)
+Tests (3):
+- tests/core.ids.test.js — "ID-001: accepts valid identifiers"
+- tests/core.ids.test.js — "ID-001: rejects recordId with colon"
+- tests/core.ids.test.js — "ID-001: rejects typeId with invalid characters"
+
+## ID-002 — Reserved typeId for blob references (testable=true)
+Tests (1):
+- tests/core.ids.test.js — "ID-002: rejects reserved gdblob typeId"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
-Tests (5):
-- tests/core.hash.test.js — "HASH-001: duplicate ids fail hashing"
-- tests/core.hash.test.js — "HASH-001: ids are ordered deterministically by UTF-8 bytes"
-- tests/core.hash.test.js — "HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID"
-- tests/core.hash.test.js — "HASH-001: line ending normalization produces stable hashes"
-- tests/core.hash.test.js — "HASH-001: non-record files do not affect hashes"
+Tests (3):
+- tests/core.hash.test.js — "HASH-001: duplicate identities fail hashing"
+- tests/core.hash.test.js — "HASH-001: line ending normalization yields stable hashes"
+- tests/core.hash.test.js — "HASH-001: non-record files are ignored"
 
 ## HASH-002 — Schema fingerprint (types only)
-Tests (1):
-- tests/core.hash.test.js — "HASH-002: schema hash ignores type file paths"
+Tests (0):
+- (none)
 
-## HASH-003 — Snapshot fingerprint (types + data records)
+## HASH-003 — Snapshot fingerprint (types + record objects)
 Tests (1):
-- tests/core.hash.test.js — "HASH-003: snapshot hash is path-independent for records"
+- tests/core.hash.test.js — "HASH-003: snapshot hash is path-independent for record files"
 
 ## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
+Tests (0):
+- (none)
+
+## HASH-005 — Blob content is committed by reference digests (testable=true)
+Tests (0):
+- (none)
+
+## BLOB-001 — Canonical blob digest (sha256) (testable=true)
 Tests (1):
-- tests/core.hash.test.js — "HASH-004: unknown hash scopes are rejected"
+- tests/core.blobs.test.js — "BLOB-001: computeBlobDigest hashes raw bytes"
 
-## LAYOUT-001 — Required directories
-Tests (2):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-001: missing required directories fails validation"
-- tests/cli.test.js — "LAYOUT-001: missing required directories fails validation"
+## BLOB-002 — BlobId format is deterministic (testable=true)
+Tests (0):
+- (none)
 
-## LAYOUT-002 — What counts as a record file
-Tests (2):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-002: ignores non-markdown files placed under records/"
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-002: ignores non-markdown files under records/"
+## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
+Tests (0):
+- (none)
 
-## LAYOUT-004 — Type records location
+## LAYOUT-002 — One object per file (testable=true)
+Tests (0):
+- (none)
+
+## BLOB-LAYOUT-001 — Blob store paths are derived from BlobId (testable=true)
+Tests (0):
+- (none)
+
+## BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store (testable=true)
 Tests (1):
-- tests/core.composition.test.js — "LAYOUT-004: nested type and record paths are accepted"
+- tests/core.blobs.test.js — "BLOB-LAYOUT-002: invalid blob path shape fails validation"
 
-## LAYOUT-005 — Data records location
-Tests (2):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-005: markdown files must live under records/<recordTypeId>/"
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-005: record files directly under records/ are invalid"
+## BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic (testable=true)
+Tests (0):
+- (none)
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
@@ -96,75 +132,60 @@ Tests (7):
 - tests/core.yaml.test.js — "FR-MD-020: non-object YAML front matter is invalid"
 - tests/core.yaml.test.js — "FR-MD-020: parses YAML objects"
 
-## FR-MD-021 — Required top-level fields
+## FR-MD-021 — Required top-level keys for type objects (testable=true)
 Tests (1):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-021: missing required id field fails validation"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-021: fields must be an object"
+
+## FR-MD-023 — Required top-level keys for record objects (testable=true)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-023: record requires recordId"
 
 ## FR-MD-022 — Body is raw Markdown
 Tests (1):
 - apps/web/src/core/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
 
-## EXT-001 — Minimal reserved vocabulary
-Tests (1):
-- tests/ext.reserved-vocabulary.test.js — "EXT-001: allows arbitrary extra top-level keys on types and records"
+## EXT-001 — Top-level vocabulary is fixed (testable=true)
+Tests (2):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "EXT-001: extra top-level keys are rejected"
+- tests/ext.reserved-vocabulary.test.js — "EXT-001: extra top-level keys are forbidden"
 
 ## EXT-002 — `fields` is open
 Tests (1):
 - tests/ext.reserved-vocabulary.test.js — "EXT-002: accepts arbitrary shapes within fields"
 
-## TYPE-001 — Type records are the schema source of truth
-Tests (1):
-- tests/core.graph.test.js — "TYPE-001: resolves a record's type via type records"
+## TYPE-001 — Types are defined by type objects (testable=true)
+Tests (0):
+- (none)
 
-## TYPE-002 — `recordTypeId` directory compatibility
-Tests (1):
-- tests/core.graph.test.js — "TYPE-002: recordTypeId must be directory-safe"
+## TYPE-002 — typeId uniqueness (testable=true)
+Tests (0):
+- (none)
 
-## TYPE-003 — recordTypeId uniqueness
-Tests (1):
-- tests/core.graph.test.js — "TYPE-003: duplicate recordTypeId fails validation"
-
-## TYPE-004 — Optional schema definition: `fieldDefs`
-Tests (4):
+## TYPE-004 — fieldDefs shape (testable=true)
+Tests (5):
 - apps/web/src/schema/typeSchema.test.ts — "TYPE-004: fieldDefs array is rejected"
 - apps/web/src/schema/typeSchema.test.ts — "TYPE-004: fieldDefs map is accepted"
 - apps/web/src/schema/typeSchema.test.ts — "TYPE-004: missing fieldDefs yields an empty schema"
 - apps/web/src/schema/typeSchema.test.ts — "TYPE-004: null fieldDefs yields an empty schema"
+- tests/core.gaps.test.js — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
 
-## TYPE-005 — Field definition minimum shape
-Tests (1):
-- tests/core.gaps.test.js — "TYPE-005: fieldDefs must declare kind"
-
-## TYPE-006 — Open world field kinds
-Tests (1):
-- tests/core.gaps.test.js — "TYPE-006: unknown kinds are accepted"
-
-## TYPE-007 — Body semantics: `bodyField` (optional)
-Tests (1):
-- tests/core.gaps.test.js — "TYPE-007: bodyField is optional"
-
-## TYPE-COMP-001 — Optional type composition metadata
+## TYPE-COMP-001 — composition shape (testable=true)
 Tests (2):
-- tests/core.composition.test.js — "TYPE-COMP-001: composition schema rejects non-map composition shapes"
-- tests/core.composition.test.js — "TYPE-COMP-001: composition schema rejects null composition"
+- tests/core.composition.test.js — "TYPE-COMP-001: composition component must include required boolean"
+- tests/core.composition.test.js — "TYPE-COMP-001: composition must be a map with only typeId + required"
 
-## REL-001 — Canonical relationship marker is Obsidian wiki-link syntax
+## REL-001 — Record relationships use composite wiki-links (testable=true)
+Tests (1):
+- tests/core.wikiLinks.test.js — "REL-001: blob references are not treated as record relationships"
+
+## REL-002 — Where record relationships are extracted (testable=true)
+Tests (0):
+- (none)
+
+## REL-003 — Record reference normalization (testable=true)
 Tests (2):
-- tests/core.wikiLinks.test.js — "REL-001: extracts ids from wiki-link tokens"
-- tests/core.wikiLinks.test.js — "REL-001: ignores wiki-link alias text"
-
-## REL-002 — Where relationships may appear
-Tests (3):
-- tests/core.graph.test.js — "REL-002: computes incoming links from extracted relationships"
-- tests/core.graph.test.js — "REL-002: extracts outgoing links from record content"
-- tests/core.graph.test.js — "REL-002: extracts wiki-links from YAML field strings"
-
-## REL-003 — ID normalization for link resolution
-Tests (4):
-- tests/core.ids.test.js — "REL-003: cleanId returns null for blank strings"
-- tests/core.ids.test.js — "REL-003: cleanId returns null for non-strings"
-- tests/core.ids.test.js — "REL-003: cleanId trims whitespace"
-- tests/core.ids.test.js — "REL-003: cleanId unwraps [[...]] tokens"
+- tests/core.wikiLinks.test.js — "REL-003: extracts record references from wiki-link tokens"
+- tests/core.wikiLinks.test.js — "REL-003: ignores malformed record tokens and aliases"
 
 ## REL-004 — Preservation: do not rewrite link spellings (testable=false)
 Tests (0):
@@ -175,45 +196,68 @@ Tests (2):
 - apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRef writes wiki-links"
 - apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRefs writes wiki-link arrays"
 
-## REL-007 — Only wiki-links are recognized as relationships in core
-Tests (2):
+## REL-007 — Only composite wiki-links are relationships in core (testable=true)
+Tests (1):
 - apps/web/src/schema/typeSchema.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
-- tests/core.composition.test.js — "REL-007: structured {ref} objects do not satisfy composition requirements"
+
+## BLOB-REF-001 — Blob references use composite wiki-link tokens (testable=true)
+Tests (1):
+- tests/core.wikiLinks.test.js — "BLOB-REF-001: extracts blob references"
+
+## BLOB-REF-002 — Blob reference normalization is strict (testable=true)
+Tests (1):
+- tests/core.wikiLinks.test.js — "BLOB-REF-002: ignores malformed blob references"
 
 ## VAL-001 — Type/records must be internally consistent
-Tests (2):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-001: unknown record type directories fail validation"
+Tests (1):
 - apps/web/src/state/DatasetContext.test.tsx — "VAL-001: invalid datasets are reported as dataset_invalid"
 
-## VAL-002 — Global ID uniqueness
+## VAL-002 — Identity uniqueness rules (testable=true)
 Tests (2):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-002: ids must be globally unique"
-- tests/core.graph.test.js — "VAL-002: enforces global id uniqueness"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-002: duplicate record identity fails validation"
+- tests/core.graph.test.js — "VAL-002: duplicate record identity fails graph build"
 
-## VAL-004 — Data record directory/type consistency
+## VAL-003 — Record objects must reference an existing type (testable=true)
 Tests (1):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-004: record typeId must match records/<recordTypeId>/ directory"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-003: record referencing missing type fails validation"
 
 ## VAL-005 — Required fields (schema-driven)
-Tests (3):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: missing required fields fails validation"
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: null required field fails validation"
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: present required field passes validation"
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: required fields enforced when fieldDefs.required = true"
 
 ## VAL-006 — No semantic validation of values
-Tests (1):
-- tests/core.gaps.test.js — "VAL-006: semantic constraints are not enforced"
+Tests (0):
+- (none)
 
-## VAL-COMP-001 — Composition referenced record types must exist
-Tests (1):
-- tests/core.composition.test.js — "VAL-COMP-001: composition references must point at existing types"
+## VAL-COMP-001 — Composition referenced types must exist
+Tests (0):
+- (none)
 
-## VAL-COMP-002 — Composition requirements must be satisfied by outgoing wiki-links
-Tests (4):
-- tests/core.composition.test.js — "VAL-COMP-002: composition fails when required component links are missing"
-- tests/core.composition.test.js — "VAL-COMP-002: composition ignores links that resolve to the wrong type"
-- tests/core.composition.test.js — "VAL-COMP-002: composition passes when required components are linked via wiki-links"
-- tests/core.composition.test.js — "VAL-COMP-002: duplicate links to the same target do not satisfy higher mins"
+## VAL-COMP-002 — Required components must be satisfied by outgoing record links
+Tests (3):
+- tests/core.composition.test.js — "VAL-COMP-002: link to wrong type does not satisfy requirement"
+- tests/core.composition.test.js — "VAL-COMP-002: missing required component link fails"
+- tests/core.composition.test.js — "VAL-COMP-002: required component link resolves to correct type"
+
+## VAL-BLOB-001 — Blob references must resolve to matching blob bytes (testable=true)
+Tests (0):
+- (none)
+
+## VAL-BLOB-002 — Blob store files must match their path digest (testable=true)
+Tests (0):
+- (none)
+
+## GC-001 — Reachable blob set is computed from blob references (testable=true)
+Tests (0):
+- (none)
+
+## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
+Tests (0):
+- (none)
+
+## GC-003 — Garbage blobs do not make a dataset invalid (testable=true)
+Tests (0):
+- (none)
 
 ## ERR-001 — File-specific errors when possible
 Tests (2):
@@ -252,21 +296,24 @@ Tests (1):
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## EXP-002 — Record-only export
-Tests (2):
-- apps/web/src/export/exportZip.test.ts — "EXP-002: record-only export includes only type/record markdown"
-- tests/core.roundtrip.test.js — "EXP-002: record-only zip export/import round-trips"
+Tests (0):
+- (none)
+
+## EXP-006 — Record-only export includes reachable blobs (testable=true)
+Tests (0):
+- (none)
 
 ## EXP-003 — Whole-repo export
-Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-003: whole-repo export round-trips snapshot files"
+Tests (0):
+- (none)
 
 ## EXP-004 — Path stability
-Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-004: export preserves original record paths"
+Tests (0):
+- (none)
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
-Tests (1):
-- tests/core.roundtrip.test.js — "EXP-005: whole-repo zip export preserves content bytes"
+Tests (0):
+- (none)
 
 ## UI-001 — Desktop + mobile usable (testable=false)
 Tests (0):

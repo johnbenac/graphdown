@@ -9,49 +9,36 @@ function snapshot(entries) {
   return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
-const recordsPlaceholder = ['records/.keep', 'placeholder'];
-
-test('EXT-001: allows arbitrary extra top-level keys on types and records', () => {
+test('EXT-001: extra top-level keys are forbidden', () => {
   const typeEntry = [
     'types/widget.md',
     [
       '---',
-      'id: type:widget',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'schemaVersion: 3',
+      'typeId: widget',
+      'fields: {}',
       'notes: custom type metadata',
-      'fields:',
-      '  recordTypeId: widget',
-      '  displayName: Widget',
       '---',
       'Widget type'
     ].join('\n')
   ];
 
   const recordEntry = [
-    'records/widget/widget-1.md',
+    'records/widget-1.md',
     [
       '---',
-      'id: widget:1',
       'typeId: widget',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
+      'recordId: one',
+      'fields: {}',
       'source: importer',
-      'metadata:',
-      '  owner: ops-team',
-      'fields:',
-      '  name: Widget 1',
-      '  status: active',
       '---',
       'Widget record'
     ].join('\n')
   ];
 
-  const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry, recordsPlaceholder]));
+  const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry]));
 
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_FORBIDDEN_TOP_LEVEL_KEY'));
 });
 
 test('EXT-002: accepts arbitrary shapes within fields', () => {
@@ -59,12 +46,8 @@ test('EXT-002: accepts arbitrary shapes within fields', () => {
     'types/gizmo.md',
     [
       '---',
-      'id: type:gizmo',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: gizmo',
+      'typeId: gizmo',
+      'fields: {}',
       '---',
       'Gizmo type'
     ].join('\n')
@@ -74,10 +57,8 @@ test('EXT-002: accepts arbitrary shapes within fields', () => {
     'records/gizmo/gizmo-1.md',
     [
       '---',
-      'id: gizmo:1',
       'typeId: gizmo',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
+      'recordId: one',
       'fields:',
       '  name: Gizmo One',
       '  count: 3',
@@ -97,7 +78,7 @@ test('EXT-002: accepts arbitrary shapes within fields', () => {
     ].join('\n')
   ];
 
-  const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry, recordsPlaceholder]));
+  const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry]));
 
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });

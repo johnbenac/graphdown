@@ -129,7 +129,7 @@ This standard does not require defenses against malicious datasets (e.g., inject
 
 Wiki-links MAY point to non-existent record references `typeId:recordId` (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
 
-Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet.
+Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved blob references are an import-failing error (VAL-BLOB-001).
 
 ---
 
@@ -167,6 +167,34 @@ A string equal to `recordKey`, used inside wiki-links.
 
 Obsidian-style link syntax: `[[...]]` containing a record reference `typeId:recordId`.
 
+### Blob object
+
+A **blob object** is an uninterpreted sequence of bytes stored in the dataset’s blob store (BLOB-LAYOUT-001).
+
+### Blob digest
+
+A **blob digest** is the lowercase hex SHA-256 digest of the blob bytes (BLOB-001).
+
+### BlobId
+
+A **BlobId** is a string of the form:
+
+`sha256-<digest>`
+
+where `<digest>` is 64 lowercase hex characters.
+
+### Blob reference
+
+A **blob reference** is a wiki-link token whose inner text is:
+
+`gdblob:<BlobId>`
+
+Example: `[[gdblob:sha256-0123...]]`
+
+### Blob store
+
+The **blob store** is the reserved directory and file layout defined by BLOB-LAYOUT-001.
+
 ---
 
 <!-- req:id=ID-001 title="Identifier syntax is separator-safe" testable=true -->
@@ -180,6 +208,15 @@ Obsidian-style link syntax: `[[...]]` containing a record reference `typeId:reco
 
 `typeId` and `recordId` MUST NOT contain `:`.
 Colon is reserved as the separator in `typeId:recordId` record references.
+
+<!-- req:id=ID-002 title="Reserved typeId for blob references" testable=true -->
+### ID-002 — Reserved typeId for blob references
+
+The `typeId` value `gdblob` is reserved.
+
+Datasets MUST NOT define:
+* any type object with `typeId: gdblob`, and
+* any record object with `typeId: gdblob`.
 
 ---
 
@@ -258,6 +295,34 @@ Core MUST NOT define or expose any additional standardized fingerprint computati
 If the core hashing API accepts a `scope` selector, it MUST accept only `schema` and `snapshot`.
 Any other value MUST fail with error code `E_USAGE` and MUST NOT return a digest.
 
+<!-- req:id=HASH-005 title="Blob content is committed by reference digests" testable=true -->
+### HASH-005 — Blob content is committed by reference digests
+
+Because blob references include the blob digest and blob integrity is enforced (VAL-BLOB-001/VAL-BLOB-002),
+dataset fingerprints (HASH-002/HASH-003) are computed over type objects and record objects only.
+
+Changing the bytes of a referenced blob necessarily changes its digest and therefore requires changing the referencing record content; therefore the dataset snapshot fingerprint changes.
+
+## 3.2 Blob identity
+
+<!-- req:id=BLOB-001 title="Canonical blob digest (sha256)" testable=true -->
+### BLOB-001 — Canonical blob digest (sha256)
+
+A blob digest MUST be computed as:
+
+* `SHA-256` over the blob’s raw bytes (no normalization, no decoding).
+
+The digest MUST be encoded as 64 lowercase hexadecimal characters.
+
+<!-- req:id=BLOB-002 title="BlobId format is deterministic" testable=true -->
+### BLOB-002 — BlobId format is deterministic
+
+A BlobId MUST have the exact form:
+
+`sha256-<digest>`
+
+Where `<digest>` matches: `^[0-9a-f]{64}$`.
+
 ## 4. Repository layout requirements
 
 <!-- req:id=LAYOUT-001 title="Record files are discovered by content (not path)" testable=true -->
@@ -270,6 +335,7 @@ A **record file** is any file that:
 * whose parsed YAML object contains a `typeId` key.
 
 Files that do not meet these conditions are ignored by core. Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
+For record files, paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
 
 <!-- req:id=LAYOUT-002 title="One object per file" testable=true -->
 ### LAYOUT-002 — One object per file
@@ -277,6 +343,36 @@ Files that do not meet these conditions are ignored by core. Paths and directory
 Each record file MUST contain exactly one YAML front matter block at the start of the file (per FR-MD-020). The remainder of the file is the record body (FR-MD-022).
 
 Core MUST NOT support multiple record objects in a single file.
+
+<!-- req:id=BLOB-LAYOUT-001 title="Blob store paths are derived from BlobId" testable=true -->
+### BLOB-LAYOUT-001 — Blob store paths are derived from BlobId
+
+Blob objects MUST be stored under the dataset root at:
+
+`blobs/sha256/<p>/<digest>`
+
+Where:
+
+* `<digest>` is the 64 lowercase hex digest from BLOB-001.
+* `<p>` is the first two hex characters of `<digest>`.
+
+Examples:
+* `blobs/sha256/0a/0a9f...<64 hex total>`
+* `blobs/sha256/ff/ff00...<64 hex total>`
+
+Blob files MUST be stored with the filename equal to `<digest>` exactly (no extension).
+
+<!-- req:id=BLOB-LAYOUT-002 title="Only canonical blob files are allowed in the blob store" testable=true -->
+### BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store
+
+Any file located under `blobs/sha256/` MUST match the canonical blob store path rules in BLOB-LAYOUT-001.
+
+Validation MUST fail if any file exists under `blobs/sha256/` that does not match the required `.../<p>/<digest>` shape.
+
+<!-- req:id=BLOB-LAYOUT-003 title="Non-record, non-blob-store files are non-semantic" testable=true -->
+### BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic
+
+Files that are not record files (LAYOUT-001) and are not blob store files (BLOB-LAYOUT-001) MUST be ignored by core for identity, linking, and validation semantics.
 
 ---
 
@@ -456,6 +552,32 @@ Core MUST NOT infer relationships from structured YAML shapes, bare IDs, or any 
 
 Such shapes MAY exist as opaque user data per EXT-002, but they have no relationship semantics in core.
 
+## 8.1 Blob references
+
+<!-- req:id=BLOB-REF-001 title="Blob references use composite wiki-link tokens" testable=true -->
+### BLOB-REF-001 — Blob references use composite wiki-link tokens
+
+A blob reference is expressed only as a wiki-link token:
+
+`[[gdblob:sha256-<digest>]]`
+
+Where `<digest>` matches `^[0-9a-f]{64}$`.
+
+Blob references MUST be extracted from:
+* the record body, and
+* any string value anywhere within the record `fields` map (including nested objects/arrays).
+
+<!-- req:id=BLOB-REF-002 title="Blob reference normalization is strict" testable=true -->
+### BLOB-REF-002 — Blob reference normalization is strict
+
+When interpreting a blob reference token, core MUST:
+
+* unwrap `[[...]]`
+* trim surrounding whitespace
+* require the inner text to match `gdblob:sha256-<digest>` exactly (lowercase hex)
+
+Tokens that do not match this shape MUST be ignored for blob reference extraction.
+
 ---
 
 ## 9. Import-time validity and integrity rules
@@ -469,6 +591,8 @@ Import MUST fail if:
 * any type object fails type requirements (§7)
 * identity uniqueness fails (§9.2)
 * a record object’s `typeId` has no matching type object (§9.3)
+* any blob store file fails blob integrity requirements (§VAL-BLOB-002)
+* any blob reference fails resolution (§VAL-BLOB-001)
 
 <!-- req:id=VAL-002 title="Identity uniqueness rules" testable=true -->
 ### VAL-002 — Identity uniqueness rules
@@ -527,6 +651,46 @@ When a type object defines `fields.composition`, then for every record object of
 For each component where `required: true`, the record MUST contain at least one outgoing relationship link (REL-001/REL-002/REL-003) to an existing record object whose `typeId` equals the component `typeId`.
 
 Links that do not resolve to an existing record object do not satisfy composition.
+
+<!-- req:id=VAL-BLOB-001 title="Blob references must resolve to matching blob bytes" testable=true -->
+### VAL-BLOB-001 — Blob references must resolve to matching blob bytes
+
+For every blob reference extracted per BLOB-REF-001/BLOB-REF-002:
+
+1. A corresponding blob file MUST exist at the canonical blob store path derived from the referenced `<digest>` (BLOB-LAYOUT-001).
+2. The blob file’s computed digest (BLOB-001) MUST equal the referenced `<digest>` exactly.
+
+Validation MUST fail otherwise.
+
+<!-- req:id=VAL-BLOB-002 title="Blob store files must match their path digest" testable=true -->
+### VAL-BLOB-002 — Blob store files must match their path digest
+
+For every file under `blobs/sha256/<p>/<digest>`:
+
+The computed digest of the file bytes (BLOB-001) MUST equal `<digest>`.
+
+Validation MUST fail otherwise.
+
+## 9.1 Blob garbage collection
+
+<!-- req:id=GC-001 title="Reachable blob set is computed from blob references" testable=true -->
+### GC-001 — Reachable blob set is computed from blob references
+
+The reachable blob set is defined as the set of `<digest>` values referenced by blob references extracted from all record objects per BLOB-REF-001/BLOB-REF-002.
+
+Implementations MUST be able to compute this reachable set deterministically.
+
+<!-- req:id=GC-002 title="Unreferenced blobs are garbage and are excluded from record-only export" testable=true -->
+### GC-002 — Unreferenced blobs are garbage and are excluded from record-only export
+
+A blob store file is garbage if its `<digest>` is not in the reachable blob set (GC-001).
+
+Record-only export (EXP-002) MUST NOT include garbage blob files.
+
+<!-- req:id=GC-003 title="Garbage blobs do not make a dataset invalid" testable=true -->
+### GC-003 — Garbage blobs do not make a dataset invalid
+
+Validation MUST NOT fail due solely to the presence of unreferenced blob store files.
 
 ---
 
@@ -602,8 +766,14 @@ Export MUST support exporting the Graphdown record subset:
 
 * all type objects (FR-MD-021)
 * all record objects (FR-MD-023)
+* all reachable blob files (GC-001) at their canonical blob store paths (BLOB-LAYOUT-001)
 
 as a zip archive.
+
+<!-- req:id=EXP-006 title="Record-only export includes reachable blobs" testable=true -->
+### EXP-006 — Record-only export includes reachable blobs
+
+Record-only export MUST include all blob store files whose digests are in the reachable blob set (GC-001), preserving their canonical blob store paths (BLOB-LAYOUT-001).
 
 <!-- req:id=EXP-003 title="Whole-repo export" -->
 ### EXP-003 — Whole-repo export

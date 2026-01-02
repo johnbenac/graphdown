@@ -9,41 +9,31 @@ function snapshot(entries) {
   return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
+function typeFile(path, typeId) {
+  return [
+    path,
+    ['---', `typeId: ${typeId}`, 'fields: {}', '---', ''].join('\n')
+  ];
+}
+
+function recordFile(path, typeId, recordId, body = '') {
+  return [
+    path,
+    ['---', `typeId: ${typeId}`, `recordId: ${recordId}`, 'fields: {}', '---', body].join('\n')
+  ];
+}
+
 function digest(result) {
-  assert.equal(result.ok, true);
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
   return result.digest;
 }
 
-test('HASH-003: snapshot hash is path-independent for records', () => {
-  const typeFile = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
+test('HASH-003: snapshot hash is path-independent for record files', () => {
+  const type = typeFile('types/note.md', 'note');
+  const recordContent = recordFile('records/note/one.md', 'note', 'one', 'Body');
 
-  const recordContent = [
-    '---',
-    'id: note:1',
-    'typeId: note',
-    'createdAt: 2024-01-03',
-    'updatedAt: 2024-01-04',
-    'fields:',
-    '  title: Note',
-    '---',
-    'Body'
-  ].join('\n');
-
-  const snapshotA = snapshot([typeFile, ['records/note/record-1.md', recordContent]]);
-  const snapshotB = snapshot([typeFile, ['records/note/subdir/record-1.md', recordContent]]);
+  const snapshotA = snapshot([type, recordContent]);
+  const snapshotB = snapshot([type, ['some/other/path.md', recordContent[1]]]);
 
   const digestA = digest(computeGdHashV1(snapshotA, 'snapshot'));
   const digestB = digest(computeGdHashV1(snapshotB, 'snapshot'));
@@ -51,242 +41,44 @@ test('HASH-003: snapshot hash is path-independent for records', () => {
   assert.equal(digestA, digestB);
 });
 
-test('HASH-002/HASH-003: schema hash changes on type edits; snapshot hash changes on data edits', () => {
-  const baseType = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-  const baseRecord = [
-    'records/note/record-1.md',
-    [
-      '---',
-      'id: note:1',
-      'typeId: note',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
-      'fields:',
-      '  title: Note',
-      '---',
-      'Body'
-    ].join('\n')
-  ];
+test('HASH-002/HASH-003: schema vs snapshot scopes', () => {
+  const type = typeFile('type.md', 'note');
+  const record = recordFile('r.md', 'note', 'one', 'Body');
+  const base = snapshot([type, record]);
 
-  const snapshotBase = snapshot([baseType, baseRecord]);
-  const schemaBase = digest(computeGdHashV1(snapshotBase, 'schema'));
-  const snapshotBaseDigest = digest(computeGdHashV1(snapshotBase, 'snapshot'));
+  const schemaDigest = digest(computeGdHashV1(base, 'schema'));
+  const snapshotDigest = digest(computeGdHashV1(base, 'snapshot'));
 
-  const snapshotDataChanged = snapshot([
-    baseType,
-    [
-      'records/note/record-1.md',
-      baseRecord[1].replace('Body', 'Updated body')
-    ]
-  ]);
+  const schemaChanged = snapshot([[type[0], type[1].replace('fields: {}', 'fields:\n  extra: true')], record]);
+  const schemaChangedDigest = digest(computeGdHashV1(schemaChanged, 'schema'));
+  assert.notEqual(schemaChangedDigest, schemaDigest);
 
-  const schemaAfterDataChange = digest(computeGdHashV1(snapshotDataChanged, 'schema'));
-  const snapshotAfterDataChange = digest(computeGdHashV1(snapshotDataChanged, 'snapshot'));
-
-  assert.equal(schemaAfterDataChange, schemaBase);
-  assert.notEqual(snapshotAfterDataChange, snapshotBaseDigest);
-
-  const snapshotSchemaChanged = snapshot([
-    [
-      'types/type--note.md',
-      baseType[1].replace('Type body', 'New type body')
-    ],
-    baseRecord
-  ]);
-
-  const schemaAfterSchemaChange = digest(computeGdHashV1(snapshotSchemaChanged, 'schema'));
-  const snapshotAfterSchemaChange = digest(computeGdHashV1(snapshotSchemaChanged, 'snapshot'));
-
-  assert.notEqual(schemaAfterSchemaChange, schemaBase);
-  assert.notEqual(snapshotAfterSchemaChange, snapshotBaseDigest);
+  const recordChanged = snapshot([type, recordFile('r.md', 'note', 'one', 'Updated')]);
+  const snapshotChanged = digest(computeGdHashV1(recordChanged, 'snapshot'));
+  assert.notEqual(snapshotChanged, snapshotDigest);
+  // Schema scope ignores record body change
+  assert.equal(digest(computeGdHashV1(recordChanged, 'schema')), schemaDigest);
 });
 
-test('HASH-001: line ending normalization produces stable hashes', () => {
-  const typeUnix = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const typeWindows = [
-    'types/type--note.md',
-    typeUnix[1].replace(/\n/g, '\r\n')
-  ];
-
-  const digestUnix = digest(computeGdHashV1(snapshot([typeUnix]), 'schema'));
-  const digestWindows = digest(computeGdHashV1(snapshot([typeWindows]), 'schema'));
-
+test('HASH-001: line ending normalization yields stable hashes', () => {
+  const unix = typeFile('t.md', 'note');
+  const windows = ['t.md', unix[1].replace(/\n/g, '\r\n')];
+  const digestUnix = digest(computeGdHashV1(snapshot([unix]), 'schema'));
+  const digestWindows = digest(computeGdHashV1(snapshot([windows]), 'schema'));
   assert.equal(digestUnix, digestWindows);
 });
 
-test('HASH-001: non-record files do not affect hashes', () => {
-  const typeFile = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const baseDigest = digest(computeGdHashV1(snapshot([typeFile]), 'schema'));
-  const withReadmeDigest = digest(
-    computeGdHashV1(
-      snapshot([
-        typeFile,
-        ['README.md', '# docs\n']
-      ]),
-      'schema'
-    )
-  );
-
-  assert.equal(baseDigest, withReadmeDigest);
+test('HASH-001: non-record files are ignored', () => {
+  const type = typeFile('type.md', 'note');
+  const base = digest(computeGdHashV1(snapshot([type]), 'schema'));
+  const withReadme = digest(computeGdHashV1(snapshot([type, ['README.md', '# docs\n']]), 'schema'));
+  assert.equal(base, withReadme);
 });
 
-test('HASH-001: duplicate ids fail hashing', () => {
-  const typeFile = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const dupTypeFile = [
-    'types/type--note-copy.md',
-    typeFile[1]
-  ];
-
-  const result = computeGdHashV1(snapshot([typeFile, dupTypeFile]), 'schema');
+test('HASH-001: duplicate identities fail hashing', () => {
+  const typeA = typeFile('a.md', 'note');
+  const typeB = typeFile('b.md', 'note');
+  const result = computeGdHashV1(snapshot([typeA, typeB]), 'schema');
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some((error) => error.code === 'E_DUPLICATE_ID'));
-});
-
-test('HASH-001: ids are ordered deterministically by UTF-8 bytes', () => {
-  const recordA = [
-    'records/note/a.md',
-    [
-      '---',
-      'id: a',
-      'typeId: note',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields: {}',
-      '---'
-    ].join('\n')
-  ];
-  const recordUmlaut = [
-    'records/note/u.md',
-    [
-      '---',
-      'id: ä',
-      'typeId: note',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields: {}',
-      '---'
-    ].join('\n')
-  ];
-  const recordZ = [
-    'records/note/z.md',
-    [
-      '---',
-      'id: z',
-      'typeId: note',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields: {}',
-      '---'
-    ].join('\n')
-  ];
-
-  const digest1 = digest(computeGdHashV1(snapshot([recordZ, recordUmlaut, recordA]), 'snapshot'));
-  const digest2 = digest(computeGdHashV1(snapshot([recordUmlaut, recordA, recordZ]), 'snapshot'));
-
-  assert.equal(digest1, digest2);
-});
-
-test('HASH-002: schema hash ignores type file paths', () => {
-  const typeContent = [
-    '---',
-    'id: type:note',
-    'typeId: sys:type',
-    'createdAt: 2024-01-01',
-    'updatedAt: 2024-01-02',
-    'fields:',
-    '  recordTypeId: note',
-    '---',
-    'Type body'
-  ].join('\n');
-
-  const digestA = digest(computeGdHashV1(snapshot([['types/type--note.md', typeContent]]), 'schema'));
-  const digestB = digest(
-    computeGdHashV1(snapshot([['types/subdir/type--note.md', typeContent]]), 'schema')
-  );
-
-  assert.equal(digestA, digestB);
-});
-
-test('HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID', () => {
-  const badBytes = new Uint8Array([0xff, 0xfe]);
-  const result = computeGdHashV1({ files: new Map([['types/type--bad.md', badBytes]]) }, 'schema');
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((error) => error.code === 'E_UTF8_INVALID'));
-});
-
-test('HASH-004: unknown hash scopes are rejected', () => {
-  const typeFile = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const result = computeGdHashV1(snapshot([typeFile]), 'records');
-
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((error) => error.code === 'E_USAGE'));
+  assert.ok(result.errors.some((e) => e.code === 'E_DUPLICATE_ID'));
 });

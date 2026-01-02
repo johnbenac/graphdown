@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { exportDatasetOnlyZip, exportWholeSnapshotZip } from "./exportZip";
 
-function snapshotFromEntries(entries: Array<[string, string]>): RepoSnapshot {
+function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): RepoSnapshot {
   return {
-    files: new Map(entries.map(([path, contents]) => [path, new Uint8Array(strToU8(contents))]))
+    files: new Map(
+      entries.map(([path, contents]) => [
+        path,
+        contents instanceof Uint8Array ? contents : new Uint8Array(strToU8(contents))
+      ])
+    )
   };
 }
 
@@ -19,10 +25,10 @@ async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<RepoSnapshot
 }
 
 describe("exportZip", () => {
-  it("EXP-003: whole-repo export round-trips snapshot files", async () => {
+  it("EXP-003/EXP-004/EXP-005: whole-repo export round-trips snapshot files", async () => {
     const snapshot = snapshotFromEntries([
-      ["types/note.md", "---\nid: type:note\n---"],
-      ["records/note/record-1.md", "---\nid: record:1\n---"],
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      ["records/note-1.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")],
       ["assets/info.txt", "hello"],
       [".git/config", "ignored"]
     ]);
@@ -41,32 +47,25 @@ describe("exportZip", () => {
     }
   });
 
-  it("EXP-002: record-only export includes only type/record markdown", async () => {
+  it("EXP-002/EXP-006/GC-002: record-only export includes reachable blobs and excludes garbage", async () => {
+    const blobBytes = new Uint8Array(strToU8("flower"));
+    const digest = createHash("sha256").update(Buffer.from(blobBytes)).digest("hex");
+    const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+
     const snapshot = snapshotFromEntries([
-      ["types/note.md", "---\nid: type:note\n---"],
-      ["records/note/record-1.md", "---\nid: record:1\n---"],
-      ["types/README.txt", "skip"],
-      ["assets/info.md", "skip"]
+      ["types/photo.md", ["---", "typeId: photo", "fields: {}", "---"].join("\n")],
+      [
+        "records/photo-1.md",
+        ["---", "typeId: photo", "recordId: one", "fields: {}", "---", `See [[gdblob:sha256-${digest}]].`].join("\n")
+      ],
+      [blobPath, blobBytes],
+      ["blobs/sha256/aa/" + "a".repeat(64), new Uint8Array(strToU8("garbage"))],
+      ["docs/readme.md", "ignore"]
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
     const imported = await readSnapshotFromZipBytes(exported);
-
-    expect([...imported.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
-  });
-
-  it("EXP-004: export preserves original record paths", async () => {
-    const snapshot = snapshotFromEntries([
-      ["types/note.md", "---\nid: type:note\n---"],
-      ["records/note/2025/record-1.md", "---\nid: record:1\n---"]
-    ]);
-
-    const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
-
-    expect(imported.files.has("records/note/2025/record-1.md")).toBe(true);
-    expect(imported.files.get("records/note/2025/record-1.md")).toEqual(
-      snapshot.files.get("records/note/2025/record-1.md")
-    );
+    const paths = [...imported.files.keys()].sort();
+    expect(paths).toEqual(["records/photo-1.md", "types/photo.md", blobPath].sort());
   });
 });

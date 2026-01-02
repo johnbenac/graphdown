@@ -10,216 +10,65 @@ function snapshotFromEntries(entries: Array<[string, string]>): RepoSnapshot {
   };
 }
 
-function baseSnapshot(): RepoSnapshot {
-  return snapshotFromEntries([
-    [
-      "types/note.md",
-      [
-        "---",
-        "id: type:note",
-        "typeId: sys:type",
-        "createdAt: 2024-01-01",
-        "updatedAt: 2024-01-02",
-        "fields:",
-        "  recordTypeId: note",
-        "---",
-        "Type body"
-      ].join("\n")
-    ],
-    [
-      "records/note/record-1.md",
-      [
-        "---",
-        "id: record:1",
-        "typeId: note",
-        "createdAt: 2024-01-01",
-        "updatedAt: 2024-01-02",
-        "fields:",
-        "  title: First",
-        "---",
-        "Record body"
-      ].join("\n")
-    ]
-  ]);
-}
-
-function snapshotWithRequiredFieldDefs(recordFields: string): RepoSnapshot {
-  return snapshotFromEntries([
-    [
-      "types/note.md",
-      [
-        "---",
-        "id: type:note",
-        "typeId: sys:type",
-        "createdAt: 2024-01-01",
-        "updatedAt: 2024-01-02",
-        "fields:",
-        "  recordTypeId: note",
-        "  fieldDefs:",
-        "    title:",
-        "      kind: string",
-        "      required: true",
-        "---",
-        "Type body"
-      ].join("\n")
-    ],
-    [
-      "records/note/record-1.md",
-      [
-        "---",
-        "id: record:1",
-        "typeId: note",
-        "createdAt: 2024-01-01",
-        "updatedAt: 2024-01-02",
-        recordFields,
-        "---",
-        "Record body"
-      ].join("\n")
-    ]
-  ]);
+function rec(path: string, yamlLines: string[], body = ""): [string, string] {
+  return [
+    path,
+    ["---", ...yamlLines, "---", body].join("\n")
+  ];
 }
 
 function getErrorCodes(snapshot: RepoSnapshot) {
   const result = validateDatasetSnapshot(snapshot);
-  if (result.ok) {
-    return [];
-  }
+  if (result.ok) return [];
   return result.errors.map((error) => error.code);
 }
 
 describe("validateDatasetSnapshot", () => {
-  it("LAYOUT-001: missing required directories fails validation", () => {
-    const snapshot = snapshotFromEntries([]);
-    expect(getErrorCodes(snapshot)).toContain("E_DIR_MISSING");
-  });
-
   it("FR-MD-020: missing YAML front matter fails validation", () => {
-    const snapshot = snapshotFromEntries([
-      ["types/placeholder.md", "No front matter"],
-      ["records/placeholder/record.md", "---\nid: record:placeholder\nfields: {}\n---"]
-    ]);
+    const snapshot = snapshotFromEntries([["note.md", "no front matter"]]);
     expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_MISSING");
   });
 
   it("FR-MD-020: invalid YAML fails validation", () => {
-    const snapshot = snapshotFromEntries([
-      ["types/placeholder.md", "---\nfoo: [\n---"],
-      ["records/placeholder/record.md", "---\nid: record:placeholder\nfields: {}\n---"]
-    ]);
+    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: [\n---"]]);
     expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
   });
 
-  it("FR-MD-021: missing required id field fails validation", () => {
-    const snapshot = snapshotFromEntries([
-      [
-        "types/placeholder.md",
-        [
-          "---",
-          "typeId: sys:type",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
-          "fields: { recordTypeId: placeholder }",
-          "---"
-        ].join("\n")
-      ],
-      ["records/placeholder/record.md", "---\nid: record:placeholder\nfields: {}\n---"]
-    ]);
+  it("FR-MD-021: fields must be an object", () => {
+    const snapshot = snapshotFromEntries([rec("type.md", ["typeId: note", "fields: []"])]);
     expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
-  it("LAYOUT-002: ignores non-markdown files under records/", () => {
-    const snapshot = baseSnapshot();
-    snapshot.files.set("records/.gitkeep", encoder.encode("keep"));
-    const result = validateDatasetSnapshot(snapshot);
-    expect(result.ok).toBe(true);
+  it("FR-MD-023: record requires recordId", () => {
+    const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "fields: {}"])]);
+    expect(getErrorCodes(snapshot)).toContain("E_INVALID_IDENTIFIER");
   });
 
-  it("LAYOUT-005: markdown files must live under records/<recordTypeId>/", () => {
-    const snapshot = baseSnapshot();
-    snapshot.files.set("records/README.md", encoder.encode("docs"));
-    expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
+  it("EXT-001: extra top-level keys are rejected", () => {
+    const snapshot = snapshotFromEntries([rec("type.md", ["typeId: note", "fields: {}", "extra: nope"])]);
+    expect(getErrorCodes(snapshot)).toContain("E_FORBIDDEN_TOP_LEVEL_KEY");
   });
 
-  it("LAYOUT-005: record files directly under records/ are invalid", () => {
-    const snapshot = baseSnapshot();
-    snapshot.files.set("records/record-1.md", encoder.encode("---\nid: record:bad\n---"));
-    expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
-  });
-
-  it("LAYOUT-002: ignores non-markdown files placed under records/", () => {
-    const snapshot = baseSnapshot();
-    snapshot.files.set("records/.gitignore", encoder.encode("*\n"));
-    snapshot.files.set("records/notes.txt", encoder.encode("hello"));
-    const result = validateDatasetSnapshot(snapshot);
-    expect(result.ok).toBe(true);
-  });
-
-  it("VAL-001: unknown record type directories fail validation", () => {
-    const snapshot = snapshotFromEntries([
-      [
-        "types/note.md",
-        [
-          "---",
-          "id: type:note",
-          "typeId: sys:type",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
-          "fields:",
-          "  recordTypeId: note",
-          "---"
-        ].join("\n")
-      ],
-      [
-        "records/unknown/record.md",
-        [
-          "---",
-          "id: record:1",
-          "typeId: unknown",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
-          "fields: {}",
-          "---"
-        ].join("\n")
-      ]
-    ]);
-    expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_RECORD_DIR");
-  });
-
-  it("VAL-004: record typeId must match records/<recordTypeId>/ directory", () => {
-    const snapshot = baseSnapshot();
-    const record = snapshot.files.get("records/note/record-1.md");
-    if (record) {
-      const text = new TextDecoder().decode(record);
-      const replaced = text.replace("typeId: note", "typeId: other");
-      snapshot.files.set("records/note/record-1.md", encoder.encode(replaced));
-    }
-    expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
-  });
-
-  it("VAL-002: ids must be globally unique", () => {
-    const snapshot = baseSnapshot();
-    const record = snapshot.files.get("records/note/record-1.md");
-    if (record) {
-      const text = new TextDecoder().decode(record);
-      const replaced = text.replace("id: record:1", "id: type:note");
-      snapshot.files.set("records/note/record-1.md", encoder.encode(replaced));
-    }
+  it("VAL-002: duplicate record identity fails validation", () => {
+    const type = rec("type.md", ["typeId: note", "fields: {}"]);
+    const record = rec("r.md", ["typeId: note", "recordId: one", "fields: {}"]);
+    const dup = rec("r2.md", ["typeId: note", "recordId: one", "fields: {}"]);
+    const snapshot = snapshotFromEntries([type, record, dup]);
     expect(getErrorCodes(snapshot)).toContain("E_DUPLICATE_ID");
   });
 
-  it("VAL-005: missing required fields fails validation", () => {
-    const snapshot = snapshotWithRequiredFieldDefs("fields: {}");
-    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
+  it("VAL-003: record referencing missing type fails validation", () => {
+    const snapshot = snapshotFromEntries([rec("r.md", ["typeId: missing", "recordId: one", "fields: {}"])]);
+    expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
   });
 
-  it("VAL-005: null required field fails validation", () => {
-    const snapshot = snapshotWithRequiredFieldDefs(["fields:", "  title: null"].join("\n"));
-    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
-  });
+  it("VAL-005: required fields enforced when fieldDefs.required = true", () => {
+    const type = rec("type.md", ["typeId: note", "fields:", "  fieldDefs:", "    title:", "      required: true"]);
+    const missing = rec("r.md", ["typeId: note", "recordId: one", "fields: {}"]);
+    const present = rec("r2.md", ["typeId: note", "recordId: two", "fields:", "  title: Hi"]);
 
-  it("VAL-005: present required field passes validation", () => {
-    const snapshot = snapshotWithRequiredFieldDefs(["fields:", "  title: Present"].join("\n"));
-    const result = validateDatasetSnapshot(snapshot);
-    expect(result.ok).toBe(true);
+    expect(getErrorCodes(snapshotFromEntries([type, missing]))).toContain("E_REQUIRED_FIELD_MISSING");
+    const ok = validateDatasetSnapshot(snapshotFromEntries([type, present]));
+    expect(ok.ok).toBe(true);
   });
 });

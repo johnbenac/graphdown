@@ -9,205 +9,68 @@ function snapshot(entries) {
   return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
-const recordsPlaceholder = ['records/.keep', 'placeholder'];
-
-const typeNote = [
-  'types/type--note.md',
-  [
-    '---',
-    'id: type:note',
-    'typeId: sys:type',
-    'createdAt: 2024-01-01',
-    'updatedAt: 2024-01-02',
-    'fields:',
-    '  recordTypeId: note',
-    '---',
-    'Type body'
-  ].join('\n')
-];
-
-test('NR-LINK-001: missing link targets do not fail validation', () => {
-  const recordWithMissingLink = [
-    'records/note/note-1.md',
-    [
-      '---',
-      'id: note:1',
-      'typeId: note',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
-      'fields: {}',
-      '---',
-      'See [[note:missing]]'
-    ].join('\n')
+function record(path, yamlLines, body = '') {
+  return [
+    path,
+    ['---', ...yamlLines, '---', body].join('\n')
   ];
+}
 
-  const result = validateDatasetSnapshot(snapshot([typeNote, recordWithMissingLink]));
+test('NR-LINK-001: missing record links are allowed (except composition)', () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/note.md', ['typeId: note', 'fields: {}']),
+      record('records/note-1.md', ['typeId: note', 'recordId: one', 'fields: {}'], 'See [[note:missing]].')
+    ])
+  );
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
 
-test('TYPE-005: fieldDefs must declare kind', () => {
-  const typeMissingKind = [
-    'types/type--device.md',
-    [
-      '---',
-      'id: type:device',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: device',
-      '  fieldDefs:',
-      '    name:',
-      '      required: true',
-      '---',
-      'Device type'
-    ].join('\n')
-  ];
+test('TYPE-004 + VAL-005: fieldDefs map enforces required=true only', () => {
+  const type = record('types/task.md', ['typeId: task', 'fields:', '  fieldDefs:', '    title:', '      required: true']);
+  const missing = record('records/task-1.md', ['typeId: task', 'recordId: t1', 'fields: {}']);
+  const present = record('records/task-2.md', ['typeId: task', 'recordId: t2', 'fields:', '  title: Hi']);
 
-  const result = validateDatasetSnapshot(snapshot([typeMissingKind, recordsPlaceholder]));
+  const failResult = validateDatasetSnapshot(snapshot([type, missing]));
+  assert.equal(failResult.ok, false);
+  assert.ok(failResult.errors.some((e) => e.code === 'E_REQUIRED_FIELD_MISSING'));
+
+  const passResult = validateDatasetSnapshot(snapshot([type, present]));
+  assert.equal(passResult.ok, true, JSON.stringify(passResult.errors));
+});
+
+test('TYPE-004: fieldDefs must be map of objects; required must be boolean when present', () => {
+  const invalid = record('types/task.md', ['typeId: task', 'fields:', '  fieldDefs:', '    title: 123']);
+  const invalidRequired = record(
+    'types/flag.md',
+    ['typeId: flag', 'fields:', '  fieldDefs:', '    on:', '      required: "yes"']
+  );
+
+  const result = validateDatasetSnapshot(snapshot([invalid]));
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some((error) => error.code === 'E_REQUIRED_FIELD_MISSING'));
+  assert.ok(result.errors.some((e) => e.code === 'E_REQUIRED_FIELD_MISSING'));
+
+  const result2 = validateDatasetSnapshot(snapshot([invalidRequired]));
+  assert.equal(result2.ok, false);
+  assert.ok(result2.errors.some((e) => e.code === 'E_REQUIRED_FIELD_MISSING'));
 });
 
-test('TYPE-006: unknown kinds are accepted', () => {
-  const typeUnknownKind = [
-    'types/type--sensor.md',
-    [
-      '---',
-      'id: type:sensor',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: sensor',
-      '  fieldDefs:',
-      '    signal:',
-      '      kind: smoke-signal',
-      '---',
-      'Sensor type'
-    ].join('\n')
-  ];
-
-  const result = validateDatasetSnapshot(snapshot([typeUnknownKind, recordsPlaceholder]));
+test('NR-SEM-001: semantic shapes are ignored by validation', () => {
+  const type = record(
+    'types/flag.md',
+    ['typeId: flag', 'fields:', '  fieldDefs:', '    enabled:', '      required: true', '      kind: boolean']
+  );
+  const recordNonBool = record('records/flag-1.md', ['typeId: flag', 'recordId: one', 'fields:', '  enabled: "not bool"']);
+  const result = validateDatasetSnapshot(snapshot([type, recordNonBool]));
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
 
-test('TYPE-007: bodyField is optional', () => {
-  const typeWithoutBodyField = typeNote;
-  const typeWithBodyField = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '  bodyField: body',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const record = [
-    'records/note/note-1.md',
-    [
-      '---',
-      'id: note:1',
-      'typeId: note',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
-      'fields:',
-      '  title: Note',
-      '---',
-      'Body'
-    ].join('\n')
-  ];
-
-  const resultNoBodyField = validateDatasetSnapshot(snapshot([typeWithoutBodyField, record]));
-  const resultWithBodyField = validateDatasetSnapshot(snapshot([typeWithBodyField, record]));
-
-  assert.equal(resultNoBodyField.ok, true, JSON.stringify(resultNoBodyField.errors));
-  assert.equal(resultWithBodyField.ok, true, JSON.stringify(resultWithBodyField.errors));
-});
-
-test('VAL-006: semantic constraints are not enforced', () => {
-  const typeWithKind = [
-    'types/type--flag.md',
-    [
-      '---',
-      'id: type:flag',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: flag',
-      '  fieldDefs:',
-      '    enabled:',
-      '      kind: boolean',
-      '      required: true',
-      '---',
-      'Flag type'
-    ].join('\n')
-  ];
-
-  const recordWithNonBoolean = [
-    'records/flag/flag-1.md',
-    [
-      '---',
-      'id: flag:1',
-      'typeId: flag',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
-      'fields:',
-      '  enabled: "not a boolean"',
-      '---',
-      'Body'
-    ].join('\n')
-  ];
-
-  const result = validateDatasetSnapshot(snapshot([typeWithKind, recordWithNonBoolean]));
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
-});
-
-test('NR-UI-002: UI hint keys are ignored by validation', () => {
-  const typeWithUiHints = [
-    'types/type--note.md',
-    [
-      '---',
-      'id: type:note',
-      'typeId: sys:type',
-      'createdAt: 2024-01-01',
-      'updatedAt: 2024-01-02',
-      'fields:',
-      '  recordTypeId: note',
-      '  fieldDefs:',
-      '    title:',
-      '      kind: string',
-      '---',
-      'Type body'
-    ].join('\n')
-  ];
-
-  const recordWithUiHints = [
-    'records/note/note-1.md',
-    [
-      '---',
-      'id: note:1',
-      'typeId: note',
-      'createdAt: 2024-01-03',
-      'updatedAt: 2024-01-04',
-      'fields:',
-      '  title: Note',
-      '  ui:',
-      '    widget: textarea',
-      '    label: "Fancy Title"',
-      '---',
-      'Body'
-    ].join('\n')
-  ];
-
-  const result = validateDatasetSnapshot(snapshot([typeWithUiHints, recordWithUiHints]));
+test('NR-UI-002: arbitrary keys inside fields are accepted', () => {
+  const type = record('types/note.md', ['typeId: note', 'fields: {}']);
+  const rec = record(
+    'records/note-1.md',
+    ['typeId: note', 'recordId: one', 'fields:', '  title: Note', '  ui:', '    widget: textarea']
+  );
+  const result = validateDatasetSnapshot(snapshot([type, rec]));
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });

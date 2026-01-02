@@ -1,8 +1,6 @@
 ---
-id: "note:1"
 typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
+recordId: "one"
 fields:
   title: "First note"
 ---

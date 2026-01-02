@@ -1,16 +1,15 @@
 export type RecordFields = Record<string, unknown>;
 
-export interface RecordEnvelope {
-  id: string;
+export interface MarkdownTypeObject {
   typeId: string;
-  createdAt: string;
-  updatedAt: string;
   fields: RecordFields;
 }
 
-export type TypeRecord = RecordEnvelope & { typeId: 'sys:type' };
-
-export type DataRecord = RecordEnvelope;
+export interface MarkdownRecordObject {
+  typeId: string;
+  recordId: string;
+  fields: RecordFields;
+}
 
 export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

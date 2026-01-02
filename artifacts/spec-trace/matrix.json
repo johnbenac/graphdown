@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-01T11:06:50.092Z",
+  "generatedAt": "2026-01-02T08:44:19.668Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -57,17 +57,23 @@
       "tests": [
         {
           "reqId": "NR-UI-002",
-          "testTitle": "NR-UI-002: UI hint keys are ignored by validation",
+          "testTitle": "NR-UI-002: arbitrary keys inside fields are accepted",
           "filePath": "tests/core.gaps.test.js"
         }
       ]
     },
     {
       "id": "NR-SEM-001",
-      "title": "No kind-based semantic validation of fields",
+      "title": "No semantic validation of fields",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "NR-SEM-001",
+          "testTitle": "NR-SEM-001: semantic shapes are ignored by validation",
+          "filePath": "tests/core.gaps.test.js"
+        }
+      ]
     },
     {
       "id": "NR-SEC-001",
@@ -84,8 +90,44 @@
       "tests": [
         {
           "reqId": "NR-LINK-001",
-          "testTitle": "NR-LINK-001: missing link targets do not fail validation",
+          "testTitle": "NR-LINK-001: missing record links are allowed (except composition)",
           "filePath": "tests/core.gaps.test.js"
+        }
+      ]
+    },
+    {
+      "id": "ID-001",
+      "title": "Identifier syntax is separator-safe",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "ID-001",
+          "testTitle": "ID-001: accepts valid identifiers",
+          "filePath": "tests/core.ids.test.js"
+        },
+        {
+          "reqId": "ID-001",
+          "testTitle": "ID-001: rejects recordId with colon",
+          "filePath": "tests/core.ids.test.js"
+        },
+        {
+          "reqId": "ID-001",
+          "testTitle": "ID-001: rejects typeId with invalid characters",
+          "filePath": "tests/core.ids.test.js"
+        }
+      ]
+    },
+    {
+      "id": "ID-002",
+      "title": "Reserved typeId for blob references",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "ID-002",
+          "testTitle": "ID-002: rejects reserved gdblob typeId",
+          "filePath": "tests/core.ids.test.js"
         }
       ]
     },
@@ -97,27 +139,17 @@
       "tests": [
         {
           "reqId": "HASH-001",
-          "testTitle": "HASH-001: duplicate ids fail hashing",
+          "testTitle": "HASH-001: duplicate identities fail hashing",
           "filePath": "tests/core.hash.test.js"
         },
         {
           "reqId": "HASH-001",
-          "testTitle": "HASH-001: ids are ordered deterministically by UTF-8 bytes",
+          "testTitle": "HASH-001: line ending normalization yields stable hashes",
           "filePath": "tests/core.hash.test.js"
         },
         {
           "reqId": "HASH-001",
-          "testTitle": "HASH-001: invalid UTF-8 fails hashing with E_UTF8_INVALID",
-          "filePath": "tests/core.hash.test.js"
-        },
-        {
-          "reqId": "HASH-001",
-          "testTitle": "HASH-001: line ending normalization produces stable hashes",
-          "filePath": "tests/core.hash.test.js"
-        },
-        {
-          "reqId": "HASH-001",
-          "testTitle": "HASH-001: non-record files do not affect hashes",
+          "testTitle": "HASH-001: non-record files are ignored",
           "filePath": "tests/core.hash.test.js"
         }
       ]
@@ -127,23 +159,17 @@
       "title": "Schema fingerprint (types only)",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "HASH-002",
-          "testTitle": "HASH-002: schema hash ignores type file paths",
-          "filePath": "tests/core.hash.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "HASH-003",
-      "title": "Snapshot fingerprint (types + data records)",
+      "title": "Snapshot fingerprint (types + record objects)",
       "testable": null,
       "verify": null,
       "tests": [
         {
           "reqId": "HASH-003",
-          "testTitle": "HASH-003: snapshot hash is path-independent for records",
+          "testTitle": "HASH-003: snapshot hash is path-independent for record files",
           "filePath": "tests/core.hash.test.js"
         }
       ]
@@ -153,80 +179,75 @@
       "title": "Only schema and snapshot fingerprints are defined in core",
       "testable": true,
       "verify": null,
+      "tests": []
+    },
+    {
+      "id": "HASH-005",
+      "title": "Blob content is committed by reference digests",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "BLOB-001",
+      "title": "Canonical blob digest (sha256)",
+      "testable": true,
+      "verify": null,
       "tests": [
         {
-          "reqId": "HASH-004",
-          "testTitle": "HASH-004: unknown hash scopes are rejected",
-          "filePath": "tests/core.hash.test.js"
+          "reqId": "BLOB-001",
+          "testTitle": "BLOB-001: computeBlobDigest hashes raw bytes",
+          "filePath": "tests/core.blobs.test.js"
         }
       ]
+    },
+    {
+      "id": "BLOB-002",
+      "title": "BlobId format is deterministic",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "LAYOUT-001",
-      "title": "Required directories",
-      "testable": null,
+      "title": "Record files are discovered by content (not path)",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "LAYOUT-001",
-          "testTitle": "LAYOUT-001: missing required directories fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "LAYOUT-001",
-          "testTitle": "LAYOUT-001: missing required directories fails validation",
-          "filePath": "tests/cli.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "LAYOUT-002",
-      "title": "What counts as a record file",
-      "testable": null,
+      "title": "One object per file",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "BLOB-LAYOUT-001",
+      "title": "Blob store paths are derived from BlobId",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "BLOB-LAYOUT-002",
+      "title": "Only canonical blob files are allowed in the blob store",
+      "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "LAYOUT-002",
-          "testTitle": "LAYOUT-002: ignores non-markdown files placed under records/",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "LAYOUT-002",
-          "testTitle": "LAYOUT-002: ignores non-markdown files under records/",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "reqId": "BLOB-LAYOUT-002",
+          "testTitle": "BLOB-LAYOUT-002: invalid blob path shape fails validation",
+          "filePath": "tests/core.blobs.test.js"
         }
       ]
     },
     {
-      "id": "LAYOUT-004",
-      "title": "Type records location",
-      "testable": null,
+      "id": "BLOB-LAYOUT-003",
+      "title": "Non-record, non-blob-store files are non-semantic",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "LAYOUT-004",
-          "testTitle": "LAYOUT-004: nested type and record paths are accepted",
-          "filePath": "tests/core.composition.test.js"
-        }
-      ]
-    },
-    {
-      "id": "LAYOUT-005",
-      "title": "Data records location",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "LAYOUT-005",
-          "testTitle": "LAYOUT-005: markdown files must live under records/<recordTypeId>/",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "LAYOUT-005",
-          "testTitle": "LAYOUT-005: record files directly under records/ are invalid",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "FR-MD-020",
@@ -273,13 +294,26 @@
     },
     {
       "id": "FR-MD-021",
-      "title": "Required top-level fields",
-      "testable": null,
+      "title": "Required top-level keys for type objects",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "FR-MD-021",
-          "testTitle": "FR-MD-021: missing required id field fails validation",
+          "testTitle": "FR-MD-021: fields must be an object",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "FR-MD-023",
+      "title": "Required top-level keys for record objects",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "FR-MD-023",
+          "testTitle": "FR-MD-023: record requires recordId",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
@@ -299,13 +333,18 @@
     },
     {
       "id": "EXT-001",
-      "title": "Minimal reserved vocabulary",
-      "testable": null,
+      "title": "Top-level vocabulary is fixed",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "EXT-001",
-          "testTitle": "EXT-001: allows arbitrary extra top-level keys on types and records",
+          "testTitle": "EXT-001: extra top-level keys are rejected",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "EXT-001",
+          "testTitle": "EXT-001: extra top-level keys are forbidden",
           "filePath": "tests/ext.reserved-vocabulary.test.js"
         }
       ]
@@ -325,47 +364,22 @@
     },
     {
       "id": "TYPE-001",
-      "title": "Type records are the schema source of truth",
-      "testable": null,
+      "title": "Types are defined by type objects",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "TYPE-001",
-          "testTitle": "TYPE-001: resolves a record's type via type records",
-          "filePath": "tests/core.graph.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "TYPE-002",
-      "title": "`recordTypeId` directory compatibility",
-      "testable": null,
+      "title": "typeId uniqueness",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "TYPE-002",
-          "testTitle": "TYPE-002: recordTypeId must be directory-safe",
-          "filePath": "tests/core.graph.test.js"
-        }
-      ]
-    },
-    {
-      "id": "TYPE-003",
-      "title": "recordTypeId uniqueness",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "TYPE-003",
-          "testTitle": "TYPE-003: duplicate recordTypeId fails validation",
-          "filePath": "tests/core.graph.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "TYPE-004",
-      "title": "Optional schema definition: `fieldDefs`",
-      "testable": null,
+      "title": "fieldDefs shape",
+      "testable": true,
       "verify": null,
       "tests": [
         {
@@ -387,132 +401,67 @@
           "reqId": "TYPE-004",
           "testTitle": "TYPE-004: null fieldDefs yields an empty schema",
           "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "TYPE-005",
-      "title": "Field definition minimum shape",
-      "testable": null,
-      "verify": null,
-      "tests": [
+        },
         {
-          "reqId": "TYPE-005",
-          "testTitle": "TYPE-005: fieldDefs must declare kind",
-          "filePath": "tests/core.gaps.test.js"
-        }
-      ]
-    },
-    {
-      "id": "TYPE-006",
-      "title": "Open world field kinds",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "TYPE-006",
-          "testTitle": "TYPE-006: unknown kinds are accepted",
-          "filePath": "tests/core.gaps.test.js"
-        }
-      ]
-    },
-    {
-      "id": "TYPE-007",
-      "title": "Body semantics: `bodyField` (optional)",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "TYPE-007",
-          "testTitle": "TYPE-007: bodyField is optional",
+          "reqId": "TYPE-004",
+          "testTitle": "TYPE-004: fieldDefs must be map of objects; required must be boolean when present",
           "filePath": "tests/core.gaps.test.js"
         }
       ]
     },
     {
       "id": "TYPE-COMP-001",
-      "title": "Optional type composition metadata",
-      "testable": null,
+      "title": "composition shape",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "TYPE-COMP-001",
-          "testTitle": "TYPE-COMP-001: composition schema rejects non-map composition shapes",
+          "testTitle": "TYPE-COMP-001: composition component must include required boolean",
           "filePath": "tests/core.composition.test.js"
         },
         {
           "reqId": "TYPE-COMP-001",
-          "testTitle": "TYPE-COMP-001: composition schema rejects null composition",
+          "testTitle": "TYPE-COMP-001: composition must be a map with only typeId + required",
           "filePath": "tests/core.composition.test.js"
         }
       ]
     },
     {
       "id": "REL-001",
-      "title": "Canonical relationship marker is Obsidian wiki-link syntax",
-      "testable": null,
+      "title": "Record relationships use composite wiki-links",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "REL-001",
-          "testTitle": "REL-001: extracts ids from wiki-link tokens",
-          "filePath": "tests/core.wikiLinks.test.js"
-        },
-        {
-          "reqId": "REL-001",
-          "testTitle": "REL-001: ignores wiki-link alias text",
+          "testTitle": "REL-001: blob references are not treated as record relationships",
           "filePath": "tests/core.wikiLinks.test.js"
         }
       ]
     },
     {
       "id": "REL-002",
-      "title": "Where relationships may appear",
-      "testable": null,
+      "title": "Where record relationships are extracted",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "REL-002",
-          "testTitle": "REL-002: computes incoming links from extracted relationships",
-          "filePath": "tests/core.graph.test.js"
-        },
-        {
-          "reqId": "REL-002",
-          "testTitle": "REL-002: extracts outgoing links from record content",
-          "filePath": "tests/core.graph.test.js"
-        },
-        {
-          "reqId": "REL-002",
-          "testTitle": "REL-002: extracts wiki-links from YAML field strings",
-          "filePath": "tests/core.graph.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "REL-003",
-      "title": "ID normalization for link resolution",
-      "testable": null,
+      "title": "Record reference normalization",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "REL-003",
-          "testTitle": "REL-003: cleanId returns null for blank strings",
-          "filePath": "tests/core.ids.test.js"
+          "testTitle": "REL-003: extracts record references from wiki-link tokens",
+          "filePath": "tests/core.wikiLinks.test.js"
         },
         {
           "reqId": "REL-003",
-          "testTitle": "REL-003: cleanId returns null for non-strings",
-          "filePath": "tests/core.ids.test.js"
-        },
-        {
-          "reqId": "REL-003",
-          "testTitle": "REL-003: cleanId trims whitespace",
-          "filePath": "tests/core.ids.test.js"
-        },
-        {
-          "reqId": "REL-003",
-          "testTitle": "REL-003: cleanId unwraps [[...]] tokens",
-          "filePath": "tests/core.ids.test.js"
+          "testTitle": "REL-003: ignores malformed record tokens and aliases",
+          "filePath": "tests/core.wikiLinks.test.js"
         }
       ]
     },
@@ -543,19 +492,40 @@
     },
     {
       "id": "REL-007",
-      "title": "Only wiki-links are recognized as relationships in core",
-      "testable": null,
+      "title": "Only composite wiki-links are relationships in core",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "REL-007",
           "testTitle": "REL-007: readRef/readRefs return cleaned ids from legacy shapes",
           "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        },
+        }
+      ]
+    },
+    {
+      "id": "BLOB-REF-001",
+      "title": "Blob references use composite wiki-link tokens",
+      "testable": true,
+      "verify": null,
+      "tests": [
         {
-          "reqId": "REL-007",
-          "testTitle": "REL-007: structured {ref} objects do not satisfy composition requirements",
-          "filePath": "tests/core.composition.test.js"
+          "reqId": "BLOB-REF-001",
+          "testTitle": "BLOB-REF-001: extracts blob references",
+          "filePath": "tests/core.wikiLinks.test.js"
+        }
+      ]
+    },
+    {
+      "id": "BLOB-REF-002",
+      "title": "Blob reference normalization is strict",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "BLOB-REF-002",
+          "testTitle": "BLOB-REF-002: ignores malformed blob references",
+          "filePath": "tests/core.wikiLinks.test.js"
         }
       ]
     },
@@ -567,11 +537,6 @@
       "tests": [
         {
           "reqId": "VAL-001",
-          "testTitle": "VAL-001: unknown record type directories fail validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "VAL-001",
           "testTitle": "VAL-001: invalid datasets are reported as dataset_invalid",
           "filePath": "apps/web/src/state/DatasetContext.test.tsx"
         }
@@ -579,31 +544,31 @@
     },
     {
       "id": "VAL-002",
-      "title": "Global ID uniqueness",
-      "testable": null,
+      "title": "Identity uniqueness rules",
+      "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "VAL-002",
-          "testTitle": "VAL-002: ids must be globally unique",
+          "testTitle": "VAL-002: duplicate record identity fails validation",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         },
         {
           "reqId": "VAL-002",
-          "testTitle": "VAL-002: enforces global id uniqueness",
+          "testTitle": "VAL-002: duplicate record identity fails graph build",
           "filePath": "tests/core.graph.test.js"
         }
       ]
     },
     {
-      "id": "VAL-004",
-      "title": "Data record directory/type consistency",
-      "testable": null,
+      "id": "VAL-003",
+      "title": "Record objects must reference an existing type",
+      "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "VAL-004",
-          "testTitle": "VAL-004: record typeId must match records/<recordTypeId>/ directory",
+          "reqId": "VAL-003",
+          "testTitle": "VAL-003: record referencing missing type fails validation",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
@@ -616,17 +581,7 @@
       "tests": [
         {
           "reqId": "VAL-005",
-          "testTitle": "VAL-005: missing required fields fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "VAL-005",
-          "testTitle": "VAL-005: null required field fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
-        },
-        {
-          "reqId": "VAL-005",
-          "testTitle": "VAL-005: present required field passes validation",
+          "testTitle": "VAL-005: required fields enforced when fieldDefs.required = true",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
@@ -636,54 +591,72 @@
       "title": "No semantic validation of values",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "VAL-006",
-          "testTitle": "VAL-006: semantic constraints are not enforced",
-          "filePath": "tests/core.gaps.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "VAL-COMP-001",
-      "title": "Composition referenced record types must exist",
+      "title": "Composition referenced types must exist",
+      "testable": null,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-COMP-002",
+      "title": "Required components must be satisfied by outgoing record links",
       "testable": null,
       "verify": null,
       "tests": [
         {
-          "reqId": "VAL-COMP-001",
-          "testTitle": "VAL-COMP-001: composition references must point at existing types",
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: link to wrong type does not satisfy requirement",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: missing required component link fails",
+          "filePath": "tests/core.composition.test.js"
+        },
+        {
+          "reqId": "VAL-COMP-002",
+          "testTitle": "VAL-COMP-002: required component link resolves to correct type",
           "filePath": "tests/core.composition.test.js"
         }
       ]
     },
     {
-      "id": "VAL-COMP-002",
-      "title": "Composition requirements must be satisfied by outgoing wiki-links",
-      "testable": null,
+      "id": "VAL-BLOB-001",
+      "title": "Blob references must resolve to matching blob bytes",
+      "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "VAL-COMP-002",
-          "testTitle": "VAL-COMP-002: composition fails when required component links are missing",
-          "filePath": "tests/core.composition.test.js"
-        },
-        {
-          "reqId": "VAL-COMP-002",
-          "testTitle": "VAL-COMP-002: composition ignores links that resolve to the wrong type",
-          "filePath": "tests/core.composition.test.js"
-        },
-        {
-          "reqId": "VAL-COMP-002",
-          "testTitle": "VAL-COMP-002: composition passes when required components are linked via wiki-links",
-          "filePath": "tests/core.composition.test.js"
-        },
-        {
-          "reqId": "VAL-COMP-002",
-          "testTitle": "VAL-COMP-002: duplicate links to the same target do not satisfy higher mins",
-          "filePath": "tests/core.composition.test.js"
-        }
-      ]
+      "tests": []
+    },
+    {
+      "id": "VAL-BLOB-002",
+      "title": "Blob store files must match their path digest",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "GC-001",
+      "title": "Reachable blob set is computed from blob references",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "GC-002",
+      "title": "Unreferenced blobs are garbage and are excluded from record-only export",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "GC-003",
+      "title": "Garbage blobs do not make a dataset invalid",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "ERR-001",
@@ -821,57 +794,35 @@
       "title": "Record-only export",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-002",
-          "testTitle": "EXP-002: record-only export includes only type/record markdown",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        },
-        {
-          "reqId": "EXP-002",
-          "testTitle": "EXP-002: record-only zip export/import round-trips",
-          "filePath": "tests/core.roundtrip.test.js"
-        }
-      ]
+      "tests": []
+    },
+    {
+      "id": "EXP-006",
+      "title": "Record-only export includes reachable blobs",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "EXP-003",
       "title": "Whole-repo export",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-003",
-          "testTitle": "EXP-003: whole-repo export round-trips snapshot files",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "EXP-004",
       "title": "Path stability",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-004",
-          "testTitle": "EXP-004: export preserves original record paths",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "EXP-005",
       "title": "Content preservation (no “reformat the universe”)",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-005",
-          "testTitle": "EXP-005: whole-repo zip export preserves content bytes",
-          "filePath": "tests/core.roundtrip.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "UI-001",
@@ -937,6 +888,50 @@
   "unknownReferences": [],
   "missingTestable": [
     {
+      "id": "BLOB-002",
+      "title": "BlobId format is deterministic"
+    },
+    {
+      "id": "BLOB-LAYOUT-001",
+      "title": "Blob store paths are derived from BlobId"
+    },
+    {
+      "id": "BLOB-LAYOUT-003",
+      "title": "Non-record, non-blob-store files are non-semantic"
+    },
+    {
+      "id": "EXP-006",
+      "title": "Record-only export includes reachable blobs"
+    },
+    {
+      "id": "GC-001",
+      "title": "Reachable blob set is computed from blob references"
+    },
+    {
+      "id": "GC-002",
+      "title": "Unreferenced blobs are garbage and are excluded from record-only export"
+    },
+    {
+      "id": "GC-003",
+      "title": "Garbage blobs do not make a dataset invalid"
+    },
+    {
+      "id": "HASH-004",
+      "title": "Only schema and snapshot fingerprints are defined in core"
+    },
+    {
+      "id": "HASH-005",
+      "title": "Blob content is committed by reference digests"
+    },
+    {
+      "id": "LAYOUT-001",
+      "title": "Record files are discovered by content (not path)"
+    },
+    {
+      "id": "LAYOUT-002",
+      "title": "One object per file"
+    },
+    {
       "id": "NFR-001",
       "title": "No full reloads for CRUD"
     },
@@ -945,8 +940,24 @@
       "title": "Read-only offline after initial load"
     },
     {
-      "id": "NR-SEM-001",
-      "title": "No kind-based semantic validation of fields"
+      "id": "REL-002",
+      "title": "Where record relationships are extracted"
+    },
+    {
+      "id": "TYPE-001",
+      "title": "Types are defined by type objects"
+    },
+    {
+      "id": "TYPE-002",
+      "title": "typeId uniqueness"
+    },
+    {
+      "id": "VAL-BLOB-001",
+      "title": "Blob references must resolve to matching blob bytes"
+    },
+    {
+      "id": "VAL-BLOB-002",
+      "title": "Blob store files must match their path digest"
     }
   ]
 }

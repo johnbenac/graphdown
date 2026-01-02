@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import { isRecordFileBytes, parseGraphdownText } from './datasetObjects';
 import { makeError, type ValidationError } from './errors';
-import { parseMarkdownRecord } from './graph';
 import type { RepoSnapshot } from './snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
@@ -28,17 +28,6 @@ function normalizeLineEndings(text: string): string {
   return text.replace(/\r\n?/g, '\n');
 }
 
-function isRecordPath(path: string, scope: HashScope): boolean {
-  const lower = path.toLowerCase();
-  if (!lower.endsWith('.md')) {
-    return false;
-  }
-  if (scope === 'schema') {
-    return path.startsWith('types/');
-  }
-  return path.startsWith('types/') || path.startsWith('records/');
-}
-
 function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   const length = Math.min(a.length, b.length);
   for (let i = 0; i < length; i++) {
@@ -59,43 +48,42 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
   const errors: ValidationError[] = [];
   const seenIds = new Set<string>();
 
-  const files = [...snapshot.files.keys()].filter((file) => isRecordPath(file, scope));
+  const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
 
   for (const file of files) {
     const raw = snapshot.files.get(file);
-    if (!raw) {
-      continue;
-    }
+    if (!raw) continue;
+    if (!isRecordFileBytes(file, raw)) continue;
+
     const decoded = decodeUtf8Fatal(raw, file, errors);
-    if (decoded === null) {
-      continue;
-    }
-    const normalized = normalizeLineEndings(decoded);
-    const parsed = parseMarkdownRecord(normalized, file);
-    if (!parsed.ok) {
+    if (decoded === null) continue;
+
+    const normalizedText = normalizeLineEndings(decoded);
+    const parsed = parseGraphdownText(file, normalizedText);
+    if (parsed.kind === 'ignored') continue;
+    if (parsed.kind === 'error') {
       errors.push(parsed.error);
       continue;
     }
-    const idRaw = parsed.yaml.id;
-    const id = typeof idRaw === 'string' ? idRaw.trim() : '';
-    if (!id) {
-      errors.push(
-        makeError('E_REQUIRED_FIELD_MISSING', `Record file ${file} is missing required id for hashing`, file)
-      );
+
+    const include =
+      (scope === 'schema' && parsed.kind === 'type') ||
+      (scope === 'snapshot' && (parsed.kind === 'type' || parsed.kind === 'record'));
+    if (!include) continue;
+
+    if (seenIds.has(parsed.identity)) {
+      errors.push(makeError('E_DUPLICATE_ID', `Duplicate identity detected during hashing: ${parsed.identity}`, file));
       continue;
     }
-    if (seenIds.has(id)) {
-      errors.push(makeError('E_DUPLICATE_ID', `Duplicate id detected during hashing: ${id}`, file));
-      continue;
-    }
-    seenIds.add(id);
+    seenIds.add(parsed.identity);
+
     if (!encoder) {
       errors.push(makeError('E_INTERNAL', 'TextEncoder not available for hashing', file));
       continue;
     }
-    const contentBytes = encoder.encode(normalized);
-    const idBytes = encoder.encode(id);
-    recordEntries.push({ id, idBytes, file, bytes: contentBytes });
+    const contentBytes = encoder.encode(normalizedText);
+    const idBytes = encoder.encode(parsed.identity);
+    recordEntries.push({ id: parsed.identity, idBytes, file, bytes: contentBytes });
   }
 
   if (errors.length) {

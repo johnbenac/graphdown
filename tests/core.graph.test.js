@@ -6,214 +6,71 @@ const test = require('node:test');
 
 const { buildGraphFromFs } = require('../dist/core');
 
-const fixtureRoot = path.join(__dirname, 'fixtures', 'graph-dataset');
+function writeFile(root, relative, content) {
+  const full = path.join(root, relative);
+  fs.mkdirSync(path.dirname(full), { recursive: true });
+  fs.writeFileSync(full, content);
+}
 
-test('REL-002: extracts outgoing links from record content', () => {
-  const result = buildGraphFromFs(fixtureRoot);
+function typeFile(typeId) {
+  return ['---', `typeId: ${typeId}`, 'fields: {}', '---', ''].join('\n');
+}
 
-  assert.equal(result.ok, true);
-  const { graph } = result;
-  assert.deepEqual(graph.getLinksFrom('note:1'), ['note:2']);
-  assert.deepEqual(graph.getLinksFrom('note:2'), ['note:1']);
-});
+function recordFile(typeId, recordId, body = '', extraFields = '') {
+  return ['---', `typeId: ${typeId}`, `recordId: ${recordId}`, 'fields: {}', extraFields, '---', body].join('\n');
+}
 
-test('REL-002: computes incoming links from extracted relationships', () => {
-  const result = buildGraphFromFs(fixtureRoot);
-
-  assert.equal(result.ok, true);
-  const { graph } = result;
-  assert.deepEqual(graph.getLinksTo('note:1'), ['note:2']);
-  assert.deepEqual(graph.getLinksTo('note:2'), ['note:1']);
-});
-
-test("TYPE-001: resolves a record's type via type records", () => {
-  const result = buildGraphFromFs(fixtureRoot);
-
-  assert.equal(result.ok, true);
-  const { graph } = result;
-  assert.equal(graph.getRecordTypeId('note:1'), 'note');
-  const type = graph.getTypeForRecord('note:1');
-  assert.ok(type);
-  assert.equal(type.recordTypeId, 'note');
-});
-
-test('REL-002: extracts wiki-links from YAML field strings', () => {
+test('REL-002/REL-003: extracts record links from bodies and fields', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
-
   try {
-    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
-    fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'types', 'type--note.md'),
-      `---
-id: "type:note"
-typeId: "sys:type"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  recordTypeId: "note"
----
-`
-    );
-
-    fs.writeFileSync(
-      path.join(tempDir, 'records', 'note', 'record--1.md'),
-      `---
-id: "note:1"
-typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  title: "Note 1"
-  description: "See [[note:2]]"
----
-`
-    );
-
-    fs.writeFileSync(
-      path.join(tempDir, 'records', 'note', 'record--2.md'),
-      `---
-id: "note:2"
-typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  title: "Note 2"
----
-`
+    writeFile(tempDir, 'types/note.md', typeFile('note'));
+    writeFile(tempDir, 'records/note-1.md', recordFile('note', 'one', 'See [[note:two]].'));
+    writeFile(
+      tempDir,
+      'records/note-2.md',
+      ['---', 'typeId: note', 'recordId: two', 'fields:', '  ref: "[[note:one]]"', '---', 'Backlink'].join('\n')
     );
 
     const result = buildGraphFromFs(tempDir);
     assert.equal(result.ok, true);
     const { graph } = result;
-
-    assert.deepEqual(graph.getLinksFrom('note:1'), ['note:2']);
-    assert.deepEqual(graph.getLinksTo('note:2'), ['note:1']);
+    assert.deepEqual(graph.getLinksFrom('note:one'), ['note:two']);
+    assert.deepEqual(graph.getLinksTo('note:one'), ['note:two']);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
-test('VAL-002: enforces global id uniqueness', () => {
+test('Graph exposes type and record lookup by identity', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
-
   try {
-    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
-    fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'types', 'type--note.md'),
-      `---
-id: "type:note"
-typeId: "sys:type"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  recordTypeId: "note"
----
-`
-    );
-
-    const recordContent = `---
-id: "note:1"
-typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  title: "Duplicated"
----
-`;
-    fs.writeFileSync(path.join(tempDir, 'records', 'note', 'record--1.md'), recordContent);
-    fs.writeFileSync(path.join(tempDir, 'records', 'note', 'record--2.md'), recordContent);
+    writeFile(tempDir, 't.md', typeFile('note'));
+    writeFile(tempDir, 'r.md', recordFile('note', 'one'));
 
     const result = buildGraphFromFs(tempDir);
-
-    assert.equal(result.ok, false);
-    assert.ok(result.errors.some((error) => error.code === 'E_DUPLICATE_ID'));
+    assert.equal(result.ok, true);
+    const { graph } = result;
+    const type = graph.getType('note');
+    assert.ok(type);
+    const record = graph.getRecord('note:one');
+    assert.ok(record);
+    assert.equal(graph.getTypeForRecord('note:one')?.typeId, 'note');
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
-test('TYPE-002: recordTypeId must be directory-safe', () => {
+test('VAL-002: duplicate record identity fails graph build', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
-
   try {
-    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
-    fs.mkdirSync(path.join(tempDir, 'records', 'note'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'types', 'type--note.md'),
-      `---
-id: "type:note"
-typeId: "sys:type"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  recordTypeId: "Note Type"
----
-`
-    );
-
-    fs.writeFileSync(
-      path.join(tempDir, 'records', 'note', 'record--1.md'),
-      `---
-id: "note:1"
-typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  title: "First note"
----
-`
-    );
+    writeFile(tempDir, 't.md', typeFile('note'));
+    const content = recordFile('note', 'one');
+    writeFile(tempDir, 'r1.md', content);
+    writeFile(tempDir, 'r2.md', content);
 
     const result = buildGraphFromFs(tempDir);
-
     assert.equal(result.ok, false);
-    assert.ok(result.errors.some((error) => error.code === 'E_RECORD_TYPE_ID_INVALID'));
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
-});
-
-test('TYPE-003: duplicate recordTypeId fails validation', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
-
-  try {
-    fs.mkdirSync(path.join(tempDir, 'types'), { recursive: true });
-
-    fs.writeFileSync(
-      path.join(tempDir, 'types', 'type--note.md'),
-      `---
-id: "type:note"
-typeId: "sys:type"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  recordTypeId: "note"
----
-`
-    );
-
-    fs.writeFileSync(
-      path.join(tempDir, 'types', 'type--note-duplicate.md'),
-      `---
-id: "type:note-duplicate"
-typeId: "sys:type"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
-fields:
-  recordTypeId: "note"
----
-`
-    );
-
-    const result = buildGraphFromFs(tempDir);
-
-    assert.equal(result.ok, false);
-    assert.ok(result.errors.some((error) => error.code === 'E_DUPLICATE_RECORD_TYPE_ID'));
+    assert.ok(result.errors.some((e) => e.code === 'E_DUPLICATE_ID'));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

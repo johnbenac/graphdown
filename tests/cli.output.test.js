@@ -51,7 +51,7 @@ test('ERR-001: pretty output includes stable error codes', () => {
 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Validation failed/);
-  assert.match(result.stderr, /\[E_DIR_MISSING\]/);
+  assert.match(result.stderr, /\[E_REQUIRED_FIELD_MISSING\]/);
 });
 
 test('json output for GitHub URL input is still JSON', () => {

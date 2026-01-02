@@ -15,16 +15,21 @@ test('prints usage when no args are provided', () => {
   assert.match(output, /Usage:/);
 });
 
-test('LAYOUT-001: missing required directories fails validation', () => {
+test('validation fails on invalid record front matter', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-'));
 
   try {
+    fs.writeFileSync(
+      path.join(tempDir, 'bad.md'),
+      ['---', 'typeId: note', 'recordId: one', 'fields: 123', '---', 'body'].join('\n')
+    );
+
     const result = spawnSync(process.execPath, [cliPath, 'validate', tempDir], {
       encoding: 'utf8'
     });
 
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /\[E_DIR_MISSING\]/);
+    assert.match(result.stderr, /\[E_REQUIRED_FIELD_MISSING\]/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
