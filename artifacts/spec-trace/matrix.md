@@ -1,10 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-02T20:07:46.232Z
-
-## Testable requirements with no tests
-- NFR-001 — No full reloads for CRUD
-- NFR-010 — Read-only offline after initial load
+Generated: 2026-01-02T20:15:38.428Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -313,12 +309,12 @@ Tests (0):
 - (none)
 
 ## NFR-001 — No full reloads for CRUD (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/state/DatasetContext.nfr.test.tsx — "NFR-001: CRUD actions do not trigger a full document load event"
 
 ## NFR-010 — Read-only offline after initial load (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/state/DatasetContext.nfr.test.tsx — "NFR-010: uses persisted dataset for read-only access when offline"
 
 ## UI-RAW-001 — Schema-agnostic record editor (testable=true)
 Tests (2):

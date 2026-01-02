@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-02T20:07:46.232Z",
+  "generatedAt": "2026-01-02T20:15:38.428Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -976,14 +976,26 @@
       "title": "No full reloads for CRUD",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "NFR-001",
+          "testTitle": "NFR-001: CRUD actions do not trigger a full document load event",
+          "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+        }
+      ]
     },
     {
       "id": "NFR-010",
       "title": "Read-only offline after initial load",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "NFR-010",
+          "testTitle": "NFR-010: uses persisted dataset for read-only access when offline",
+          "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+        }
+      ]
     },
     {
       "id": "UI-RAW-001",
@@ -1019,14 +1031,5 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": [
-    {
-      "id": "NFR-001",
-      "title": "No full reloads for CRUD"
-    },
-    {
-      "id": "NFR-010",
-      "title": "Read-only offline after initial load"
-    }
-  ]
+  "missingTestable": []
 }
