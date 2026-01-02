@@ -6,6 +6,7 @@ import { makeError } from "../../../../src/core/errors";
 import { isObject } from "../../../../src/core/types";
 import { useDataset } from "../state/DatasetContext";
 import type { TypeSchema } from "../schema/typeSchema";
+import SchemaFieldInput from "./SchemaFieldInput";
 
 type RecordEditorProps = {
   mode: "edit" | "create";
@@ -28,24 +29,78 @@ export default function RecordEditor({
 }: RecordEditorProps) {
   const { updateRecord, createRecord } = useDataset();
   const [fieldsText, setFieldsText] = useState("{}");
+  const [fieldsObject, setFieldsObject] = useState<Record<string, unknown>>({});
   const [bodyValue, setBodyValue] = useState("");
   const [recordId, setRecordId] = useState("");
   const [errors, setErrors] = useState<ValidationError[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [yamlError, setYamlError] = useState<string | null>(null);
+  const isSchemaMode = Boolean(schema && schema.fields.length > 0 && !schemaError);
 
   useEffect(() => {
     if (mode === "edit" && record) {
       setBodyValue(record.body ?? "");
       setRecordId(record.id);
-      setFieldsText(YAML.stringify(record.fields ?? {}, { indent: 2 }));
+      const nextFields = record.fields ?? {};
+      setFieldsObject(nextFields);
+      setFieldsText(YAML.stringify(nextFields, { indent: 2 }));
     }
     if (mode === "create") {
       setBodyValue("");
       setRecordId("");
+      setFieldsObject({});
       setFieldsText("{}");
     }
     setErrors(null);
+    setYamlError(null);
   }, [mode, record]);
+
+  useEffect(() => {
+    if (isSchemaMode) {
+      setFieldsText(YAML.stringify(fieldsObject ?? {}, { indent: 2 }));
+    }
+  }, [fieldsObject, isSchemaMode]);
+
+  const parseFieldsText = (
+    rawText: string
+  ): { ok: true; value: Record<string, unknown> } | { ok: false; message: string } => {
+    try {
+      const trimmed = rawText.trim();
+      const parsed = trimmed ? YAML.parse(trimmed) : {};
+      if (!isObject(parsed) || Array.isArray(parsed)) {
+        return { ok: false, message: "Fields must be a YAML object." };
+      }
+      return { ok: true, value: parsed as Record<string, unknown> };
+    } catch (err) {
+      return {
+        ok: false,
+        message: `Fields YAML is invalid: ${err instanceof Error ? err.message : String(err)}`
+      };
+    }
+  };
+
+  const handleFieldsTextChange = (value: string) => {
+    setFieldsText(value);
+    const parsed = parseFieldsText(value);
+    if (parsed.ok) {
+      setFieldsObject(parsed.value);
+      setYamlError(null);
+    } else {
+      setYamlError(parsed.message);
+    }
+  };
+
+  const handleFieldChange = (name: string, value: unknown) => {
+    setFieldsObject((prev) => {
+      const next = { ...prev };
+      if (value === undefined) {
+        delete next[name];
+      } else {
+        next[name] = value;
+      }
+      return next;
+    });
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -57,18 +112,23 @@ export default function RecordEditor({
     }
 
     const nextFields: Record<string, unknown> = {};
-    const rawText = fieldsText.trim();
-    try {
-      const parsed = rawText ? YAML.parse(rawText) : {};
-      if (!isObject(parsed) || Array.isArray(parsed)) {
-        nextErrors.push(makeError("E_USAGE", "Fields must be a YAML object."));
+    if (isSchemaMode) {
+      if (yamlError) {
+        nextErrors.push(makeError("E_USAGE", yamlError));
       } else {
-        Object.assign(nextFields, parsed as Record<string, unknown>);
+        for (const [key, value] of Object.entries(fieldsObject)) {
+          if (value !== undefined) {
+            nextFields[key] = value;
+          }
+        }
       }
-    } catch (err) {
-      nextErrors.push(
-        makeError("E_USAGE", `Fields YAML is invalid: ${err instanceof Error ? err.message : String(err)}`)
-      );
+    } else {
+      const parsed = parseFieldsText(fieldsText);
+      if (!parsed.ok) {
+        nextErrors.push(makeError("E_USAGE", parsed.message));
+      } else {
+        Object.assign(nextFields, parsed.value);
+      }
     }
 
     if (nextErrors.length) {
@@ -137,21 +197,46 @@ export default function RecordEditor({
           />
         </div>
       ) : null}
-      <div className="form-row">
-        <div className="form-row__inline">
-          <label htmlFor="fields-yaml">Fields (YAML)</label>
+      {isSchemaMode ? (
+        <>
+          {schema?.fields.map((def) => (
+            <SchemaFieldInput
+              key={def.name}
+              def={def}
+              value={fieldsObject[def.name]}
+              onChange={(value) => handleFieldChange(def.name, value)}
+            />
+          ))}
+          <details className="form-row">
+            <summary>Advanced: edit raw YAML</summary>
+            {yamlError ? <div className="form-error">{yamlError}</div> : null}
+            <textarea
+              id="fields-yaml"
+              data-testid="fields-yaml-editor"
+              value={fieldsText}
+              onChange={(event) => handleFieldsTextChange(event.target.value)}
+              rows={12}
+            />
+            <p className="hint">Edit the record fields as YAML key/value data. This editor is schema-agnostic.</p>
+          </details>
+        </>
+      ) : (
+        <div className="form-row">
+          <div className="form-row__inline">
+            <label htmlFor="fields-yaml">Fields (YAML)</label>
+          </div>
+          <textarea
+            id="fields-yaml"
+            data-testid="fields-yaml-editor"
+            value={fieldsText}
+            onChange={(event) => handleFieldsTextChange(event.target.value)}
+            rows={12}
+          />
+          <p className="hint">Edit the record fields as YAML key/value data. This editor is schema-agnostic.</p>
         </div>
-        <textarea
-          id="fields-yaml"
-          data-testid="fields-yaml-editor"
-          value={fieldsText}
-          onChange={(event) => setFieldsText(event.target.value)}
-          rows={12}
-        />
-        <p className="hint">Edit the record fields as YAML key/value data. This editor is schema-agnostic.</p>
-      </div>
+      )}
       <div className="form-row">
-        <label htmlFor="record-body">Body</label>
+        <label htmlFor="record-body">{schema?.bodyField || "Body"}</label>
         <textarea
           id="record-body"
           value={bodyValue}
