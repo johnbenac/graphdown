@@ -41,6 +41,29 @@ test('REL-002/REL-003: extracts record links from bodies and fields', () => {
   }
 });
 
+test('REL-002: does not synthesize links across separate string values', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+  try {
+    writeFile(tempDir, 'types/note.md', typeFile('note'));
+    writeFile(
+      tempDir,
+      'records/note-1.md',
+      ['---', 'typeId: note', 'recordId: one', 'fields:', '  part1: "[[note:two"', '  part2: "]]"', '---', ''].join(
+        '\n'
+      )
+    );
+    writeFile(tempDir, 'records/note-2.md', recordFile('note', 'two'));
+
+    const result = buildGraphFromFs(tempDir);
+    assert.equal(result.ok, true, JSON.stringify(result.errors));
+    const { graph } = result;
+    assert.deepEqual(graph.getLinksFrom('note:one'), []);
+    assert.deepEqual(graph.getLinksTo('note:two'), []);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test('Graph exposes type and record lookup by identity', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
   try {

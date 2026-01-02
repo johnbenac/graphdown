@@ -5,10 +5,8 @@ describe("serializeMarkdownRecord", () => {
   it("FR-MD-022: serializer preserves raw Markdown body and updated YAML", () => {
     const input = [
       "---",
-      "id: record:1",
       "typeId: note",
-      "createdAt: 2024-01-01",
-      "updatedAt: 2024-01-02",
+      "recordId: record-1",
       "fields:",
       "  title: Draft",
       "---",
@@ -22,7 +20,7 @@ describe("serializeMarkdownRecord", () => {
 
     const nextYaml: Record<string, unknown> = {
       ...parsed.yaml,
-      updatedAt: "2024-01-03",
+      recordId: "record-1",
       fields: {
         ...(parsed.yaml.fields as Record<string, unknown>),
         status: "done"
@@ -37,7 +35,6 @@ describe("serializeMarkdownRecord", () => {
     }
 
     expect(reparsed.body.trimEnd()).toBe("Updated body.");
-    expect(reparsed.yaml.updatedAt).toBe("2024-01-03");
     expect((reparsed.yaml.fields as Record<string, unknown>).status).toBe("done");
   });
 });

@@ -232,16 +232,18 @@ function validateBlobStore(
     const strings = new Set<string>();
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
-    for (const digest of extractBlobRefs([...strings].join('\n'))) {
-      referencedDigests.add(digest);
-      if (!digestToPath.has(digest)) {
-        errors.push(
-          makeError(
-            'E_BLOB_REFERENCE_MISSING',
-            `Blob ${digest} referenced from ${record.identity} is missing`,
-            record.file
-          )
-        );
+    for (const value of strings) {
+      for (const digest of extractBlobRefs(value)) {
+        referencedDigests.add(digest);
+        if (!digestToPath.has(digest)) {
+          errors.push(
+            makeError(
+              'E_BLOB_REFERENCE_MISSING',
+              `Blob ${digest} referenced from ${record.identity} is missing`,
+              record.file
+            )
+          );
+        }
       }
     }
   }
@@ -254,8 +256,10 @@ function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
   const strings = new Set<string>();
   collectStringValues(record.fields, strings);
   collectStringValues(record.body, strings);
-  for (const ref of extractRecordRefs([...strings].join('\n'))) {
-    refs.add(ref);
+  for (const value of strings) {
+    for (const ref of extractRecordRefs(value)) {
+      refs.add(ref);
+    }
   }
   return refs;
 }

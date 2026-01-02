@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-02T08:44:19.668Z",
+  "generatedAt": "2026-01-02T18:33:26.282Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -213,7 +213,13 @@
       "title": "Record files are discovered by content (not path)",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "LAYOUT-001",
+          "testTitle": "LAYOUT-001: no recordId means the object is treated as a type",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
     },
     {
       "id": "LAYOUT-002",
@@ -313,7 +319,7 @@
       "tests": [
         {
           "reqId": "FR-MD-023",
-          "testTitle": "FR-MD-023: record requires recordId",
+          "testTitle": "FR-MD-023: recordId must be a string identifier when present",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
@@ -445,7 +451,13 @@
       "title": "Where record relationships are extracted",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "REL-002",
+          "testTitle": "REL-002: does not synthesize links across separate string values",
+          "filePath": "tests/core.graph.test.js"
+        }
+      ]
     },
     {
       "id": "REL-003",
@@ -509,6 +521,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "BLOB-REF-001",
+          "testTitle": "BLOB-REF-001: split strings do not synthesize blob references",
+          "filePath": "tests/core.blobs.test.js"
+        },
         {
           "reqId": "BLOB-REF-001",
           "testTitle": "BLOB-REF-001: extracts blob references",
@@ -924,10 +941,6 @@
       "title": "Blob content is committed by reference digests"
     },
     {
-      "id": "LAYOUT-001",
-      "title": "Record files are discovered by content (not path)"
-    },
-    {
       "id": "LAYOUT-002",
       "title": "One object per file"
     },
@@ -938,10 +951,6 @@
     {
       "id": "NFR-010",
       "title": "Read-only offline after initial load"
-    },
-    {
-      "id": "REL-002",
-      "title": "Where record relationships are extracted"
     },
     {
       "id": "TYPE-001",

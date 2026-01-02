@@ -25,8 +25,8 @@ function getErrorCodes(snapshot: RepoSnapshot) {
 
 describe("validateDatasetSnapshot", () => {
   it("FR-MD-020: missing YAML front matter fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "no front matter"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_MISSING");
+    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: bar\nbody"]]);
+    expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_UNTERMINATED");
   });
 
   it("FR-MD-020: invalid YAML fails validation", () => {
@@ -39,9 +39,14 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
-  it("FR-MD-023: record requires recordId", () => {
-    const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "fields: {}"])]);
+  it("FR-MD-023: recordId must be a string identifier when present", () => {
+    const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "recordId: 123", "fields: {}"])]);
     expect(getErrorCodes(snapshot)).toContain("E_INVALID_IDENTIFIER");
+  });
+
+  it("LAYOUT-001: no recordId means the object is treated as a type", () => {
+    const snapshot = snapshotFromEntries([rec("records/note.md", ["typeId: note", "fields: {}"])]);
+    expect(getErrorCodes(snapshot)).toEqual([]);
   });
 
   it("EXT-001: extra top-level keys are rejected", () => {

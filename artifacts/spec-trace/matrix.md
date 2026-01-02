@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-02T08:44:19.668Z
+Generated: 2026-01-02T18:33:26.282Z
 
 ## Testable requirements with no tests
 - BLOB-002 — BlobId format is deterministic
@@ -12,11 +12,9 @@ Generated: 2026-01-02T08:44:19.668Z
 - GC-003 — Garbage blobs do not make a dataset invalid
 - HASH-004 — Only schema and snapshot fingerprints are defined in core
 - HASH-005 — Blob content is committed by reference digests
-- LAYOUT-001 — Record files are discovered by content (not path)
 - LAYOUT-002 — One object per file
 - NFR-001 — No full reloads for CRUD
 - NFR-010 — Read-only offline after initial load
-- REL-002 — Where record relationships are extracted
 - TYPE-001 — Types are defined by type objects
 - TYPE-002 — typeId uniqueness
 - VAL-BLOB-001 — Blob references must resolve to matching blob bytes
@@ -103,8 +101,8 @@ Tests (0):
 - (none)
 
 ## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-001: no recordId means the object is treated as a type"
 
 ## LAYOUT-002 — One object per file (testable=true)
 Tests (0):
@@ -138,7 +136,7 @@ Tests (1):
 
 ## FR-MD-023 — Required top-level keys for record objects (testable=true)
 Tests (1):
-- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-023: record requires recordId"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-023: recordId must be a string identifier when present"
 
 ## FR-MD-022 — Body is raw Markdown
 Tests (1):
@@ -179,8 +177,8 @@ Tests (1):
 - tests/core.wikiLinks.test.js — "REL-001: blob references are not treated as record relationships"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.graph.test.js — "REL-002: does not synthesize links across separate string values"
 
 ## REL-003 — Record reference normalization (testable=true)
 Tests (2):
@@ -201,7 +199,8 @@ Tests (1):
 - apps/web/src/schema/typeSchema.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
 
 ## BLOB-REF-001 — Blob references use composite wiki-link tokens (testable=true)
-Tests (1):
+Tests (2):
+- tests/core.blobs.test.js — "BLOB-REF-001: split strings do not synthesize blob references"
 - tests/core.wikiLinks.test.js — "BLOB-REF-001: extracts blob references"
 
 ## BLOB-REF-002 — Blob reference normalization is strict (testable=true)

@@ -76,23 +76,22 @@ describe("DatasetContext GitHub import", () => {
 
     const typeContent = [
       "---",
-      "id: type:note",
-      "typeId: sys:type",
-      "createdAt: 2024-01-01",
-      "updatedAt: 2024-01-02",
+      "typeId: note",
       "fields:",
-      "  recordTypeId: note",
+      "  fieldDefs:",
+      "    title:",
+      "      required: false",
       "---"
     ].join("\n");
 
     const recordContent = [
       "---",
-      "id: record:1",
       "typeId: note",
-      "createdAt: 2024-01-01",
-      "updatedAt: 2024-01-02",
-      "fields: {}",
-      "---"
+      "recordId: record-1",
+      "fields:",
+      "  title: Hello",
+      "---",
+      "Body"
     ].join("\n");
 
     fetchMock
@@ -138,7 +137,7 @@ describe("DatasetContext GitHub import", () => {
 describe("DatasetContext zip import", () => {
   it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
     const zipBytes = zipSync({
-      "types/note.md": new Uint8Array(strToU8("---\nid: type:note\nfields: { recordTypeId: note }\n---"))
+      "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: []\n---"))
     });
     const file = {
       name: "demo.zip",

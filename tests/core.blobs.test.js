@@ -61,6 +61,26 @@ test('VAL-BLOB-001/002: blob reference must exist and match digest', () => {
   assert.ok(mismatch.errors.some((e) => e.code === 'E_BLOB_DIGEST_MISMATCH'));
 });
 
+test('BLOB-REF-001: split strings do not synthesize blob references', () => {
+  const digest = 'a'.repeat(64);
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/photo.md', ['typeId: photo', 'fields: {}']),
+      record(
+        'records/photo-1.md',
+        [
+          'typeId: photo',
+          'recordId: one',
+          'fields:',
+          `  head: "[[gdblob:sha256-${digest.slice(0, 10)}"`,
+          `  tail: "${digest.slice(10)}]]"`
+        ]
+      )
+    ])
+  );
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+});
+
 test('BLOB-LAYOUT-002: invalid blob path shape fails validation', () => {
   const blobBytes = encoder.encode('flower');
   const digest = createHash('sha256').update(blobBytes).digest('hex');

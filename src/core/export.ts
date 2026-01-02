@@ -26,8 +26,10 @@ function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
     const strings = new Set<string>();
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
-    for (const digest of extractBlobRefs([...strings].join('\n'))) {
-      digests.add(digest);
+    for (const value of strings) {
+      for (const digest of extractBlobRefs(value)) {
+        digests.add(digest);
+      }
     }
   }
 

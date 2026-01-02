@@ -66,8 +66,10 @@ function collectRecordRefsFromRecord(fields: Record<string, unknown>, body: stri
   collectStringValues(fields, strings);
   collectStringValues(body, strings);
   const refs = new Set<string>();
-  for (const ref of extractRecordRefs([...strings].join('\n'))) {
-    refs.add(ref);
+  for (const value of strings) {
+    for (const ref of extractRecordRefs(value)) {
+      refs.add(ref);
+    }
   }
   return refs;
 }
