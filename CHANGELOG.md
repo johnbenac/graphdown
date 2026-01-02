@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/johnbenac/graphdown/compare/v0.7.0...v0.8.0) (2026-01-02)
+
+
+### Features
+
+* align core with blob spec and verification ([ea015e8](https://github.com/johnbenac/graphdown/commit/ea015e8dad610040f612cb27f6bc0f3ffff171cd))
+
 # [0.7.0](https://github.com/johnbenac/graphdown/compare/v0.6.0...v0.7.0) (2026-01-01)
 
 
