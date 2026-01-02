@@ -1,20 +1,22 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-01T11:06:50.092Z
+Generated: 2026-01-02T20:15:38.428Z
 Source: artifacts/spec-trace/matrix.json
 
-- Requirements (testable): 51
-- Covered: 48
-- Missing: 3
-- Coverage: 94.1%
+- Requirements (testable): 62
+- Covered: 57
+- Missing: 5
+- Coverage: 91.9%
 
 The following requirements currently have **no referenced tests**:
 
-## NFR (2)
-- NFR-001 — No full reloads for CRUD
-- NFR-010 — Read-only offline after initial load
+## EXP (3)
+- EXP-002 — Record-only export
+- EXP-004 — Path stability
+- EXP-005 — Content preservation (no “reformat the universe”)
 
-## NR (1)
-- NR-SEM-001 — No kind-based semantic validation of fields
+## VAL (2)
+- VAL-006 — No semantic validation of values
+- VAL-COMP-001 — Composition referenced types must exist
 
 _Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._
