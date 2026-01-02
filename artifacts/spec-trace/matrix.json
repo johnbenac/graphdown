@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-02T19:49:20.276Z",
+  "generatedAt": "2026-01-02T20:07:46.232Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -250,7 +250,13 @@
       "title": "One object per file",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "LAYOUT-002",
+          "testTitle": "LAYOUT-002: only first front matter block defines a record object",
+          "filePath": "tests/core.layout.test.js"
+        }
+      ]
     },
     {
       "id": "BLOB-LAYOUT-001",
@@ -1014,10 +1020,6 @@
   ],
   "unknownReferences": [],
   "missingTestable": [
-    {
-      "id": "LAYOUT-002",
-      "title": "One object per file"
-    },
     {
       "id": "NFR-001",
       "title": "No full reloads for CRUD"

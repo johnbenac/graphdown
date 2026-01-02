@@ -1,9 +1,8 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-02T19:49:20.276Z
+Generated: 2026-01-02T20:07:46.232Z
 
 ## Testable requirements with no tests
-- LAYOUT-002 — One object per file
 - NFR-001 — No full reloads for CRUD
 - NFR-010 — Read-only offline after initial load
 
@@ -92,8 +91,8 @@ Tests (1):
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "LAYOUT-001: no recordId means the object is treated as a type"
 
 ## LAYOUT-002 — One object per file (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.layout.test.js — "LAYOUT-002: only first front matter block defines a record object"
 
 ## BLOB-LAYOUT-001 — Blob store paths are derived from BlobId (testable=true)
 Tests (1):
