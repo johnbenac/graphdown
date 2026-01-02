@@ -1,3 +1,10 @@
+## [0.8.1](https://github.com/johnbenac/graphdown/compare/v0.8.0...v0.8.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* handle per-string link extraction ([9004393](https://github.com/johnbenac/graphdown/commit/9004393694e899f505aeadc0f6b5cce03d4ba1ea))
+
 # [0.8.0](https://github.com/johnbenac/graphdown/compare/v0.7.0...v0.8.0) (2026-01-02)
 
 
