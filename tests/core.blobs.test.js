@@ -27,38 +27,59 @@ test('BLOB-001: computeBlobDigest hashes raw bytes', () => {
   assert.equal(computeBlobDigest(bytes), expected);
 });
 
-test('VAL-BLOB-001/002: blob reference must exist and match digest', () => {
+test('VAL-BLOB-001: referenced blob must exist', () => {
   const blobBytes = encoder.encode('flower');
   const digest = createHash('sha256').update(blobBytes).digest('hex');
-  const goodBlob = [blobPathFor(digest), blobBytes];
   const result = validateDatasetSnapshot(
-    snapshot([
-      record('types/photo.md', ['typeId: photo', 'fields: {}']),
-      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`),
-      goodBlob
-    ])
-  );
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
-
-  const missing = validateDatasetSnapshot(
     snapshot([
       record('types/photo.md', ['typeId: photo', 'fields: {}']),
       record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`)
     ])
   );
-  assert.equal(missing.ok, false);
-  assert.ok(missing.errors.some((e) => e.code === 'E_BLOB_REFERENCE_MISSING'));
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_BLOB_REFERENCE_MISSING'));
+});
 
+test('VAL-BLOB-002: blob bytes must match referenced digest', () => {
+  const blobBytes = encoder.encode('flower');
+  const digest = createHash('sha256').update(blobBytes).digest('hex');
   const badBytes = encoder.encode('flower2');
-  const mismatch = validateDatasetSnapshot(
+  const result = validateDatasetSnapshot(
     snapshot([
       record('types/photo.md', ['typeId: photo', 'fields: {}']),
       record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`),
       [blobPathFor(digest), badBytes]
     ])
   );
-  assert.equal(mismatch.ok, false);
-  assert.ok(mismatch.errors.some((e) => e.code === 'E_BLOB_DIGEST_MISMATCH'));
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_BLOB_DIGEST_MISMATCH'));
+});
+
+test('BLOB-LAYOUT-002: invalid blob path shape fails validation', () => {
+  const blobBytes = encoder.encode('flower');
+  const digest = createHash('sha256').update(blobBytes).digest('hex');
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/photo.md', ['typeId: photo', 'fields: {}']),
+      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`),
+      ['blobs/sha256/nothex/' + digest, blobBytes]
+    ])
+  );
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_BLOB_PATH_INVALID'));
+});
+
+test('BLOB-LAYOUT-001: canonical blob path is accepted', () => {
+  const blobBytes = encoder.encode('rose');
+  const digest = createHash('sha256').update(blobBytes).digest('hex');
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/photo.md', ['typeId: photo', 'fields: {}']),
+      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`),
+      [blobPathFor(digest), blobBytes]
+    ])
+  );
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
 
 test('BLOB-REF-001: split strings do not synthesize blob references', () => {
@@ -81,16 +102,26 @@ test('BLOB-REF-001: split strings do not synthesize blob references', () => {
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
 
-test('BLOB-LAYOUT-002: invalid blob path shape fails validation', () => {
-  const blobBytes = encoder.encode('flower');
+test('GC-003: unreferenced but valid blobs do not fail validation', () => {
+  const blobBytes = encoder.encode('tulip');
   const digest = createHash('sha256').update(blobBytes).digest('hex');
   const result = validateDatasetSnapshot(
     snapshot([
       record('types/photo.md', ['typeId: photo', 'fields: {}']),
-      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}'], `[[gdblob:sha256-${digest}]]`),
-      ['blobs/sha256/nothex/' + digest, blobBytes]
+      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}']),
+      [blobPathFor(digest), blobBytes]
     ])
   );
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.code === 'E_BLOB_PATH_INVALID'));
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+});
+
+test('BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation', () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/photo.md', ['typeId: photo', 'fields: {}']),
+      record('records/photo-1.md', ['typeId: photo', 'recordId: one', 'fields: {}']),
+      ['misc/data.bin', encoder.encode('bytes')]
+    ])
+  );
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
 });

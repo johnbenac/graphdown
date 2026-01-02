@@ -41,7 +41,7 @@ test('HASH-003: snapshot hash is path-independent for record files', () => {
   assert.equal(digestA, digestB);
 });
 
-test('HASH-002/HASH-003: schema vs snapshot scopes', () => {
+test('HASH-002: schema fingerprint ignores record object changes', () => {
   const type = typeFile('type.md', 'note');
   const record = recordFile('r.md', 'note', 'one', 'Body');
   const base = snapshot([type, record]);
@@ -58,6 +58,26 @@ test('HASH-002/HASH-003: schema vs snapshot scopes', () => {
   assert.notEqual(snapshotChanged, snapshotDigest);
   // Schema scope ignores record body change
   assert.equal(digest(computeGdHashV1(recordChanged, 'schema')), schemaDigest);
+});
+
+test('HASH-004: invalid hash scope fails with E_USAGE', () => {
+  const type = typeFile('type.md', 'note');
+  const result = computeGdHashV1(snapshot([type]), 'records');
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_USAGE'));
+});
+
+test('HASH-005: snapshot hash ignores blob store bytes', () => {
+  const type = typeFile('type.md', 'note');
+  const record = recordFile('r.md', 'note', 'one', 'Body');
+  const blobDigest = 'a'.repeat(64);
+  const blobPath = `blobs/sha256/${blobDigest.slice(0, 2)}/${blobDigest}`;
+  const base = snapshot([type, record, [blobPath, encoder.encode('one')]]);
+  const changedBlob = snapshot([type, record, [blobPath, encoder.encode('two')]]);
+
+  const baseDigest = digest(computeGdHashV1(base, 'snapshot'));
+  const changedDigest = digest(computeGdHashV1(changedBlob, 'snapshot'));
+  assert.equal(baseDigest, changedDigest);
 });
 
 test('HASH-001: line ending normalization yields stable hashes', () => {

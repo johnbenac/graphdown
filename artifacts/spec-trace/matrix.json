@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-02T18:33:26.282Z",
+  "generatedAt": "2026-01-02T19:49:20.276Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -159,7 +159,13 @@
       "title": "Schema fingerprint (types only)",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "HASH-002",
+          "testTitle": "HASH-002: schema fingerprint ignores record object changes",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
     },
     {
       "id": "HASH-003",
@@ -179,14 +185,26 @@
       "title": "Only schema and snapshot fingerprints are defined in core",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "HASH-004",
+          "testTitle": "HASH-004: invalid hash scope fails with E_USAGE",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
     },
     {
       "id": "HASH-005",
       "title": "Blob content is committed by reference digests",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "HASH-005",
+          "testTitle": "HASH-005: snapshot hash ignores blob store bytes",
+          "filePath": "tests/core.hash.test.js"
+        }
+      ]
     },
     {
       "id": "BLOB-001",
@@ -206,7 +224,13 @@
       "title": "BlobId format is deterministic",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "BLOB-002",
+          "testTitle": "BLOB-002: blob ids must be 64 lowercase hex characters",
+          "filePath": "tests/core.wikiLinks.test.js"
+        }
+      ]
     },
     {
       "id": "LAYOUT-001",
@@ -233,7 +257,13 @@
       "title": "Blob store paths are derived from BlobId",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "BLOB-LAYOUT-001",
+          "testTitle": "BLOB-LAYOUT-001: canonical blob path is accepted",
+          "filePath": "tests/core.blobs.test.js"
+        }
+      ]
     },
     {
       "id": "BLOB-LAYOUT-002",
@@ -253,7 +283,13 @@
       "title": "Non-record, non-blob-store files are non-semantic",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "BLOB-LAYOUT-003",
+          "testTitle": "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation",
+          "filePath": "tests/core.blobs.test.js"
+        }
+      ]
     },
     {
       "id": "FR-MD-020",
@@ -373,14 +409,26 @@
       "title": "Types are defined by type objects",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "TYPE-001",
+          "testTitle": "TYPE-001: type object without recordId is valid",
+          "filePath": "tests/core.ids.test.js"
+        }
+      ]
     },
     {
       "id": "TYPE-002",
       "title": "typeId uniqueness",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "TYPE-002",
+          "testTitle": "TYPE-002: duplicate typeId fails validation",
+          "filePath": "tests/core.ids.test.js"
+        }
+      ]
     },
     {
       "id": "TYPE-004",
@@ -455,6 +503,11 @@
         {
           "reqId": "REL-002",
           "testTitle": "REL-002: does not synthesize links across separate string values",
+          "filePath": "tests/core.graph.test.js"
+        },
+        {
+          "reqId": "REL-002",
+          "testTitle": "REL-002: extracts record links from bodies and fields",
           "filePath": "tests/core.graph.test.js"
         }
       ]
@@ -645,35 +698,70 @@
       "title": "Blob references must resolve to matching blob bytes",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-BLOB-001",
+          "testTitle": "VAL-BLOB-001: referenced blob must exist",
+          "filePath": "tests/core.blobs.test.js"
+        }
+      ]
     },
     {
       "id": "VAL-BLOB-002",
       "title": "Blob store files must match their path digest",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-BLOB-002",
+          "testTitle": "VAL-BLOB-002: blob bytes must match referenced digest",
+          "filePath": "tests/core.blobs.test.js"
+        }
+      ]
     },
     {
       "id": "GC-001",
       "title": "Reachable blob set is computed from blob references",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "GC-001",
+          "testTitle": "GC-001: reachable blob set includes references from fields",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
     },
     {
       "id": "GC-002",
       "title": "Unreferenced blobs are garbage and are excluded from record-only export",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "GC-002",
+          "testTitle": "GC-002: record-only export excludes unreferenced blobs",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        },
+        {
+          "reqId": "GC-002",
+          "testTitle": "GC-002: record-only export excludes unreferenced blobs",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
     },
     {
       "id": "GC-003",
       "title": "Garbage blobs do not make a dataset invalid",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "GC-003",
+          "testTitle": "GC-003: unreferenced but valid blobs do not fail validation",
+          "filePath": "tests/core.blobs.test.js"
+        }
+      ]
     },
     {
       "id": "ERR-001",
@@ -818,14 +906,36 @@
       "title": "Record-only export includes reachable blobs",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-006",
+          "testTitle": "EXP-006: record-only export includes reachable blobs",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        },
+        {
+          "reqId": "EXP-006",
+          "testTitle": "EXP-006: record-only export includes reachable blobs",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
     },
     {
       "id": "EXP-003",
       "title": "Whole-repo export",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: whole-repo export round-trips snapshot files",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        },
+        {
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: whole-repo export round-trips all files and bytes",
+          "filePath": "tests/core.roundtrip.test.js"
+        }
+      ]
     },
     {
       "id": "EXP-004",
@@ -905,42 +1015,6 @@
   "unknownReferences": [],
   "missingTestable": [
     {
-      "id": "BLOB-002",
-      "title": "BlobId format is deterministic"
-    },
-    {
-      "id": "BLOB-LAYOUT-001",
-      "title": "Blob store paths are derived from BlobId"
-    },
-    {
-      "id": "BLOB-LAYOUT-003",
-      "title": "Non-record, non-blob-store files are non-semantic"
-    },
-    {
-      "id": "EXP-006",
-      "title": "Record-only export includes reachable blobs"
-    },
-    {
-      "id": "GC-001",
-      "title": "Reachable blob set is computed from blob references"
-    },
-    {
-      "id": "GC-002",
-      "title": "Unreferenced blobs are garbage and are excluded from record-only export"
-    },
-    {
-      "id": "GC-003",
-      "title": "Garbage blobs do not make a dataset invalid"
-    },
-    {
-      "id": "HASH-004",
-      "title": "Only schema and snapshot fingerprints are defined in core"
-    },
-    {
-      "id": "HASH-005",
-      "title": "Blob content is committed by reference digests"
-    },
-    {
       "id": "LAYOUT-002",
       "title": "One object per file"
     },
@@ -951,22 +1025,6 @@
     {
       "id": "NFR-010",
       "title": "Read-only offline after initial load"
-    },
-    {
-      "id": "TYPE-001",
-      "title": "Types are defined by type objects"
-    },
-    {
-      "id": "TYPE-002",
-      "title": "typeId uniqueness"
-    },
-    {
-      "id": "VAL-BLOB-001",
-      "title": "Blob references must resolve to matching blob bytes"
-    },
-    {
-      "id": "VAL-BLOB-002",
-      "title": "Blob store files must match their path digest"
     }
   ]
 }

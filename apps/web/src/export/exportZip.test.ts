@@ -25,7 +25,7 @@ async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<RepoSnapshot
 }
 
 describe("exportZip", () => {
-  it("EXP-003/EXP-004/EXP-005: whole-repo export round-trips snapshot files", async () => {
+  it("EXP-003: whole-repo export round-trips snapshot files", async () => {
     const snapshot = snapshotFromEntries([
       ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
       ["records/note-1.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")],
@@ -47,7 +47,7 @@ describe("exportZip", () => {
     }
   });
 
-  it("EXP-002/EXP-006/GC-002: record-only export includes reachable blobs and excludes garbage", async () => {
+  it("EXP-006: record-only export includes reachable blobs", async () => {
     const blobBytes = new Uint8Array(strToU8("flower"));
     const digest = createHash("sha256").update(Buffer.from(blobBytes)).digest("hex");
     const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
@@ -67,5 +67,25 @@ describe("exportZip", () => {
     const imported = await readSnapshotFromZipBytes(exported);
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(["records/photo-1.md", "types/photo.md", blobPath].sort());
+  });
+
+  it("GC-002: record-only export excludes unreferenced blobs", async () => {
+    const blobBytes = new Uint8Array(strToU8("flower"));
+    const digest = createHash("sha256").update(Buffer.from(blobBytes)).digest("hex");
+
+    const snapshot = snapshotFromEntries([
+      ["types/photo.md", ["---", "typeId: photo", "fields: {}", "---"].join("\n")],
+      [
+        "records/photo-1.md",
+        ["---", "typeId: photo", "recordId: one", "fields: {}", "---", `See [[gdblob:sha256-${digest}]].`].join("\n")
+      ],
+      [`blobs/sha256/${digest.slice(0, 2)}/${digest}`, blobBytes],
+      ["blobs/sha256/aa/" + "a".repeat(64), new Uint8Array(strToU8("garbage"))]
+    ]);
+
+    const exported = exportDatasetOnlyZip(snapshot);
+    const imported = await readSnapshotFromZipBytes(exported);
+    const paths = [...imported.files.keys()];
+    expect(paths).not.toContain("blobs/sha256/aa/" + "a".repeat(64));
   });
 });

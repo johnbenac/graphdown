@@ -34,3 +34,8 @@ test('BLOB-REF-002: ignores malformed blob references', () => {
 test('REL-001: blob references are not treated as record relationships', () => {
   assert.deepEqual(extractRecordRefs('see [[gdblob:sha256-' + 'a'.repeat(64) + ']]'), []);
 });
+
+test('BLOB-002: blob ids must be 64 lowercase hex characters', () => {
+  const invalid = '[[gdblob:sha256-' + 'A'.repeat(64) + ']] [[gdblob:sha256-' + 'a'.repeat(63) + ']]';
+  assert.deepEqual(extractBlobRefs(invalid), []);
+});

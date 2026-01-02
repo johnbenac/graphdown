@@ -1,24 +1,11 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-02T18:33:26.282Z
+Generated: 2026-01-02T19:49:20.276Z
 
 ## Testable requirements with no tests
-- BLOB-002 — BlobId format is deterministic
-- BLOB-LAYOUT-001 — Blob store paths are derived from BlobId
-- BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic
-- EXP-006 — Record-only export includes reachable blobs
-- GC-001 — Reachable blob set is computed from blob references
-- GC-002 — Unreferenced blobs are garbage and are excluded from record-only export
-- GC-003 — Garbage blobs do not make a dataset invalid
-- HASH-004 — Only schema and snapshot fingerprints are defined in core
-- HASH-005 — Blob content is committed by reference digests
 - LAYOUT-002 — One object per file
 - NFR-001 — No full reloads for CRUD
 - NFR-010 — Read-only offline after initial load
-- TYPE-001 — Types are defined by type objects
-- TYPE-002 — typeId uniqueness
-- VAL-BLOB-001 — Blob references must resolve to matching blob bytes
-- VAL-BLOB-002 — Blob store files must match their path digest
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -77,28 +64,28 @@ Tests (3):
 - tests/core.hash.test.js — "HASH-001: non-record files are ignored"
 
 ## HASH-002 — Schema fingerprint (types only)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.hash.test.js — "HASH-002: schema fingerprint ignores record object changes"
 
 ## HASH-003 — Snapshot fingerprint (types + record objects)
 Tests (1):
 - tests/core.hash.test.js — "HASH-003: snapshot hash is path-independent for record files"
 
 ## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.hash.test.js — "HASH-004: invalid hash scope fails with E_USAGE"
 
 ## HASH-005 — Blob content is committed by reference digests (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.hash.test.js — "HASH-005: snapshot hash ignores blob store bytes"
 
 ## BLOB-001 — Canonical blob digest (sha256) (testable=true)
 Tests (1):
 - tests/core.blobs.test.js — "BLOB-001: computeBlobDigest hashes raw bytes"
 
 ## BLOB-002 — BlobId format is deterministic (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.wikiLinks.test.js — "BLOB-002: blob ids must be 64 lowercase hex characters"
 
 ## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
 Tests (1):
@@ -109,16 +96,16 @@ Tests (0):
 - (none)
 
 ## BLOB-LAYOUT-001 — Blob store paths are derived from BlobId (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.blobs.test.js — "BLOB-LAYOUT-001: canonical blob path is accepted"
 
 ## BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store (testable=true)
 Tests (1):
 - tests/core.blobs.test.js — "BLOB-LAYOUT-002: invalid blob path shape fails validation"
 
 ## BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.blobs.test.js — "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation"
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
@@ -152,12 +139,12 @@ Tests (1):
 - tests/ext.reserved-vocabulary.test.js — "EXT-002: accepts arbitrary shapes within fields"
 
 ## TYPE-001 — Types are defined by type objects (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.ids.test.js — "TYPE-001: type object without recordId is valid"
 
 ## TYPE-002 — typeId uniqueness (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.ids.test.js — "TYPE-002: duplicate typeId fails validation"
 
 ## TYPE-004 — fieldDefs shape (testable=true)
 Tests (5):
@@ -177,8 +164,9 @@ Tests (1):
 - tests/core.wikiLinks.test.js — "REL-001: blob references are not treated as record relationships"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
-Tests (1):
+Tests (2):
 - tests/core.graph.test.js — "REL-002: does not synthesize links across separate string values"
+- tests/core.graph.test.js — "REL-002: extracts record links from bodies and fields"
 
 ## REL-003 — Record reference normalization (testable=true)
 Tests (2):
@@ -239,24 +227,25 @@ Tests (3):
 - tests/core.composition.test.js — "VAL-COMP-002: required component link resolves to correct type"
 
 ## VAL-BLOB-001 — Blob references must resolve to matching blob bytes (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.blobs.test.js — "VAL-BLOB-001: referenced blob must exist"
 
 ## VAL-BLOB-002 — Blob store files must match their path digest (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.blobs.test.js — "VAL-BLOB-002: blob bytes must match referenced digest"
 
 ## GC-001 — Reachable blob set is computed from blob references (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.roundtrip.test.js — "GC-001: reachable blob set includes references from fields"
 
 ## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
-Tests (0):
-- (none)
+Tests (2):
+- apps/web/src/export/exportZip.test.ts — "GC-002: record-only export excludes unreferenced blobs"
+- tests/core.roundtrip.test.js — "GC-002: record-only export excludes unreferenced blobs"
 
 ## GC-003 — Garbage blobs do not make a dataset invalid (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.blobs.test.js — "GC-003: unreferenced but valid blobs do not fail validation"
 
 ## ERR-001 — File-specific errors when possible
 Tests (2):
@@ -299,12 +288,14 @@ Tests (0):
 - (none)
 
 ## EXP-006 — Record-only export includes reachable blobs (testable=true)
-Tests (0):
-- (none)
+Tests (2):
+- apps/web/src/export/exportZip.test.ts — "EXP-006: record-only export includes reachable blobs"
+- tests/core.roundtrip.test.js — "EXP-006: record-only export includes reachable blobs"
 
 ## EXP-003 — Whole-repo export
-Tests (0):
-- (none)
+Tests (2):
+- apps/web/src/export/exportZip.test.ts — "EXP-003: whole-repo export round-trips snapshot files"
+- tests/core.roundtrip.test.js — "EXP-003: whole-repo export round-trips all files and bytes"
 
 ## EXP-004 — Path stability
 Tests (0):

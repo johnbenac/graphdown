@@ -20,7 +20,7 @@ function recordFile(typeId, recordId, body = '', extraFields = '') {
   return ['---', `typeId: ${typeId}`, `recordId: ${recordId}`, 'fields: {}', extraFields, '---', body].join('\n');
 }
 
-test('REL-002/REL-003: extracts record links from bodies and fields', () => {
+test('REL-002: extracts record links from bodies and fields', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
   try {
     writeFile(tempDir, 'types/note.md', typeFile('note'));

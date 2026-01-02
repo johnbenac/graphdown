@@ -42,7 +42,56 @@ function hash(content) {
   return createHash('sha256').update(content).digest('hex');
 }
 
-test('EXP-002/EXP-006: record-only export includes type/records and reachable blobs, excludes garbage', () => {
+test('EXP-006: record-only export includes reachable blobs', () => {
+  const blobBytes = encoder.encode('flower');
+  const digest = hash(blobBytes);
+  const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+
+  const snapshot = makeSnapshot([
+    ['types/note.md', ['---', 'typeId: note', 'fields: {}', '---', ''].join('\n')],
+    ['records/note-1.md', ['---', 'typeId: note', 'recordId: one', 'fields: {}', '---', `See [[gdblob:sha256-${digest}]].`].join('\n')],
+    [blobPath, blobBytes]
+  ]);
+
+  const zipBytes = exportDatasetOnlyZip(snapshot);
+  const { tempDir, zipPath } = writeTempZip(zipBytes);
+  try {
+    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
+    const paths = [...roundTripped.files.keys()];
+    assert.ok(paths.includes(blobPath));
+    assert.ok(paths.includes('types/note.md'));
+    assert.ok(paths.includes('records/note-1.md'));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('GC-001: reachable blob set includes references from fields', () => {
+  const blobBytes = encoder.encode('orchid');
+  const digest = hash(blobBytes);
+  const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+
+  const snapshot = makeSnapshot([
+    ['types/photo.md', ['---', 'typeId: photo', 'fields: {}', '---', ''].join('\n')],
+    [
+      'records/photo-1.md',
+      ['---', 'typeId: photo', 'recordId: one', 'fields:', `  note: "[[gdblob:sha256-${digest}]]"`, '---', 'Body'].join('\n')
+    ],
+    [blobPath, blobBytes]
+  ]);
+
+  const zipBytes = exportDatasetOnlyZip(snapshot);
+  const { tempDir, zipPath } = writeTempZip(zipBytes);
+  try {
+    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
+    const paths = [...roundTripped.files.keys()];
+    assert.ok(paths.includes(blobPath));
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('GC-002: record-only export excludes unreferenced blobs', () => {
   const blobBytes = encoder.encode('flower');
   const digest = hash(blobBytes);
   const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
@@ -51,31 +100,21 @@ test('EXP-002/EXP-006: record-only export includes type/records and reachable bl
     ['types/note.md', ['---', 'typeId: note', 'fields: {}', '---', ''].join('\n')],
     ['records/note-1.md', ['---', 'typeId: note', 'recordId: one', 'fields: {}', '---', `See [[gdblob:sha256-${digest}]].`].join('\n')],
     [blobPath, blobBytes],
-    ['assets/info.txt', 'not part of dataset'],
     ['blobs/sha256/aa/aa' + '0'.repeat(62), encoder.encode('garbage blob')]
   ]);
-
-  const graph = buildGraphFromSnapshot(snapshot);
-  assert.equal(graph.ok, true, JSON.stringify(graph.errors));
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
   const { tempDir, zipPath } = writeTempZip(zipBytes);
   try {
     const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
-    const graph2 = buildGraphFromSnapshot(roundTripped);
-    assert.equal(graph2.ok, true, JSON.stringify(graph2.errors));
-    assert.deepEqual(serializeGraph(graph.graph), serializeGraph(graph2.graph));
-
     const paths = [...roundTripped.files.keys()];
-    assert.ok(paths.includes(blobPath));
-    assert.ok(!paths.includes('assets/info.txt'));
     assert.ok(!paths.includes('blobs/sha256/aa/aa' + '0'.repeat(62)));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
-test('EXP-003/EXP-004/EXP-005: whole-repo export round-trips all files and bytes', () => {
+test('EXP-003: whole-repo export round-trips all files and bytes', () => {
   const snapshot = makeSnapshot([
     ['types/note.md', ['---', 'typeId: note', 'fields: {}', '---', ''].join('\n')],
     ['records/note-1.md', ['---', 'typeId: note', 'recordId: one', 'fields: {}', '---', 'Body'].join('\n')],
