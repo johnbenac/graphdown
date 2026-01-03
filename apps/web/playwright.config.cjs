@@ -3,7 +3,8 @@ const { defineConfig } = require("@playwright/test");
 module.exports = defineConfig({
   testDir: "./e2e",
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 5173",
+    // Use the built app to ensure screenshots reflect production output
+    command: "npm run preview -- --host 127.0.0.1 --port 5173",
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI
   },
@@ -14,8 +15,8 @@ module.exports = defineConfig({
   expect: {
     toHaveScreenshot: {
       animations: "disabled",
-      // Allow small rendering differences between local and CI environments
-      maxDiffPixelRatio: 0.05
+      // Keep this strict so stale baselines fail loudly
+      maxDiffPixelRatio: 0.01
     },
     snapshotPathTemplate: "{testDir}/{testFileName}-snapshots/{arg}{ext}"
   }
