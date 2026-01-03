@@ -1,3 +1,10 @@
+## [0.8.4](https://github.com/johnbenac/graphdown/compare/v0.8.3...v0.8.4) (2026-01-03)
+
+
+### Bug Fixes
+
+* use fontsource variable inter ([722bbe8](https://github.com/johnbenac/graphdown/commit/722bbe80ff664a2837c6e4c27ee7c5f7dc919ce0))
+
 ## [0.8.3](https://github.com/johnbenac/graphdown/compare/v0.8.2...v0.8.3) (2026-01-03)
 
 
