@@ -6,7 +6,7 @@ const path = require('path');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const MATRIX_PATH = path.join(REPO_ROOT, 'artifacts', 'spec-trace', 'matrix.json');
-const OUTPUT_PATH = path.join(REPO_ROOT, 'burndown.md');
+const OUTPUT_PATH = path.join(REPO_ROOT, 'artifacts', 'spec-trace', 'burndown.md');
 const NON_TESTABLE_OUTPUT_PATH = path.join(REPO_ROOT, 'artifacts', 'spec-trace', 'non-testable.md');
 
 function loadMatrix(matrixPath) {
@@ -102,6 +102,7 @@ function buildNonTestableMarkdown(matrix) {
 function main() {
   const matrix = loadMatrix(MATRIX_PATH);
   const markdown = buildMarkdown(matrix);
+  fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, `${markdown}\n`);
   const nonTestable = buildNonTestableMarkdown(matrix);
   fs.mkdirSync(path.dirname(NON_TESTABLE_OUTPUT_PATH), { recursive: true });

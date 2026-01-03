@@ -38,3 +38,4 @@ artifacts/spec-trace/*
 !artifacts/spec-trace/matrix.json
 !artifacts/spec-trace/matrix.md
 !artifacts/spec-trace/non-testable.md
+!artifacts/spec-trace/burndown.md
