@@ -76,4 +76,36 @@ describe("validateDatasetSnapshot", () => {
     const ok = validateDatasetSnapshot(snapshotFromEntries([type, present]));
     expect(ok.ok).toBe(true);
   });
+
+  it("VAL-006: semantic validation of field values is not enforced", () => {
+    const type = rec("type.md", [
+      "typeId: note",
+      "fields:",
+      "  fieldDefs:",
+      "    title:",
+      "      kind: string",
+      "    estimate:",
+      "      kind: number",
+      "    status:",
+      "      kind: enum",
+      "      options: [todo, done]",
+      "    due:",
+      "      kind: date",
+      "    assignee:",
+      "      kind: ref"
+    ]);
+    const record = rec("r.md", [
+      "typeId: note",
+      "recordId: one",
+      "fields:",
+      "  title: 123",
+      "  estimate: not-a-number",
+      "  status: unknown",
+      "  due: not-a-date",
+      "  assignee: 42"
+    ]);
+
+    const result = validateDatasetSnapshot(snapshotFromEntries([type, record]));
+    expect(result.ok).toBe(true);
+  });
 });

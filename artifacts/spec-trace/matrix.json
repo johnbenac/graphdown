@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-02T20:31:50.786Z",
+  "generatedAt": "2026-01-03T02:21:11.448Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -667,14 +667,26 @@
       "title": "No semantic validation of values",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-006",
+          "testTitle": "VAL-006: semantic validation of field values is not enforced",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-COMP-001",
       "title": "Composition referenced types must exist",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-COMP-001",
+          "testTitle": "VAL-COMP-001: composition referenced types must exist",
+          "filePath": "tests/core.composition.test.js"
+        }
+      ]
     },
     {
       "id": "VAL-COMP-002",
@@ -795,11 +807,6 @@
       "tests": [
         {
           "reqId": "ERR-002",
-          "testTitle": "ERR-002: shows invalid_url category for unsupported GitHub URLs (e2e)",
-          "filePath": "apps/web/e2e/app.spec.ts"
-        },
-        {
-          "reqId": "ERR-002",
           "testTitle": "ERR-002: maps GitHub 404 repo responses to not_found",
           "filePath": "apps/web/src/state/DatasetContext.test.tsx"
         },
@@ -864,11 +871,6 @@
       "tests": [
         {
           "reqId": "GH-003",
-          "testTitle": "GH-003: imports GitHub repos via tree API + raw fetch (e2e)",
-          "filePath": "apps/web/e2e/app.spec.ts"
-        },
-        {
-          "reqId": "GH-003",
           "testTitle": "GH-003: imports a repo snapshot via tree listing + raw fetch",
           "filePath": "apps/web/src/state/DatasetContext.test.tsx"
         }
@@ -905,7 +907,13 @@
       "title": "Record-only export",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-002",
+          "testTitle": "EXP-002: record-only export excludes non-graph files",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-006",
@@ -948,14 +956,26 @@
       "title": "Path stability",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-004",
+          "testTitle": "EXP-004: record-only export preserves original record paths",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-005",
       "title": "Content preservation (no “reformat the universe”)",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-005",
+          "testTitle": "EXP-005: record-only export preserves bytes exactly",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "UI-001",

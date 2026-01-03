@@ -88,4 +88,45 @@ describe("exportZip", () => {
     const paths = [...imported.files.keys()];
     expect(paths).not.toContain("blobs/sha256/aa/" + "a".repeat(64));
   });
+
+  it("EXP-002: record-only export excludes non-graph files", async () => {
+    const snapshot = snapshotFromEntries([
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      ["records/note/one.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")],
+      ["docs/readme.md", "ignore me"],
+      ["assets/logo.png", "binary"],
+      [".git/config", "ignored"]
+    ]);
+
+    const exported = exportDatasetOnlyZip(snapshot);
+    const imported = await readSnapshotFromZipBytes(exported);
+    expect([...imported.files.keys()].sort()).toEqual(["records/note/one.md", "types/note.md"]);
+  });
+
+  it("EXP-004: record-only export preserves original record paths", async () => {
+    const snapshot = snapshotFromEntries([
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      ["records/note/weird file name.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")]
+    ]);
+
+    const exported = exportDatasetOnlyZip(snapshot);
+    const imported = await readSnapshotFromZipBytes(exported);
+    expect(imported.files.has("records/note/weird file name.md")).toBe(true);
+  });
+
+  it("EXP-005: record-only export preserves bytes exactly", async () => {
+    const original = new Uint8Array(
+      strToU8(["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body with \r\ntrailing  ", "Emoji: 😊"].join("\n"))
+    );
+    const snapshot = snapshotFromEntries([
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      ["records/note/custom.md", original]
+    ]);
+
+    const exported = exportDatasetOnlyZip(snapshot);
+    const imported = await readSnapshotFromZipBytes(exported);
+    const roundTrip = imported.files.get("records/note/custom.md");
+    expect(roundTrip).toBeDefined();
+    expect(roundTrip).toEqual(original);
+  });
 });

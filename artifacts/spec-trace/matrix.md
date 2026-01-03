@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-02T20:31:50.786Z
+Generated: 2026-01-03T02:21:11.448Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -208,12 +208,12 @@ Tests (1):
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-005: required fields enforced when fieldDefs.required = true"
 
 ## VAL-006 — No semantic validation of values
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-006: semantic validation of field values is not enforced"
 
 ## VAL-COMP-001 — Composition referenced types must exist
-Tests (0):
-- (none)
+Tests (1):
+- tests/core.composition.test.js — "VAL-COMP-001: composition referenced types must exist"
 
 ## VAL-COMP-002 — Required components must be satisfied by outgoing record links
 Tests (3):
@@ -248,8 +248,7 @@ Tests (2):
 - tests/cli.output.test.js — "ERR-001: pretty output includes stable error codes"
 
 ## ERR-002 — Clear failure categories for GitHub import
-Tests (3):
-- apps/web/e2e/app.spec.ts — "ERR-002: shows invalid_url category for unsupported GitHub URLs (e2e)"
+Tests (2):
 - apps/web/src/state/DatasetContext.test.tsx — "ERR-002: maps GitHub 404 repo responses to not_found"
 - apps/web/src/state/DatasetContext.test.tsx — "ERR-002: maps GitHub rate limits to rate_limited"
 
@@ -266,8 +265,7 @@ Tests (1):
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "GH-002: falls back to main when default_branch is missing"
 
 ## GH-003 — Recursive listing + raw fetch
-Tests (2):
-- apps/web/e2e/app.spec.ts — "GH-003: imports GitHub repos via tree API + raw fetch (e2e)"
+Tests (1):
 - apps/web/src/state/DatasetContext.test.tsx — "GH-003: imports a repo snapshot via tree listing + raw fetch"
 
 ## GH-005 — Reject subdirectory URLs
@@ -279,8 +277,8 @@ Tests (1):
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## EXP-002 — Record-only export
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-002: record-only export excludes non-graph files"
 
 ## EXP-006 — Record-only export includes reachable blobs (testable=true)
 Tests (2):
@@ -293,12 +291,12 @@ Tests (2):
 - tests/core.roundtrip.test.js — "EXP-003: whole-repo export round-trips all files and bytes"
 
 ## EXP-004 — Path stability
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-004: record-only export preserves original record paths"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-005: record-only export preserves bytes exactly"
 
 ## UI-001 — Desktop + mobile usable (testable=false)
 Tests (0):

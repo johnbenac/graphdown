@@ -52,6 +52,17 @@ test('VAL-COMP-002: link to wrong type does not satisfy requirement', () => {
   assert.ok(result.errors.some((e) => e.code === 'E_COMPOSITION_CONSTRAINT_VIOLATION'));
 });
 
+test('VAL-COMP-001: composition referenced types must exist', () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record('types/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true']),
+      record('records/car/c1.md', ['typeId: car', 'recordId: c1', 'fields: {}'])
+    ])
+  );
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.code === 'E_COMPOSITION_UNKNOWN_TYPE'));
+});
+
 test('TYPE-COMP-001: composition must be a map with only typeId + required', () => {
   const invalid = validateDatasetSnapshot(
     snapshot([
