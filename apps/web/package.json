@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "pretest:e2e": "npm run playwright:install-deps",
-    "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e": "PLAYWRIGHT_SNAPSHOT_PATH_TEMPLATE='{testDir}/app.spec.ts-snapshots/{arg}{ext}' playwright test --config playwright.config.cjs",
+    "test:e2e:update": "PLAYWRIGHT_SNAPSHOT_PATH_TEMPLATE='{testDir}/app.spec.ts-snapshots/{arg}{ext}' playwright test --config playwright.config.cjs --update-snapshots",
     "playwright:install-deps": "playwright install-deps",
     "playwright:install": "playwright install --with-deps",
     "verify": "npm run test && npm run test:e2e"

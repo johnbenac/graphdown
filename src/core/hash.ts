@@ -1,4 +1,5 @@
-import { createHash } from 'node:crypto';
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex } from '@noble/hashes/utils';
 
 import { isRecordFileBytes, parseGraphdownText } from './datasetObjects';
 import { makeError, type ValidationError } from './errors';
@@ -43,6 +44,9 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
   if (scope !== 'schema' && scope !== 'snapshot') {
     return { ok: false, errors: [makeError('E_USAGE', `Unknown hash scope: ${String(scope)}`)] };
   }
+  if (!encoder) {
+    return { ok: false, errors: [makeError('E_INTERNAL', 'TextEncoder not available for hashing')] };
+  }
 
   const recordEntries: Array<{ id: string; idBytes: Uint8Array; file: string; bytes: Uint8Array }> = [];
   const errors: ValidationError[] = [];
@@ -77,10 +81,6 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
     }
     seenIds.add(parsed.identity);
 
-    if (!encoder) {
-      errors.push(makeError('E_INTERNAL', 'TextEncoder not available for hashing', file));
-      continue;
-    }
     const contentBytes = encoder.encode(normalizedText);
     const idBytes = encoder.encode(parsed.identity);
     recordEntries.push({ id: parsed.identity, idBytes, file, bytes: contentBytes });
@@ -92,18 +92,18 @@ export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashR
 
   recordEntries.sort((a, b) => lexCompareBytes(a.idBytes, b.idBytes));
 
-  const hash = createHash('sha256');
-  hash.update(Buffer.from('graphdown:gdhash:v1\0', 'utf8'));
+  const hash = sha256.create();
+  hash.update(encoder.encode('graphdown:gdhash:v1\0'));
 
   for (const entry of recordEntries) {
     hash.update(entry.idBytes);
     hash.update(Uint8Array.of(0));
-    hash.update(Buffer.from(String(entry.bytes.length), 'utf8'));
+    hash.update(encoder.encode(String(entry.bytes.length)));
     hash.update(Uint8Array.of(0));
     hash.update(entry.bytes);
     hash.update(Uint8Array.of(0));
   }
 
-  const digest = hash.digest('hex');
+  const digest = bytesToHex(hash.digest());
   return { ok: true, digest };
 }

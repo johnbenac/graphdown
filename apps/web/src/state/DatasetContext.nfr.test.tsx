@@ -4,6 +4,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 import { buildGraphFromSnapshot } from "../../../../src/core/graph";
 import { DatasetProvider, useDataset } from "./DatasetContext";
+import type { DatasetContextValue } from "./DatasetContext";
 import { MemoryStore } from "../storage/MemoryStore";
 import { createPersistence } from "../persistence/persistence";
 import { FORMAT_VERSIONS } from "../persistence/versions";
@@ -80,7 +81,7 @@ describe("DatasetContext non-functional requirements", () => {
     global.fetch = fetchMock as unknown as typeof fetch;
     await seedActiveDataset();
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <Harness onReady={(value) => (ctx = value)} />
@@ -88,7 +89,8 @@ describe("DatasetContext non-functional requirements", () => {
     );
 
     await waitFor(() => expect(ctx?.status).toBe("ready"));
-    expect(ctx?.activeDataset?.repoSnapshot.files.size).toBeGreaterThan(0);
+    expect(ctx).not.toBeNull();
+    expect(ctx!.activeDataset?.repoSnapshot.files.size).toBeGreaterThan(0);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -98,7 +100,7 @@ describe("DatasetContext non-functional requirements", () => {
     window.addEventListener("load", loadSpy);
     window.dispatchEvent(new Event("load"));
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <Harness onReady={(value) => (ctx = value)} />
@@ -110,13 +112,13 @@ describe("DatasetContext non-functional requirements", () => {
 
     await act(async () => {
       await ctx?.createRecord({
-        recordTypeId: "note",
-        id: "note-2",
+        typeId: "note",
+        recordId: "note-2",
         fields: { title: "Second" },
         body: "Second body"
       });
       await ctx?.updateRecord({
-        recordId: "note:one",
+        recordKey: "note:one",
         nextFields: { title: "Updated" },
         nextBody: "Updated body"
       });

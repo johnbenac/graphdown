@@ -1,4 +1,5 @@
-import { createHash } from 'node:crypto';
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex } from '@noble/hashes/utils';
 
 import { extractFrontMatter } from './frontMatter';
 import { makeError, type ValidationError } from './errors';
@@ -251,7 +252,5 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
 }
 
 export function computeBlobDigest(bytes: Uint8Array): string {
-  const hash = createHash('sha256');
-  hash.update(bytes);
-  return hash.digest('hex');
+  return bytesToHex(sha256(bytes));
 }

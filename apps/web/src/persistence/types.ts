@@ -1,4 +1,4 @@
-import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 
 export type DatasetMeta = {
@@ -17,8 +17,8 @@ export type PersistedRepoSnapshot = {
 };
 
 export type PersistedGraph = {
-  nodes: GraphNode[];
-  types: GraphTypeDef[];
+  types: GraphTypeNode[];
+  records: GraphRecordNode[];
   outgoing: Array<[string, string[]]>;
   incoming: Array<[string, string[]]>;
 };

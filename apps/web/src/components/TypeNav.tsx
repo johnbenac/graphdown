@@ -1,22 +1,22 @@
 import { NavLink } from "react-router-dom";
-import type { Graph, GraphTypeDef } from "../../../../src/core/graph";
+import type { Graph, GraphTypeNode } from "../../../../src/core/graph";
 
 type TypeNavProps = {
   graph: Graph;
   basePath?: string;
 };
 
-export function getTypeLabel(type: GraphTypeDef): string {
+export function getTypeLabel(type: GraphTypeNode): string {
   const fields = type.fields ?? {};
   const pluralName = typeof fields.pluralName === "string" ? fields.pluralName : null;
   const displayName = typeof fields.displayName === "string" ? fields.displayName : null;
   const name = typeof fields.name === "string" ? fields.name : null;
-  return pluralName ?? displayName ?? name ?? type.recordTypeId;
+  return pluralName ?? displayName ?? name ?? type.typeId;
 }
 
 export default function TypeNav({ graph, basePath = "/datasets" }: TypeNavProps) {
   const types = [...graph.typesByRecordTypeId.values()].sort((a, b) =>
-    a.recordTypeId.localeCompare(b.recordTypeId)
+    a.typeId.localeCompare(b.typeId)
   );
 
   const counts = new Map<string, number>();
@@ -34,13 +34,13 @@ export default function TypeNav({ graph, basePath = "/datasets" }: TypeNavProps)
       <div className="type-nav__header">Types</div>
       <ul className="type-nav__list">
         {types.map((type) => (
-          <li key={type.recordTypeId}>
+          <li key={type.typeId}>
             <NavLink
               className={({ isActive }) => (isActive ? "type-nav__link active" : "type-nav__link")}
-              to={`${normalizedBasePath}/${type.recordTypeId}`}
+              to={`${normalizedBasePath}/${type.typeId}`}
             >
               <span className="type-nav__label">{getTypeLabel(type)}</span>
-              <span className="type-nav__count">{counts.get(type.recordTypeId) ?? 0}</span>
+              <span className="type-nav__count">{counts.get(type.typeId) ?? 0}</span>
             </NavLink>
           </li>
         ))}

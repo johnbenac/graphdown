@@ -45,6 +45,7 @@
     "typescript-eslint": "^8.10.0"
   },
   "dependencies": {
+    "@noble/hashes": "^1.4.0",
     "fflate": "^0.8.2",
     "yaml": "^2.8.2"
   }

@@ -1,9 +1,9 @@
 import YAML from "yaml";
-import type { GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
 
 type RecordViewerProps = {
-  record: GraphNode;
-  typeDef: GraphTypeDef;
+  record: GraphRecordNode;
+  typeDef: GraphTypeNode;
   outgoingLinks: string[];
   incomingLinks: string[];
 };
@@ -20,11 +20,9 @@ export default function RecordViewer({
   return (
     <div className="record-card">
       <p>
-        <strong>{record.id}</strong>
+        <strong>{record.recordId}</strong>
       </p>
-      <p>Type: {typeDef.recordTypeId}</p>
-      <p>Created: {record.createdAt}</p>
-      <p>Updated: {record.updatedAt}</p>
+      <p>Type: {typeDef.typeId}</p>
       <div>
         <h3>Fields</h3>
         <pre>{fieldsYaml}</pre>

@@ -1,58 +1,73 @@
-import type { Graph, GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
 import type { PersistedGraph } from "./types";
 
 class GraphImpl implements Graph {
   constructor(
-    public nodesById: Map<string, GraphNode>,
-    public typesByRecordTypeId: Map<string, GraphTypeDef>,
+    public typesById: Map<string, GraphTypeNode>,
+    public recordsByKey: Map<string, GraphRecordNode>,
+    public nodesById: Map<string, GraphTypeNode | GraphRecordNode>,
+    public typesByRecordTypeId: Map<string, GraphTypeNode>,
     public outgoing: Map<string, Set<string>>,
     public incoming: Map<string, Set<string>>
   ) {}
 
-  getLinksFrom(id: string): string[] {
-    const links = this.outgoing.get(id);
+  getLinksFrom(recordKey: string): string[] {
+    const links = this.outgoing.get(recordKey);
     return links ? [...links].sort((a, b) => a.localeCompare(b)) : [];
   }
 
-  getLinksTo(id: string): string[] {
-    const links = this.incoming.get(id);
+  getLinksTo(recordKey: string): string[] {
+    const links = this.incoming.get(recordKey);
     return links ? [...links].sort((a, b) => a.localeCompare(b)) : [];
   }
 
-  getRecordTypeId(id: string): string | null {
-    const node = this.nodesById.get(id);
-    if (!node) {
-      return null;
-    }
-    if (node.kind === "type") {
-      const recordTypeId = typeof node.fields.recordTypeId === "string" ? node.fields.recordTypeId : null;
-      return recordTypeId ?? null;
-    }
-    return node.typeId || null;
+  getType(typeId: string) {
+    return this.typesById.get(typeId) ?? null;
   }
 
-  getTypeForRecord(id: string): GraphTypeDef | null {
-    const node = this.nodesById.get(id);
-    if (!node || node.kind !== "record") {
-      return null;
-    }
-    return this.typesByRecordTypeId.get(node.typeId) ?? null;
+  getRecord(recordKey: string) {
+    return this.recordsByKey.get(recordKey) ?? null;
+  }
+
+  getTypeForRecord(recordKey: string): GraphTypeNode | null {
+    const record = this.recordsByKey.get(recordKey);
+    if (!record) return null;
+    return this.typesById.get(record.typeId) ?? null;
+  }
+
+  getRecordTypeId(recordKey: string): string | null {
+    const record = this.recordsByKey.get(recordKey);
+    if (record) return record.typeId;
+    const type = this.typesById.get(recordKey);
+    if (type) return type.typeId;
+    return null;
   }
 }
 
 export function serializeGraph(graph: Graph): PersistedGraph {
   return {
-    nodes: [...graph.nodesById.values()],
-    types: [...graph.typesByRecordTypeId.values()],
+    types: [...graph.typesById.values()],
+    records: [...graph.recordsByKey.values()],
     outgoing: [...graph.outgoing.entries()].map(([id, targets]) => [id, [...targets]]),
     incoming: [...graph.incoming.entries()].map(([id, sources]) => [id, [...sources]])
   };
 }
 
 export function deserializeGraph(payload: PersistedGraph): Graph {
+  const typesById = new Map(payload.types.map((type) => [type.typeId, type]));
+  const recordsByKey = new Map(payload.records.map((record) => [record.recordKey, record]));
+  const nodesById = new Map<string, GraphTypeNode | GraphRecordNode>();
+  for (const type of payload.types) {
+    nodesById.set(type.typeId, type);
+  }
+  for (const record of payload.records) {
+    nodesById.set(record.recordKey, record);
+  }
   return new GraphImpl(
-    new Map(payload.nodes.map((node) => [node.id, node])),
-    new Map(payload.types.map((type) => [type.recordTypeId, type])),
+    typesById,
+    recordsByKey,
+    nodesById,
+    typesById,
     new Map(payload.outgoing.map(([id, targets]) => [id, new Set(targets)])),
     new Map(payload.incoming.map(([id, sources]) => [id, new Set(sources)]))
   );

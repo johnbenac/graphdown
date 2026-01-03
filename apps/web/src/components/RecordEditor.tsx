@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { GraphNode, GraphTypeDef } from "../../../../src/core/graph";
+import type { GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
 import { isObject } from "../../../../src/core/types";
@@ -12,10 +12,10 @@ type RecordEditorProps = {
   mode: "edit" | "create";
   schema?: TypeSchema;
   schemaError?: string;
-  record?: GraphNode | null;
-  typeDef: GraphTypeDef;
+  record?: GraphRecordNode | null;
+  typeDef: GraphTypeNode;
   onCancel: () => void;
-  onComplete: (recordId: string) => void;
+  onComplete: (recordKey: string) => void;
 };
 
 export default function RecordEditor({
@@ -43,7 +43,7 @@ export default function RecordEditor({
     const nextFields = record?.fields ?? {};
     if (mode === "edit" && record) {
       setBodyValue(record.body ?? "");
-      setRecordId(record.id);
+      setRecordId(record.recordId);
       setFieldsText(YAML.stringify(nextFields, { indent: 2 }));
     }
     if (mode === "create") {
@@ -137,24 +137,24 @@ export default function RecordEditor({
     try {
       if (mode === "edit" && record) {
         const result = await updateRecord({
-          recordId: record.id,
+          recordKey: record.recordKey,
           nextFields,
           nextBody: bodyValue
         });
         if (result.ok) {
-          onComplete(record.id);
+          onComplete(record.recordKey);
           return;
         }
         setErrors(result.errors);
       } else if (mode === "create") {
         const result = await createRecord({
-          recordTypeId: typeDef.recordTypeId,
-          id: trimmedId,
+          typeId: typeDef.typeId,
+          recordId: trimmedId,
           fields: nextFields,
           body: bodyValue
         });
         if (result.ok) {
-          onComplete(result.id);
+          onComplete(result.recordKey);
           return;
         }
         setErrors(result.errors);
@@ -188,7 +188,7 @@ export default function RecordEditor({
             type="text"
             value={recordId}
             onChange={(event) => setRecordId(event.target.value)}
-            placeholder="record:example"
+            placeholder="example"
             required
           />
         </div>

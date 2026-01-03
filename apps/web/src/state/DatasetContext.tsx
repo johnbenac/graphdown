@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { buildGraphFromSnapshot, parseMarkdownRecord } from "../../../../src/core/graph";
+import { buildGraphFromSnapshot } from "../../../../src/core/graph";
 import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
-import { serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
+import { parseMarkdownRecord, serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 import { isObject } from "../../../../src/core/types";
 import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
@@ -55,7 +55,7 @@ export type ImportProgress =
   | { phase: Exclude<ImportPhase, "downloading_files">; detail?: string }
   | { phase: "downloading_files"; completed: number; total: number; detail?: string };
 
-type DatasetContextValue = {
+export type DatasetContextValue = {
   status: "idle" | "loading" | "ready" | "error";
   progress: ImportProgress;
   activeDataset?: LoadedDataset;
@@ -64,16 +64,16 @@ type DatasetContextValue = {
   importDatasetFromGitHub: (url: string) => Promise<void>;
   clearPersistence: () => Promise<void>;
   updateRecord: (input: {
-    recordId: string;
+    recordKey: string;
     nextFields: Record<string, unknown>;
     nextBody: string;
   }) => Promise<{ ok: true } | { ok: false; errors: ValidationError[] }>;
   createRecord: (input: {
-    recordTypeId: string;
-    id: string;
+    typeId: string;
+    recordId: string;
     fields: Record<string, unknown>;
     body: string;
-  }) => Promise<{ ok: true; id: string } | { ok: false; errors: ValidationError[] }>;
+  }) => Promise<{ ok: true; recordKey: string } | { ok: false; errors: ValidationError[] }>;
 };
 
 const DatasetContext = createContext<DatasetContextValue | undefined>(undefined);
@@ -368,14 +368,14 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const updateRecord = useCallback<DatasetContextValue["updateRecord"]>(
     async (input: {
-      recordId: string;
+      recordKey: string;
       nextFields: Record<string, unknown>;
       nextBody: string;
     }) => {
       if (!activeDataset?.parsedGraph) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
-      const node = activeDataset.parsedGraph.nodesById.get(input.recordId);
+      const node = activeDataset.parsedGraph.nodesById.get(input.recordKey);
       if (!node || node.kind !== "record") {
         return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
@@ -398,9 +398,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
       }
       const nextYaml: Record<string, unknown> = {
-        ...parsed.yaml,
-        fields: mergedFields,
-        updatedAt: new Date().toISOString()
+        typeId: parsed.yaml.typeId,
+        recordId: parsed.yaml.recordId,
+        fields: mergedFields
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
       const nextFiles = new Map(activeDataset.repoSnapshot.files);
@@ -416,34 +416,34 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createRecord = useCallback<DatasetContextValue["createRecord"]>(
-    async (input: { recordTypeId: string; id: string; fields: Record<string, unknown>; body: string }) => {
+    async (input: { typeId: string; recordId: string; fields: Record<string, unknown>; body: string }) => {
       if (!activeDataset?.parsedGraph) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
-      const trimmedId = input.id.trim();
-      if (!trimmedId) {
+      const trimmedRecordId = input.recordId.trim();
+      if (!trimmedRecordId) {
         return { ok: false, errors: [makeError("E_USAGE", "Record ID is required.")] } as const;
       }
-      if (!activeDataset.parsedGraph.typesByRecordTypeId.has(input.recordTypeId)) {
+      if (!activeDataset.parsedGraph.typesByRecordTypeId.has(input.typeId)) {
         return {
           ok: false,
-          errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.", input.recordTypeId)]
+          errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.", input.typeId)]
         } as const;
       }
-      if (activeDataset.parsedGraph.nodesById.has(trimmedId)) {
+      const recordKey = `${input.typeId}:${trimmedRecordId}`;
+      if (activeDataset.parsedGraph.nodesById.has(recordKey)) {
         return {
           ok: false,
-          errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedId} already exists.`)]
+          errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedRecordId} already exists.`)]
         } as const;
       }
-      const safeId = trimmedId.replace(/[^A-Za-z0-9_-]+/g, "-");
-      let filePath = `records/${input.recordTypeId}/record--${safeId}.md`;
+      const safeId = trimmedRecordId.replace(/[^A-Za-z0-9_-]+/g, "-");
+      let filePath = `records/${input.typeId}/record--${safeId}.md`;
       let counter = 1;
       while (activeDataset.repoSnapshot.files.has(filePath)) {
         counter += 1;
-        filePath = `records/${input.recordTypeId}/record--${safeId}-${counter}.md`;
+        filePath = `records/${input.typeId}/record--${safeId}-${counter}.md`;
       }
-      const now = new Date().toISOString();
       const fields: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(input.fields)) {
         if (value !== undefined) {
@@ -451,10 +451,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
       }
       const yaml: Record<string, unknown> = {
-        id: trimmedId,
-        typeId: input.recordTypeId,
-        createdAt: now,
-        updatedAt: now,
+        typeId: input.typeId,
+        recordId: trimmedRecordId,
         fields
       };
       const text = serializeMarkdownRecord({ yaml, body: input.body ?? "" });
@@ -465,7 +463,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       if (!commitResult.ok) {
         return { ok: false, errors: commitResult.errors } as const;
       }
-      return { ok: true, id: trimmedId } as const;
+      return { ok: true, recordKey } as const;
     },
     [activeDataset, commitSnapshot]
   );

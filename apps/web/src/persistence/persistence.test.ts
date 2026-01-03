@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GraphNode } from "../../../../src/core/graph";
+import type { GraphTypeNode } from "../../../../src/core/graph";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
 import { MemoryStore } from "../storage/MemoryStore";
 import { KEY } from "./keys";
@@ -14,26 +14,23 @@ const sampleSnapshot: RepoSnapshot = {
     [
       "types/note.md",
       new TextEncoder().encode(
-        "---\nid: type:note\ntypeId: sys:type\ncreatedAt: 2024-01-01\nupdatedAt: 2024-01-01\nfields:\n  recordTypeId: note\n---\nDemo"
+        "---\ntypeId: note\nfields:\n  name: Note\n---\nDemo"
       )
     ]
   ])
 };
 
-const sampleGraphNode: GraphNode = {
-  id: "type:note",
-  typeId: "sys:type",
-  createdAt: "2024-01-01",
-  updatedAt: "2024-01-01",
-  fields: { recordTypeId: "note" },
+const sampleType: GraphTypeNode = {
+  kind: "type",
+  typeId: "note",
+  fields: { name: "Note" },
   body: "Demo",
-  file: "types/note.md",
-  kind: "type"
+  file: "types/note.md"
 };
 
 const samplePersistedGraph: PersistedGraph = {
-  nodes: [sampleGraphNode],
-  types: [],
+  types: [sampleType],
+  records: [],
   outgoing: [],
   incoming: []
 };

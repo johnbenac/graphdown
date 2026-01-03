@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import type { GraphRecordNode } from "../../../../src/core/graph";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
@@ -10,9 +11,9 @@ import { useDataset } from "../state/DatasetContext";
 
 export default function DatasetRoute() {
   const { activeDataset, status } = useDataset();
-  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [selectedRecordKey, setSelectedRecordKey] = useState<string | null>(null);
   const [editorMode, setEditorMode] = useState<"view" | "edit" | "create">("view");
-  const [previousRecordId, setPreviousRecordId] = useState<string | null>(null);
+  const [previousRecordKey, setPreviousRecordKey] = useState<string | null>(null);
   const { recordTypeId } = useParams();
   const navigate = useNavigate();
 
@@ -47,34 +48,36 @@ export default function DatasetRoute() {
       return [];
     }
     return [...graph.nodesById.values()]
-      .filter((node) => node.kind === "record" && node.typeId === selectedTypeId)
-      .sort((a, b) => a.id.localeCompare(b.id));
+      .filter((node): node is GraphRecordNode => node.kind === "record" && node.typeId === selectedTypeId)
+      .sort((a, b) => a.recordId.localeCompare(b.recordId));
   }, [graph, selectedTypeId]);
 
   useEffect(() => {
     if (!selectedTypeId) {
-      setSelectedRecordId(null);
+      setSelectedRecordKey(null);
       setEditorMode("view");
       return;
     }
     if (editorMode === "create") {
       return;
     }
-    if (selectedRecordId && recordsForSelectedType.some((record) => record.id === selectedRecordId)) {
+    if (selectedRecordKey && recordsForSelectedType.some((record) => record.recordKey === selectedRecordKey)) {
       return;
     }
-    const firstRecordId = recordsForSelectedType[0]?.id ?? null;
-    setSelectedRecordId(firstRecordId);
-  }, [recordsForSelectedType, selectedRecordId, selectedTypeId, editorMode]);
+    const firstRecordKey = recordsForSelectedType[0]?.recordKey ?? null;
+    setSelectedRecordKey(firstRecordKey);
+  }, [recordsForSelectedType, selectedRecordKey, selectedTypeId, editorMode]);
 
   useEffect(() => {
     setEditorMode("view");
-    setPreviousRecordId(null);
+    setPreviousRecordKey(null);
   }, [selectedTypeId]);
 
-  const selectedRecord = selectedRecordId ? graph?.nodesById.get(selectedRecordId) ?? null : null;
-  const outgoingLinks = selectedRecord ? graph?.getLinksFrom(selectedRecord.id) ?? [] : [];
-  const incomingLinks = selectedRecord ? graph?.getLinksTo(selectedRecord.id) ?? [] : [];
+  const selectedRecord = selectedRecordKey ? graph?.nodesById.get(selectedRecordKey) ?? null : null;
+  const selectedRecordNode =
+    selectedRecord && selectedRecord.kind === "record" ? selectedRecord : null;
+  const outgoingLinks = selectedRecordNode ? graph?.getLinksFrom(selectedRecordNode.recordKey) ?? [] : [];
+  const incomingLinks = selectedRecordNode ? graph?.getLinksTo(selectedRecordNode.recordKey) ?? [] : [];
 
   return (
     <AppShell
@@ -119,8 +122,8 @@ export default function DatasetRoute() {
                     data-testid="create-record"
                     disabled={!selectedTypeDef}
                     onClick={() => {
-                      setPreviousRecordId(selectedRecordId);
-                      setSelectedRecordId(null);
+                      setPreviousRecordKey(selectedRecordKey);
+                      setSelectedRecordKey(null);
                       setEditorMode("create");
                     }}
                   >
@@ -130,18 +133,18 @@ export default function DatasetRoute() {
                 {recordsForSelectedType.length ? (
                   <ul>
                     {recordsForSelectedType.map((record) => (
-                      <li key={record.id}>
+                      <li key={record.recordKey}>
                         <button
                           type="button"
                           className={
-                            record.id === selectedRecordId ? "record-link is-active" : "record-link"
+                            record.recordKey === selectedRecordKey ? "record-link is-active" : "record-link"
                           }
                           onClick={() => {
-                            setSelectedRecordId(record.id);
+                            setSelectedRecordKey(record.recordKey);
                             setEditorMode("view");
                           }}
                         >
-                          {record.id}
+                          {record.recordId}
                         </button>
                       </li>
                     ))}
@@ -154,7 +157,7 @@ export default function DatasetRoute() {
               <div className="record-details" data-testid="record-details">
                 <div className="record-details__header">
                   <h2>Record details</h2>
-                  {selectedRecord && editorMode === "view" ? (
+                  {selectedRecordNode && editorMode === "view" ? (
                     <button
                       type="button"
                       className="button secondary"
@@ -173,30 +176,30 @@ export default function DatasetRoute() {
                     typeDef={selectedTypeDef}
                     onCancel={() => {
                       setEditorMode("view");
-                      setSelectedRecordId(previousRecordId);
+                      setSelectedRecordKey(previousRecordKey);
                     }}
                     onComplete={(newId) => {
                       setEditorMode("view");
-                      setSelectedRecordId(newId);
+                      setSelectedRecordKey(newId);
                     }}
                   />
-                ) : selectedRecord && selectedTypeDef && graph ? (
+                ) : selectedRecordNode && selectedTypeDef && graph ? (
                   editorMode === "edit" ? (
                     <RecordEditor
                       mode="edit"
                       schema={schema}
                       schemaError={schemaError}
-                      record={selectedRecord}
+                      record={selectedRecordNode}
                       typeDef={selectedTypeDef}
                       onCancel={() => setEditorMode("view")}
                       onComplete={(id) => {
                         setEditorMode("view");
-                        setSelectedRecordId(id);
+                        setSelectedRecordKey(id);
                       }}
                     />
                   ) : (
                     <RecordViewer
-                      record={selectedRecord}
+                      record={selectedRecordNode}
                       typeDef={selectedTypeDef}
                       outgoingLinks={outgoingLinks}
                       incomingLinks={incomingLinks}

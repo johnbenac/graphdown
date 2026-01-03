@@ -55,12 +55,8 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         contentType: "text/plain",
         body: [
           "---",
-          "id: type:note",
-          "typeId: sys:type",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
+          "typeId: note",
           "fields:",
-          "  recordTypeId: note",
           "  displayName: Note",
           "  pluralName: Notes",
           "  bodyField: content",
@@ -89,12 +85,8 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         contentType: "text/plain",
         body: [
           "---",
-          "id: type:task",
-          "typeId: sys:type",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
+          "typeId: task",
           "fields:",
-          "  recordTypeId: task",
           "  pluralName: Tasks",
           "---"
         ].join("\n")
@@ -107,18 +99,16 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         contentType: "text/plain",
         body: [
           "---",
-          "id: record:1",
           "typeId: note",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
+          "recordId: record-1",
           "fields:",
           "  title: Draft title",
           "  estimate: 3",
           "  status: todo",
           "  due: 2024-01-10",
-          "  assignee: \"[[record:task-1]]\"",
+          "  assignee: \"[[task:task-1]]\"",
           "  watchers:",
-          "    - \"[[record:task-1]]\"",
+          "    - \"[[task:task-1]]\"",
           "---",
           "This is the note body."
         ].join("\n")
@@ -131,10 +121,8 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
         contentType: "text/plain",
         body: [
           "---",
-          "id: record:task-1",
           "typeId: task",
-          "createdAt: 2024-01-01",
-          "updatedAt: 2024-01-02",
+          "recordId: task-1",
           "fields: {}",
           "---"
         ].join("\n")
@@ -159,13 +147,14 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
   await page.getByTestId("edit-record").click();
   await page.getByLabel("title").fill("Updated title");
   await page.getByTestId("save-record").click();
-  await expect(page.getByText("Updated title")).toBeVisible();
+  await expect(page.getByTestId("edit-record")).toBeVisible();
+  await expect(page.getByTestId("record-details")).toContainText("Updated title");
 
   await page.getByTestId("create-record").click();
-  await page.getByLabel("Record ID").fill("record:new");
+  await page.getByLabel("Record ID").fill("record-new");
   await page.getByLabel("title").fill("New record title");
   await page.getByTestId("save-record").click();
-  await expect(page.getByRole("button", { name: "record:new" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "record-new" })).toBeVisible();
 
   await page.getByRole("link", { name: /task/i }).click();
   await expect(page).toHaveURL(/\/datasets\/task/);
