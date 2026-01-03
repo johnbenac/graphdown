@@ -1,3 +1,10 @@
+## [0.8.2](https://github.com/johnbenac/graphdown/compare/v0.8.1...v0.8.2) (2026-01-03)
+
+
+### Bug Fixes
+
+* align web UI with new graph API and Playwright config ([b79b2a2](https://github.com/johnbenac/graphdown/commit/b79b2a213fce1a5ef94a73ddfec6c1a50c7ffd88))
+
 ## [0.8.1](https://github.com/johnbenac/graphdown/compare/v0.8.0...v0.8.1) (2026-01-02)
 
 
