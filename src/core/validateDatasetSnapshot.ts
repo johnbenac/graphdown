@@ -16,10 +16,6 @@ export type ValidateDatasetResult =
 
 type CompositionComponent = { typeId: string; required: boolean };
 
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
-}
-
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
     into.add(value);
