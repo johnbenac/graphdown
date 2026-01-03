@@ -1,13 +1,23 @@
 import { test, expect } from "@playwright/test";
 
+async function waitForUiStable(page) {
+  await page.waitForLoadState("domcontentloaded");
+  if (page.evaluate) {
+    await page.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
+  }
+  await page.waitForTimeout(50);
+}
+
 test("import screen renders", async ({ page }) => {
-  await page.goto("/import");
+  await page.goto("/import", { waitUntil: "networkidle" });
+  await waitForUiStable(page);
   await expect(page.getByTestId("import-screen")).toBeVisible();
   await expect(page).toHaveScreenshot("import.png");
 });
 
 test("datasets screen renders", async ({ page }) => {
-  await page.goto("/datasets");
+  await page.goto("/datasets", { waitUntil: "networkidle" });
+  await waitForUiStable(page);
   await expect(page.getByTestId("dataset-screen")).toBeVisible();
   await expect(page).toHaveScreenshot("datasets.png");
 });

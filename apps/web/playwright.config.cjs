@@ -10,11 +10,17 @@ module.exports = defineConfig({
   },
   use: {
     baseURL: "http://127.0.0.1:5173",
-    viewport: { width: 1280, height: 720 }
+    viewport: { width: 1280, height: 720 },
+    deviceScaleFactor: 1,
+    locale: "en-US",
+    timezoneId: "UTC",
+    colorScheme: "light",
+    reducedMotion: "reduce"
   },
   expect: {
     toHaveScreenshot: {
       animations: "disabled",
+      caret: "hide",
       // Keep this strict so stale baselines fail loudly
       maxDiffPixelRatio: 0.01
     },
