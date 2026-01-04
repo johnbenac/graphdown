@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-04T17:59:17.415Z",
+  "generatedAt": "2026-01-04T19:06:29.569Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1011,6 +1011,11 @@
         {
           "reqId": "UI-RAW-001",
           "testTitle": "UI-RAW-001: edits fields outside any schema and persists them",
+          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+        },
+        {
+          "reqId": "UI-RAW-001",
+          "testTitle": "UI-RAW-001: removes fields when YAML omits them",
           "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
         }
       ]

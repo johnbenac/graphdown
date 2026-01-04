@@ -83,7 +83,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
     });
   });
 
-  it("removes fields when YAML omits them", async () => {
+  it("UI-RAW-001: removes fields when YAML omits them", async () => {
     const record: GraphRecordNode = {
       recordKey: "note:record-3",
       recordId: "record-3",

@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-04T17:59:17.415Z
+Generated: 2026-01-04T19:06:29.569Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -311,9 +311,10 @@ Tests (1):
 - apps/web/src/state/DatasetContext.nfr.test.tsx — "NFR-010: uses persisted dataset for read-only access when offline"
 
 ## UI-RAW-001 — Schema-agnostic record editor (testable=true)
-Tests (2):
+Tests (3):
 - apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: edits arbitrary fields without kind semantics"
 - apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: edits fields outside any schema and persists them"
+- apps/web/src/components/RecordEditor.raw.test.tsx — "UI-RAW-001: removes fields when YAML omits them"
 
 ## NFR-030 — Plugins must not require core modification (testable=false)
 Tests (0):

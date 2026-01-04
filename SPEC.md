@@ -836,6 +836,8 @@ The editor MUST NOT render schema-driven field widgets or any schema-derived UI 
 This includes (but is not limited to) rendering inputs based on `fields.fieldDefs` metadata such as `kind`, `options`, or UI-hint-like keys.
 The only required editing surface for record `fields` is raw YAML text.
 
+On save, the submitted YAML map replaces the persisted `fields` map; omitting a key removes it.
+
 On save, the UI MUST validate the resulting dataset snapshot using core validation rules. If validation fails, the UI MUST NOT persist the change and MUST surface the validation errors.
 
 ---
