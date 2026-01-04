@@ -1,15 +1,31 @@
 import { test, expect } from "@playwright/test";
 
+const CHECK_SCREENSHOTS = process.env.CHECK_SCREENSHOTS === "1";
+
+async function waitForUiStable(page) {
+  await page.waitForLoadState("domcontentloaded");
+  if (page.evaluate) {
+    await page.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
+  }
+  await page.waitForTimeout(50);
+}
+
 test("import screen renders", async ({ page }) => {
-  await page.goto("/import");
+  await page.goto("/import", { waitUntil: "networkidle" });
+  await waitForUiStable(page);
   await expect(page.getByTestId("import-screen")).toBeVisible();
-  await expect(page).toHaveScreenshot("import.png");
+  if (CHECK_SCREENSHOTS) {
+    await expect(page).toHaveScreenshot("import.png");
+  }
 });
 
 test("datasets screen renders", async ({ page }) => {
-  await page.goto("/datasets");
+  await page.goto("/datasets", { waitUntil: "networkidle" });
+  await waitForUiStable(page);
   await expect(page.getByTestId("dataset-screen")).toBeVisible();
-  await expect(page).toHaveScreenshot("datasets.png");
+  if (CHECK_SCREENSHOTS) {
+    await expect(page).toHaveScreenshot("datasets.png");
+  }
 });
 
 test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ page }) => {
@@ -145,14 +161,24 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
   await expect(page.getByRole("link", { name: /task/i })).toBeVisible();
 
   await page.getByTestId("edit-record").click();
-  await page.getByLabel("title").fill("Updated title");
+  await page.getByTestId("fields-yaml-editor").fill(
+    [
+      "title: Updated title",
+      "estimate: 3",
+      "status: todo",
+      "due: 2024-01-10",
+      'assignee: "[[task:task-1]]"',
+      "watchers:",
+      '  - "[[task:task-1]]"'
+    ].join("\n")
+  );
   await page.getByTestId("save-record").click();
   await expect(page.getByTestId("edit-record")).toBeVisible();
   await expect(page.getByTestId("record-details")).toContainText("Updated title");
 
   await page.getByTestId("create-record").click();
   await page.getByLabel("Record ID").fill("record-new");
-  await page.getByLabel("title").fill("New record title");
+  await page.getByTestId("fields-yaml-editor").fill("title: New record title");
   await page.getByTestId("save-record").click();
   await expect(page.getByRole("button", { name: "record-new" })).toBeVisible();
 

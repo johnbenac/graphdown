@@ -1,3 +1,17 @@
+## [0.8.4](https://github.com/johnbenac/graphdown/compare/v0.8.3...v0.8.4) (2026-01-03)
+
+
+### Bug Fixes
+
+* use fontsource variable inter ([722bbe8](https://github.com/johnbenac/graphdown/commit/722bbe80ff664a2837c6e4c27ee7c5f7dc919ce0))
+
+## [0.8.3](https://github.com/johnbenac/graphdown/compare/v0.8.2...v0.8.3) (2026-01-03)
+
+
+### Bug Fixes
+
+* bundle inter font for stable e2e screenshots ([e5182aa](https://github.com/johnbenac/graphdown/commit/e5182aa51318024e517d093b2fff7adb8bb1ece4))
+
 ## [0.8.2](https://github.com/johnbenac/graphdown/compare/v0.8.1...v0.8.2) (2026-01-03)
 
 

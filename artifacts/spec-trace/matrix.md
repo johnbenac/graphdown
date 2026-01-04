@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-03T02:21:11.448Z
+Generated: 2026-01-04T17:59:17.415Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -142,11 +142,7 @@ Tests (1):
 - tests/core.ids.test.js — "TYPE-002: duplicate typeId fails validation"
 
 ## TYPE-004 — fieldDefs shape (testable=true)
-Tests (5):
-- apps/web/src/schema/typeSchema.test.ts — "TYPE-004: fieldDefs array is rejected"
-- apps/web/src/schema/typeSchema.test.ts — "TYPE-004: fieldDefs map is accepted"
-- apps/web/src/schema/typeSchema.test.ts — "TYPE-004: missing fieldDefs yields an empty schema"
-- apps/web/src/schema/typeSchema.test.ts — "TYPE-004: null fieldDefs yields an empty schema"
+Tests (1):
 - tests/core.gaps.test.js — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
 
 ## TYPE-COMP-001 — composition shape (testable=true)
@@ -174,12 +170,12 @@ Tests (0):
 
 ## REL-005 — Graphdown-created relationships are serialized as wiki-links (testable=true)
 Tests (2):
-- apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRef writes wiki-links"
-- apps/web/src/schema/typeSchema.test.ts — "REL-005: writeRefs writes wiki-link arrays"
+- apps/web/src/utils/wikiLinks.test.ts — "REL-005: writeRef writes wiki-links"
+- apps/web/src/utils/wikiLinks.test.ts — "REL-005: writeRefs writes wiki-link arrays"
 
 ## REL-007 — Only composite wiki-links are relationships in core (testable=true)
 Tests (1):
-- apps/web/src/schema/typeSchema.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
+- apps/web/src/utils/wikiLinks.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
 
 ## BLOB-REF-001 — Blob references use composite wiki-link tokens (testable=true)
 Tests (2):

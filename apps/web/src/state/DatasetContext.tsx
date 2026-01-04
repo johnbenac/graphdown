@@ -4,7 +4,6 @@ import type { ValidationError } from "../../../../src/core/errors";
 import { makeError } from "../../../../src/core/errors";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
 import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { isObject } from "../../../../src/core/types";
 import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
 import { GitHubImportError } from "../import/github/mapGitHubError";
@@ -390,17 +389,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       if (!parsed.ok) {
         return { ok: false, errors: [parsed.error] } as const;
       }
-      const existingFields = isObject(parsed.yaml.fields) ? parsed.yaml.fields : {};
-      const mergedFields: Record<string, unknown> = { ...existingFields, ...input.nextFields };
-      for (const [key, value] of Object.entries(mergedFields)) {
+      const nextFields: Record<string, unknown> = { ...input.nextFields };
+      for (const [key, value] of Object.entries(nextFields)) {
         if (value === undefined) {
-          delete mergedFields[key];
+          delete nextFields[key];
         }
       }
       const nextYaml: Record<string, unknown> = {
         typeId: parsed.yaml.typeId,
         recordId: parsed.yaml.recordId,
-        fields: mergedFields
+        fields: nextFields
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
       const nextFiles = new Map(activeDataset.repoSnapshot.files);
