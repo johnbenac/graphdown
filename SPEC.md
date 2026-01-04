@@ -2,7 +2,7 @@
 # Graphdown Standard: Markdown Dataset Repositories
 
 **Spec Version:** 0.3 (Draft)
-**Last Updated:** 2026-01-01
+**Last Updated:** 2026-01-02
 **Status:** Normative / single source of truth
 
 This document is the **only** authoritative specification for Graphdown. It **absorbs** and **replaces** any separate “dataset validity” documents. If there’s a conflict between documents, **this** one wins.
@@ -824,7 +824,7 @@ After a dataset is loaded, the UI MUST allow read-only navigation of already-loa
 <!-- req:id=UI-RAW-001 title="Schema-agnostic record editor" testable=true -->
 ### UI-RAW-001 — Schema-agnostic record editor
 
-The UI MUST provide a single, schema-agnostic editor that works without plugins and without interpreting type schema beyond `required`.
+The UI MUST provide a single, schema-agnostic editor that works without plugins and without interpreting type schema.
 
 The editor MUST let the user:
 
@@ -832,7 +832,9 @@ The editor MUST let the user:
 * edit the record `fields` as a YAML map (key/value data),
 * edit the record Markdown body as raw text.
 
-The editor MUST NOT require any semantic understanding of field kinds (e.g., number/date/ref) to render or save edits. Optional UI conveniences are allowed, but they MUST NOT be required for CRUD.
+The editor MUST NOT render schema-driven field widgets or any schema-derived UI for record fields.
+This includes (but is not limited to) rendering inputs based on `fields.fieldDefs` metadata such as `kind`, `options`, or UI-hint-like keys.
+The only required editing surface for record `fields` is raw YAML text.
 
 On save, the UI MUST validate the resulting dataset snapshot using core validation rules. If validation fails, the UI MUST NOT persist the change and MUST surface the validation errors.
 

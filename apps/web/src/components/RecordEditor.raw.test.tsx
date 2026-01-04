@@ -39,14 +39,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
       kind: "record"
     };
     render(
-      <RecordEditor
-        mode="edit"
-        record={record}
-        schema={undefined}
-        typeDef={typeDef}
-        onCancel={() => {}}
-        onComplete={() => {}}
-      />
+      <RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />
     );
 
     const fieldsEditor = await screen.findByTestId("fields-yaml-editor");
@@ -74,14 +67,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
       kind: "record"
     };
     render(
-      <RecordEditor
-        mode="edit"
-        record={record}
-        schema={undefined}
-        typeDef={typeDef}
-        onCancel={() => {}}
-        onComplete={() => {}}
-      />
+      <RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />
     );
 
     const fieldsEditor = await screen.findByTestId("fields-yaml-editor");
@@ -94,6 +80,31 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
       recordKey: record.recordKey,
       nextFields: { count: "not-a-number", extra: { nested: false }, another: ["x", "y"] },
       nextBody: ""
+    });
+  });
+
+  it("removes fields when YAML omits them", async () => {
+    const record: GraphRecordNode = {
+      recordKey: "note:record-3",
+      recordId: "record-3",
+      typeId: "note",
+      fields: { keep: 1, drop: true },
+      body: "body",
+      file: "records/note/record--3.md",
+      kind: "record"
+    };
+
+    render(<RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />);
+
+    const fieldsEditor = await screen.findByTestId("fields-yaml-editor");
+    fireEvent.change(fieldsEditor, { target: { value: "keep: 1\n" } });
+    fireEvent.click(screen.getByTestId("save-record"));
+
+    await waitFor(() => expect(mockUpdateRecord).toHaveBeenCalledTimes(1));
+    expect(mockUpdateRecord).toHaveBeenCalledWith({
+      recordKey: record.recordKey,
+      nextFields: { keep: 1 },
+      nextBody: "body"
     });
   });
 });

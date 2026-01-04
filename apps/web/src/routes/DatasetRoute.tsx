@@ -6,7 +6,6 @@ import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
 import RecordViewer from "../components/RecordViewer";
 import TypeNav, { getTypeLabel } from "../components/TypeNav";
-import { parseTypeSchema } from "../schema/typeSchema";
 import { useDataset } from "../state/DatasetContext";
 
 export default function DatasetRoute() {
@@ -39,9 +38,6 @@ export default function DatasetRoute() {
   const selectedTypeId =
     recordTypeId && graph?.typesByRecordTypeId.has(recordTypeId) ? recordTypeId : null;
   const selectedTypeDef = selectedTypeId ? graph?.typesByRecordTypeId.get(selectedTypeId) ?? null : null;
-  const schemaResult = selectedTypeDef ? parseTypeSchema(selectedTypeDef.fields) : null;
-  const schema = schemaResult && schemaResult.ok ? schemaResult.schema : undefined;
-  const schemaError = schemaResult && !schemaResult.ok ? schemaResult.message : undefined;
 
   const recordsForSelectedType = useMemo(() => {
     if (!graph || !selectedTypeId) {
@@ -171,8 +167,6 @@ export default function DatasetRoute() {
                 {editorMode === "create" && selectedTypeDef && graph ? (
                   <RecordEditor
                     mode="create"
-                    schema={schema}
-                    schemaError={schemaError}
                     typeDef={selectedTypeDef}
                     onCancel={() => {
                       setEditorMode("view");
@@ -187,8 +181,6 @@ export default function DatasetRoute() {
                   editorMode === "edit" ? (
                     <RecordEditor
                       mode="edit"
-                      schema={schema}
-                      schemaError={schemaError}
                       record={selectedRecordNode}
                       typeDef={selectedTypeDef}
                       onCancel={() => setEditorMode("view")}

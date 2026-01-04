@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-03T02:21:11.448Z",
+  "generatedAt": "2026-01-04T17:59:17.415Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -444,26 +444,6 @@
       "tests": [
         {
           "reqId": "TYPE-004",
-          "testTitle": "TYPE-004: fieldDefs array is rejected",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        },
-        {
-          "reqId": "TYPE-004",
-          "testTitle": "TYPE-004: fieldDefs map is accepted",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        },
-        {
-          "reqId": "TYPE-004",
-          "testTitle": "TYPE-004: missing fieldDefs yields an empty schema",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        },
-        {
-          "reqId": "TYPE-004",
-          "testTitle": "TYPE-004: null fieldDefs yields an empty schema",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
-        },
-        {
-          "reqId": "TYPE-004",
           "testTitle": "TYPE-004: fieldDefs must be map of objects; required must be boolean when present",
           "filePath": "tests/core.gaps.test.js"
         }
@@ -552,12 +532,12 @@
         {
           "reqId": "REL-005",
           "testTitle": "REL-005: writeRef writes wiki-links",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
         },
         {
           "reqId": "REL-005",
           "testTitle": "REL-005: writeRefs writes wiki-link arrays",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
         }
       ]
     },
@@ -570,7 +550,7 @@
         {
           "reqId": "REL-007",
           "testTitle": "REL-007: readRef/readRefs return cleaned ids from legacy shapes",
-          "filePath": "apps/web/src/schema/typeSchema.test.ts"
+          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
         }
       ]
     },

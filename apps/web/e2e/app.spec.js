@@ -161,14 +161,24 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
   await expect(page.getByRole("link", { name: /task/i })).toBeVisible();
 
   await page.getByTestId("edit-record").click();
-  await page.getByLabel("title").fill("Updated title");
+  await page.getByTestId("fields-yaml-editor").fill(
+    [
+      "title: Updated title",
+      "estimate: 3",
+      "status: todo",
+      "due: 2024-01-10",
+      'assignee: "[[task:task-1]]"',
+      "watchers:",
+      '  - "[[task:task-1]]"'
+    ].join("\n")
+  );
   await page.getByTestId("save-record").click();
   await expect(page.getByTestId("edit-record")).toBeVisible();
   await expect(page.getByTestId("record-details")).toContainText("Updated title");
 
   await page.getByTestId("create-record").click();
   await page.getByLabel("Record ID").fill("record-new");
-  await page.getByLabel("title").fill("New record title");
+  await page.getByTestId("fields-yaml-editor").fill("title: New record title");
   await page.getByTestId("save-record").click();
   await expect(page.getByRole("button", { name: "record-new" })).toBeVisible();
 
