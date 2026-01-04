@@ -1,8 +1,8 @@
 
 # Graphdown Standard: Markdown Dataset Repositories
 
-**Spec Version:** 0.3 (Draft)
-**Last Updated:** 2026-01-02
+**Spec Version:** 0.4 (Draft)
+**Last Updated:** 2026-01-04
 **Status:** Normative / single source of truth
 
 This document is the **only** authoritative specification for Graphdown. It **absorbs** and **replaces** any separate “dataset validity” documents. If there’s a conflict between documents, **this** one wins.
@@ -129,6 +129,9 @@ This standard does not require defenses against malicious datasets (e.g., inject
 
 Wiki-links MAY point to non-existent record references `typeId:recordId` (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
 
+This non-requirement applies only to wiki-links extracted from record bodies and record `fields` (REL-002).
+It does not apply to record hierarchy parent pointers (HIER-001): parent pointers MUST resolve and are import-failing when missing (VAL-PARENT-002).
+
 Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved blob references are an import-failing error (VAL-BLOB-001).
 
 ---
@@ -158,6 +161,14 @@ Stable identifier for a record object **within its type**.
 ### recordKey (computed)
 
 `typeId:recordId` — the globally unique record identity. Core treats `recordKey` as computed and MUST NOT store it as a separate YAML field.
+
+### parent
+
+`parent` is an optional top-level key on **record objects**.
+
+When present and non-null, `parent` is a record reference string `typeId:recordId` that defines the record’s parent in the record hierarchy (HIER-001).
+
+When `parent` is missing or null, the record is a hierarchy root.
 
 ### Record reference
 
@@ -406,6 +417,8 @@ A YAML front matter object is a **type object** when it defines:
 
 A type object MUST NOT define `recordId`.
 
+A type object MUST NOT define `parent`.
+
 A type object MUST NOT define any other top-level keys.
 
 <!-- req:id=FR-MD-023 title="Required top-level keys for record objects" testable=true -->
@@ -416,6 +429,7 @@ A YAML front matter object is a **record object** when it defines:
 * `typeId` (string; MUST satisfy ID-001)
 * `recordId` (string; MUST satisfy ID-001)
 * `fields` (object/map)
+* `parent` (optional; when present MUST satisfy HIER-001)
 
 A record object MUST NOT define any other top-level keys.
 
@@ -437,6 +451,7 @@ The only top-level YAML keys defined by this standard are:
 
 * `typeId`
 * `recordId`
+* `parent`
 * `fields`
 
 All other top-level keys are forbidden.
@@ -580,6 +595,27 @@ Tokens that do not match this shape MUST be ignored for blob reference extractio
 
 ---
 
+## 8.2 Record hierarchy (parent pointers)
+
+<!-- req:id=HIER-001 title="Record hierarchy uses explicit parent pointers" testable=true -->
+### HIER-001 — Record hierarchy uses explicit parent pointers
+
+Record objects MAY define an optional top-level key `parent`.
+
+`parent` semantics:
+* If `parent` is **missing**, the record is a hierarchy root.
+* If `parent` is explicitly **null**, the record is a hierarchy root.
+* Otherwise, `parent` MUST be a string equal to a record reference `typeId:recordId` where both parts satisfy ID-001.
+
+Hierarchy semantics:
+* The hierarchy edge is directed from the record (child) to its `parent` (parent).
+* Each record has at most one parent (because `parent` is a single scalar), and datasets MAY contain multiple hierarchy roots.
+* The hierarchy is **structural** and MUST NOT be inferred from wiki-links or any other conventions. Only the `parent` key defines hierarchy.
+
+`parent` MUST NOT be interpreted as a relationship link under REL-001/REL-002. Wiki-link relationships remain independent.
+
+---
+
 ## 9. Import-time validity and integrity rules
 
 <!-- req:id=VAL-001 title="Type/records must be internally consistent" -->
@@ -591,6 +627,7 @@ Import MUST fail if:
 * any type object fails type requirements (§7)
 * identity uniqueness fails (§9.2)
 * a record object’s `typeId` has no matching type object (§9.3)
+* any record hierarchy `parent` pointer is invalid, unresolved, or cyclic (VAL-PARENT-001/VAL-PARENT-002/VAL-PARENT-003)
 * any blob store file fails blob integrity requirements (§VAL-BLOB-002)
 * any blob reference fails resolution (§VAL-BLOB-001)
 
@@ -651,6 +688,29 @@ When a type object defines `fields.composition`, then for every record object of
 For each component where `required: true`, the record MUST contain at least one outgoing relationship link (REL-001/REL-002/REL-003) to an existing record object whose `typeId` equals the component `typeId`.
 
 Links that do not resolve to an existing record object do not satisfy composition.
+
+<!-- req:id=VAL-PARENT-001 title="Parent field shape is strict" testable=true -->
+### VAL-PARENT-001 — Parent field shape is strict
+
+For every record object:
+* If `parent` is missing or null: valid (root).
+* If `parent` is present and non-null: it MUST be a string record reference `typeId:recordId` satisfying ID-001 for both parts.
+
+Validation MUST fail otherwise.
+
+<!-- req:id=VAL-PARENT-002 title="Parent pointers must resolve" testable=true -->
+### VAL-PARENT-002 — Parent pointers must resolve
+
+For every record object with a non-null `parent` value, the referenced parent record MUST exist as a record object in the dataset.
+
+Validation MUST fail otherwise.
+
+<!-- req:id=VAL-PARENT-003 title="Record hierarchy must be acyclic" testable=true -->
+### VAL-PARENT-003 — Record hierarchy must be acyclic
+
+Following `parent` pointers from any record MUST terminate at a root record (missing/null `parent`).
+
+If any cycle is present (including self-parenting), validation MUST fail.
 
 <!-- req:id=VAL-BLOB-001 title="Blob references must resolve to matching blob bytes" testable=true -->
 ### VAL-BLOB-001 — Blob references must resolve to matching blob bytes
@@ -770,6 +830,8 @@ Export MUST support exporting the Graphdown record subset:
 
 as a zip archive.
 
+Record-only export MUST use the canonical parent-based layout defined in EXP-HIER-001.
+
 <!-- req:id=EXP-006 title="Record-only export includes reachable blobs" testable=true -->
 ### EXP-006 — Record-only export includes reachable blobs
 
@@ -783,7 +845,31 @@ Export MUST support exporting the entire repository snapshot (including non-reco
 <!-- req:id=EXP-004 title="Path stability" -->
 ### EXP-004 — Path stability
 
-When exporting files that were imported from specific paths, export SHOULD preserve those paths (unless the user explicitly relocates files). Paths carry no semantic meaning but may be preserved for user convenience.
+Whole-repo export (EXP-003) SHOULD preserve the imported snapshot paths (unless the user explicitly relocates files). Paths carry no semantic meaning but may be preserved for user convenience.
+
+Record-only export (EXP-002) MUST ignore imported record/type file paths and MUST use the canonical layout in EXP-HIER-001.
+
+<!-- req:id=EXP-HIER-001 title="Canonical parent-based export layout" testable=true -->
+### EXP-HIER-001 — Canonical parent-based export layout
+
+Record-only export MUST produce a deterministic directory tree rooted at `types/` and `records/` derived solely from object identities and record `parent` pointers (HIER-001).
+
+Type objects:
+* A type object with `typeId = T` MUST be exported at: `types/T.md`
+
+Record objects:
+* Each record object has identity `K = typeId:recordId`.
+* Define the directory name for `K` as: `dirName(K) = "<typeId>.<recordId>"`
+  * The literal `.` separator is safe because `typeId` and `recordId` do not allow `.` per ID-001.
+* Define the record file name as: `<recordId>.md`
+* If a record is a hierarchy root (HIER-001), it MUST be exported at:
+  * `records/<dirName(K)>/<recordId>.md`
+* If a record has `parent = P`, it MUST be exported under its parent’s directory:
+  * `<exportDir(P)>/<dirName(K)>/<recordId>.md`
+  * where `<exportDir(P)>` is the directory containing the parent’s `<parentRecordId>.md` file.
+
+Reachable blobs:
+* Record-only export MUST include reachable blob files per EXP-006, preserving canonical blob store paths (BLOB-LAYOUT-001).
 
 <!-- req:id=EXP-005 title="Content preservation (no “reformat the universe”)" -->
 ### EXP-005 — Content preservation (no “reformat the universe”)
@@ -917,3 +1003,19 @@ fields:
   trim: sport
 ---
 Has engine [[engine:e-9]].
+```
+
+### Record object (parent pointer)
+
+```md
+---
+typeId: part
+recordId: steeringwheel
+parent: car:car-001
+fields:
+  material: leather
+---
+Fits [[car:car-001]].
+```
+
+---
