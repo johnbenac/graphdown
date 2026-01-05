@@ -11,3 +11,4 @@ export * from './validateDatasetSnapshot';
 export * from './hash';
 export * from './datasetObjects';
 export * from './markdownRecord';
+export * from './canonicalizeDatasetSnapshot';

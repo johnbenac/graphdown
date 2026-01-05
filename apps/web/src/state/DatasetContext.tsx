@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { buildGraphFromSnapshot } from "../core/graph";
 import type { ValidationError } from "../core/errors";
 import { makeError } from "../core/errors";
+import { canonicalizeDatasetSnapshot } from "../core/canonicalizeDatasetSnapshot";
+import { buildGraphFromSnapshot } from "../core/graph";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "../core/markdownRecord";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { validateDatasetSnapshot } from "../core/validateDatasetSnapshot";
@@ -201,12 +202,12 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setError(undefined);
       setProgress({ phase: "validating_dataset" });
       try {
-        const { snapshot: datasetSnapshot, ignored } = await readZipSnapshot(file);
+        const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
         const importReport: ImportReport = {
           ignoredCount: ignored.length,
           ignoredSample: ignored.slice(0, 20)
         };
-        const validation = validateDatasetSnapshot(datasetSnapshot);
+        const validation = validateDatasetSnapshot(rawSnapshot);
         if (!validation.ok) {
           setStatus("error");
           setError({
@@ -217,6 +218,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         }
+        const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
@@ -265,7 +267,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const { snapshot: datasetSnapshot, ignored } = await loadGitHubSnapshot({
+        const { snapshot: rawSnapshot, ignored } = await loadGitHubSnapshot({
           owner: parsed.value.owner,
           repo: parsed.value.repo,
           ref: parsed.value.ref,
@@ -277,7 +279,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         };
 
         setProgress({ phase: "validating_dataset" });
-        const validation = validateDatasetSnapshot(datasetSnapshot);
+        const validation = validateDatasetSnapshot(rawSnapshot);
         if (!validation.ok) {
           setStatus("error");
           setError({
@@ -289,6 +291,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
