@@ -1,6 +1,9 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T06:35:37.367Z
+Generated: 2026-01-05T09:16:53.043Z
+
+## Testable requirements with no tests
+- GC-001 — Reachable blob set is computed from blob references
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -245,13 +248,12 @@ Tests (1):
 - tests/core.blobs.test.js — "VAL-BLOB-002: blob bytes must match referenced digest"
 
 ## GC-001 — Reachable blob set is computed from blob references (testable=true)
-Tests (1):
-- tests/core.roundtrip.test.js — "GC-001: reachable blob set includes references from fields"
+Tests (0):
+- (none)
 
 ## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
-Tests (2):
-- apps/web/src/export/exportZip.test.ts — "GC-002: record-only export excludes unreferenced blobs"
-- tests/core.roundtrip.test.js — "GC-002: record-only export excludes unreferenced blobs"
+Tests (1):
+- tests/core.roundtrip.test.js — "GC-002: export excludes unreferenced blobs"
 
 ## GC-003 — Garbage blobs do not make a dataset invalid (testable=true)
 Tests (1):
@@ -291,30 +293,29 @@ Tests (1):
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## EXP-002 — Record-only export
-Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-002: record-only export excludes non-graph files"
+Tests (0):
+- (none)
 
 ## EXP-006 — Record-only export includes reachable blobs (testable=true)
 Tests (2):
-- apps/web/src/export/exportZip.test.ts — "EXP-006: record-only export includes reachable blobs"
-- tests/core.roundtrip.test.js — "EXP-006: record-only export includes reachable blobs"
+- apps/web/src/export/exportZip.test.ts — "EXP-006: includes only referenced blobs alongside canonical records/types"
+- tests/core.roundtrip.test.js — "EXP-006: export includes reachable blobs"
 
 ## EXP-003 — Whole-repo export
-Tests (2):
-- apps/web/src/export/exportZip.test.ts — "EXP-003: whole-repo export round-trips snapshot files"
-- tests/core.roundtrip.test.js — "EXP-003: whole-repo export round-trips all files and bytes"
+Tests (1):
+- tests/core.roundtrip.test.js — "EXP-003: canonical dataset export round-trips bytes and graph"
 
 ## EXP-004 — Path stability
-Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-004: record-only export ignores imported record/type file paths"
+Tests (0):
+- (none)
 
 ## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
 Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-HIER-001: canonical parent-based export layout nests records under their parent directory"
+- apps/web/src/export/exportZip.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
-Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-005: record-only export preserves bytes exactly"
+Tests (0):
+- (none)
 
 ## UI-001 — Desktop + mobile usable (testable=false)
 Tests (0):

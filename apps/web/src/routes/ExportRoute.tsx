@@ -2,11 +2,8 @@ import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import {
-  downloadZipBytes,
-  exportDatasetOnlyZip,
-  exportWholeSnapshotZip
-} from "../export/exportZip";
+import { exportDatasetZipBytes } from "../core/export";
+import { downloadZipBytes } from "../export/downloadZip";
 import { useDataset } from "../state/DatasetContext";
 
 function sanitizeLabel(label: string): string {
@@ -54,8 +51,8 @@ export default function ExportRoute() {
 
             <div className="export-options">
               <div className="export-card">
-                <h2>Whole snapshot zip</h2>
-                <p>Exports every file Graphdown imported and stored, preserving paths.</p>
+                <h2>Dataset zip</h2>
+                <p>Exports the dataset (types/records + referenced blobs) in canonical layout.</p>
                 <Button
                   type="button"
                   disabled={disabled}
@@ -63,52 +60,15 @@ export default function ExportRoute() {
                     if (!activeDataset) {
                       return;
                     }
-                    const bytes = exportWholeSnapshotZip(activeDataset.datasetSnapshot);
-                    downloadZipBytes(bytes, `graphdown-export--${safeLabel}--whole.zip`);
+                    const bytes = exportDatasetZipBytes(activeDataset.datasetSnapshot);
+                    downloadZipBytes(bytes, `graphdown-export--${safeLabel}.zip`);
                   }}
                 >
-                  Download zip (whole snapshot)
-                </Button>
-              </div>
-
-              <div className="export-card">
-                <h2>Dataset-only zip</h2>
-                <p>Exports only Markdown records under types/ and records/.</p>
-                <Button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => {
-                    if (!activeDataset) {
-                      return;
-                    }
-                    const bytes = exportDatasetOnlyZip(activeDataset.datasetSnapshot);
-                    downloadZipBytes(bytes, `graphdown-export--${safeLabel}--dataset-only.zip`);
-                  }}
-                >
-                  Download zip (dataset-only)
+                  Download zip
                 </Button>
               </div>
             </div>
 
-            <details className="export-compare">
-              <summary>Compare exported zip with a local checkout</summary>
-              <p>
-                The zip contains exactly the files Graphdown imported and stored (same paths, same
-                bytes). To compare with a local checkout of the source dataset:
-              </p>
-              <pre>{`# 1) Clone the source dataset repository
-git clone https://github.com/<owner>/<dataset-source> source-checkout
-cd source-checkout
-
-# 2) Unzip your Graphdown export somewhere (example)
-mkdir -p ../graphdown-export
-unzip ../graphdown-export--<dataset>--whole.zip -d ../graphdown-export
-
-# 3) Diff (exclude .git if present)
-diff -ruN --exclude=.git . ../graphdown-export`}</pre>
-              <p>If you exported "dataset-only", compare just the dataset structure:</p>
-              <pre>{`diff -ruN datasets types records ../graphdown-export/datasets ../graphdown-export/types ../graphdown-export/records`}</pre>
-            </details>
           </>
         ) : (
           <EmptyState title={status === "loading" ? "Loading dataset..." : "Import a dataset to export"}>

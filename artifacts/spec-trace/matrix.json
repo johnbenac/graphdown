@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T06:35:37.367Z",
+  "generatedAt": "2026-01-05T09:16:53.043Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -789,13 +789,7 @@
       "title": "Reachable blob set is computed from blob references",
       "testable": true,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "GC-001",
-          "testTitle": "GC-001: reachable blob set includes references from fields",
-          "filePath": "tests/core.roundtrip.test.js"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "GC-002",
@@ -805,12 +799,7 @@
       "tests": [
         {
           "reqId": "GC-002",
-          "testTitle": "GC-002: record-only export excludes unreferenced blobs",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        },
-        {
-          "reqId": "GC-002",
-          "testTitle": "GC-002: record-only export excludes unreferenced blobs",
+          "testTitle": "GC-002: export excludes unreferenced blobs",
           "filePath": "tests/core.roundtrip.test.js"
         }
       ]
@@ -949,13 +938,7 @@
       "title": "Record-only export",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-002",
-          "testTitle": "EXP-002: record-only export excludes non-graph files",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "EXP-006",
@@ -965,12 +948,12 @@
       "tests": [
         {
           "reqId": "EXP-006",
-          "testTitle": "EXP-006: record-only export includes reachable blobs",
+          "testTitle": "EXP-006: includes only referenced blobs alongside canonical records/types",
           "filePath": "apps/web/src/export/exportZip.test.ts"
         },
         {
           "reqId": "EXP-006",
-          "testTitle": "EXP-006: record-only export includes reachable blobs",
+          "testTitle": "EXP-006: export includes reachable blobs",
           "filePath": "tests/core.roundtrip.test.js"
         }
       ]
@@ -983,12 +966,7 @@
       "tests": [
         {
           "reqId": "EXP-003",
-          "testTitle": "EXP-003: whole-repo export round-trips snapshot files",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        },
-        {
-          "reqId": "EXP-003",
-          "testTitle": "EXP-003: whole-repo export round-trips all files and bytes",
+          "testTitle": "EXP-003: canonical dataset export round-trips bytes and graph",
           "filePath": "tests/core.roundtrip.test.js"
         }
       ]
@@ -998,13 +976,7 @@
       "title": "Path stability",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-004",
-          "testTitle": "EXP-004: record-only export ignores imported record/type file paths",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "EXP-HIER-001",
@@ -1014,7 +986,7 @@
       "tests": [
         {
           "reqId": "EXP-HIER-001",
-          "testTitle": "EXP-HIER-001: canonical parent-based export layout nests records under their parent directory",
+          "testTitle": "EXP-HIER-001: export uses canonical layout paths",
           "filePath": "apps/web/src/export/exportZip.test.ts"
         }
       ]
@@ -1024,13 +996,7 @@
       "title": "Content preservation (no “reformat the universe”)",
       "testable": null,
       "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-005",
-          "testTitle": "EXP-005: record-only export preserves bytes exactly",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
-        }
-      ]
+      "tests": []
     },
     {
       "id": "UI-001",
@@ -1111,5 +1077,10 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [
+    {
+      "id": "GC-001",
+      "title": "Reachable blob set is computed from blob references"
+    }
+  ]
 }
