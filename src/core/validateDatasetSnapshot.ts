@@ -291,6 +291,48 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   for (const record of parsed.recordObjects) {
+    if (typeof record.parent === 'string') {
+      if (!recordsByKey.has(record.parent)) {
+        errors.push(
+          makeError(
+            'E_PARENT_MISSING',
+            `Record ${record.identity} parent ${record.parent} does not exist`,
+            record.file
+          )
+        );
+      }
+    }
+  }
+
+  const visitState = new Map<string, 0 | 1 | 2>();
+  const visit = (recordKey: string, trail: string[] = []): void => {
+    const state = visitState.get(recordKey) ?? 0;
+    if (state === 1) {
+      const cycle = [...trail, recordKey].join(' -> ');
+      const record = recordsByKey.get(recordKey);
+      errors.push(makeError('E_PARENT_CYCLE', `Parent cycle detected: ${cycle}`, record?.file));
+      return;
+    }
+    if (state === 2) {
+      return;
+    }
+    visitState.set(recordKey, 1);
+    const record = recordsByKey.get(recordKey);
+    if (!record) {
+      visitState.set(recordKey, 2);
+      return;
+    }
+    if (typeof record.parent === 'string') {
+      visit(record.parent, [...trail, recordKey]);
+    }
+    visitState.set(recordKey, 2);
+  };
+
+  for (const record of parsed.recordObjects) {
+    visit(record.identity);
+  }
+
+  for (const record of parsed.recordObjects) {
     if (!typesById.has(record.typeId)) {
       errors.push(
         makeError(

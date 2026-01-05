@@ -7,6 +7,7 @@ import { isObject } from './types';
 import { parseYamlObject } from './yaml';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
 export type ParsedTypeObject = {
   kind: 'type';
@@ -22,6 +23,7 @@ export type ParsedRecordObject = {
   file: string;
   typeId: string;
   recordId: string;
+  parent?: string | null;
   fields: Record<string, unknown>;
   body: string;
   identity: string;
@@ -144,9 +146,10 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
 
     const topLevelKeys = Object.keys(yamlObject);
     const hasRecordId = Object.prototype.hasOwnProperty.call(yamlObject, 'recordId');
+    const hasParent = Object.prototype.hasOwnProperty.call(yamlObject, 'parent');
 
     if (hasRecordId) {
-      const allowed = new Set(['typeId', 'recordId', 'fields']);
+      const allowed = new Set(['typeId', 'recordId', 'fields', 'parent']);
       for (const key of topLevelKeys) {
         if (!allowed.has(key)) {
           return {
@@ -180,12 +183,33 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
       if (!recordIdCheck.ok) {
         return { kind: 'error', error: recordIdCheck.error };
       }
+      let parent: string | null | undefined;
+      if (hasParent) {
+        const parentValue = yamlObject.parent;
+        if (parentValue === null) {
+          parent = null;
+        } else if (typeof parentValue === 'string') {
+          if (!RECORD_KEY_PATTERN.test(parentValue)) {
+            return {
+              kind: 'error',
+              error: makeError('E_PARENT_INVALID', 'parent must be a record key that satisfies ID-001', path),
+            };
+          }
+          parent = parentValue;
+        } else {
+          return {
+            kind: 'error',
+            error: makeError('E_PARENT_INVALID', 'parent must be a record key that satisfies ID-001', path),
+          };
+        }
+      }
       const recordId = recordIdCheck.value;
       return {
         kind: 'record',
         file: path,
         typeId,
         recordId,
+        parent,
         fields,
         body,
         identity: `${typeId}:${recordId}`,

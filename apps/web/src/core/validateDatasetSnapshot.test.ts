@@ -108,4 +108,69 @@ describe("validateDatasetSnapshot", () => {
     const result = validateDatasetSnapshot(snapshotFromEntries([type, record]));
     expect(result.ok).toBe(true);
   });
+
+  it("HIER-001: parent missing and parent null both define hierarchy roots", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/note.md", ["typeId: note", "fields: {}"]),
+      rec("records/note-1.md", ["typeId: note", "recordId: one", "fields: {}"]),
+      rec("records/note-2.md", ["typeId: note", "recordId: two", "parent: null", "fields: {}"])
+    ]);
+
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("VAL-PARENT-001: invalid parent shapes fail validation", () => {
+    const type = rec("types/note.md", ["typeId: note", "fields: {}"]);
+    const cases = [
+      ["parent: 123"],
+      ["parent: {}"],
+      ["parent: \"\""],
+      ["parent: no-colon"],
+      ["parent: \"bad type!:id\""]
+    ];
+
+    for (const [parentLine] of cases) {
+      const record = rec("records/note-1.md", ["typeId: note", "recordId: one", parentLine, "fields: {}"]);
+      expect(getErrorCodes(snapshotFromEntries([type, record]))).toContain("E_PARENT_INVALID");
+    }
+  });
+
+  it("VAL-PARENT-002: parent pointers must resolve to an existing record", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/note.md", ["typeId: note", "fields: {}"]),
+      rec("records/note-1.md", ["typeId: note", "recordId: one", "parent: note:missing", "fields: {}"])
+    ]);
+
+    expect(getErrorCodes(snapshot)).toContain("E_PARENT_MISSING");
+  });
+
+  it("VAL-PARENT-003: parent pointer cycles fail validation", () => {
+    const type = rec("types/note.md", ["typeId: note", "fields: {}"]);
+    const recordA = rec("records/a.md", ["typeId: note", "recordId: one", "parent: note:two", "fields: {}"]);
+    const recordB = rec("records/b.md", ["typeId: note", "recordId: two", "parent: note:one", "fields: {}"]);
+    expect(getErrorCodes(snapshotFromEntries([type, recordA, recordB]))).toContain("E_PARENT_CYCLE");
+
+    const selfParent = rec("records/self.md", ["typeId: note", "recordId: self", "parent: note:self", "fields: {}"]);
+    expect(getErrorCodes(snapshotFromEntries([type, selfParent]))).toContain("E_PARENT_CYCLE");
+  });
+
+  it("FR-MD-021: type objects must not define parent", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/note.md", ["typeId: note", "parent: note:one", "fields: {}"])
+    ]);
+
+    expect(getErrorCodes(snapshot)).toContain("E_FORBIDDEN_TOP_LEVEL_KEY");
+  });
+
+  it("FR-MD-023: record objects may include parent", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/note.md", ["typeId: note", "fields: {}"]),
+      rec("records/p.md", ["typeId: note", "recordId: p", "fields: {}"]),
+      rec("records/c.md", ["typeId: note", "recordId: c", "parent: note:p", "fields: {}"])
+    ]);
+
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
 });

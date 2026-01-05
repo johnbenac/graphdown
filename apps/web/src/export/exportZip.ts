@@ -63,18 +63,84 @@ function buildZipBytes(snapshot: RepoSnapshot, include?: (path: string) => boole
   return zipSync(entries, { level: 0 });
 }
 
+function buildZipBytesFromEntries(entries: Map<string, Uint8Array>): Uint8Array {
+  const sortedEntries = [...entries.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const output: Record<string, Uint8Array> = {};
+
+  for (const [path, contents] of sortedEntries) {
+    output[path] = contents;
+  }
+
+  return zipSync(output, { level: 0 });
+}
+
+function buildCanonicalDatasetOnlyEntries(snapshot: RepoSnapshot): Map<string, Uint8Array> {
+  const parsed = discoverGraphdownObjects(snapshot);
+  const outFiles = new Map<string, Uint8Array>();
+
+  for (const typeObj of parsed.typeObjects) {
+    const bytes = snapshot.files.get(typeObj.file);
+    if (!bytes) {
+      throw new Error(`Missing bytes for type ${typeObj.typeId}`);
+    }
+    outFiles.set(`types/${typeObj.typeId}.md`, bytes);
+  }
+
+  const recordByKey = new Map(parsed.recordObjects.map((record) => [record.identity, record]));
+  const dirCache = new Map<string, string>();
+  const visiting = new Set<string>();
+
+  const getDirForRecord = (recordKey: string): string => {
+    const cached = dirCache.get(recordKey);
+    if (cached) {
+      return cached;
+    }
+    if (visiting.has(recordKey)) {
+      throw new Error(`Parent cycle detected at ${recordKey}`);
+    }
+    const record = recordByKey.get(recordKey);
+    if (!record) {
+      throw new Error(`Missing record for key ${recordKey}`);
+    }
+
+    visiting.add(recordKey);
+    let dir = `records/${record.typeId}.${record.recordId}`;
+    if (typeof record.parent === "string") {
+      const parentDir = getDirForRecord(record.parent);
+      dir = `${parentDir}/${record.typeId}.${record.recordId}`;
+    }
+    visiting.delete(recordKey);
+    dirCache.set(recordKey, dir);
+    return dir;
+  };
+
+  for (const record of parsed.recordObjects) {
+    const bytes = snapshot.files.get(record.file);
+    if (!bytes) {
+      throw new Error(`Missing bytes for record ${record.identity}`);
+    }
+    const recordDir = getDirForRecord(record.identity);
+    outFiles.set(`${recordDir}/${record.recordId}.md`, bytes);
+  }
+
+  const blobPaths = collectReachableBlobPaths(snapshot);
+  for (const blobPath of blobPaths) {
+    const bytes = snapshot.files.get(blobPath);
+    if (bytes) {
+      outFiles.set(blobPath, bytes);
+    }
+  }
+
+  return outFiles;
+}
+
 export function exportWholeSnapshotZip(snapshot: RepoSnapshot): Uint8Array {
   return buildZipBytes(snapshot);
 }
 
 export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
-  const parsed = discoverGraphdownObjects(snapshot);
-  const recordPaths = new Set<string>([
-    ...parsed.typeObjects.map((t) => t.file),
-    ...parsed.recordObjects.map((r) => r.file)
-  ]);
-  const blobPaths = collectReachableBlobPaths(snapshot);
-  return buildZipBytes(snapshot, (path) => recordPaths.has(path) || blobPaths.has(path));
+  const entries = buildCanonicalDatasetOnlyEntries(snapshot);
+  return buildZipBytesFromEntries(entries);
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
