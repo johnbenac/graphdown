@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { RepoSnapshot } from "../core/snapshotTypes";
 
 const ROOT_DIRS = new Set(["types", "records"]);
 

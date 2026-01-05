@@ -1,10 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { buildGraphFromSnapshot } from "../../../../src/core/graph";
-import type { ValidationError } from "../../../../src/core/errors";
-import { makeError } from "../../../../src/core/errors";
-import { parseMarkdownRecord, serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
+import { buildGraphFromSnapshot } from "../core/graph";
+import type { ValidationError } from "../core/errors";
+import { makeError } from "../core/errors";
+import { parseMarkdownRecord, serializeMarkdownRecord } from "../core/markdownRecord";
+import type { RepoSnapshot } from "../core/snapshotTypes";
+import { validateDatasetSnapshot } from "../core/validateDatasetSnapshot";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
 import { GitHubImportError } from "../import/github/mapGitHubError";
 import { parseGitHubUrl } from "../import/github/parseGitHubUrl";

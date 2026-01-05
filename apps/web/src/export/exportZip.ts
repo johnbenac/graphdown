@@ -1,7 +1,7 @@
 import { zipSync } from "fflate";
-import { discoverGraphdownObjects, extractBlobRefs } from "../../../../src/core";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { isObject } from "../../../../src/core/types";
+import { discoverGraphdownObjects, extractBlobRefs } from "../core";
+import type { RepoSnapshot } from "../core/snapshotTypes";
+import { isObject } from "../core/types";
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === "string") {

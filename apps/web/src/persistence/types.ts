@@ -1,5 +1,5 @@
-import type { Graph, GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../core/graph";
+import type { RepoSnapshot } from "../core/snapshotTypes";
 
 export type DatasetMeta = {
   id: string;

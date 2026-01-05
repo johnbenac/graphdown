@@ -1,8 +1,8 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { buildGraphFromSnapshot } from "../../../../src/core/graph";
+import type { RepoSnapshot } from "../core/snapshotTypes";
+import { buildGraphFromSnapshot } from "../core/graph";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 import type { DatasetContextValue } from "./DatasetContext";
 import { MemoryStore } from "../storage/MemoryStore";

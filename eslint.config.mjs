@@ -5,7 +5,7 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    files: ['apps/web/src/core/**/*.ts'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module'

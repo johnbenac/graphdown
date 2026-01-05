@@ -1,5 +1,5 @@
-import type { Graph } from "../../../../src/core/graph";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { Graph } from "../core/graph";
+import type { RepoSnapshot } from "../core/snapshotTypes";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
 import { serializeGraph, deserializeGraph } from "./serializeGraph";

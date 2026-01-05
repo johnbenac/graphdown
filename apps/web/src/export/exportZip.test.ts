@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { RepoSnapshot } from "../core/snapshotTypes";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { exportDatasetOnlyZip, exportWholeSnapshotZip } from "./exportZip";
 

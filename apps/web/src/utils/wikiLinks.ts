@@ -1,5 +1,5 @@
-import { cleanId } from "../../../../src/core/ids";
-import { isObject } from "../../../../src/core/types";
+import { cleanId } from "../core/ids";
+import { isObject } from "../core/types";
 
 function normalizeId(value: unknown): string | null {
   return cleanId(value);

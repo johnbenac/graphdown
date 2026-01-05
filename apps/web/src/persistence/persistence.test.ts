@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GraphTypeNode } from "../../../../src/core/graph";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { GraphTypeNode } from "../core/graph";
+import type { RepoSnapshot } from "../core/snapshotTypes";
 import { MemoryStore } from "../storage/MemoryStore";
 import { KEY } from "./keys";
 import { createPersistence } from "./persistence";

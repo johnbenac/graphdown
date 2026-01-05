@@ -1,4 +1,4 @@
-import type { RepoSnapshot } from "../../../../../src/core/snapshotTypes";
+import type { RepoSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
