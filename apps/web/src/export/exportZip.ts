@@ -69,12 +69,70 @@ export function exportWholeSnapshotZip(snapshot: RepoSnapshot): Uint8Array {
 
 export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
   const parsed = discoverGraphdownObjects(snapshot);
-  const recordPaths = new Set<string>([
-    ...parsed.typeObjects.map((t) => t.file),
-    ...parsed.recordObjects.map((r) => r.file)
-  ]);
+  const outputFiles = new Map<string, Uint8Array>();
+
+  for (const typeObj of parsed.typeObjects) {
+    const bytes = snapshot.files.get(typeObj.file);
+    if (!bytes) {
+      continue;
+    }
+    outputFiles.set(`types/${typeObj.typeId}.md`, bytes);
+  }
+
+  const recordsByKey = new Map(parsed.recordObjects.map((record) => [record.identity, record]));
+  const dirMemo = new Map<string, string>();
+  const visiting = new Set<string>();
+
+  const resolveRecordDir = (recordKey: string): string => {
+    const cached = dirMemo.get(recordKey);
+    if (cached) {
+      return cached;
+    }
+    const record = recordsByKey.get(recordKey);
+    if (!record) {
+      throw new Error(`Missing record for key ${recordKey}`);
+    }
+    if (visiting.has(recordKey)) {
+      throw new Error(`Parent cycle detected at ${recordKey}`);
+    }
+    visiting.add(recordKey);
+    const ownDir = `records/${record.typeId}.${record.recordId}`;
+    let fullDir = ownDir;
+    if (typeof record.parent === "string") {
+      const parentDir = resolveRecordDir(record.parent);
+      fullDir = `${parentDir}/${record.typeId}.${record.recordId}`;
+    }
+    visiting.delete(recordKey);
+    dirMemo.set(recordKey, fullDir);
+    return fullDir;
+  };
+
+  for (const recordObj of parsed.recordObjects) {
+    const bytes = snapshot.files.get(recordObj.file);
+    if (!bytes) {
+      continue;
+    }
+    const recordDir = resolveRecordDir(recordObj.identity);
+    outputFiles.set(`${recordDir}/${recordObj.recordId}.md`, bytes);
+  }
+
   const blobPaths = collectReachableBlobPaths(snapshot);
-  return buildZipBytes(snapshot, (path) => recordPaths.has(path) || blobPaths.has(path));
+  for (const blobPath of blobPaths) {
+    const bytes = snapshot.files.get(blobPath);
+    if (bytes) {
+      outputFiles.set(blobPath, bytes);
+    }
+  }
+
+  const entries: Record<string, Uint8Array> = {};
+  const sortedPaths = [...outputFiles.keys()].sort((a, b) => a.localeCompare(b));
+  for (const path of sortedPaths) {
+    const contents = outputFiles.get(path);
+    if (contents) {
+      entries[path] = contents;
+    }
+  }
+  return zipSync(entries, { level: 0 });
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {

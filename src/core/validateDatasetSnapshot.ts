@@ -291,6 +291,57 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   for (const record of parsed.recordObjects) {
+    if (typeof record.parent === 'string' && !recordsByKey.has(record.parent)) {
+      errors.push(
+        makeError(
+          'E_PARENT_MISSING',
+          `Record ${record.identity} parent ${record.parent} does not exist`,
+          record.file
+        )
+      );
+    }
+  }
+
+  const parentState = new Map<string, 0 | 1 | 2>();
+  const visitParent = (recordKey: string, stack: string[]) => {
+    const state = parentState.get(recordKey) ?? 0;
+    if (state === 1) {
+      const cycleStartIndex = stack.indexOf(recordKey);
+      const cyclePath =
+        cycleStartIndex >= 0 ? stack.slice(cycleStartIndex).concat(recordKey) : stack.concat(recordKey);
+      const file = recordsByKey.get(recordKey)?.file;
+      if (file) {
+        errors.push(
+          makeError('E_PARENT_CYCLE', `Parent pointer cycle detected: ${cyclePath.join(' -> ')}`, file)
+        );
+      }
+      return;
+    }
+    if (state === 2) {
+      return;
+    }
+    parentState.set(recordKey, 1);
+    const record = recordsByKey.get(recordKey);
+    if (record && typeof record.parent === 'string') {
+      const parentKey = record.parent;
+      if (parentKey === recordKey) {
+        errors.push(
+          makeError('E_PARENT_CYCLE', `Parent pointer cycle detected: ${recordKey} -> ${recordKey}`, record.file)
+        );
+      } else if (recordsByKey.has(parentKey)) {
+        visitParent(parentKey, [...stack, recordKey]);
+      }
+    }
+    parentState.set(recordKey, 2);
+  };
+
+  for (const record of parsed.recordObjects) {
+    if ((parentState.get(record.identity) ?? 0) === 0) {
+      visitParent(record.identity, []);
+    }
+  }
+
+  for (const record of parsed.recordObjects) {
     if (!typesById.has(record.typeId)) {
       errors.push(
         makeError(
