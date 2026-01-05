@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/johnbenac/graphdown/compare/v0.8.4...v0.9.0) (2026-01-05)
+
+
+### Features
+
+* drop non-dataset files on import ([dddc335](https://github.com/johnbenac/graphdown/commit/dddc33586f3daeb43ae613fe6b1b4b35009df500))
+
 ## [0.8.4](https://github.com/johnbenac/graphdown/compare/v0.8.3...v0.8.4) (2026-01-03)
 
 
