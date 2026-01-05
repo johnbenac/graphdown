@@ -1,8 +1,33 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 
-const { loadRepoSnapshotFromFs, validateDatasetSnapshot } = require('../dist/core');
+const { validateDatasetSnapshot } = require('../dist/core');
+
+function loadRepoSnapshotFromFs(root) {
+  const files = new Map();
+
+  const walk = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === '.git') {
+        continue;
+      }
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.isFile()) {
+        const relPath = path.relative(root, fullPath).split(path.sep).join('/');
+        const contents = fs.readFileSync(fullPath);
+        files.set(relPath, contents);
+      }
+    }
+  };
+
+  walk(root);
+  return { files };
+}
 
 test('ERR-001: validation errors expose stable fields', () => {
   const snapshot = loadRepoSnapshotFromFs(path.join(__dirname, 'fixtures', 'invalid-dataset'));

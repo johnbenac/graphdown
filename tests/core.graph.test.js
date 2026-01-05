@@ -4,7 +4,31 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 
-const { buildGraphFromFs } = require('../dist/core');
+const { buildGraphFromSnapshot } = require('../dist/core');
+
+function loadRepoSnapshotFromFs(root) {
+  const files = new Map();
+
+  const walk = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === '.git') {
+        continue;
+      }
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.isFile()) {
+        const relPath = path.relative(root, fullPath).split(path.sep).join('/');
+        const contents = fs.readFileSync(fullPath);
+        files.set(relPath, contents);
+      }
+    }
+  };
+
+  walk(root);
+  return { files };
+}
 
 function writeFile(root, relative, content) {
   const full = path.join(root, relative);
@@ -31,7 +55,7 @@ test('REL-002: extracts record links from bodies and fields', () => {
       ['---', 'typeId: note', 'recordId: two', 'fields:', '  ref: "[[note:one]]"', '---', 'Backlink'].join('\n')
     );
 
-    const result = buildGraphFromFs(tempDir);
+    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
     assert.equal(result.ok, true);
     const { graph } = result;
     assert.deepEqual(graph.getLinksFrom('note:one'), ['note:two']);
@@ -54,7 +78,7 @@ test('REL-002: does not synthesize links across separate string values', () => {
     );
     writeFile(tempDir, 'records/note-2.md', recordFile('note', 'two'));
 
-    const result = buildGraphFromFs(tempDir);
+    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
     assert.equal(result.ok, true, JSON.stringify(result.errors));
     const { graph } = result;
     assert.deepEqual(graph.getLinksFrom('note:one'), []);
@@ -70,7 +94,7 @@ test('Graph exposes type and record lookup by identity', () => {
     writeFile(tempDir, 't.md', typeFile('note'));
     writeFile(tempDir, 'r.md', recordFile('note', 'one'));
 
-    const result = buildGraphFromFs(tempDir);
+    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
     assert.equal(result.ok, true);
     const { graph } = result;
     const type = graph.getType('note');
@@ -91,7 +115,7 @@ test('VAL-002: duplicate record identity fails graph build', () => {
     writeFile(tempDir, 'r1.md', content);
     writeFile(tempDir, 'r2.md', content);
 
-    const result = buildGraphFromFs(tempDir);
+    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
     assert.equal(result.ok, false);
     assert.ok(result.errors.some((e) => e.code === 'E_DUPLICATE_ID'));
   } finally {

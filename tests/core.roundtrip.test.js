@@ -1,7 +1,4 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
 const test = require('node:test');
 const { createHash } = require('node:crypto');
 
@@ -9,7 +6,6 @@ const {
   buildGraphFromSnapshot,
   exportDatasetOnlyZip,
   exportWholeRepoZip,
-  loadRepoSnapshotFromZipFile,
   loadRepoSnapshotFromZipBytes
 } = require('../dist/core');
 
@@ -17,13 +13,6 @@ const encoder = new TextEncoder();
 
 function makeSnapshot(entries) {
   return { files: new Map(entries.map(([p, c]) => [p, typeof c === 'string' ? encoder.encode(c) : c])) };
-}
-
-function writeTempZip(zipBytes) {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-zip-'));
-  const zipPath = path.join(tempDir, 'snapshot.zip');
-  fs.writeFileSync(zipPath, Buffer.from(zipBytes));
-  return { tempDir, zipPath };
 }
 
 function serializeGraph(graph) {
@@ -54,16 +43,11 @@ test('EXP-006: record-only export includes reachable blobs', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const { tempDir, zipPath } = writeTempZip(zipBytes);
-  try {
-    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
-    const paths = [...roundTripped.files.keys()];
-    assert.ok(paths.includes(blobPath));
-    assert.ok(paths.includes('types/note.md'));
-    assert.ok(paths.includes('records/note.one/one.md'));
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
+  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const paths = [...roundTripped.files.keys()];
+  assert.ok(paths.includes(blobPath));
+  assert.ok(paths.includes('types/note.md'));
+  assert.ok(paths.includes('records/note.one/one.md'));
 });
 
 test('GC-001: reachable blob set includes references from fields', () => {
@@ -81,14 +65,9 @@ test('GC-001: reachable blob set includes references from fields', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const { tempDir, zipPath } = writeTempZip(zipBytes);
-  try {
-    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
-    const paths = [...roundTripped.files.keys()];
-    assert.ok(paths.includes(blobPath));
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
+  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const paths = [...roundTripped.files.keys()];
+  assert.ok(paths.includes(blobPath));
 });
 
 test('GC-002: record-only export excludes unreferenced blobs', () => {
@@ -104,14 +83,9 @@ test('GC-002: record-only export excludes unreferenced blobs', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const { tempDir, zipPath } = writeTempZip(zipBytes);
-  try {
-    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
-    const paths = [...roundTripped.files.keys()];
-    assert.ok(!paths.includes('blobs/sha256/aa/aa' + '0'.repeat(62)));
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
+  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const paths = [...roundTripped.files.keys()];
+  assert.ok(!paths.includes('blobs/sha256/aa/aa' + '0'.repeat(62)));
 });
 
 test('EXP-003: whole-repo export round-trips all files and bytes', () => {
@@ -122,30 +96,25 @@ test('EXP-003: whole-repo export round-trips all files and bytes', () => {
   ]);
 
   const zipBytes = exportWholeRepoZip(snapshot);
-  const { tempDir, zipPath } = writeTempZip(zipBytes);
-  try {
-    const roundTripped = loadRepoSnapshotFromZipFile(zipPath);
-    const graph = buildGraphFromSnapshot(roundTripped);
-    assert.equal(graph.ok, true, JSON.stringify(graph.errors));
-    assert.deepEqual(
-      [...snapshot.files.keys()].sort(),
-      [...roundTripped.files.keys()].sort()
-    );
-    for (const key of snapshot.files.keys()) {
-      const original = snapshot.files.get(key);
-      const roundTrip = roundTripped.files.get(key);
-      assert.ok(original);
-      assert.ok(roundTrip);
-      assert.equal(Buffer.compare(Buffer.from(original), Buffer.from(roundTrip)), 0);
-    }
-
-    // Re-export stays stable
-    const zipAgain = exportWholeRepoZip(roundTripped);
-    const roundTrippedAgain = loadRepoSnapshotFromZipBytes(zipAgain);
-    const graphAgain = buildGraphFromSnapshot(roundTrippedAgain);
-    assert.equal(graphAgain.ok, true, JSON.stringify(graphAgain.errors));
-    assert.deepEqual(serializeGraph(graph.graph), serializeGraph(graphAgain.graph));
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
+  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const graph = buildGraphFromSnapshot(roundTripped);
+  assert.equal(graph.ok, true, JSON.stringify(graph.errors));
+  assert.deepEqual(
+    [...snapshot.files.keys()].sort(),
+    [...roundTripped.files.keys()].sort()
+  );
+  for (const key of snapshot.files.keys()) {
+    const original = snapshot.files.get(key);
+    const roundTrip = roundTripped.files.get(key);
+    assert.ok(original);
+    assert.ok(roundTrip);
+    assert.equal(Buffer.compare(Buffer.from(original), Buffer.from(roundTrip)), 0);
   }
+
+  // Re-export stays stable
+  const zipAgain = exportWholeRepoZip(roundTripped);
+  const roundTrippedAgain = loadRepoSnapshotFromZipBytes(zipAgain);
+  const graphAgain = buildGraphFromSnapshot(roundTrippedAgain);
+  assert.equal(graphAgain.ok, true, JSON.stringify(graphAgain.errors));
+  assert.deepEqual(serializeGraph(graph.graph), serializeGraph(graphAgain.graph));
 });

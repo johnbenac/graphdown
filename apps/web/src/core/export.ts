@@ -1,6 +1,6 @@
 import { discoverGraphdownObjects } from './datasetObjects';
 import { extractBlobRefs } from './wikiLinks';
-import { RepoSnapshot } from './snapshot';
+import type { RepoSnapshot } from './snapshotTypes';
 import { exportRepoSnapshotToZipBytes } from './zipSnapshot';
 import { isObject } from './types';
 

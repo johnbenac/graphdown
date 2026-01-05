@@ -1,8 +1,6 @@
-import fs from 'node:fs';
-
 import { unzipSync, zipSync } from 'fflate';
 
-import { RepoSnapshot } from './snapshot';
+import type { RepoSnapshot } from './snapshotTypes';
 
 export interface ExportZipOptions {
   include?: (path: string) => boolean;
@@ -50,11 +48,6 @@ export function loadRepoSnapshotFromZipBytes(zipBytes: Uint8Array): RepoSnapshot
   }
 
   return { files };
-}
-
-export function loadRepoSnapshotFromZipFile(zipPath: string): RepoSnapshot {
-  const zipBytes = fs.readFileSync(zipPath);
-  return loadRepoSnapshotFromZipBytes(zipBytes);
 }
 
 export function exportRepoSnapshotToZipBytes(
