@@ -77,9 +77,10 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
-    const snapshot = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
+    expect(ignored).toEqual([]);
 
     const treeCall = fetchMock.mock.calls.find(
       ([url]) => typeof url === "string" && url.includes("/git/trees/")
@@ -90,5 +91,42 @@ describe("loadGitHubSnapshot", () => {
       ([url]) => typeof url === "string" && url.includes("/raw.githubusercontent.com/")
     );
     expect(rawCall?.[0]).toContain("/main/types/note.md");
+  });
+
+  it("GH-003: includes blobs and reports ignored files", async () => {
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [
+            { path: "types/note.md", type: "blob" },
+            { path: "records/note/record-1.md", type: "blob" },
+            { path: "blobs/sha256/aa/aa11111111111111111111111111111111111111111111111111111111111111", type: "blob" },
+            { path: "README.md", type: "blob" }
+          ]
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
+      )
+      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+
+    expect([...snapshot.files.keys()].sort()).toEqual([
+      "blobs/sha256/aa/aa11111111111111111111111111111111111111111111111111111111111111",
+      "records/note/record-1.md",
+      "types/note.md"
+    ]);
+    expect(ignored).toEqual(["README.md"]);
   });
 });

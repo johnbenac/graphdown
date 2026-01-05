@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { GraphRecordNode } from "../../../../src/core/graph";
+import type { GraphRecordNode } from "../core/graph";
 import AppShell from "../components/AppShell";
+import DatasetWarnings from "../components/DatasetWarnings";
 import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
 import RecordViewer from "../components/RecordViewer";
@@ -82,7 +83,7 @@ export default function DatasetRoute() {
           <div className="sidebar-stack">
             <div>
               <p>Active dataset:</p>
-              <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
+              <strong>{activeDataset.meta.label ?? "Dataset"}</strong>
             </div>
             {graph ? <TypeNav graph={graph} /> : null}
             <Link to="/import">Import another dataset</Link>
@@ -100,14 +101,19 @@ export default function DatasetRoute() {
               <div className="dataset-summary">
                 <p>
                   <strong>
-                    {activeDataset.meta.label ?? activeDataset.meta.id}
+                    {activeDataset.meta.label ?? "Dataset"}
                   </strong>
                 </p>
-                <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
               </div>
+              <DatasetWarnings
+                ignoredFileCount={activeDataset.meta.ignoredFileCount}
+                ignoredFileSample={activeDataset.meta.ignoredFileSample}
+                droppedBlobCount={activeDataset.meta.droppedBlobCount}
+                droppedBlobSample={activeDataset.meta.droppedBlobSample}
+              />
 
               <div className="dataset-records" data-testid="record-list">
                 <div className="record-list__header">

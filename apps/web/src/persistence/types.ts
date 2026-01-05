@@ -1,8 +1,7 @@
-import type { Graph, GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../core/graph";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 
 export type DatasetMeta = {
-  id: string;
   createdAt: number;
   updatedAt: number;
   snapshotFormatVersion: number;
@@ -10,9 +9,13 @@ export type DatasetMeta = {
   uiStateFormatVersion: number;
   label?: string;
   source?: string;
+  ignoredFileCount?: number;
+  ignoredFileSample?: string[];
+  droppedBlobCount?: number;
+  droppedBlobSample?: string[];
 };
 
-export type PersistedRepoSnapshot = {
+export type PersistedDatasetSnapshot = {
   files: Array<{ path: string; contents: Uint8Array }>;
 };
 
@@ -27,7 +30,7 @@ export type PersistedUiState = Record<string, unknown>;
 
 export type LoadedDataset = {
   meta: DatasetMeta;
-  repoSnapshot: RepoSnapshot;
+  datasetSnapshot: DatasetSnapshot;
   parsedGraph?: Graph;
   uiState?: PersistedUiState;
 };

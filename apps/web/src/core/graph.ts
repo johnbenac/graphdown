@@ -1,6 +1,6 @@
 import { discoverGraphdownObjects } from './datasetObjects';
 import { makeError, type ValidationError } from './errors';
-import type { RepoSnapshot } from './snapshotTypes';
+import type { DatasetSnapshot } from './snapshotTypes';
 import { isObject } from './types';
 import { extractRecordRefs } from './wikiLinks';
 
@@ -117,7 +117,7 @@ class GraphImpl implements Graph {
   }
 }
 
-export function buildGraphFromSnapshot(snapshot: RepoSnapshot): BuildGraphResult {
+export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphResult {
   const parsed = discoverGraphdownObjects(snapshot);
   if (parsed.errors.length) {
     return { ok: false, errors: parsed.errors };

@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
+import type { GraphRecordNode, GraphTypeNode } from "../core/graph";
 
 type RecordViewerProps = {
   record: GraphRecordNode;

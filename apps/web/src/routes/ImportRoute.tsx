@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
+import DatasetWarnings from "../components/DatasetWarnings";
 import type { ImportProgress } from "../state/DatasetContext";
 import { useDataset } from "../state/DatasetContext";
 
@@ -58,7 +59,7 @@ export default function ImportRoute() {
         activeDataset ? (
           <div>
             <p>Active dataset:</p>
-            <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
+            <strong>{activeDataset.meta.label ?? "Dataset"}</strong>
           </div>
         ) : (
           <p>No datasets loaded.</p>
@@ -68,6 +69,14 @@ export default function ImportRoute() {
       <section className="import-stack" data-testid="import-screen">
         <h1>Import</h1>
         <p>Paste a GitHub repository URL to import a dataset.</p>
+        {activeDataset ? (
+          <DatasetWarnings
+            ignoredFileCount={activeDataset.meta.ignoredFileCount}
+            ignoredFileSample={activeDataset.meta.ignoredFileSample}
+            droppedBlobCount={activeDataset.meta.droppedBlobCount}
+            droppedBlobSample={activeDataset.meta.droppedBlobSample}
+          />
+        ) : null}
         <label className="input-field">
           GitHub URL
           <input

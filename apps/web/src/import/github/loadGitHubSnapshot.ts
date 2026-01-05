@@ -1,4 +1,4 @@
-import type { RepoSnapshot } from "../../../../../src/core/snapshotTypes";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -46,11 +46,15 @@ function isMarkdownFile(path: string): boolean {
 }
 
 function isTypeFile(path: string): boolean {
-  return path.startsWith("types/");
+  return path.startsWith("types/") && isMarkdownFile(path);
 }
 
 function isRecordFile(path: string): boolean {
-  return path.startsWith("records/");
+  return path.startsWith("records/") && isMarkdownFile(path);
+}
+
+function isBlobFile(path: string): boolean {
+  return path.startsWith("blobs/sha256/");
 }
 
 export async function loadGitHubSnapshot(input: {
@@ -58,7 +62,7 @@ export async function loadGitHubSnapshot(input: {
   repo: string;
   ref?: string;
   onProgress?: (progress: ImportProgress) => void;
-}): Promise<RepoSnapshot> {
+}): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
   const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
@@ -71,16 +75,18 @@ export async function loadGitHubSnapshot(input: {
   );
 
   const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
+  const ignored: string[] = [];
 
   for (const entry of treeResponse.tree) {
-    if (entry.type !== "blob" || !isMarkdownFile(entry.path)) {
+    if (entry.type !== "blob") {
       continue;
     }
     const snapshotPath = entry.path;
     if (!snapshotPath) {
       continue;
     }
-    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
+    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath) && !isBlobFile(snapshotPath)) {
+      ignored.push(snapshotPath);
       continue;
     }
     allFiles.push({ repoPath: entry.path, snapshotPath });
@@ -107,5 +113,5 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { files };
+  return { snapshot: { files }, ignored };
 }

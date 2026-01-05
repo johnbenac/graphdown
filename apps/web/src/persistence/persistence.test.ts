@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GraphTypeNode } from "../../../../src/core/graph";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { GraphTypeNode } from "../core/graph";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { MemoryStore } from "../storage/MemoryStore";
 import { KEY } from "./keys";
 import { createPersistence } from "./persistence";
@@ -9,7 +9,7 @@ import { serializeSnapshot } from "./serializeSnapshot";
 import type { PersistedGraph } from "./types";
 import { FORMAT_VERSIONS } from "./versions";
 
-const sampleSnapshot: RepoSnapshot = {
+const sampleSnapshot: DatasetSnapshot = {
   files: new Map([
     [
       "types/note.md",
@@ -39,26 +39,21 @@ describe("persistence service", () => {
   it("saves and loads the active dataset", async () => {
     const store = new MemoryStore();
     const persistence = createPersistence({ store });
-    const datasetId = "dataset-1";
 
-    await persistence.saveDataset({
-      datasetId,
+    await persistence.saveActiveDataset({
       meta: {
-        id: datasetId,
         createdAt: 1,
         updatedAt: 1,
         snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
         graphFormatVersion: FORMAT_VERSIONS.graph,
         uiStateFormatVersion: FORMAT_VERSIONS.uiState
       },
-      repoSnapshot: sampleSnapshot,
+      datasetSnapshot: sampleSnapshot,
       parsedGraph: deserializeGraph(samplePersistedGraph)
     });
-    await persistence.setActiveDatasetId(datasetId);
 
     const loaded = await persistence.loadActiveDataset();
-    expect(loaded?.meta.id).toBe(datasetId);
-    expect(loaded?.repoSnapshot.files.size).toBe(1);
+    expect(loaded?.datasetSnapshot.files.size).toBe(1);
     expect(loaded?.parsedGraph?.nodesById.size).toBe(1);
   });
 
@@ -66,18 +61,15 @@ describe("persistence service", () => {
     const store = new MemoryStore();
     const parseGraph = vi.fn(async () => deserializeGraph(samplePersistedGraph));
     const persistence = createPersistence({ store, parseGraph });
-    const datasetId = "dataset-2";
 
-    await store.set(KEY.repoSnapshot(datasetId), serializeSnapshot(sampleSnapshot));
-    await store.set(KEY.datasetMeta(datasetId), {
-      id: datasetId,
+    await store.set(KEY.datasetSnapshot, serializeSnapshot(sampleSnapshot));
+    await store.set(KEY.meta, {
       createdAt: 1,
       updatedAt: 1,
       snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
       graphFormatVersion: 0,
       uiStateFormatVersion: FORMAT_VERSIONS.uiState
     });
-    await persistence.setActiveDatasetId(datasetId);
 
     const loaded = await persistence.loadActiveDataset();
     expect(parseGraph).toHaveBeenCalledOnce();
@@ -87,10 +79,16 @@ describe("persistence service", () => {
   it("clears the active dataset when records are missing", async () => {
     const store = new MemoryStore();
     const persistence = createPersistence({ store });
-    await persistence.setActiveDatasetId("missing");
+    await store.set(KEY.meta, {
+      createdAt: 1,
+      updatedAt: 1,
+      snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
+      graphFormatVersion: FORMAT_VERSIONS.graph,
+      uiStateFormatVersion: FORMAT_VERSIONS.uiState
+    });
 
     const loaded = await persistence.loadActiveDataset();
     expect(loaded).toBeUndefined();
-    expect(await persistence.getActiveDatasetId()).toBeUndefined();
+    expect(await store.get(KEY.meta)).toBeUndefined();
   });
 });
