@@ -1,3 +1,10 @@
+# [0.12.0](https://github.com/johnbenac/graphdown/compare/v0.11.0...v0.12.0) (2026-01-05)
+
+
+### Features
+
+* show type bodies in dataset view ([f235ac9](https://github.com/johnbenac/graphdown/commit/f235ac9e8a814396d9e9eac71023a7db7a1e158d))
+
 # [0.11.0](https://github.com/johnbenac/graphdown/compare/v0.10.0...v0.11.0) (2026-01-05)
 
 
