@@ -77,10 +77,70 @@ jobs:
           set -euo pipefail
           rm -rf /tmp/research-lab-dataset
           git clone --depth 1 https://github.com/johnbenac/research-lab-dataset.git /tmp/research-lab-dataset
-          node -e "const { loadRepoSnapshotFromFs, validateDatasetSnapshot } = require('./dist/core'); const snapshot = loadRepoSnapshotFromFs('/tmp/research-lab-dataset'); const result = validateDatasetSnapshot(snapshot); if (!result.ok) { console.error(JSON.stringify(result, null, 2)); process.exit(1); } console.log('research-lab-dataset: ok');"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { validateDatasetSnapshot } = require('./dist/core');
+
+          function loadRepoSnapshotFromFs(root) {
+            const files = new Map();
+            const walk = (dir) => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (entry.name === '.git') continue;
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  walk(full);
+                } else if (entry.isFile()) {
+                  const rel = path.relative(root, full).split(path.sep).join('/');
+                  files.set(rel, fs.readFileSync(full));
+                }
+              }
+            };
+            walk(root);
+            return { files };
+          }
+
+          const snapshot = loadRepoSnapshotFromFs('/tmp/research-lab-dataset');
+          const result = validateDatasetSnapshot(snapshot);
+          if (!result.ok) {
+            console.error(JSON.stringify(result, null, 2));
+            process.exit(1);
+          }
+          console.log('research-lab-dataset: ok');
+          NODE
       - name: Validate product-tracker-dataset (JSON)
         run: |
           set -euo pipefail
           rm -rf /tmp/product-tracker-dataset
           git clone --depth 1 https://github.com/johnbenac/product-tracker-dataset.git /tmp/product-tracker-dataset
-          node -e "const { loadRepoSnapshotFromFs, validateDatasetSnapshot } = require('./dist/core'); const snapshot = loadRepoSnapshotFromFs('/tmp/product-tracker-dataset'); const result = validateDatasetSnapshot(snapshot); if (!result.ok) { console.error(JSON.stringify(result, null, 2)); process.exit(1); } console.log('product-tracker-dataset: ok');"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { validateDatasetSnapshot } = require('./dist/core');
+
+          function loadRepoSnapshotFromFs(root) {
+            const files = new Map();
+            const walk = (dir) => {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (entry.name === '.git') continue;
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  walk(full);
+                } else if (entry.isFile()) {
+                  const rel = path.relative(root, full).split(path.sep).join('/');
+                  files.set(rel, fs.readFileSync(full));
+                }
+              }
+            };
+            walk(root);
+            return { files };
+          }
+
+          const snapshot = loadRepoSnapshotFromFs('/tmp/product-tracker-dataset');
+          const result = validateDatasetSnapshot(snapshot);
+          if (!result.ok) {
+            console.error(JSON.stringify(result, null, 2));
+            process.exit(1);
+          }
+          console.log('product-tracker-dataset: ok');
+          NODE
