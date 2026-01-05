@@ -22,7 +22,7 @@ Goal: allow a type to declare dependencies on other types so creating/editing a 
 
 3) **Hard validation (composition as integrity rule)**  
    - Extend spec with new MUST (e.g., “CAR-001: records of type car MUST link ≥1 engine and ≥1 chassis”).  
-   - Validator checks presence of required links; import/export and CLI would fail on missing associations.  
+   - Validator checks presence of required links; imports/exports would fail on missing associations.  
    - Highest risk of breaking existing datasets; needs gated rollout and new requirement IDs.
 
 ### Touchpoints if we implement type-level dependencies
@@ -31,7 +31,6 @@ Goal: allow a type to declare dependencies on other types so creating/editing a 
 - **Validator**: `src/core/validateDatasetSnapshot.ts` to surface warnings/errors when records of a type lack mandated links; new error codes if enforced.
 - **Graph model**: `src/core/graph.ts` `GraphTypeDef` may need to carry dependency metadata; link extraction stays record-based unless composition auto-creates links.
 - **UI**: `RecordEditor.tsx`, `RecordViewer.tsx`, creation flows to prompt for required related records, pre-filter link pickers by required types, and display composition status.
-- **CLI**: `src/cli/output.ts` to include any new warning/error codes for unmet type dependencies.
 - **Tests/fixtures**: update core/web tests and sample datasets to include type-level dependency metadata and example records satisfying them.
 
 ## Recommendation
