@@ -6,6 +6,7 @@ import EmptyState from "../components/EmptyState";
 import ImportWarningBanner from "../components/ImportWarningBanner";
 import RecordEditor from "../components/RecordEditor";
 import RecordViewer from "../components/RecordViewer";
+import TypeViewer from "../components/TypeViewer";
 import TypeNav, { getTypeLabel } from "../components/TypeNav";
 import { useDataset } from "../state/DatasetContext";
 
@@ -110,6 +111,14 @@ export default function DatasetRoute() {
                 <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
                 <ImportWarningBanner report={activeDataset.meta.importReport} />
               </div>
+              {selectedTypeDef ? (
+                <div className="type-details">
+                  <div className="record-details__header">
+                    <h2>Type details</h2>
+                  </div>
+                  <TypeViewer typeDef={selectedTypeDef} />
+                </div>
+              ) : null}
 
               <div className="dataset-records" data-testid="record-list">
                 <div className="record-list__header">
