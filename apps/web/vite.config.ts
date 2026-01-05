@@ -19,10 +19,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true,
-    fs: {
-      allow: ["../.."]
-    }
+    host: true
   },
   test: {
     // Ensure describe/it/expect exist globally at runtime

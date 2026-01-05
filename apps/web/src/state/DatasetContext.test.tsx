@@ -129,7 +129,9 @@ describe("DatasetContext GitHub import", () => {
     await waitFor(() => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
-      expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(2);
+      expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
+      expect(ctx?.activeDataset?.datasetSnapshot.files.has("types/note.md")).toBe(true);
+      expect(ctx?.activeDataset?.datasetSnapshot.files.has("records/note.record-1/record-1.md")).toBe(true);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { GraphRecordNode } from "../../../../src/core/graph";
+import type { GraphRecordNode } from "../core/graph";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
@@ -75,6 +75,11 @@ export default function DatasetRoute() {
   const outgoingLinks = selectedRecordNode ? graph?.getLinksFrom(selectedRecordNode.recordKey) ?? [] : [];
   const incomingLinks = selectedRecordNode ? graph?.getLinksTo(selectedRecordNode.recordKey) ?? [] : [];
 
+  const ignoredFileCount = activeDataset?.meta.ignoredFileCount ?? 0;
+  const ignoredFileSample = activeDataset?.meta.ignoredFileSample ?? [];
+  const droppedBlobCount = activeDataset?.meta.droppedBlobCount ?? 0;
+  const droppedBlobSample = activeDataset?.meta.droppedBlobSample ?? [];
+
   return (
     <AppShell
       sidebar={
@@ -84,6 +89,35 @@ export default function DatasetRoute() {
               <p>Active dataset:</p>
               <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
             </div>
+            {ignoredFileCount > 0 || droppedBlobCount > 0 ? (
+              <div className="dataset-warning">
+                <strong>Import warnings</strong>
+                {ignoredFileCount > 0 ? (
+                  <details>
+                    <summary>Ignored {ignoredFileCount} non-dataset files</summary>
+                    {ignoredFileSample.length ? (
+                      <ul>
+                        {ignoredFileSample.map((path) => (
+                          <li key={`ignored-${path}`}>{path}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </details>
+                ) : null}
+                {droppedBlobCount > 0 ? (
+                  <details>
+                    <summary>Dropped {droppedBlobCount} unreferenced blobs</summary>
+                    {droppedBlobSample.length ? (
+                      <ul>
+                        {droppedBlobSample.map((path) => (
+                          <li key={`dropped-${path}`}>{path}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </details>
+                ) : null}
+              </div>
+            ) : null}
             {graph ? <TypeNav graph={graph} /> : null}
             <Link to="/import">Import another dataset</Link>
           </div>
@@ -106,7 +140,41 @@ export default function DatasetRoute() {
                 <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
+                {ignoredFileCount > 0 ? (
+                  <div className="dataset-warning">
+                    <p>
+                      Ignored {ignoredFileCount} non-dataset file{ignoredFileCount === 1 ? "" : "s"} during import.
+                    </p>
+                    {ignoredFileSample.length ? (
+                      <details>
+                        <summary>View ignored paths</summary>
+                        <ul>
+                          {ignoredFileSample.map((path) => (
+                            <li key={`ignored-summary-${path}`}>{path}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null}
+                  </div>
+                ) : null}
+                {droppedBlobCount > 0 ? (
+                  <div className="dataset-warning">
+                    <p>
+                      Dropped {droppedBlobCount} unreferenced blob{droppedBlobCount === 1 ? "" : "s"} during import.
+                    </p>
+                    {droppedBlobSample.length ? (
+                      <details>
+                        <summary>View dropped blobs</summary>
+                        <ul>
+                          {droppedBlobSample.map((path) => (
+                            <li key={`dropped-summary-${path}`}>{path}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className="dataset-records" data-testid="record-list">

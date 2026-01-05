@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMarkdownRecord, serializeMarkdownRecord } from "../../../../src/core/markdownRecord";
+import { parseMarkdownRecord, serializeMarkdownRecord } from "../core/markdownRecord";
 
 describe("serializeMarkdownRecord", () => {
   it("FR-MD-022: serializer preserves raw Markdown body and updated YAML", () => {

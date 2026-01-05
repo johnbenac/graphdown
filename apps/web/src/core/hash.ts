@@ -3,7 +3,7 @@ import { bytesToHex } from '@noble/hashes/utils';
 
 import { isRecordFileBytes, parseGraphdownText } from './datasetObjects';
 import { makeError, type ValidationError } from './errors';
-import type { RepoSnapshot } from './snapshotTypes';
+import type { DatasetSnapshot } from './snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
 
@@ -40,7 +40,7 @@ function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   return a.length < b.length ? -1 : 1;
 }
 
-export function computeGdHashV1(snapshot: RepoSnapshot, scope: HashScope): HashResult {
+export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): HashResult {
   if (scope !== 'schema' && scope !== 'snapshot') {
     return { ok: false, errors: [makeError('E_USAGE', `Unknown hash scope: ${String(scope)}`)] };
   }

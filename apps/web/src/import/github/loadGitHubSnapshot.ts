@@ -1,4 +1,4 @@
-import type { RepoSnapshot } from "../../../../../src/core/snapshotTypes";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -53,12 +53,16 @@ function isRecordFile(path: string): boolean {
   return path.startsWith("records/");
 }
 
+function isBlobFile(path: string): boolean {
+  return path.startsWith("blobs/sha256/");
+}
+
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
   onProgress?: (progress: ImportProgress) => void;
-}): Promise<RepoSnapshot> {
+}): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
   const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
@@ -71,19 +75,25 @@ export async function loadGitHubSnapshot(input: {
   );
 
   const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
+  const ignored: string[] = [];
 
   for (const entry of treeResponse.tree) {
-    if (entry.type !== "blob" || !isMarkdownFile(entry.path)) {
+    if (entry.type !== "blob") {
       continue;
     }
     const snapshotPath = entry.path;
     if (!snapshotPath) {
       continue;
     }
-    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
-      continue;
+    const normalizedPath = snapshotPath.toLowerCase();
+    const isDatasetMarkdown =
+      isMarkdownFile(normalizedPath) && (isTypeFile(normalizedPath) || isRecordFile(normalizedPath));
+    const isBlobStore = isBlobFile(normalizedPath);
+    if (isDatasetMarkdown || isBlobStore) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+    } else {
+      ignored.push(snapshotPath);
     }
-    allFiles.push({ repoPath: entry.path, snapshotPath });
   }
   const files = new Map<string, Uint8Array>();
 
@@ -107,5 +117,5 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { files };
+  return { snapshot: { files }, ignored };
 }

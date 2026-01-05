@@ -1,8 +1,7 @@
 import { discoverGraphdownObjects } from './datasetObjects';
-import { extractBlobRefs } from './wikiLinks';
-import { RepoSnapshot } from './snapshot';
-import { exportRepoSnapshotToZipBytes } from './zipSnapshot';
+import type { DatasetSnapshot } from './snapshotTypes';
 import { isObject } from './types';
+import { extractBlobRefs } from './wikiLinks';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
@@ -10,15 +9,19 @@ function collectStringValues(value: unknown, into: Set<string>): void {
     return;
   }
   if (Array.isArray(value)) {
-    for (const item of value) collectStringValues(item, into);
+    for (const item of value) {
+      collectStringValues(item, into);
+    }
     return;
   }
   if (isObject(value)) {
-    for (const child of Object.values(value)) collectStringValues(child, into);
+    for (const child of Object.values(value)) {
+      collectStringValues(child, into);
+    }
   }
 }
 
-function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
+function collectReachableBlobPaths(snapshot: DatasetSnapshot): Set<string> {
   const parsed = discoverGraphdownObjects(snapshot);
   const digests = new Set<string>();
 
@@ -44,18 +47,7 @@ function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
   return paths;
 }
 
-export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
-  const parsed = discoverGraphdownObjects(snapshot);
-  const outputFiles = new Map<string, Uint8Array>();
-
-  for (const typeObj of parsed.typeObjects) {
-    const bytes = snapshot.files.get(typeObj.file);
-    if (!bytes) {
-      continue;
-    }
-    outputFiles.set(`types/${typeObj.typeId}.md`, bytes);
-  }
-
+function resolveRecordDirs(parsed: ReturnType<typeof discoverGraphdownObjects>): Map<string, string> {
   const recordsByKey = new Map(parsed.recordObjects.map((record) => [record.identity, record]));
   const dirMemo = new Map<string, string>();
   const visiting = new Set<string>();
@@ -84,12 +76,35 @@ export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
     return fullDir;
   };
 
+  for (const record of recordsByKey.keys()) {
+    resolveRecordDir(record);
+  }
+
+  return dirMemo;
+}
+
+export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetSnapshot {
+  const parsed = discoverGraphdownObjects(snapshot);
+  const outputFiles = new Map<string, Uint8Array>();
+
+  for (const typeObj of parsed.typeObjects) {
+    const bytes = snapshot.files.get(typeObj.file);
+    if (!bytes) {
+      continue;
+    }
+    outputFiles.set(`types/${typeObj.typeId}.md`, bytes);
+  }
+
+  const recordDirs = resolveRecordDirs(parsed);
   for (const recordObj of parsed.recordObjects) {
     const bytes = snapshot.files.get(recordObj.file);
     if (!bytes) {
       continue;
     }
-    const recordDir = resolveRecordDir(recordObj.identity);
+    const recordDir = recordDirs.get(recordObj.identity);
+    if (!recordDir) {
+      continue;
+    }
     outputFiles.set(`${recordDir}/${recordObj.recordId}.md`, bytes);
   }
 
@@ -101,9 +116,5 @@ export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
     }
   }
 
-  return exportRepoSnapshotToZipBytes({ files: outputFiles });
-}
-
-export function exportWholeRepoZip(snapshot: RepoSnapshot): Uint8Array {
-  return exportRepoSnapshotToZipBytes(snapshot);
+  return { files: outputFiles };
 }

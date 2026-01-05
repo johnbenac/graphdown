@@ -6,7 +6,7 @@ import {
   type ParsedTypeObject,
 } from './datasetObjects';
 import { makeError, type ValidationError } from './errors';
-import type { RepoSnapshot } from './snapshotTypes';
+import type { DatasetSnapshot } from './snapshotTypes';
 import { isObject } from './types';
 import { extractBlobRefs, extractRecordRefs } from './wikiLinks';
 
@@ -179,7 +179,7 @@ function enforceCompositionShape(typeObj: ParsedTypeObject, errors: ValidationEr
 }
 
 function validateBlobStore(
-  snapshot: RepoSnapshot,
+  snapshot: DatasetSnapshot,
   records: ParsedRecordObject[],
   errors: ValidationError[]
 ): void {
@@ -260,7 +260,7 @@ function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
   return refs;
 }
 
-export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDatasetResult {
+export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateDatasetResult {
   const errors: ValidationError[] = [];
 
   const parsed = discoverGraphdownObjects(snapshot);

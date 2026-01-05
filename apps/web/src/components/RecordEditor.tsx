@@ -1,9 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { GraphRecordNode, GraphTypeNode } from "../../../../src/core/graph";
-import type { ValidationError } from "../../../../src/core/errors";
-import { makeError } from "../../../../src/core/errors";
-import { isObject } from "../../../../src/core/types";
+import type { GraphRecordNode, GraphTypeNode } from "../core/graph";
+import type { ValidationError } from "../core/errors";
+import { makeError } from "../core/errors";
+import { isObject } from "../core/types";
 import { useDataset } from "../state/DatasetContext";
 
 type RecordEditorProps = {

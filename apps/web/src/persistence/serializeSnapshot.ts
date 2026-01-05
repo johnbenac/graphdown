@@ -1,7 +1,7 @@
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import type { PersistedRepoSnapshot } from "./types";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { PersistedDatasetSnapshot } from "./types";
 
-export function serializeSnapshot(snapshot: RepoSnapshot): PersistedRepoSnapshot {
+export function serializeSnapshot(snapshot: DatasetSnapshot): PersistedDatasetSnapshot {
   return {
     files: [...snapshot.files.entries()].map(([path, contents]) => ({
       path,
@@ -10,7 +10,7 @@ export function serializeSnapshot(snapshot: RepoSnapshot): PersistedRepoSnapshot
   };
 }
 
-export function deserializeSnapshot(snapshot: PersistedRepoSnapshot): RepoSnapshot {
+export function deserializeSnapshot(snapshot: PersistedDatasetSnapshot): DatasetSnapshot {
   return {
     files: new Map(snapshot.files.map(({ path, contents }) => [path, contents]))
   };

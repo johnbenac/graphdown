@@ -62,7 +62,9 @@ describe("loadGitHubSnapshot", () => {
         jsonResponse({
           tree: [
             { path: "types/note.md", type: "blob" },
-            { path: "records/note/record-1.md", type: "blob" }
+            { path: "records/note/record-1.md", type: "blob" },
+            { path: "blobs/sha256/aa/" + "a".repeat(64), type: "blob" },
+            { path: "docs/readme.md", type: "blob" }
           ]
         })
       )
@@ -75,11 +77,17 @@ describe("loadGitHubSnapshot", () => {
       )
       .mockResolvedValueOnce(
         new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
-      );
+      )
+      .mockResolvedValueOnce(new Response("blob-bytes", { status: 200 }));
 
-    const snapshot = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
-    expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
+    expect([...snapshot.files.keys()].sort()).toEqual([
+      "blobs/sha256/aa/" + "a".repeat(64),
+      "records/note/record-1.md",
+      "types/note.md"
+    ]);
+    expect(ignored).toEqual(["docs/readme.md"]);
 
     const treeCall = fetchMock.mock.calls.find(
       ([url]) => typeof url === "string" && url.includes("/git/trees/")
