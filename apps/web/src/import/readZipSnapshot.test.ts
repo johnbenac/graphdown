@@ -13,7 +13,7 @@ describe("readZipSnapshot", () => {
     const file = {
       arrayBuffer: async () => buffer
     } as File;
-    const snapshot = await readZipSnapshot(file);
+    const { snapshot } = await readZipSnapshot(file);
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);

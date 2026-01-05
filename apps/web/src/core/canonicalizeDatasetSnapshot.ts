@@ -1,7 +1,7 @@
-import { zipSync } from "fflate";
-import { discoverGraphdownObjects, extractBlobRefs } from "../../../../src/core";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { isObject } from "../../../../src/core/types";
+import { discoverGraphdownObjects } from "./datasetObjects";
+import { extractBlobRefs } from "./wikiLinks";
+import { isObject } from "./types";
+import type { DatasetSnapshot } from "./snapshotTypes";
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === "string") {
@@ -17,7 +17,7 @@ function collectStringValues(value: unknown, into: Set<string>): void {
   }
 }
 
-function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
+function collectReachableBlobPaths(snapshot: DatasetSnapshot): Set<string> {
   const parsed = discoverGraphdownObjects(snapshot);
   const digests = new Set<string>();
 
@@ -39,44 +39,19 @@ function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
       paths.add(path);
     }
   }
+
   return paths;
 }
 
-function isGitPath(filePath: string): boolean {
-  return filePath === ".git" || filePath.startsWith(".git/");
-}
-
-function buildZipBytes(snapshot: RepoSnapshot, include?: (path: string) => boolean): Uint8Array {
-  const entries: Record<string, Uint8Array> = {};
-  const sortedPaths = [...snapshot.files.keys()]
-    .filter((path) => !isGitPath(path))
-    .filter((path) => (include ? include(path) : true))
-    .sort((a, b) => a.localeCompare(b));
-
-  for (const path of sortedPaths) {
-    const contents = snapshot.files.get(path);
-    if (contents) {
-      entries[path] = contents;
-    }
-  }
-
-  return zipSync(entries, { level: 0 });
-}
-
-export function exportWholeSnapshotZip(snapshot: RepoSnapshot): Uint8Array {
-  return buildZipBytes(snapshot);
-}
-
-export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
+export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetSnapshot {
   const parsed = discoverGraphdownObjects(snapshot);
   const outputFiles = new Map<string, Uint8Array>();
 
   for (const typeObj of parsed.typeObjects) {
     const bytes = snapshot.files.get(typeObj.file);
-    if (!bytes) {
-      continue;
+    if (bytes) {
+      outputFiles.set(`types/${typeObj.typeId}.md`, bytes);
     }
-    outputFiles.set(`types/${typeObj.typeId}.md`, bytes);
   }
 
   const recordsByKey = new Map(parsed.recordObjects.map((record) => [record.identity, record]));
@@ -124,33 +99,5 @@ export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
     }
   }
 
-  const entries: Record<string, Uint8Array> = {};
-  const sortedPaths = [...outputFiles.keys()].sort((a, b) => a.localeCompare(b));
-  for (const path of sortedPaths) {
-    const contents = outputFiles.get(path);
-    if (contents) {
-      entries[path] = contents;
-    }
-  }
-  return zipSync(entries, { level: 0 });
-}
-
-function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  if (bytes.buffer instanceof ArrayBuffer) {
-    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-  }
-
-  const buffer = new ArrayBuffer(bytes.byteLength);
-  new Uint8Array(buffer).set(bytes);
-  return buffer;
-}
-
-export function downloadZipBytes(bytes: Uint8Array, filename: string): void {
-  const blob = new Blob([toArrayBuffer(bytes)], { type: "application/zip" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  return { files: outputFiles };
 }

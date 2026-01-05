@@ -181,6 +181,26 @@ a {
   color: #92400e;
 }
 
+.import-warning {
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #92400e;
+}
+
+.import-warning summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.import-warning ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
 .import-error-details {
   display: grid;
   gap: 0.75rem;

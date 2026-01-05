@@ -1,7 +1,21 @@
 import { unzipSync } from "fflate";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 
-const ROOT_DIRS = new Set(["types", "records"]);
+const ROOT_DIRS = new Set(["types", "records", "blobs"]);
+
+function isDatasetPath(path: string): boolean {
+  const lower = path.toLowerCase();
+  if (lower.startsWith("types/") && lower.endsWith(".md")) {
+    return true;
+  }
+  if (lower.startsWith("records/") && lower.endsWith(".md")) {
+    return true;
+  }
+  if (path.startsWith("blobs/sha256/")) {
+    return true;
+  }
+  return false;
+}
 
 function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {
@@ -28,7 +42,9 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-export async function readZipSnapshot(file: File): Promise<RepoSnapshot> {
+export async function readZipSnapshot(
+  file: File
+): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
   const buffer = await file.arrayBuffer();
   const entries = unzipSync(new Uint8Array(buffer));
   const normalizedEntries: Array<{ path: string; contents: Uint8Array }> = [];
@@ -50,12 +66,17 @@ export async function readZipSnapshot(file: File): Promise<RepoSnapshot> {
     !ROOT_DIRS.has(root) &&
     normalizedEntries.every((entry) => entry.path.startsWith(`${root}/`));
   const files = new Map<string, Uint8Array>();
+  const ignored: string[] = [];
   for (const entry of normalizedEntries) {
     const finalPath = shouldStripRoot ? entry.path.split("/").slice(1).join("/") : entry.path;
     if (!finalPath) {
       continue;
     }
-    files.set(finalPath, entry.contents);
+    if (isDatasetPath(finalPath)) {
+      files.set(finalPath, entry.contents);
+    } else {
+      ignored.push(finalPath);
+    }
   }
-  return { files };
+  return { snapshot: { files }, ignored };
 }

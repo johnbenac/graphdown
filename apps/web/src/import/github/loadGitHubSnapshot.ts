@@ -1,4 +1,4 @@
-import type { RepoSnapshot } from "../../../../../src/core/snapshotTypes";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -53,12 +53,16 @@ function isRecordFile(path: string): boolean {
   return path.startsWith("records/");
 }
 
+function isBlobFile(path: string): boolean {
+  return path.startsWith("blobs/sha256/");
+}
+
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
   onProgress?: (progress: ImportProgress) => void;
-}): Promise<RepoSnapshot> {
+}): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
   const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
@@ -71,19 +75,29 @@ export async function loadGitHubSnapshot(input: {
   );
 
   const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
+  const ignored: string[] = [];
 
   for (const entry of treeResponse.tree) {
-    if (entry.type !== "blob" || !isMarkdownFile(entry.path)) {
+    if (entry.type !== "blob") {
       continue;
     }
     const snapshotPath = entry.path;
     if (!snapshotPath) {
       continue;
     }
-    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
+    const isMarkdown = isMarkdownFile(snapshotPath);
+    const isType = isTypeFile(snapshotPath);
+    const isRecord = isRecordFile(snapshotPath);
+    const isBlob = isBlobFile(snapshotPath);
+    if ((isType || isRecord) && isMarkdown) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
-    allFiles.push({ repoPath: entry.path, snapshotPath });
+    if (isBlob) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    ignored.push(snapshotPath);
   }
   const files = new Map<string, Uint8Array>();
 
@@ -107,5 +121,5 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { files };
+  return { snapshot: { files }, ignored };
 }

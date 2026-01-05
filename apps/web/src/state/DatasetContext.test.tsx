@@ -129,7 +129,7 @@ describe("DatasetContext GitHub import", () => {
     await waitFor(() => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
-      expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(2);
+      expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
   });
 });

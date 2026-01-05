@@ -1,15 +1,15 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
-
-const { validateDatasetSnapshot, buildGraphFromSnapshot } = require('../dist/core');
+import assert from "node:assert/strict";
+import { it } from "vitest";
+import { buildGraphFromSnapshot } from "../../core/graph";
+import { validateDatasetSnapshot } from "../../core/validateDatasetSnapshot";
 
 const encoder = new TextEncoder();
 
-function snapshot(entries) {
+function snapshot(entries: Array<[string, string]>) {
   return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
-test('LAYOUT-002: only first front matter block defines a record object', () => {
+it("LAYOUT-002: only first front matter block defines a record object", () => {
   const recordContent = [
     '---',
     'typeId: note',
@@ -23,11 +23,11 @@ test('LAYOUT-002: only first front matter block defines a record object', () => 
     'fields: {}',
     '---',
     'Trailing text.',
-  ].join('\n');
+  ].join("\n");
 
   const snap = snapshot([
-    ['types/note.md', ['---', 'typeId: note', 'fields: {}', '---', ''].join('\n')],
-    ['records/multi.md', recordContent],
+    ["types/note.md", ["---", "typeId: note", "fields: {}", "---", ""].join("\n")],
+    ["records/multi.md", recordContent],
   ]);
 
   const validation = validateDatasetSnapshot(snap);
@@ -37,7 +37,7 @@ test('LAYOUT-002: only first front matter block defines a record object', () => 
   assert.equal(graphResult.ok, true, JSON.stringify(graphResult.errors));
   const { graph } = graphResult;
 
-  assert.ok(graph.getRecord('note:one'));
-  assert.equal(graph.getRecord('note:two'), null);
-  assert.deepEqual(graph.getLinksFrom('note:one'), []);
+  assert.ok(graph.getRecord("note:one"));
+  assert.equal(graph.getRecord("note:two"), null);
+  assert.deepEqual(graph.getLinksFrom("note:one"), []);
 });

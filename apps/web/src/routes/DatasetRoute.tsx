@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { GraphRecordNode } from "../../../../src/core/graph";
+import type { GraphRecordNode } from "../core/graph";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
@@ -74,6 +74,11 @@ export default function DatasetRoute() {
     selectedRecord && selectedRecord.kind === "record" ? selectedRecord : null;
   const outgoingLinks = selectedRecordNode ? graph?.getLinksFrom(selectedRecordNode.recordKey) ?? [] : [];
   const incomingLinks = selectedRecordNode ? graph?.getLinksTo(selectedRecordNode.recordKey) ?? [] : [];
+  const ignoredFileCount = activeDataset?.meta.ignoredFileCount ?? 0;
+  const ignoredFileSample = activeDataset?.meta.ignoredFileSample ?? [];
+  const droppedBlobCount = activeDataset?.meta.droppedBlobCount ?? 0;
+  const droppedBlobSample = activeDataset?.meta.droppedBlobSample ?? [];
+  const showWarnings = ignoredFileCount > 0 || droppedBlobCount > 0;
 
   return (
     <AppShell
@@ -82,7 +87,7 @@ export default function DatasetRoute() {
           <div className="sidebar-stack">
             <div>
               <p>Active dataset:</p>
-              <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
+              <strong>{activeDataset.meta.label ?? "Active dataset"}</strong>
             </div>
             {graph ? <TypeNav graph={graph} /> : null}
             <Link to="/import">Import another dataset</Link>
@@ -100,13 +105,40 @@ export default function DatasetRoute() {
               <div className="dataset-summary">
                 <p>
                   <strong>
-                    {activeDataset.meta.label ?? activeDataset.meta.id}
+                    {activeDataset.meta.label ?? "Active dataset"}
                   </strong>
                 </p>
-                <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
+                {showWarnings ? (
+                  <div className="import-warning">
+                    {ignoredFileCount > 0 ? (
+                      <details>
+                        <summary>Ignored {ignoredFileCount} non-dataset files during import.</summary>
+                        {ignoredFileSample.length ? (
+                          <ul>
+                            {ignoredFileSample.map((path) => (
+                              <li key={path}>{path}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </details>
+                    ) : null}
+                    {droppedBlobCount > 0 ? (
+                      <details>
+                        <summary>Dropped {droppedBlobCount} unreferenced blobs.</summary>
+                        {droppedBlobSample.length ? (
+                          <ul>
+                            {droppedBlobSample.map((path) => (
+                              <li key={path}>{path}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </details>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className="dataset-records" data-testid="record-list">

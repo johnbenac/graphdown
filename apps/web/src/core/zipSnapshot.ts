@@ -1,8 +1,6 @@
-import fs from 'node:fs';
-
 import { unzipSync, zipSync } from 'fflate';
 
-import { RepoSnapshot } from './snapshot';
+import { DatasetSnapshot } from './snapshotTypes';
 
 export interface ExportZipOptions {
   include?: (path: string) => boolean;
@@ -36,7 +34,7 @@ function normalizeZipPath(entryPath: string): string {
   return segments.join('/');
 }
 
-export function loadRepoSnapshotFromZipBytes(zipBytes: Uint8Array): RepoSnapshot {
+export function loadRepoSnapshotFromZipBytes(zipBytes: Uint8Array): DatasetSnapshot {
   const entries = unzipSync(zipBytes);
   const files = new Map<string, Uint8Array>();
 
@@ -52,13 +50,8 @@ export function loadRepoSnapshotFromZipBytes(zipBytes: Uint8Array): RepoSnapshot
   return { files };
 }
 
-export function loadRepoSnapshotFromZipFile(zipPath: string): RepoSnapshot {
-  const zipBytes = fs.readFileSync(zipPath);
-  return loadRepoSnapshotFromZipBytes(zipBytes);
-}
-
 export function exportRepoSnapshotToZipBytes(
-  snapshot: RepoSnapshot,
+  snapshot: DatasetSnapshot,
   options: ExportZipOptions = {}
 ): Uint8Array {
   const include = options.include ?? (() => true);

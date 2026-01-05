@@ -51,6 +51,11 @@ export default function ImportRoute() {
   }, [progress.phase]);
 
   const hasProgress = progress.phase !== "idle" && status === "loading";
+  const ignoredFileCount = activeDataset?.meta.ignoredFileCount ?? 0;
+  const ignoredFileSample = activeDataset?.meta.ignoredFileSample ?? [];
+  const droppedBlobCount = activeDataset?.meta.droppedBlobCount ?? 0;
+  const droppedBlobSample = activeDataset?.meta.droppedBlobSample ?? [];
+  const showWarnings = Boolean(activeDataset) && (ignoredFileCount > 0 || droppedBlobCount > 0);
 
   return (
     <AppShell
@@ -58,7 +63,7 @@ export default function ImportRoute() {
         activeDataset ? (
           <div>
             <p>Active dataset:</p>
-            <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
+            <strong>{activeDataset.meta.label ?? "Active dataset"}</strong>
           </div>
         ) : (
           <p>No datasets loaded.</p>
@@ -110,6 +115,35 @@ export default function ImportRoute() {
               </li>
             ))}
           </ol>
+        ) : null}
+
+        {showWarnings ? (
+          <div className="import-warning" role="status">
+            {ignoredFileCount > 0 ? (
+              <details>
+                <summary>Ignored {ignoredFileCount} non-dataset files during import.</summary>
+                {ignoredFileSample.length ? (
+                  <ul>
+                    {ignoredFileSample.map((path) => (
+                      <li key={path}>{path}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </details>
+            ) : null}
+            {droppedBlobCount > 0 ? (
+              <details>
+                <summary>Dropped {droppedBlobCount} unreferenced blobs.</summary>
+                {droppedBlobSample.length ? (
+                  <ul>
+                    {droppedBlobSample.map((path) => (
+                      <li key={path}>{path}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </details>
+            ) : null}
+          </div>
         ) : null}
 
         {error ? (
