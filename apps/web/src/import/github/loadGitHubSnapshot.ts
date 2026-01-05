@@ -58,7 +58,7 @@ export async function loadGitHubSnapshot(input: {
   repo: string;
   ref?: string;
   onProgress?: (progress: ImportProgress) => void;
-}): Promise<DatasetSnapshot> {
+}): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
   const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });
@@ -71,19 +71,29 @@ export async function loadGitHubSnapshot(input: {
   );
 
   const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
+  const ignored: string[] = [];
 
   for (const entry of treeResponse.tree) {
-    if (entry.type !== "blob" || !isMarkdownFile(entry.path)) {
+    if (entry.type !== "blob") {
       continue;
     }
     const snapshotPath = entry.path;
     if (!snapshotPath) {
       continue;
     }
-    if (!isTypeFile(snapshotPath) && !isRecordFile(snapshotPath)) {
+    if (isTypeFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
-    allFiles.push({ repoPath: entry.path, snapshotPath });
+    if (isRecordFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    if (snapshotPath.startsWith("blobs/sha256/")) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    ignored.push(snapshotPath);
   }
   const files = new Map<string, Uint8Array>();
 
@@ -107,5 +117,5 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { files };
+  return { snapshot: { files }, ignored };
 }

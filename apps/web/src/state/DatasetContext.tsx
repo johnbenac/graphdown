@@ -10,7 +10,7 @@ import { GitHubImportError } from "../import/github/mapGitHubError";
 import { parseGitHubUrl } from "../import/github/parseGitHubUrl";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
-import type { LoadedDataset } from "../persistence/types";
+import type { ImportReport, LoadedDataset } from "../persistence/types";
 import { FORMAT_VERSIONS } from "../persistence/versions";
 import { createPersistStore } from "../storage/createPersistStore";
 
@@ -172,7 +172,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       label: string,
       datasetSnapshot: DatasetSnapshot,
-      parsedGraph: Awaited<ReturnType<typeof parseGraph>>
+      parsedGraph: Awaited<ReturnType<typeof parseGraph>>,
+      importReport?: ImportReport
     ) => {
       const datasetId = createDatasetId();
       const now = Date.now();
@@ -184,7 +185,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         graphFormatVersion: FORMAT_VERSIONS.graph,
         uiStateFormatVersion: FORMAT_VERSIONS.uiState,
         label,
-        source: "import"
+        source: "import",
+        importReport
       };
       await persistence.saveDataset({ datasetId, meta, datasetSnapshot, parsedGraph });
       await persistence.setActiveDatasetId(datasetId);
@@ -199,7 +201,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setError(undefined);
       setProgress({ phase: "validating_dataset" });
       try {
-        const datasetSnapshot = await readZipSnapshot(file);
+        const { snapshot: datasetSnapshot, ignored } = await readZipSnapshot(file);
+        const importReport: ImportReport = {
+          ignoredCount: ignored.length,
+          ignoredSample: ignored.slice(0, 20)
+        };
         const validation = validateDatasetSnapshot(datasetSnapshot);
         if (!validation.ok) {
           setStatus("error");
@@ -224,7 +230,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "persisting" });
-        await saveDataset(file.name, datasetSnapshot, graphResult.graph);
+        await saveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -259,12 +265,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const datasetSnapshot = await loadGitHubSnapshot({
+        const { snapshot: datasetSnapshot, ignored } = await loadGitHubSnapshot({
           owner: parsed.value.owner,
           repo: parsed.value.repo,
           ref: parsed.value.ref,
           onProgress: (progress) => setProgress(progress)
         });
+        const importReport: ImportReport = {
+          ignoredCount: ignored.length,
+          ignoredSample: ignored.slice(0, 20)
+        };
 
         setProgress({ phase: "validating_dataset" });
         const validation = validateDatasetSnapshot(datasetSnapshot);
@@ -293,7 +303,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "persisting" });
-        await saveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph);
+        await saveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {

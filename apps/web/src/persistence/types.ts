@@ -10,6 +10,7 @@ export type DatasetMeta = {
   uiStateFormatVersion: number;
   label?: string;
   source?: string;
+  importReport?: ImportReport;
 };
 
 export type PersistedDatasetSnapshot = {
@@ -30,4 +31,11 @@ export type LoadedDataset = {
   datasetSnapshot: DatasetSnapshot;
   parsedGraph?: Graph;
   uiState?: PersistedUiState;
+};
+
+export type ImportReport = {
+  ignoredCount: number;
+  ignoredSample: string[];
+  droppedUnreferencedBlobsCount?: number;
+  droppedUnreferencedBlobsSample?: string[];
 };
