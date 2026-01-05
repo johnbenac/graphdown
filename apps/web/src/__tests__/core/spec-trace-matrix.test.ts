@@ -15,10 +15,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 test('GOV-002: spec-trace output matches committed matrix', () => {
   const repoRoot = path.resolve(__dirname, '../../../../../');
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-trace-'));
-  let committed;
-  let regenerated;
-  let committedMd;
-  let regeneratedMd;
+  let committed: any;
+  let regenerated: any;
+  let committedMd: string | undefined;
+  let regeneratedMd: string | undefined;
 
   try {
     const result = generateSpecTrace({ outputDir: tempDir, writeFiles: true, generatedAt: 'normalized' });
@@ -42,19 +42,22 @@ test('GOV-002: spec-trace output matches committed matrix', () => {
     committedMd = fs.readFileSync(baselineMdPath, 'utf8');
     regeneratedMd = fs.readFileSync(path.join(tempDir, 'matrix.md'), 'utf8');
 
-    const normalizeMd = (text) => text.replace(/^Generated: .+$/m, 'Generated: normalized');
+    const normalizeMd = (text: string): string => text.replace(/^Generated: .+$/m, 'Generated: normalized');
 
     assert.deepStrictEqual(regenerated, committed);
     assert.strictEqual(normalizeMd(regeneratedMd), normalizeMd(committedMd));
-  } catch (error) {
+  } catch (error: unknown) {
     const context = {
       committedRequirements: committed?.requirements?.length,
       regeneratedRequirements: regenerated?.requirements?.length,
       committedMissingTestable: committed?.missingTestable?.length,
       regeneratedMissingTestable: regenerated?.missingTestable?.length,
     };
-    error.message = `spec-trace mismatch: ${error.message} | context=${JSON.stringify(context)}`;
-    throw error;
+    if (error instanceof Error) {
+      error.message = `spec-trace mismatch: ${error.message} | context=${JSON.stringify(context)}`;
+      throw error;
+    }
+    throw new Error(`spec-trace mismatch: ${String(error)} | context=${JSON.stringify(context)}`);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

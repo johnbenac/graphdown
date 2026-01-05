@@ -2,83 +2,99 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { validateDatasetSnapshot } from "../../core";
+import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "../../core";
 
 const encoder = new TextEncoder();
 
-function snapshot(entries) {
-  return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
+type SnapshotEntry = [string, string];
+
+function snapshot(entries: SnapshotEntry[]): DatasetSnapshot {
+  return { files: new Map<string, Uint8Array>(entries.map(([path, content]) => [path, encoder.encode(content)])) };
+}
+
+function expectErrors(result: ValidateDatasetResult): ValidationError[] {
+  if (result.ok) {
+    assert.fail("Expected validation errors");
+  }
+  return result.errors;
+}
+
+function expectOk(result: ValidateDatasetResult): void {
+  if (!result.ok) {
+    assert.fail(JSON.stringify(result.errors));
+  }
 }
 
 test('EXT-001: extra top-level keys are forbidden', () => {
-  const typeEntry = [
-    'types/widget.md',
+  const typeEntry: SnapshotEntry = [
+    "types/widget.md",
     [
-      '---',
-      'typeId: widget',
-      'fields: {}',
-      'notes: custom type metadata',
-      '---',
-      'Widget type'
-    ].join('\n')
+      "---",
+      "typeId: widget",
+      "fields: {}",
+      "notes: custom type metadata",
+      "---",
+      "Widget type"
+    ].join("\n")
   ];
 
-  const recordEntry = [
-    'records/widget-1.md',
+  const recordEntry: SnapshotEntry = [
+    "records/widget-1.md",
     [
-      '---',
-      'typeId: widget',
-      'recordId: one',
-      'fields: {}',
-      'source: importer',
-      '---',
-      'Widget record'
-    ].join('\n')
+      "---",
+      "typeId: widget",
+      "recordId: one",
+      "fields: {}",
+      "source: importer",
+      "---",
+      "Widget record"
+    ].join("\n")
   ];
 
   const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry]));
 
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.code === 'E_FORBIDDEN_TOP_LEVEL_KEY'));
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_FORBIDDEN_TOP_LEVEL_KEY"));
 });
 
 test('EXT-002: accepts arbitrary shapes within fields', () => {
-  const typeEntry = [
-    'types/gizmo.md',
+  const typeEntry: SnapshotEntry = [
+    "types/gizmo.md",
     [
-      '---',
-      'typeId: gizmo',
-      'fields: {}',
-      '---',
-      'Gizmo type'
-    ].join('\n')
+      "---",
+      "typeId: gizmo",
+      "fields: {}",
+      "---",
+      "Gizmo type"
+    ].join("\n")
   ];
 
-  const recordEntry = [
-    'records/gizmo/gizmo-1.md',
+  const recordEntry: SnapshotEntry = [
+    "records/gizmo/gizmo-1.md",
     [
-      '---',
-      'typeId: gizmo',
-      'recordId: one',
-      'fields:',
-      '  name: Gizmo One',
-      '  count: 3',
-      '  active: true',
-      '  nothing: null',
-      '  tags:',
-      '    - alpha',
-      '    - 2',
-      '    - { nested: yes }',
-      '  metadata:',
-      '    owner: qa',
-      '    notes:',
-      '      - { label: first, score: 10 }',
-      '      - { label: second, score: 20 }',
-      '---',
-      'Gizmo record'
-    ].join('\n')
+      "---",
+      "typeId: gizmo",
+      "recordId: one",
+      "fields:",
+      "  name: Gizmo One",
+      "  count: 3",
+      "  active: true",
+      "  nothing: null",
+      "  tags:",
+      "    - alpha",
+      "    - 2",
+      "    - { nested: yes }",
+      "  metadata:",
+      "    owner: qa",
+      "    notes:",
+      "      - { label: first, score: 10 }",
+      "      - { label: second, score: 20 }",
+      "---",
+      "Gizmo record"
+    ].join("\n")
   ];
 
   const result = validateDatasetSnapshot(snapshot([typeEntry, recordEntry]));
 
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  expectOk(result);
 });

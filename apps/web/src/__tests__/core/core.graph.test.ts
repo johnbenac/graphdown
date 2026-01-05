@@ -5,21 +5,22 @@ import path from "node:path";
 import { test } from "vitest";
 
 import { buildGraphFromSnapshot } from "../../core";
+import type { BuildGraphResult, DatasetSnapshot } from "../../core";
 
-function loadDatasetSnapshotFromFs(root) {
-  const files = new Map();
+function loadDatasetSnapshotFromFs(root: string): DatasetSnapshot {
+  const files = new Map<string, Uint8Array>();
 
-  const walk = (dir) => {
+  const walk = (dir: string): void => {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
-      if (entry.name === '.git') {
+      if (entry.name === ".git") {
         continue;
       }
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         walk(fullPath);
       } else if (entry.isFile()) {
-        const relPath = path.relative(root, fullPath).split(path.sep).join('/');
+        const relPath = path.relative(root, fullPath).split(path.sep).join("/");
         const contents = fs.readFileSync(fullPath);
         files.set(relPath, contents);
       }
@@ -30,94 +31,103 @@ function loadDatasetSnapshotFromFs(root) {
   return { files };
 }
 
-function writeFile(root, relative, content) {
+function writeFile(root: string, relative: string, content: string): void {
   const full = path.join(root, relative);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, content);
 }
 
-function typeFile(typeId) {
-  return ['---', `typeId: ${typeId}`, 'fields: {}', '---', ''].join('\n');
+function typeFile(typeId: string): string {
+  return ["---", `typeId: ${typeId}`, "fields: {}", "---", ""].join("\n");
 }
 
-function recordFile(typeId, recordId, body = '', extraFields = '') {
-  return ['---', `typeId: ${typeId}`, `recordId: ${recordId}`, 'fields: {}', extraFields, '---', body].join('\n');
+function recordFile(typeId: string, recordId: string, body = "", extraFields = ""): string {
+  return ["---", `typeId: ${typeId}`, `recordId: ${recordId}`, "fields: {}", extraFields, "---", body].join("\n");
+}
+
+function expectGraphOk(result: BuildGraphResult): asserts result is Extract<BuildGraphResult, { ok: true }> {
+  if (!result.ok) {
+    const message = result.errors ? JSON.stringify(result.errors) : "Graph build failed";
+    throw new Error(message);
+  }
 }
 
 test('REL-002: extracts record links from bodies and fields', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
-    writeFile(tempDir, 'types/note.md', typeFile('note'));
-    writeFile(tempDir, 'records/note-1.md', recordFile('note', 'one', 'See [[note:two]].'));
+    writeFile(tempDir, "types/note.md", typeFile("note"));
+    writeFile(tempDir, "records/note-1.md", recordFile("note", "one", "See [[note:two]]."));
     writeFile(
       tempDir,
-      'records/note-2.md',
-      ['---', 'typeId: note', 'recordId: two', 'fields:', '  ref: "[[note:one]]"', '---', 'Backlink'].join('\n')
+      "records/note-2.md",
+      ["---", "typeId: note", "recordId: two", "fields:", '  ref: "[[note:one]]"', "---", "Backlink"].join("\n")
     );
 
     const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
-    assert.equal(result.ok, true);
+    expectGraphOk(result);
     const { graph } = result;
-    assert.deepEqual(graph.getLinksFrom('note:one'), ['note:two']);
-    assert.deepEqual(graph.getLinksTo('note:one'), ['note:two']);
+    assert.deepEqual(graph.getLinksFrom("note:one"), ["note:two"]);
+    assert.deepEqual(graph.getLinksTo("note:one"), ["note:two"]);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
 test('REL-002: does not synthesize links across separate string values', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
-    writeFile(tempDir, 'types/note.md', typeFile('note'));
+    writeFile(tempDir, "types/note.md", typeFile("note"));
     writeFile(
       tempDir,
-      'records/note-1.md',
-      ['---', 'typeId: note', 'recordId: one', 'fields:', '  part1: "[[note:two"', '  part2: "]]"', '---', ''].join(
-        '\n'
+      "records/note-1.md",
+      ["---", "typeId: note", "recordId: one", "fields:", '  part1: "[[note:two"', '  part2: "]]"', "---", ""].join(
+        "\n"
       )
     );
-    writeFile(tempDir, 'records/note-2.md', recordFile('note', 'two'));
+    writeFile(tempDir, "records/note-2.md", recordFile("note", "two"));
 
     const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
-    assert.equal(result.ok, true, JSON.stringify(result.errors));
+    expectGraphOk(result);
     const { graph } = result;
-    assert.deepEqual(graph.getLinksFrom('note:one'), []);
-    assert.deepEqual(graph.getLinksTo('note:two'), []);
+    assert.deepEqual(graph.getLinksFrom("note:one"), []);
+    assert.deepEqual(graph.getLinksTo("note:two"), []);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
 test('Graph exposes type and record lookup by identity', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
-    writeFile(tempDir, 't.md', typeFile('note'));
-    writeFile(tempDir, 'r.md', recordFile('note', 'one'));
+    writeFile(tempDir, "t.md", typeFile("note"));
+    writeFile(tempDir, "r.md", recordFile("note", "one"));
 
     const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
-    assert.equal(result.ok, true);
+    expectGraphOk(result);
     const { graph } = result;
-    const type = graph.getType('note');
+    const type = graph.getType("note");
     assert.ok(type);
-    const record = graph.getRecord('note:one');
+    const record = graph.getRecord("note:one");
     assert.ok(record);
-    assert.equal(graph.getTypeForRecord('note:one')?.typeId, 'note');
+    assert.equal(graph.getTypeForRecord("note:one")?.typeId, "note");
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
 test('VAL-002: duplicate record identity fails graph build', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graphdown-graph-'));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
-    writeFile(tempDir, 't.md', typeFile('note'));
-    const content = recordFile('note', 'one');
-    writeFile(tempDir, 'r1.md', content);
-    writeFile(tempDir, 'r2.md', content);
+    writeFile(tempDir, "t.md", typeFile("note"));
+    const content = recordFile("note", "one");
+    writeFile(tempDir, "r1.md", content);
+    writeFile(tempDir, "r2.md", content);
 
     const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
-    assert.equal(result.ok, false);
-    assert.ok(result.errors.some((e) => e.code === 'E_DUPLICATE_ID'));
+    if (result.ok) {
+      assert.fail("Expected duplicate ID error");
+    }
+    assert.ok(result.errors.some((e) => e.code === "E_DUPLICATE_ID"));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

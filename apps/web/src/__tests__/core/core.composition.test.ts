@@ -2,94 +2,110 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { validateDatasetSnapshot } from "../../core";
+import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "../../core";
 
 const encoder = new TextEncoder();
 
-function snapshot(entries) {
-  return { files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)])) };
+type SnapshotEntry = [string, string];
+
+function snapshot(entries: SnapshotEntry[]): DatasetSnapshot {
+  return { files: new Map<string, Uint8Array>(entries.map(([path, content]) => [path, encoder.encode(content)])) };
 }
 
-function record(path, yamlLines, body = '') {
+function record(path: string, yamlLines: string[], body = ""): SnapshotEntry {
   return [
     path,
-    ['---', ...yamlLines, '---', body].join('\n')
+    ["---", ...yamlLines, "---", body].join("\n")
   ];
+}
+
+function expectErrors(result: ValidateDatasetResult): ValidationError[] {
+  if (result.ok) {
+    assert.fail("Expected validation errors");
+  }
+  return result.errors;
+}
+
+function expectOk(result: ValidateDatasetResult): void {
+  if (!result.ok) {
+    assert.fail(JSON.stringify(result.errors));
+  }
 }
 
 test('VAL-COMP-002: required component link resolves to correct type', () => {
   const result = validateDatasetSnapshot(
     snapshot([
-      record('any/engine.md', ['typeId: engine', 'fields: {}']),
-      record('any/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true']),
-      record('records/engine/e1.md', ['typeId: engine', 'recordId: e1', 'fields: {}']),
-      record('records/car/c1.md', ['typeId: car', 'recordId: c1', 'fields: {}'], 'Has [[engine:e1]].')
+      record("any/engine.md", ["typeId: engine", "fields: {}"]),
+      record("any/car.md", ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine", "      required: true"]),
+      record("records/engine/e1.md", ["typeId: engine", "recordId: e1", "fields: {}"]),
+      record("records/car/c1.md", ["typeId: car", "recordId: c1", "fields: {}"], "Has [[engine:e1]].")
     ])
   );
-  assert.equal(result.ok, true);
+  expectOk(result);
 });
 
 test('VAL-COMP-002: missing required component link fails', () => {
   const result = validateDatasetSnapshot(
     snapshot([
-      record('types/engine.md', ['typeId: engine', 'fields: {}']),
-      record('types/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true']),
-      record('records/car/c1.md', ['typeId: car', 'recordId: c1', 'fields: {}'], 'No links here.')
+      record("types/engine.md", ["typeId: engine", "fields: {}"]),
+      record("types/car.md", ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine", "      required: true"]),
+      record("records/car/c1.md", ["typeId: car", "recordId: c1", "fields: {}"], "No links here.")
     ])
   );
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.code === 'E_COMPOSITION_CONSTRAINT_VIOLATION'));
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_COMPOSITION_CONSTRAINT_VIOLATION"));
 });
 
 test('VAL-COMP-002: link to wrong type does not satisfy requirement', () => {
   const result = validateDatasetSnapshot(
     snapshot([
-      record('types/engine.md', ['typeId: engine', 'fields: {}']),
-      record('types/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true']),
-      record('records/car/c1.md', ['typeId: car', 'recordId: c1', 'fields: {}'], 'Points to [[car:self]]')
+      record("types/engine.md", ["typeId: engine", "fields: {}"]),
+      record("types/car.md", ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine", "      required: true"]),
+      record("records/car/c1.md", ["typeId: car", "recordId: c1", "fields: {}"], "Points to [[car:self]]")
     ])
   );
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.code === 'E_COMPOSITION_CONSTRAINT_VIOLATION'));
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_COMPOSITION_CONSTRAINT_VIOLATION"));
 });
 
 test('VAL-COMP-001: composition referenced types must exist', () => {
   const result = validateDatasetSnapshot(
     snapshot([
-      record('types/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true']),
-      record('records/car/c1.md', ['typeId: car', 'recordId: c1', 'fields: {}'])
+      record("types/car.md", ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine", "      required: true"]),
+      record("records/car/c1.md", ["typeId: car", "recordId: c1", "fields: {}"])
     ])
   );
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some((e) => e.code === 'E_COMPOSITION_UNKNOWN_TYPE'));
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_COMPOSITION_UNKNOWN_TYPE"));
 });
 
 test('TYPE-COMP-001: composition must be a map with only typeId + required', () => {
   const invalid = validateDatasetSnapshot(
     snapshot([
-      record('types/car.md', ['typeId: car', 'fields:', '  composition: []'])
+      record("types/car.md", ["typeId: car", "fields:", "  composition: []"])
     ])
   );
-  assert.equal(invalid.ok, false);
-  assert.ok(invalid.errors.some((e) => e.code === 'E_COMPOSITION_SCHEMA_INVALID'));
+  const invalidErrors = expectErrors(invalid);
+  assert.ok(invalidErrors.some((e) => e.code === "E_COMPOSITION_SCHEMA_INVALID"));
 
   const extraKey = validateDatasetSnapshot(
     snapshot([
       record(
-        'types/car.md',
-        ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine', '      required: true', '      max: 2']
+        "types/car.md",
+        ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine", "      required: true", "      max: 2"]
       )
     ])
   );
-  assert.equal(extraKey.ok, false);
-  assert.ok(extraKey.errors.some((e) => e.code === 'E_COMPOSITION_SCHEMA_INVALID'));
+  const extraKeyErrors = expectErrors(extraKey);
+  assert.ok(extraKeyErrors.some((e) => e.code === "E_COMPOSITION_SCHEMA_INVALID"));
 });
 
 test('TYPE-COMP-001: composition component must include required boolean', () => {
   const missingRequired = validateDatasetSnapshot(
     snapshot([
-      record('types/car.md', ['typeId: car', 'fields:', '  composition:', '    engine:', '      typeId: engine'])
+      record("types/car.md", ["typeId: car", "fields:", "  composition:", "    engine:", "      typeId: engine"])
     ])
   );
-  assert.equal(missingRequired.ok, false);
-  assert.ok(missingRequired.errors.some((e) => e.code === 'E_COMPOSITION_SCHEMA_INVALID'));
+  const missingErrors = expectErrors(missingRequired);
+  assert.ok(missingErrors.some((e) => e.code === "E_COMPOSITION_SCHEMA_INVALID"));
 });
