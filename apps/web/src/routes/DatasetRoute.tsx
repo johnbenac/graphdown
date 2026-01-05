@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import type { GraphRecordNode } from "../core/graph";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
+import ImportWarningBanner from "../components/ImportWarningBanner";
 import RecordEditor from "../components/RecordEditor";
 import RecordViewer from "../components/RecordViewer";
 import TypeNav, { getTypeLabel } from "../components/TypeNav";
@@ -107,6 +108,7 @@ export default function DatasetRoute() {
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
                 <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
+                <ImportWarningBanner report={activeDataset.meta.importReport} />
               </div>
 
               <div className="dataset-records" data-testid="record-list">

@@ -34,8 +34,8 @@ export type LoadedDataset = {
 };
 
 export type ImportReport = {
-  ignoredCount: number;
-  ignoredSample: string[];
-  droppedUnreferencedBlobsCount?: number;
-  droppedUnreferencedBlobsSample?: string[];
+  ignoredFileCount: number;
+  ignoredFileSample: string[];
+  droppedBlobCount: number;
+  droppedBlobSample: string[];
 };

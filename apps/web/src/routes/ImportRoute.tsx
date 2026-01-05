@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
+import ImportWarningBanner from "../components/ImportWarningBanner";
 import type { ImportProgress } from "../state/DatasetContext";
 import { useDataset } from "../state/DatasetContext";
 
@@ -33,6 +34,7 @@ export default function ImportRoute() {
     progress,
     activeDataset
   } = useDataset();
+  const importReport = activeDataset?.meta.importReport;
 
   useEffect(() => {
     if (shouldNavigate && status === "ready" && activeDataset) {
@@ -68,6 +70,7 @@ export default function ImportRoute() {
       <section className="import-stack" data-testid="import-screen">
         <h1>Import</h1>
         <p>Paste a GitHub repository URL to import a dataset.</p>
+        <ImportWarningBanner report={importReport} />
         <label className="input-field">
           GitHub URL
           <input

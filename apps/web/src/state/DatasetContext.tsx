@@ -14,6 +14,7 @@ import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
 import { FORMAT_VERSIONS } from "../persistence/versions";
 import { createPersistStore } from "../storage/createPersistStore";
+import { buildImportReport } from "./importReport";
 
 export type ImportErrorCategory =
   | "invalid_url"
@@ -194,10 +195,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setProgress({ phase: "validating_dataset" });
       try {
         const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
-        const importReport: ImportReport = {
-          ignoredCount: ignored.length,
-          ignoredSample: ignored.slice(0, 20)
-        };
         const validation = validateDatasetSnapshot(rawSnapshot);
         if (!validation.ok) {
           setStatus("error");
@@ -210,6 +207,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
+        const importReport = buildImportReport({
+          rawSnapshot,
+          canonicalSnapshot: datasetSnapshot,
+          ignored
+        });
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
@@ -264,10 +266,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           ref: parsed.value.ref,
           onProgress: (progress) => setProgress(progress)
         });
-        const importReport: ImportReport = {
-          ignoredCount: ignored.length,
-          ignoredSample: ignored.slice(0, 20)
-        };
 
         setProgress({ phase: "validating_dataset" });
         const validation = validateDatasetSnapshot(rawSnapshot);
@@ -283,6 +281,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
+        const importReport: ImportReport = buildImportReport({
+          rawSnapshot,
+          canonicalSnapshot: datasetSnapshot,
+          ignored
+        });
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {

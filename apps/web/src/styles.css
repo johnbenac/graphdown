@@ -225,6 +225,42 @@ a {
   font-size: 0.9rem;
 }
 
+.warning-banner {
+  border: 1px solid #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.warning-banner__header {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.warning-banner__body {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.warning-banner__item p {
+  margin: 0;
+}
+
+.warning-banner__details summary {
+  cursor: pointer;
+  color: #b45309;
+}
+
+.warning-banner__list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+}
+
 .import-zip {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
