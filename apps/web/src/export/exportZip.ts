@@ -1,6 +1,6 @@
 import { zipSync } from "fflate";
 import { discoverGraphdownObjects, extractBlobRefs } from "../core";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { isObject } from "../core/types";
 
 function collectStringValues(value: unknown, into: Set<string>): void {
@@ -17,7 +17,7 @@ function collectStringValues(value: unknown, into: Set<string>): void {
   }
 }
 
-function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
+function collectReachableBlobPaths(snapshot: DatasetSnapshot): Set<string> {
   const parsed = discoverGraphdownObjects(snapshot);
   const digests = new Set<string>();
 
@@ -46,7 +46,7 @@ function isGitPath(filePath: string): boolean {
   return filePath === ".git" || filePath.startsWith(".git/");
 }
 
-function buildZipBytes(snapshot: RepoSnapshot, include?: (path: string) => boolean): Uint8Array {
+function buildZipBytes(snapshot: DatasetSnapshot, include?: (path: string) => boolean): Uint8Array {
   const entries: Record<string, Uint8Array> = {};
   const sortedPaths = [...snapshot.files.keys()]
     .filter((path) => !isGitPath(path))
@@ -63,11 +63,11 @@ function buildZipBytes(snapshot: RepoSnapshot, include?: (path: string) => boole
   return zipSync(entries, { level: 0 });
 }
 
-export function exportWholeSnapshotZip(snapshot: RepoSnapshot): Uint8Array {
+export function exportWholeSnapshotZip(snapshot: DatasetSnapshot): Uint8Array {
   return buildZipBytes(snapshot);
 }
 
-export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
+export function exportDatasetOnlyZip(snapshot: DatasetSnapshot): Uint8Array {
   const parsed = discoverGraphdownObjects(snapshot);
   const outputFiles = new Map<string, Uint8Array>();
 

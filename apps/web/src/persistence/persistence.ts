@@ -1,5 +1,5 @@
 import type { Graph } from "../core/graph";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
 import { serializeGraph, deserializeGraph } from "./serializeGraph";
@@ -9,7 +9,7 @@ import type {
   DatasetMeta,
   LoadedDataset,
   PersistedGraph,
-  PersistedRepoSnapshot,
+  PersistedDatasetSnapshot,
   PersistedUiState
 } from "./types";
 
@@ -21,7 +21,7 @@ export interface Persistence {
   saveDataset(input: {
     datasetId: string;
     meta: DatasetMeta;
-    repoSnapshot: RepoSnapshot;
+    datasetSnapshot: DatasetSnapshot;
     parsedGraph?: Graph;
     uiState?: PersistedUiState;
   }): Promise<void>;
@@ -34,7 +34,7 @@ export interface Persistence {
 
 type CreatePersistenceOptions = {
   store: PersistStore;
-  parseGraph?: (snapshot: RepoSnapshot) => Promise<Graph>;
+  parseGraph?: (snapshot: DatasetSnapshot) => Promise<Graph>;
   logger?: Logger;
 };
 
@@ -63,9 +63,9 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
   }
 
   return {
-    async saveDataset({ datasetId, meta, repoSnapshot, parsedGraph, uiState }) {
-      const persistedSnapshot: PersistedRepoSnapshot = serializeSnapshot(repoSnapshot);
-      await store.set(KEY.repoSnapshot(datasetId), persistedSnapshot);
+    async saveDataset({ datasetId, meta, datasetSnapshot, parsedGraph, uiState }) {
+      const persistedSnapshot: PersistedDatasetSnapshot = serializeSnapshot(datasetSnapshot);
+      await store.set(KEY.datasetSnapshot(datasetId), persistedSnapshot);
       if (parsedGraph) {
         const persistedGraph: PersistedGraph = serializeGraph(parsedGraph);
         await store.set(KEY.parsedGraph(datasetId), persistedGraph);
@@ -88,7 +88,7 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
         return undefined;
       }
       const meta = await store.get<DatasetMeta>(KEY.datasetMeta(activeId));
-      const snapshotPayload = await store.get<PersistedRepoSnapshot>(KEY.repoSnapshot(activeId));
+      const snapshotPayload = await store.get<PersistedDatasetSnapshot>(KEY.datasetSnapshot(activeId));
       if (!meta || !snapshotPayload) {
         await store.del(KEY.activeDatasetId);
         return undefined;
@@ -98,14 +98,14 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
         logger.warn(`Snapshot format mismatch for dataset ${activeId}; clearing active dataset.`);
         return undefined;
       }
-      const repoSnapshot = deserializeSnapshot(snapshotPayload);
+      const datasetSnapshot = deserializeSnapshot(snapshotPayload);
       let parsedGraph: Graph | undefined;
       const storedGraph = await store.get<PersistedGraph>(KEY.parsedGraph(activeId));
       if (storedGraph && meta.graphFormatVersion === FORMAT_VERSIONS.graph) {
         parsedGraph = deserializeGraph(storedGraph);
       } else if (parseGraph) {
         try {
-          parsedGraph = await parseGraph(repoSnapshot);
+          parsedGraph = await parseGraph(datasetSnapshot);
           await store.set(KEY.parsedGraph(activeId), serializeGraph(parsedGraph));
           const updatedMeta = {
             ...meta,
@@ -122,14 +122,14 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
         uiState = undefined;
         await store.del(KEY.uiState(activeId));
       }
-      return { meta, repoSnapshot, parsedGraph, uiState };
+      return { meta, datasetSnapshot, parsedGraph, uiState };
     },
     async clearAll() {
       await store.clear();
     },
     async deleteDataset(id: string) {
       await store.del(KEY.datasetMeta(id));
-      await store.del(KEY.repoSnapshot(id));
+      await store.del(KEY.datasetSnapshot(id));
       await store.del(KEY.parsedGraph(id));
       await store.del(KEY.uiState(id));
       await updateDatasetIndex(id, true);

@@ -1,4 +1,4 @@
-import type { RepoSnapshot } from "../../core/snapshotTypes";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -58,7 +58,7 @@ export async function loadGitHubSnapshot(input: {
   repo: string;
   ref?: string;
   onProgress?: (progress: ImportProgress) => void;
-}): Promise<RepoSnapshot> {
+}): Promise<DatasetSnapshot> {
   const { owner, repo, ref, onProgress } = input;
 
   onProgress?.({ phase: "fetching_repo" });

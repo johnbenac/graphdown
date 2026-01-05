@@ -6,7 +6,7 @@ const test = require('node:test');
 
 const { buildGraphFromSnapshot } = require('../dist/core');
 
-function loadRepoSnapshotFromFs(root) {
+function loadDatasetSnapshotFromFs(root) {
   const files = new Map();
 
   const walk = (dir) => {
@@ -55,7 +55,7 @@ test('REL-002: extracts record links from bodies and fields', () => {
       ['---', 'typeId: note', 'recordId: two', 'fields:', '  ref: "[[note:one]]"', '---', 'Backlink'].join('\n')
     );
 
-    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
+    const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     assert.equal(result.ok, true);
     const { graph } = result;
     assert.deepEqual(graph.getLinksFrom('note:one'), ['note:two']);
@@ -78,7 +78,7 @@ test('REL-002: does not synthesize links across separate string values', () => {
     );
     writeFile(tempDir, 'records/note-2.md', recordFile('note', 'two'));
 
-    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
+    const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     assert.equal(result.ok, true, JSON.stringify(result.errors));
     const { graph } = result;
     assert.deepEqual(graph.getLinksFrom('note:one'), []);
@@ -94,7 +94,7 @@ test('Graph exposes type and record lookup by identity', () => {
     writeFile(tempDir, 't.md', typeFile('note'));
     writeFile(tempDir, 'r.md', recordFile('note', 'one'));
 
-    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
+    const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     assert.equal(result.ok, true);
     const { graph } = result;
     const type = graph.getType('note');
@@ -115,7 +115,7 @@ test('VAL-002: duplicate record identity fails graph build', () => {
     writeFile(tempDir, 'r1.md', content);
     writeFile(tempDir, 'r2.md', content);
 
-    const result = buildGraphFromSnapshot(loadRepoSnapshotFromFs(tempDir));
+    const result = buildGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     assert.equal(result.ok, false);
     assert.ok(result.errors.some((e) => e.code === 'E_DUPLICATE_ID'));
   } finally {

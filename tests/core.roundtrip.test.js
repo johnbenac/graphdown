@@ -5,8 +5,8 @@ const { createHash } = require('node:crypto');
 const {
   buildGraphFromSnapshot,
   exportDatasetOnlyZip,
-  exportWholeRepoZip,
-  loadRepoSnapshotFromZipBytes
+  exportWholeDatasetZip,
+  loadDatasetSnapshotFromZipBytes
 } = require('../dist/core');
 
 const encoder = new TextEncoder();
@@ -43,7 +43,7 @@ test('EXP-006: record-only export includes reachable blobs', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const roundTripped = loadDatasetSnapshotFromZipBytes(zipBytes);
   const paths = [...roundTripped.files.keys()];
   assert.ok(paths.includes(blobPath));
   assert.ok(paths.includes('types/note.md'));
@@ -65,7 +65,7 @@ test('GC-001: reachable blob set includes references from fields', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const roundTripped = loadDatasetSnapshotFromZipBytes(zipBytes);
   const paths = [...roundTripped.files.keys()];
   assert.ok(paths.includes(blobPath));
 });
@@ -83,7 +83,7 @@ test('GC-002: record-only export excludes unreferenced blobs', () => {
   ]);
 
   const zipBytes = exportDatasetOnlyZip(snapshot);
-  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const roundTripped = loadDatasetSnapshotFromZipBytes(zipBytes);
   const paths = [...roundTripped.files.keys()];
   assert.ok(!paths.includes('blobs/sha256/aa/aa' + '0'.repeat(62)));
 });
@@ -95,8 +95,8 @@ test('EXP-003: whole-repo export round-trips all files and bytes', () => {
     ['docs/readme.md', '# docs\n']
   ]);
 
-  const zipBytes = exportWholeRepoZip(snapshot);
-  const roundTripped = loadRepoSnapshotFromZipBytes(zipBytes);
+  const zipBytes = exportWholeDatasetZip(snapshot);
+  const roundTripped = loadDatasetSnapshotFromZipBytes(zipBytes);
   const graph = buildGraphFromSnapshot(roundTripped);
   assert.equal(graph.ok, true, JSON.stringify(graph.errors));
   assert.deepEqual(
@@ -112,8 +112,8 @@ test('EXP-003: whole-repo export round-trips all files and bytes', () => {
   }
 
   // Re-export stays stable
-  const zipAgain = exportWholeRepoZip(roundTripped);
-  const roundTrippedAgain = loadRepoSnapshotFromZipBytes(zipAgain);
+  const zipAgain = exportWholeDatasetZip(roundTripped);
+  const roundTrippedAgain = loadDatasetSnapshotFromZipBytes(zipAgain);
   const graphAgain = buildGraphFromSnapshot(roundTrippedAgain);
   assert.equal(graphAgain.ok, true, JSON.stringify(graphAgain.errors));
   assert.deepEqual(serializeGraph(graph.graph), serializeGraph(graphAgain.graph));

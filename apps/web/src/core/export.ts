@@ -1,7 +1,7 @@
 import { discoverGraphdownObjects } from './datasetObjects';
 import { extractBlobRefs } from './wikiLinks';
-import type { RepoSnapshot } from './snapshotTypes';
-import { exportRepoSnapshotToZipBytes } from './zipSnapshot';
+import type { DatasetSnapshot } from './snapshotTypes';
+import { exportDatasetSnapshotToZipBytes } from './zipSnapshot';
 import { isObject } from './types';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
@@ -18,7 +18,7 @@ function collectStringValues(value: unknown, into: Set<string>): void {
   }
 }
 
-function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
+function collectReachableBlobPaths(snapshot: DatasetSnapshot): Set<string> {
   const parsed = discoverGraphdownObjects(snapshot);
   const digests = new Set<string>();
 
@@ -44,7 +44,7 @@ function collectReachableBlobPaths(snapshot: RepoSnapshot): Set<string> {
   return paths;
 }
 
-export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
+export function exportDatasetOnlyZip(snapshot: DatasetSnapshot): Uint8Array {
   const parsed = discoverGraphdownObjects(snapshot);
   const outputFiles = new Map<string, Uint8Array>();
 
@@ -101,9 +101,9 @@ export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
     }
   }
 
-  return exportRepoSnapshotToZipBytes({ files: outputFiles });
+  return exportDatasetSnapshotToZipBytes({ files: outputFiles });
 }
 
-export function exportWholeRepoZip(snapshot: RepoSnapshot): Uint8Array {
-  return exportRepoSnapshotToZipBytes(snapshot);
+export function exportWholeDatasetZip(snapshot: DatasetSnapshot): Uint8Array {
+  return exportDatasetSnapshotToZipBytes(snapshot);
 }

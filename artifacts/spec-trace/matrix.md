@@ -280,7 +280,7 @@ Tests (1):
 
 ## GH-003 — Recursive listing + raw fetch
 Tests (1):
-- apps/web/src/state/DatasetContext.test.tsx — "GH-003: imports a repo snapshot via tree listing + raw fetch"
+- apps/web/src/state/DatasetContext.test.tsx — "GH-003: imports a dataset snapshot via tree listing + raw fetch"
 
 ## GH-005 — Reject subdirectory URLs
 Tests (1):

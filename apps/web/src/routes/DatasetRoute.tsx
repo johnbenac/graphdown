@@ -106,7 +106,7 @@ export default function DatasetRoute() {
                 <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
               </div>
 
               <div className="dataset-records" data-testid="record-list">

@@ -81,7 +81,7 @@ Body content with links like [[example:other]].
 ```
 
 ## Snapshots, hashing, and exports
-- Snapshots can be loaded from zip (`loadRepoSnapshotFromZipBytes/File`).
+- Snapshots can be loaded from zip (`loadDatasetSnapshotFromZipBytes`).
 - Deterministic dataset fingerprints: `computeGdHashV1(snapshot, 'schema' | 'snapshot')` (gdhash-v1) normalize line endings, enforce UTF-8, and error on duplicate IDs.
 - Export helpers generate zips for dataset Markdown (`types/` + `records/`).
 

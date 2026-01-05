@@ -3,7 +3,7 @@ import { buildGraphFromSnapshot } from "../core/graph";
 import type { ValidationError } from "../core/errors";
 import { makeError } from "../core/errors";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "../core/markdownRecord";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { validateDatasetSnapshot } from "../core/validateDatasetSnapshot";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
 import { GitHubImportError } from "../import/github/mapGitHubError";
@@ -107,7 +107,7 @@ function encodeText(text: string): Uint8Array {
   return Uint8Array.from(text.split("").map((char) => char.charCodeAt(0)));
 }
 
-async function parseGraph(snapshot: RepoSnapshot) {
+async function parseGraph(snapshot: DatasetSnapshot) {
   const result = buildGraphFromSnapshot(snapshot);
   if (!result.ok) {
     const errorMessages = result.errors.map((error) => error.message).join("\n");
@@ -169,7 +169,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   }, [persistence]);
 
   const saveDataset = useCallback(
-    async (label: string, repoSnapshot: RepoSnapshot, parsedGraph: Awaited<ReturnType<typeof parseGraph>>) => {
+    async (
+      label: string,
+      datasetSnapshot: DatasetSnapshot,
+      parsedGraph: Awaited<ReturnType<typeof parseGraph>>
+    ) => {
       const datasetId = createDatasetId();
       const now = Date.now();
       const meta = {
@@ -182,9 +186,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         label,
         source: "import"
       };
-      await persistence.saveDataset({ datasetId, meta, repoSnapshot, parsedGraph });
+      await persistence.saveDataset({ datasetId, meta, datasetSnapshot, parsedGraph });
       await persistence.setActiveDatasetId(datasetId);
-      setActiveDataset({ meta, repoSnapshot, parsedGraph });
+      setActiveDataset({ meta, datasetSnapshot, parsedGraph });
     },
     [persistence]
   );
@@ -195,8 +199,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setError(undefined);
       setProgress({ phase: "validating_dataset" });
       try {
-        const repoSnapshot = await readZipSnapshot(file);
-        const validation = validateDatasetSnapshot(repoSnapshot);
+        const datasetSnapshot = await readZipSnapshot(file);
+        const validation = validateDatasetSnapshot(datasetSnapshot);
         if (!validation.ok) {
           setStatus("error");
           setError({
@@ -208,7 +212,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "building_graph" });
-        const graphResult = buildGraphFromSnapshot(repoSnapshot);
+        const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
           setError({
@@ -220,7 +224,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "persisting" });
-        await saveDataset(file.name, repoSnapshot, graphResult.graph);
+        await saveDataset(file.name, datasetSnapshot, graphResult.graph);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -255,7 +259,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const repoSnapshot = await loadGitHubSnapshot({
+        const datasetSnapshot = await loadGitHubSnapshot({
           owner: parsed.value.owner,
           repo: parsed.value.repo,
           ref: parsed.value.ref,
@@ -263,7 +267,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
 
         setProgress({ phase: "validating_dataset" });
-        const validation = validateDatasetSnapshot(repoSnapshot);
+        const validation = validateDatasetSnapshot(datasetSnapshot);
         if (!validation.ok) {
           setStatus("error");
           setError({
@@ -276,7 +280,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "building_graph" });
-        const graphResult = buildGraphFromSnapshot(repoSnapshot);
+        const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
           setError({
@@ -289,7 +293,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "persisting" });
-        await saveDataset(parsed.value.canonicalRepoUrl, repoSnapshot, graphResult.graph);
+        await saveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -332,7 +336,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const commitSnapshot = useCallback(
     async (
-      nextSnapshot: RepoSnapshot
+      nextSnapshot: DatasetSnapshot
     ): Promise<
       | { ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> }
       | { ok: false; errors: ValidationError[] }
@@ -356,10 +360,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       await persistence.saveDataset({
         datasetId,
         meta: nextMeta,
-        repoSnapshot: nextSnapshot,
+        datasetSnapshot: nextSnapshot,
         parsedGraph: graphResult.graph
       });
-      setActiveDataset({ meta: nextMeta, repoSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
+      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
       return { ok: true, parsedGraph: graphResult.graph } as const;
     },
     [activeDataset, persistence]
@@ -378,7 +382,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       if (!node || node.kind !== "record") {
         return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
-      const currentBytes = activeDataset.repoSnapshot.files.get(node.file);
+      const currentBytes = activeDataset.datasetSnapshot.files.get(node.file);
       if (!currentBytes) {
         return {
           ok: false,
@@ -404,9 +408,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         fields: nextFields
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
-      const nextFiles = new Map(activeDataset.repoSnapshot.files);
+      const nextFiles = new Map(activeDataset.datasetSnapshot.files);
       nextFiles.set(node.file, encodeText(nextText));
-      const nextSnapshot = { ...activeDataset.repoSnapshot, files: nextFiles };
+      const nextSnapshot = { ...activeDataset.datasetSnapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
         return { ok: false, errors: commitResult.errors } as const;
@@ -441,7 +445,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const safeId = trimmedRecordId.replace(/[^A-Za-z0-9_-]+/g, "-");
       let filePath = `records/${input.typeId}/record--${safeId}.md`;
       let counter = 1;
-      while (activeDataset.repoSnapshot.files.has(filePath)) {
+      while (activeDataset.datasetSnapshot.files.has(filePath)) {
         counter += 1;
         filePath = `records/${input.typeId}/record--${safeId}-${counter}.md`;
       }
@@ -457,9 +461,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         fields
       };
       const text = serializeMarkdownRecord({ yaml, body: input.body ?? "" });
-      const nextFiles = new Map(activeDataset.repoSnapshot.files);
+      const nextFiles = new Map(activeDataset.datasetSnapshot.files);
       nextFiles.set(filePath, encodeText(text));
-      const nextSnapshot = { ...activeDataset.repoSnapshot, files: nextFiles };
+      const nextSnapshot = { ...activeDataset.datasetSnapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
         return { ok: false, errors: commitResult.errors } as const;

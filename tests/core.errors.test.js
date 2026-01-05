@@ -5,7 +5,7 @@ const test = require('node:test');
 
 const { validateDatasetSnapshot } = require('../dist/core');
 
-function loadRepoSnapshotFromFs(root) {
+function loadDatasetSnapshotFromFs(root) {
   const files = new Map();
 
   const walk = (dir) => {
@@ -30,7 +30,7 @@ function loadRepoSnapshotFromFs(root) {
 }
 
 test('ERR-001: validation errors expose stable fields', () => {
-  const snapshot = loadRepoSnapshotFromFs(path.join(__dirname, 'fixtures', 'invalid-dataset'));
+  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, 'fixtures', 'invalid-dataset'));
 
   const result = validateDatasetSnapshot(snapshot);
   assert.equal(result.ok, false);

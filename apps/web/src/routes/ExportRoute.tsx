@@ -48,7 +48,7 @@ export default function ExportRoute() {
             <div className="export-summary">
               <div>
                 <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
               </div>
             </div>
 
@@ -63,7 +63,7 @@ export default function ExportRoute() {
                     if (!activeDataset) {
                       return;
                     }
-                    const bytes = exportWholeSnapshotZip(activeDataset.repoSnapshot);
+                    const bytes = exportWholeSnapshotZip(activeDataset.datasetSnapshot);
                     downloadZipBytes(bytes, `graphdown-export--${safeLabel}--whole.zip`);
                   }}
                 >
@@ -81,7 +81,7 @@ export default function ExportRoute() {
                     if (!activeDataset) {
                       return;
                     }
-                    const bytes = exportDatasetOnlyZip(activeDataset.repoSnapshot);
+                    const bytes = exportDatasetOnlyZip(activeDataset.datasetSnapshot);
                     downloadZipBytes(bytes, `graphdown-export--${safeLabel}--dataset-only.zip`);
                   }}
                 >
@@ -91,18 +91,18 @@ export default function ExportRoute() {
             </div>
 
             <details className="export-compare">
-              <summary>Compare exported zip with a local clone</summary>
+              <summary>Compare exported zip with a local checkout</summary>
               <p>
                 The zip contains exactly the files Graphdown imported and stored (same paths, same
-                bytes). To compare with a cloned repo:
+                bytes). To compare with a local checkout of the source dataset:
               </p>
-              <pre>{`# 1) Clone the repo you imported
-git clone https://github.com/<owner>/<repo> repo-clone
-cd repo-clone
+              <pre>{`# 1) Clone the source dataset repository
+git clone https://github.com/<owner>/<dataset-source> source-checkout
+cd source-checkout
 
 # 2) Unzip your Graphdown export somewhere (example)
 mkdir -p ../graphdown-export
-unzip ../graphdown-export--<repo>--whole.zip -d ../graphdown-export
+unzip ../graphdown-export--<dataset>--whole.zip -d ../graphdown-export
 
 # 3) Diff (exclude .git if present)
 diff -ruN --exclude=.git . ../graphdown-export`}</pre>

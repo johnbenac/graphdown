@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { exportDatasetOnlyZip, exportWholeSnapshotZip } from "./exportZip";
 
-function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): RepoSnapshot {
+function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
     files: new Map(
       entries.map(([path, contents]) => [
@@ -16,7 +16,7 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Rep
   };
 }
 
-async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<RepoSnapshot> {
+async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<DatasetSnapshot> {
   const buffer = Uint8Array.from(bytes).buffer;
   const file = {
     arrayBuffer: async () => buffer

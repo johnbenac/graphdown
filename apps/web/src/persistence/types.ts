@@ -1,5 +1,5 @@
 import type { Graph, GraphRecordNode, GraphTypeNode } from "../core/graph";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 
 export type DatasetMeta = {
   id: string;
@@ -12,7 +12,7 @@ export type DatasetMeta = {
   source?: string;
 };
 
-export type PersistedRepoSnapshot = {
+export type PersistedDatasetSnapshot = {
   files: Array<{ path: string; contents: Uint8Array }>;
 };
 
@@ -27,7 +27,7 @@ export type PersistedUiState = Record<string, unknown>;
 
 export type LoadedDataset = {
   meta: DatasetMeta;
-  repoSnapshot: RepoSnapshot;
+  datasetSnapshot: DatasetSnapshot;
   parsedGraph?: Graph;
   uiState?: PersistedUiState;
 };

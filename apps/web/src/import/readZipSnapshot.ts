@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { RepoSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
 
 const ROOT_DIRS = new Set(["types", "records"]);
 
@@ -28,7 +28,7 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-export async function readZipSnapshot(file: File): Promise<RepoSnapshot> {
+export async function readZipSnapshot(file: File): Promise<DatasetSnapshot> {
   const buffer = await file.arrayBuffer();
   const entries = unzipSync(new Uint8Array(buffer));
   const normalizedEntries: Array<{ path: string; contents: Uint8Array }> = [];
