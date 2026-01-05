@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "../../../../src/core/validateDatasetSnapshot";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
+import { validateDatasetSnapshot } from "./validateDatasetSnapshot";
+import type { DatasetSnapshot } from "./snapshotTypes";
 
 const encoder = new TextEncoder();
 
-function snapshotFromEntries(entries: Array<[string, string]>): RepoSnapshot {
+function snapshotFromEntries(entries: Array<[string, string]>): DatasetSnapshot {
   return {
     files: new Map(entries.map(([path, content]) => [path, encoder.encode(content)]))
   };
@@ -17,7 +17,7 @@ function rec(path: string, yamlLines: string[], body = ""): [string, string] {
   ];
 }
 
-function getErrorCodes(snapshot: RepoSnapshot) {
+function getErrorCodes(snapshot: DatasetSnapshot) {
   const result = validateDatasetSnapshot(snapshot);
   if (result.ok) return [];
   return result.errors.map((error) => error.code);

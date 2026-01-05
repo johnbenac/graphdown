@@ -70,7 +70,7 @@ describe("DatasetContext GitHub import", () => {
     });
   });
 
-  it("GH-003: imports a repo snapshot via tree listing + raw fetch", async () => {
+  it("GH-003: imports a dataset snapshot via tree listing + raw fetch", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -129,7 +129,7 @@ describe("DatasetContext GitHub import", () => {
     await waitFor(() => {
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
-      expect(ctx?.activeDataset?.repoSnapshot.files.size).toBe(2);
+      expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
   });
 });
@@ -150,6 +150,10 @@ describe("DatasetContext zip import", () => {
         <TestHarness onReady={(value) => (ctx = value)} />
       </DatasetProvider>
     );
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("ready");
+    });
 
     await act(async () => {
       await ctx?.importDatasetZip(file);

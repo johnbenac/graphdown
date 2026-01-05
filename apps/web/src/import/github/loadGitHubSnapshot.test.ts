@@ -77,7 +77,7 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
-    const snapshot = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
 

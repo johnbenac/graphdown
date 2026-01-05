@@ -1,10 +1,9 @@
 # Graphdown
 
-Graphdown is a toolkit for Markdown-first datasets defined by the Graphdown standard. It ships the spec, a CLI validator, a web app for importing/browsing/editing datasets, and core libraries for working with dataset snapshots.
+Graphdown is a toolkit for Markdown-first datasets defined by the Graphdown standard. It ships the spec, a web app for importing/browsing/editing datasets, and core libraries for working with dataset snapshots.
 
 ## What’s inside
 - **Spec:** `SPEC.md` (v0.2 draft) is the single source of truth. The older `docs/spec/dataset-validity.md` is a tombstone.
-- **CLI validator:** `graphdown validate <datasetPath> [--json|--pretty]` for local paths.
 - **Web app:** `apps/web` to import from GitHub or zip, browse/edit records, and export zips.
 - **Core library:** utilities for parsing Markdown records, building graphs, validating composition, hashing datasets, and exporting/importing zip snapshots.
 
@@ -15,33 +14,24 @@ Graphdown is a toolkit for Markdown-first datasets defined by the Graphdown stan
 ## Quick start
 - Install deps: `npm ci`
 
-CLI validator:
-```bash
-npm run build
-node dist/cli.js validate ./my-dataset          # pretty (default)
-node dist/cli.js validate ./my-dataset --json   # JSON output
-# GitHub URLs are rejected; clone first. Use the web app for remote imports.
-```
-
 Web app:
 ```bash
 npm run dev:web   # http://localhost:5173
 # Import a GitHub repo root or /tree/<ref> URL, or upload a dataset zip.
 ```
 
-## Validation rules (CLI + web)
-- Requires `types/` and `records/`; record files must live under `records/<recordTypeId>/`.
+## Validation rules (web)
+- Requires `types/` and `records/`; record files must live under `records/<recordTypeId>.<recordId>/`.
 - Records and types must be Markdown with YAML front matter containing `id`, `typeId`, `createdAt`, `updatedAt`, and a `fields` object.
 - Type records: `id` must start with `type:`, `typeId` must be `sys:type`, and `fields.recordTypeId` must match `/^[A-Za-z0-9][A-Za-z0-9_-]*$/`. Duplicate `recordTypeId`s and IDs are errors.
 - Required fields are derived from `fields.fieldDefs.*.required === true` on type records and enforced on matching data records.
 - Composition: types may declare `fields.composition.<name> = { recordTypeId, min?, max? }`. Records must satisfy the min/max counts via wiki-links (`[[id]]`) found in front matter and Markdown bodies. Unknown component types and constraint violations are reported.
-- CLI accepts only local paths; GitHub URLs produce `E_GITHUB_URL_UNSUPPORTED` (the web app handles GitHub import).
 
 ## Web app capabilities
 - Import datasets from GitHub repo roots or `/tree/<ref>` URLs (datasets/, types/, and records/ paths are fetched) or from uploaded zip archives. File/issue/subdirectory URLs are rejected.
-- Runs the same validator as the CLI, builds a link graph, and persists the loaded snapshot offline (IndexedDB with in-memory fallback).
+- Runs the validator, builds a link graph, and persists the loaded snapshot offline (IndexedDB with in-memory fallback).
 - Browse by type, view incoming/outgoing wiki-links, create/edit records using type schemas (`fieldDefs`, `bodyField`), and keep edits in the persisted snapshot.
-- Export either the full imported snapshot or dataset-only Markdown (`types/` + `records/`) as zips.
+- Export the dataset (`types/` + `records/` + referenced blobs) as a zip.
 
 ## Dataset layout
 ```
@@ -49,8 +39,8 @@ dataset-root/
 ├── types/
 │   ├── type--<name>.md            # type records (id starts with type:, typeId: sys:type)
 └── records/
-    ├── <recordTypeId>/
-    │   └── <record>.md
+    └── <recordTypeId>.<recordId>/
+        └── <recordId>.md
 ```
 
 ### Record format (example type record)
@@ -91,15 +81,15 @@ Body content with links like [[example:other]].
 ```
 
 ## Snapshots, hashing, and exports
-- Snapshots can be loaded from the filesystem or zip (`loadRepoSnapshotFromFs`, `loadRepoSnapshotFromZipBytes/File`).
+- Snapshots can be loaded from zip bytes (`loadDatasetSnapshotFromZipBytes`).
 - Deterministic dataset fingerprints: `computeGdHashV1(snapshot, 'schema' | 'snapshot')` (gdhash-v1) normalize line endings, enforce UTF-8, and error on duplicate IDs.
-- Export helpers generate zips for the full snapshot or dataset-only Markdown (`exportWholeRepoZip`, `exportDatasetOnlyZip`).
+- Export helpers generate dataset zips (`exportDatasetZipBytes`).
 
 ## Example datasets
 - https://github.com/johnbenac/product-tracker-dataset
 - https://github.com/johnbenac/research-lab-dataset
 
 ## Development
-- Run all Node tests: `npm test` (builds first).
+- Run unit tests: `npm test`.
 - Frontend tests + Playwright E2E: `npm run verify:web` (requires browsers installed).
 - Spec tracing: `npm run spec:trace` regenerates `artifacts/spec-trace/matrix.json` from `SPEC.md`.

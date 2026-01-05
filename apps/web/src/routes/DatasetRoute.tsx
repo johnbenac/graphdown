@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { GraphRecordNode } from "../../../../src/core/graph";
+import type { GraphRecordNode } from "../core/graph";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import RecordEditor from "../components/RecordEditor";
@@ -106,7 +106,47 @@ export default function DatasetRoute() {
                 <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.repoSnapshot.files.size}</p>
+                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
+                {activeDataset.meta.ignoredFileCount || activeDataset.meta.droppedBlobCount ? (
+                  <div className="dataset-warning">
+                    {activeDataset.meta.ignoredFileCount ? (
+                      <div>
+                        <p>
+                          Ignored {activeDataset.meta.ignoredFileCount} non-dataset file
+                          {activeDataset.meta.ignoredFileCount === 1 ? "" : "s"} during import.
+                        </p>
+                        {activeDataset.meta.ignoredFileSample?.length ? (
+                          <details>
+                            <summary>Show ignored file sample</summary>
+                            <ul>
+                              {activeDataset.meta.ignoredFileSample.map((path) => (
+                                <li key={path}>{path}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {activeDataset.meta.droppedBlobCount ? (
+                      <div>
+                        <p>
+                          Dropped {activeDataset.meta.droppedBlobCount} unreferenced blob
+                          {activeDataset.meta.droppedBlobCount === 1 ? "" : "s"}.
+                        </p>
+                        {activeDataset.meta.droppedBlobSample?.length ? (
+                          <details>
+                            <summary>Show dropped blob sample</summary>
+                            <ul>
+                              {activeDataset.meta.droppedBlobSample.map((path) => (
+                                <li key={path}>{path}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className="dataset-records" data-testid="record-list">

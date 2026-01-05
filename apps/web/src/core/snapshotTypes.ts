@@ -1,3 +1,3 @@
-export interface RepoSnapshot {
+export interface DatasetSnapshot {
   files: Map<string, Uint8Array>;
 }

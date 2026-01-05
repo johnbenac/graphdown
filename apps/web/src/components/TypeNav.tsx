@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import type { Graph, GraphTypeNode } from "../../../../src/core/graph";
+import type { Graph, GraphTypeNode } from "../core/graph";
 
 type TypeNavProps = {
   graph: Graph;

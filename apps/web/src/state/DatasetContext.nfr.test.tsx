@@ -1,8 +1,8 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { RepoSnapshot } from "../../../../src/core/snapshotTypes";
-import { buildGraphFromSnapshot } from "../../../../src/core/graph";
+import type { DatasetSnapshot } from "../core/snapshotTypes";
+import { buildGraphFromSnapshot } from "../core/graph";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 import type { DatasetContextValue } from "./DatasetContext";
 import { MemoryStore } from "../storage/MemoryStore";
@@ -17,12 +17,12 @@ vi.mock("../storage/createPersistStore", () => ({
 
 const encoder = new TextEncoder();
 
-function makeSnapshot(): RepoSnapshot {
+function makeSnapshot(): DatasetSnapshot {
   return {
     files: new Map<string, Uint8Array>([
       ["types/note.md", encoder.encode(["---", "typeId: note", "fields: {}", "---", ""].join("\n"))],
       [
-        "records/note/one.md",
+        "records/note.one/one.md",
         encoder.encode(["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body"].join("\n"))
       ]
     ])
@@ -48,13 +48,11 @@ async function seedActiveDataset() {
     graphFormatVersion: FORMAT_VERSIONS.graph,
     uiStateFormatVersion: FORMAT_VERSIONS.uiState
   };
-  await persistence.saveDataset({
-    datasetId: meta.id,
+  await persistence.saveActiveDataset({
     meta,
-    repoSnapshot: snapshot,
+    datasetSnapshot: snapshot,
     parsedGraph: graphResult.graph
   });
-  await persistence.setActiveDatasetId(meta.id);
 }
 
 function Harness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
@@ -90,7 +88,7 @@ describe("DatasetContext non-functional requirements", () => {
 
     await waitFor(() => expect(ctx?.status).toBe("ready"));
     expect(ctx).not.toBeNull();
-    expect(ctx!.activeDataset?.repoSnapshot.files.size).toBeGreaterThan(0);
+    expect(ctx!.activeDataset?.datasetSnapshot.files.size).toBeGreaterThan(0);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

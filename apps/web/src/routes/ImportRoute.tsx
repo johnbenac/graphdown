@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
@@ -23,7 +23,6 @@ export default function ImportRoute() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string>("");
-  const [shouldNavigate, setShouldNavigate] = useState(false);
   const navigate = useNavigate();
   const {
     importDatasetZip,
@@ -33,13 +32,13 @@ export default function ImportRoute() {
     progress,
     activeDataset
   } = useDataset();
-
-  useEffect(() => {
-    if (shouldNavigate && status === "ready" && activeDataset) {
-      setShouldNavigate(false);
-      navigate("/datasets");
-    }
-  }, [shouldNavigate, status, activeDataset, navigate]);
+  const ignoredCount = activeDataset?.meta.ignoredFileCount ?? 0;
+  const droppedBlobCount = activeDataset?.meta.droppedBlobCount ?? 0;
+  const showWarning =
+    status === "ready" &&
+    progress.phase === "done" &&
+    activeDataset &&
+    (ignoredCount > 0 || droppedBlobCount > 0);
 
   const progressItems = useMemo(() => {
     const currentIndex = getStepIndex(progress.phase);
@@ -83,7 +82,6 @@ export default function ImportRoute() {
             type="button"
             disabled={!url.trim() || status === "loading"}
             onClick={async () => {
-              setShouldNavigate(true);
               await importDatasetFromGitHub(url);
             }}
           >
@@ -151,6 +149,49 @@ export default function ImportRoute() {
           </div>
         ) : null}
 
+        {showWarning ? (
+          <div className="import-warning-panel">
+            <h2>Import warning</h2>
+            {ignoredCount > 0 ? (
+              <div>
+                <p>Ignored {ignoredCount} non-dataset file{ignoredCount === 1 ? "" : "s"} during import.</p>
+                {activeDataset?.meta.ignoredFileSample?.length ? (
+                  <details>
+                    <summary>Show ignored file sample</summary>
+                    <ul>
+                      {activeDataset.meta.ignoredFileSample.map((path) => (
+                        <li key={path}>{path}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+              </div>
+            ) : null}
+            {droppedBlobCount > 0 ? (
+              <div>
+                <p>Dropped {droppedBlobCount} unreferenced blob{droppedBlobCount === 1 ? "" : "s"}.</p>
+                {activeDataset?.meta.droppedBlobSample?.length ? (
+                  <details>
+                    <summary>Show dropped blob sample</summary>
+                    <ul>
+                      {activeDataset.meta.droppedBlobSample.map((path) => (
+                        <li key={path}>{path}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+              </div>
+            ) : null}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate("/datasets")}
+            >
+              View dataset
+            </Button>
+          </div>
+        ) : null}
+
         <details className="import-zip">
           <summary>Import from zip (advanced)</summary>
           <p>Upload a dataset zip to browse.</p>
@@ -187,7 +228,6 @@ export default function ImportRoute() {
               if (!file) {
                 return;
               }
-              setShouldNavigate(true);
               await importDatasetZip(file);
             }}
           >
