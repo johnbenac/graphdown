@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T02:51:44.161Z",
+  "generatedAt": "2026-01-05T06:35:37.367Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -836,13 +836,8 @@
       "tests": [
         {
           "reqId": "ERR-001",
-          "testTitle": "ERR-001: json output includes stable error fields",
-          "filePath": "tests/cli.output.test.js"
-        },
-        {
-          "reqId": "ERR-001",
-          "testTitle": "ERR-001: pretty output includes stable error codes",
-          "filePath": "tests/cli.output.test.js"
+          "testTitle": "ERR-001: validation errors expose stable fields",
+          "filePath": "tests/core.errors.test.js"
         }
       ]
     },

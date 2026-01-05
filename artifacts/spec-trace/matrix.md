@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T02:51:44.161Z
+Generated: 2026-01-05T06:35:37.367Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -258,9 +258,8 @@ Tests (1):
 - tests/core.blobs.test.js — "GC-003: unreferenced but valid blobs do not fail validation"
 
 ## ERR-001 — File-specific errors when possible
-Tests (2):
-- tests/cli.output.test.js — "ERR-001: json output includes stable error fields"
-- tests/cli.output.test.js — "ERR-001: pretty output includes stable error codes"
+Tests (1):
+- tests/core.errors.test.js — "ERR-001: validation errors expose stable fields"
 
 ## ERR-002 — Clear failure categories for GitHub import
 Tests (2):
