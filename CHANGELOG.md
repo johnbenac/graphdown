@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/johnbenac/graphdown/compare/v0.9.0...v0.10.0) (2026-01-05)
+
+
+### Features
+
+* canonicalize dataset snapshots on import ([efaff4b](https://github.com/johnbenac/graphdown/commit/efaff4b8cb9611f15665bb7fa10c046dada98172))
+
 # [0.9.0](https://github.com/johnbenac/graphdown/compare/v0.8.4...v0.9.0) (2026-01-05)
 
 
