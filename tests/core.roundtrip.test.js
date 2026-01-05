@@ -60,7 +60,7 @@ test('EXP-006: record-only export includes reachable blobs', () => {
     const paths = [...roundTripped.files.keys()];
     assert.ok(paths.includes(blobPath));
     assert.ok(paths.includes('types/note.md'));
-    assert.ok(paths.includes('records/note-1.md'));
+    assert.ok(paths.includes('records/note.one/one.md'));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

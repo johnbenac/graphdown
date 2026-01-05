@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-04T19:06:29.569Z
+Generated: 2026-01-05T02:51:44.161Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -113,11 +113,13 @@ Tests (7):
 - tests/core.yaml.test.js — "FR-MD-020: parses YAML objects"
 
 ## FR-MD-021 — Required top-level keys for type objects (testable=true)
-Tests (1):
+Tests (2):
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-021: fields must be an object"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-021: type objects must not define parent"
 
 ## FR-MD-023 — Required top-level keys for record objects (testable=true)
-Tests (1):
+Tests (2):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-023: record objects may include parent"
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-023: recordId must be a string identifier when present"
 
 ## FR-MD-022 — Body is raw Markdown
@@ -186,6 +188,10 @@ Tests (2):
 Tests (1):
 - tests/core.wikiLinks.test.js — "BLOB-REF-002: ignores malformed blob references"
 
+## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "HIER-001: parent missing and parent null both define hierarchy roots"
+
 ## VAL-001 — Type/records must be internally consistent
 Tests (1):
 - apps/web/src/state/DatasetContext.test.tsx — "VAL-001: invalid datasets are reported as dataset_invalid"
@@ -216,6 +222,19 @@ Tests (3):
 - tests/core.composition.test.js — "VAL-COMP-002: link to wrong type does not satisfy requirement"
 - tests/core.composition.test.js — "VAL-COMP-002: missing required component link fails"
 - tests/core.composition.test.js — "VAL-COMP-002: required component link resolves to correct type"
+
+## VAL-PARENT-001 — Parent field shape is strict (testable=true)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-PARENT-001: invalid parent shapes fail validation"
+
+## VAL-PARENT-002 — Parent pointers must resolve (testable=true)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-PARENT-002: parent pointers must resolve to an existing record"
+
+## VAL-PARENT-003 — Record hierarchy must be acyclic (testable=true)
+Tests (2):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
 ## VAL-BLOB-001 — Blob references must resolve to matching blob bytes (testable=true)
 Tests (1):
@@ -288,7 +307,11 @@ Tests (2):
 
 ## EXP-004 — Path stability
 Tests (1):
-- apps/web/src/export/exportZip.test.ts — "EXP-004: record-only export preserves original record paths"
+- apps/web/src/export/exportZip.test.ts — "EXP-004: record-only export ignores imported record/type file paths"
+
+## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-HIER-001: canonical parent-based export layout nests records under their parent directory"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
 Tests (1):
