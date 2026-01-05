@@ -16,7 +16,7 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
   };
 }
 
-async function readSnapshotFromZipBytes(bytes: Uint8Array): Promise<DatasetSnapshot> {
+async function readSnapshotFromZipBytes(bytes: Uint8Array) {
   const buffer = Uint8Array.from(bytes).buffer;
   const file = {
     arrayBuffer: async () => buffer
@@ -34,17 +34,12 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportWholeSnapshotZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported, ignored } = await readSnapshotFromZipBytes(exported);
 
-    expect(imported.files.size).toBe(3);
-    for (const [path, contents] of snapshot.files) {
-      if (path.startsWith(".git/")) {
-        expect(imported.files.has(path)).toBe(false);
-        continue;
-      }
-      expect(imported.files.has(path)).toBe(true);
-      expect(imported.files.get(path)).toEqual(contents);
-    }
+    expect(imported.files.size).toBe(2);
+    expect(ignored).toEqual(["assets/info.txt"]);
+    expect(imported.files.get("types/note.md")).toEqual(snapshot.files.get("types/note.md"));
+    expect(imported.files.get("records/note-1.md")).toEqual(snapshot.files.get("records/note-1.md"));
   });
 
   it("EXP-006: record-only export includes reachable blobs", async () => {
@@ -64,7 +59,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(["records/photo.one/one.md", "types/photo.md", blobPath].sort());
   });
@@ -84,7 +79,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     const paths = [...imported.files.keys()];
     expect(paths).not.toContain("blobs/sha256/aa/" + "a".repeat(64));
   });
@@ -99,7 +94,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     expect([...imported.files.keys()].sort()).toEqual(["records/note.one/one.md", "types/note.md"]);
   });
 
@@ -113,7 +108,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     expect(imported.files.has("types/note.md")).toBe(true);
     expect(imported.files.has("records/note.one/one.md")).toBe(true);
     expect(imported.files.has("weird/type-location.md")).toBe(false);
@@ -144,7 +139,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(
       [
@@ -168,7 +163,7 @@ describe("exportZip", () => {
     ]);
 
     const exported = exportDatasetOnlyZip(snapshot);
-    const imported = await readSnapshotFromZipBytes(exported);
+    const { snapshot: imported } = await readSnapshotFromZipBytes(exported);
     const roundTrip = imported.files.get("records/note.one/one.md");
     expect(roundTrip).toBeDefined();
     expect(roundTrip).toEqual(original);
