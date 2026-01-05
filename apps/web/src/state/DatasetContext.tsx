@@ -78,13 +78,6 @@ export type DatasetContextValue = {
 
 const DatasetContext = createContext<DatasetContextValue | undefined>(undefined);
 
-function createDatasetId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `dataset-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 const textEncoder = typeof TextEncoder !== "undefined" ? new TextEncoder() : null;
 const textDecoder = typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8") : null;
 
@@ -141,7 +134,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     try {
       const dataset = await persistence.loadActiveDataset();
       setActiveDataset(dataset);
-      setStatus("ready");
+      setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
       console.warn("Failed to load persisted dataset.", err);
       setActiveDataset(undefined);
@@ -161,7 +154,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (window as Window & { __appDebug?: { clearPersistence: () => Promise<void> } }).__appDebug = {
       clearPersistence: async () => {
-        await persistence.clearAll();
+        await persistence.clearActiveDataset();
         setActiveDataset(undefined);
         setStatus("ready");
         setProgress({ phase: "idle" });
@@ -169,17 +162,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     };
   }, [persistence]);
 
-  const saveDataset = useCallback(
+  const saveActiveDataset = useCallback(
     async (
       label: string,
       datasetSnapshot: DatasetSnapshot,
       parsedGraph: Awaited<ReturnType<typeof parseGraph>>,
       importReport?: ImportReport
     ) => {
-      const datasetId = createDatasetId();
       const now = Date.now();
       const meta = {
-        id: datasetId,
+        id: "active",
         createdAt: now,
         updatedAt: now,
         snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
@@ -189,8 +181,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         source: "import",
         importReport
       };
-      await persistence.saveDataset({ datasetId, meta, datasetSnapshot, parsedGraph });
-      await persistence.setActiveDatasetId(datasetId);
+      await persistence.saveActiveDataset({ meta, datasetSnapshot, parsedGraph });
       setActiveDataset({ meta, datasetSnapshot, parsedGraph });
     },
     [persistence]
@@ -232,7 +223,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "persisting" });
-        await saveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
+        await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -245,7 +236,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [saveDataset]
+    [saveActiveDataset]
   );
 
   const importDatasetFromGitHub = useCallback(
@@ -306,7 +297,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "persisting" });
-        await saveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
+        await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -337,11 +328,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [saveDataset]
+    [saveActiveDataset]
   );
 
   const clearPersistence = useCallback(async () => {
-    await persistence.clearAll();
+    await persistence.clearActiveDataset();
     setActiveDataset(undefined);
     setStatus("ready");
     setProgress({ phase: "idle" });
@@ -368,10 +359,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           errors: [makeError("E_INTERNAL", "No active dataset is loaded.")]
         } as const;
       }
-      const datasetId = activeDataset.meta.id;
       const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
-      await persistence.saveDataset({
-        datasetId,
+      await persistence.saveActiveDataset({
         meta: nextMeta,
         datasetSnapshot: nextSnapshot,
         parsedGraph: graphResult.graph

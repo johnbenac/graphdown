@@ -41,20 +41,18 @@ async function seedActiveDataset() {
     parseGraph: async () => graphResult.graph
   });
   const meta = {
-    id: "dataset-nfr",
+    id: "active",
     createdAt: Date.now(),
     updatedAt: Date.now(),
     snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
     graphFormatVersion: FORMAT_VERSIONS.graph,
     uiStateFormatVersion: FORMAT_VERSIONS.uiState
   };
-  await persistence.saveDataset({
-    datasetId: meta.id,
+  await persistence.saveActiveDataset({
     meta,
     datasetSnapshot: snapshot,
     parsedGraph: graphResult.graph
   });
-  await persistence.setActiveDatasetId(meta.id);
 }
 
 function Harness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
