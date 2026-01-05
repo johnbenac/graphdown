@@ -5,6 +5,7 @@ import { canonicalizeDatasetSnapshot } from "../core/canonicalizeDatasetSnapshot
 import { buildGraphFromSnapshot } from "../core/graph";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "../core/markdownRecord";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
+import { isObject } from "../core/types";
 import { validateDatasetSnapshot } from "../core/validateDatasetSnapshot";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
 import { GitHubImportError } from "../import/github/mapGitHubError";
@@ -14,6 +15,11 @@ import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
 import { FORMAT_VERSIONS } from "../persistence/versions";
 import { createPersistStore } from "../storage/createPersistStore";
+import { createUiPluginHost, type UiPluginHost } from "../uiPlugins/host";
+import { discoverPlugins } from "../uiPlugins/discoverPlugins";
+import { loadUiConfig } from "../uiPlugins/loadConfig";
+import { resolveProvider } from "../uiPlugins/resolve";
+import type { UiPluginWarning, UiRequirement } from "../uiPlugins/types";
 import { buildImportReport } from "./importReport";
 
 export type ImportErrorCategory =
@@ -60,6 +66,7 @@ export type DatasetContextValue = {
   status: "idle" | "loading" | "ready" | "error";
   progress: ImportProgress;
   activeDataset?: LoadedDataset;
+  uiPlugins?: UiPluginHost | null;
   error?: ImportErrorState;
   importDatasetZip: (file: File) => Promise<void>;
   importDatasetFromGitHub: (url: string) => Promise<void>;
@@ -111,6 +118,58 @@ async function parseGraph(snapshot: DatasetSnapshot) {
   return result.graph;
 }
 
+function collectPluginWarnings(
+  snapshot: DatasetSnapshot,
+  graph: Awaited<ReturnType<typeof parseGraph>>
+): UiPluginWarning[] {
+  const warnings: UiPluginWarning[] = [];
+  const { config, warnings: configWarnings } = loadUiConfig(snapshot);
+  warnings.push(...configWarnings);
+  const { catalog, warnings: pluginWarnings } = discoverPlugins(snapshot);
+  warnings.push(...pluginWarnings);
+
+  for (const typeDef of graph.typesById.values()) {
+    if (!isObject(typeDef.fields)) {
+      continue;
+    }
+    const fieldDefs = typeDef.fields.fieldDefs;
+    if (!isObject(fieldDefs)) {
+      continue;
+    }
+    for (const [fieldName, fieldDef] of Object.entries(fieldDefs)) {
+      const kind =
+        isObject(fieldDef) && typeof fieldDef.kind === "string" ? fieldDef.kind : undefined;
+      const selector: Record<string, string> = {
+        typeId: typeDef.typeId,
+        fieldName
+      };
+      if (kind) {
+        selector.kind = kind;
+      }
+      const requirement: UiRequirement = {
+        capability: "field.view",
+        selector
+      };
+      const resolved = resolveProvider(requirement, catalog, config, warnings);
+      if (!resolved) {
+        continue;
+      }
+      if (resolved.ambiguousTopGroup.length > 1 && !resolved.usedResolution) {
+        const competitorIds = [
+          ...new Set(resolved.ambiguousTopGroup.map((provider) => provider.pluginId))
+        ].filter((id) => id !== resolved.chosen.pluginId);
+        warnings.push({
+          message: `Ambiguous ${requirement.capability} providers for selector ${JSON.stringify(
+            requirement.selector
+          )}; chose "${resolved.chosen.pluginId}" over ${JSON.stringify(competitorIds)}.`
+        });
+      }
+    }
+  }
+
+  return warnings;
+}
+
 export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<DatasetContextValue["status"]>("idle");
   const [activeDataset, setActiveDataset] = useState<LoadedDataset | undefined>(undefined);
@@ -127,6 +186,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     () => createPersistence({ store, parseGraph, logger: console }),
     [store]
   );
+
+  const uiPlugins = useMemo(() => {
+    if (!activeDataset?.parsedGraph) {
+      return null;
+    }
+    return createUiPluginHost(activeDataset.datasetSnapshot, activeDataset.parsedGraph);
+  }, [activeDataset]);
 
   const loadActive = useCallback(async () => {
     setStatus("loading");
@@ -207,11 +273,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
-        const importReport = buildImportReport({
-          rawSnapshot,
-          canonicalSnapshot: datasetSnapshot,
-          ignored
-        });
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
@@ -224,6 +285,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         }
+        const pluginWarnings = collectPluginWarnings(datasetSnapshot, graphResult.graph);
+        const importReport = buildImportReport({
+          rawSnapshot,
+          canonicalSnapshot: datasetSnapshot,
+          ignored,
+          pluginWarnings
+        });
         setProgress({ phase: "persisting" });
         await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
@@ -281,11 +349,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
-        const importReport: ImportReport = buildImportReport({
-          rawSnapshot,
-          canonicalSnapshot: datasetSnapshot,
-          ignored
-        });
         setProgress({ phase: "building_graph" });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
@@ -299,6 +362,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        const pluginWarnings = collectPluginWarnings(datasetSnapshot, graphResult.graph);
+        const importReport: ImportReport = buildImportReport({
+          rawSnapshot,
+          canonicalSnapshot: datasetSnapshot,
+          ignored,
+          pluginWarnings
+        });
         setProgress({ phase: "persisting" });
         await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
@@ -484,6 +554,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         status,
         progress,
         activeDataset,
+        uiPlugins,
         error,
         importDatasetZip,
         importDatasetFromGitHub,

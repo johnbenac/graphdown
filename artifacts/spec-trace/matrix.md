@@ -1,6 +1,11 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:49:38.087Z
+Generated: 2026-01-05T23:06:07.285Z
+
+## Testable requirements with no tests
+- PLUG-001 — Dataset-embedded UI plugins are preserved
+- PLUG-002 — UI plugin artifacts are non-semantic
+- PLUG-003 — Deterministic UI plugin resolution with ambiguity warnings
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -341,5 +346,17 @@ Tests (0):
 - (none)
 
 ## NFR-031 — New field kinds without rewriting CRUD (testable=false)
+Tests (0):
+- (none)
+
+## PLUG-001 — Dataset-embedded UI plugins are preserved (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-002 — UI plugin artifacts are non-semantic (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-003 — Deterministic UI plugin resolution with ambiguity warnings (testable=true)
 Tests (0):
 - (none)

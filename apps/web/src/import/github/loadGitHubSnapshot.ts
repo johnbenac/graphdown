@@ -45,14 +45,6 @@ function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
 }
 
-function isTypeFile(path: string): boolean {
-  return path.startsWith("types/");
-}
-
-function isRecordFile(path: string): boolean {
-  return path.startsWith("records/");
-}
-
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
@@ -81,15 +73,19 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) {
       continue;
     }
-    if (isTypeFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
-      continue;
-    }
-    if (isRecordFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
-      continue;
-    }
     if (snapshotPath.startsWith("blobs/sha256/")) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    if (snapshotPath.startsWith("plugins/")) {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    if (snapshotPath === "graphdown.ui.json") {
+      allFiles.push({ repoPath: entry.path, snapshotPath });
+      continue;
+    }
+    if (isMarkdownFile(snapshotPath)) {
       allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }

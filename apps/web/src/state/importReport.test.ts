@@ -23,13 +23,16 @@ describe("buildImportReport", () => {
     const report = buildImportReport({
       rawSnapshot,
       canonicalSnapshot,
-      ignored: ["docs/readme.md", "assets/logo.png"]
+      ignored: ["docs/readme.md", "assets/logo.png"],
+      pluginWarnings: [{ message: "Plugin warning A" }, { message: "Plugin warning B" }]
     });
 
     expect(report.ignoredFileCount).toBe(2);
     expect(report.ignoredFileSample).toEqual(["docs/readme.md", "assets/logo.png"]);
     expect(report.droppedBlobCount).toBe(1);
     expect(report.droppedBlobSample).toEqual(["blobs/sha256/bb/bbblob"]);
+    expect(report.pluginWarningCount).toBe(2);
+    expect(report.pluginWarningSample).toEqual(["Plugin warning A", "Plugin warning B"]);
   });
 
   it("handles cases with no warnings", () => {
@@ -39,12 +42,15 @@ describe("buildImportReport", () => {
     const report = buildImportReport({
       rawSnapshot,
       canonicalSnapshot,
-      ignored: []
+      ignored: [],
+      pluginWarnings: []
     });
 
     expect(report.ignoredFileCount).toBe(0);
     expect(report.ignoredFileSample).toEqual([]);
     expect(report.droppedBlobCount).toBe(0);
     expect(report.droppedBlobSample).toEqual([]);
+    expect(report.pluginWarningCount).toBe(0);
+    expect(report.pluginWarningSample).toEqual([]);
   });
 });
