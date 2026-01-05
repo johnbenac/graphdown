@@ -7,6 +7,7 @@ import { isObject } from './types';
 import { parseYamlObject } from './yaml';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
 export type ParsedTypeObject = {
   kind: 'type';
@@ -25,6 +26,7 @@ export type ParsedRecordObject = {
   fields: Record<string, unknown>;
   body: string;
   identity: string;
+  parent?: string | null;
 };
 
 export type ParsedGraphdownObject =
@@ -146,7 +148,7 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
     const hasRecordId = Object.prototype.hasOwnProperty.call(yamlObject, 'recordId');
 
     if (hasRecordId) {
-      const allowed = new Set(['typeId', 'recordId', 'fields']);
+      const allowed = new Set(['typeId', 'recordId', 'fields', 'parent']);
       for (const key of topLevelKeys) {
         if (!allowed.has(key)) {
           return {
@@ -181,6 +183,24 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
         return { kind: 'error', error: recordIdCheck.error };
       }
       const recordId = recordIdCheck.value;
+      const hasParent = Object.prototype.hasOwnProperty.call(yamlObject, 'parent');
+      let parent: string | null | undefined;
+      if (hasParent) {
+        if (yamlObject.parent === null) {
+          parent = null;
+        } else if (typeof yamlObject.parent === 'string' && RECORD_KEY_PATTERN.test(yamlObject.parent)) {
+          parent = yamlObject.parent;
+        } else {
+          return {
+            kind: 'error',
+            error: makeError(
+              'E_PARENT_INVALID',
+              `parent must be null or match ${RECORD_KEY_PATTERN.source}`,
+              path,
+            ),
+          };
+        }
+      }
       return {
         kind: 'record',
         file: path,
@@ -189,6 +209,7 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
         fields,
         body,
         identity: `${typeId}:${recordId}`,
+        parent,
       };
     }
 

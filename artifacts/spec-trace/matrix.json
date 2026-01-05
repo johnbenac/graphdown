@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-04T19:06:29.569Z",
+  "generatedAt": "2026-01-05T02:51:28.747Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -350,6 +350,11 @@
           "reqId": "FR-MD-021",
           "testTitle": "FR-MD-021: fields must be an object",
           "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "FR-MD-021",
+          "testTitle": "FR-MD-021: type objects must not define parent",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -359,6 +364,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "FR-MD-023",
+          "testTitle": "FR-MD-023: record objects may include parent",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: recordId must be a string identifier when present",
@@ -586,6 +596,19 @@
       ]
     },
     {
+      "id": "HIER-001",
+      "title": "Record hierarchy uses explicit parent pointers",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "HIER-001",
+          "testTitle": "HIER-001: parent missing and parent null both define hierarchy roots",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
       "id": "VAL-001",
       "title": "Type/records must be internally consistent",
       "testable": null,
@@ -688,6 +711,45 @@
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: required component link resolves to correct type",
           "filePath": "tests/core.composition.test.js"
+        }
+      ]
+    },
+    {
+      "id": "VAL-PARENT-001",
+      "title": "Parent field shape is strict",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-PARENT-001",
+          "testTitle": "VAL-PARENT-001: invalid parent shapes fail validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "VAL-PARENT-002",
+      "title": "Parent pointers must resolve",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-PARENT-002",
+          "testTitle": "VAL-PARENT-002: parent pointers must resolve to an existing record",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "VAL-PARENT-003",
+      "title": "Record hierarchy must be acyclic",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-PARENT-003",
+          "testTitle": "VAL-PARENT-003: parent pointer cycles fail validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -939,7 +1001,20 @@
       "tests": [
         {
           "reqId": "EXP-004",
-          "testTitle": "EXP-004: record-only export preserves original record paths",
+          "testTitle": "EXP-004: record-only export ignores imported record/type file paths",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "EXP-HIER-001",
+      "title": "Canonical parent-based export layout",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "EXP-HIER-001",
+          "testTitle": "EXP-HIER-001: canonical parent-based export layout nests records under their parent directory",
           "filePath": "apps/web/src/export/exportZip.test.ts"
         }
       ]
