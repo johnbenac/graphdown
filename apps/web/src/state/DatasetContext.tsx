@@ -398,6 +398,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const nextYaml: Record<string, unknown> = {
         typeId: parsed.yaml.typeId,
         recordId: parsed.yaml.recordId,
+        ...(Object.prototype.hasOwnProperty.call(parsed.yaml, "parent") ? { parent: parsed.yaml.parent } : {}),
         fields: nextFields
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });

@@ -21,6 +21,9 @@ export type ValidationErrorCode =
   | 'E_BLOB_DIGEST_MISMATCH'
   | 'E_BLOB_REFERENCE_MISSING'
   | 'E_GITHUB_URL_UNSUPPORTED'
+  | 'E_PARENT_INVALID'
+  | 'E_PARENT_MISSING'
+  | 'E_PARENT_CYCLE'
   | 'E_USAGE'
   | 'E_INTERNAL';
 

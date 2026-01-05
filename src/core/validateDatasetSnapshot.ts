@@ -291,6 +291,57 @@ export function validateDatasetSnapshot(snapshot: RepoSnapshot): ValidateDataset
   }
 
   for (const record of parsed.recordObjects) {
+    if (typeof record.parent === 'string' && !recordsByKey.has(record.parent)) {
+      errors.push(
+        makeError(
+          'E_PARENT_MISSING',
+          `Record ${record.identity} references missing parent ${record.parent}`,
+          record.file
+        )
+      );
+    }
+  }
+
+  const parentState = new Map<string, 0 | 1 | 2>();
+  const stack: string[] = [];
+
+  const visitParent = (key: string): void => {
+    const state = parentState.get(key) ?? 0;
+    if (state === 1) {
+      const cycleStart = stack.indexOf(key);
+      const cyclePath = cycleStart >= 0 ? stack.slice(cycleStart).concat(key) : [key, key];
+      const record = recordsByKey.get(key);
+      errors.push(
+        makeError(
+          'E_PARENT_CYCLE',
+          `Parent cycle detected: ${cyclePath.join(' -> ')}`,
+          record?.file
+        )
+      );
+      return;
+    }
+    if (state === 2) return;
+    parentState.set(key, 1);
+    stack.push(key);
+    const record = recordsByKey.get(key);
+    if (record && typeof record.parent === 'string') {
+      if (record.parent === key) {
+        errors.push(
+          makeError('E_PARENT_CYCLE', `Record ${record.identity} cannot parent itself`, record.file)
+        );
+      } else if (recordsByKey.has(record.parent)) {
+        visitParent(record.parent);
+      }
+    }
+    stack.pop();
+    parentState.set(key, 2);
+  };
+
+  for (const record of parsed.recordObjects) {
+    visitParent(record.identity);
+  }
+
+  for (const record of parsed.recordObjects) {
     if (!typesById.has(record.typeId)) {
       errors.push(
         makeError(

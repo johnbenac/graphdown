@@ -7,6 +7,7 @@ import { isObject } from './types';
 import { parseYamlObject } from './yaml';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
 export type ParsedTypeObject = {
   kind: 'type';
@@ -22,6 +23,7 @@ export type ParsedRecordObject = {
   file: string;
   typeId: string;
   recordId: string;
+  parent?: string | null;
   fields: Record<string, unknown>;
   body: string;
   identity: string;
@@ -146,7 +148,7 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
     const hasRecordId = Object.prototype.hasOwnProperty.call(yamlObject, 'recordId');
 
     if (hasRecordId) {
-      const allowed = new Set(['typeId', 'recordId', 'fields']);
+      const allowed = new Set(['typeId', 'recordId', 'fields', 'parent']);
       for (const key of topLevelKeys) {
         if (!allowed.has(key)) {
           return {
@@ -181,11 +183,26 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
         return { kind: 'error', error: recordIdCheck.error };
       }
       const recordId = recordIdCheck.value;
+      let parent: string | null | undefined;
+      if (Object.prototype.hasOwnProperty.call(yamlObject, 'parent')) {
+        const raw = yamlObject.parent;
+        if (raw === null || raw === undefined) {
+          parent = raw ?? null;
+        } else if (typeof raw === 'string' && RECORD_KEY_PATTERN.test(raw)) {
+          parent = raw;
+        } else {
+          return {
+            kind: 'error',
+            error: makeError('E_PARENT_INVALID', 'parent must be null or a record key like "typeId:recordId"', path),
+          };
+        }
+      }
       return {
         kind: 'record',
         file: path,
         typeId,
         recordId,
+        parent,
         fields,
         body,
         identity: `${typeId}:${recordId}`,

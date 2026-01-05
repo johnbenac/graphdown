@@ -69,12 +69,72 @@ export function exportWholeSnapshotZip(snapshot: RepoSnapshot): Uint8Array {
 
 export function exportDatasetOnlyZip(snapshot: RepoSnapshot): Uint8Array {
   const parsed = discoverGraphdownObjects(snapshot);
-  const recordPaths = new Set<string>([
-    ...parsed.typeObjects.map((t) => t.file),
-    ...parsed.recordObjects.map((r) => r.file)
-  ]);
+  if (parsed.errors.length) {
+    throw new Error(parsed.errors.map((error) => error.message).join("\n"));
+  }
+
+  const entries = new Map<string, Uint8Array>();
+
+  for (const typeObj of parsed.typeObjects) {
+    const bytes = snapshot.files.get(typeObj.file);
+    if (!bytes) {
+      throw new Error(`Missing type file ${typeObj.file}`);
+    }
+    entries.set(`types/${typeObj.typeId}.md`, bytes);
+  }
+
+  const recordByKey = new Map(parsed.recordObjects.map((record) => [record.identity, record]));
+  const dirMemo = new Map<string, string>();
+  const visiting = new Set<string>();
+
+  const getRecordDir = (recordKey: string): string => {
+    const memoized = dirMemo.get(recordKey);
+    if (memoized) return memoized;
+    if (visiting.has(recordKey)) {
+      throw new Error(`Parent cycle detected while exporting ${recordKey}`);
+    }
+    visiting.add(recordKey);
+    const record = recordByKey.get(recordKey);
+    if (!record) {
+      throw new Error(`Missing record ${recordKey}`);
+    }
+    const currentDir = `records/${record.typeId}.${record.recordId}`;
+    let resolvedDir = currentDir;
+    if (record.parent !== undefined && record.parent !== null) {
+      if (typeof record.parent !== "string") {
+        throw new Error(`Invalid parent value for ${recordKey}`);
+      }
+      const parentRecord = recordByKey.get(record.parent);
+      if (!parentRecord) {
+        throw new Error(`Missing parent ${record.parent} for ${recordKey}`);
+      }
+      const parentDir = getRecordDir(parentRecord.identity);
+      resolvedDir = `${parentDir}/${record.typeId}.${record.recordId}`;
+    }
+    visiting.delete(recordKey);
+    dirMemo.set(recordKey, resolvedDir);
+    return resolvedDir;
+  };
+
+  for (const recordObj of parsed.recordObjects) {
+    const bytes = snapshot.files.get(recordObj.file);
+    if (!bytes) {
+      throw new Error(`Missing record file ${recordObj.file}`);
+    }
+    const recordDir = getRecordDir(recordObj.identity);
+    entries.set(`${recordDir}/${recordObj.recordId}.md`, bytes);
+  }
+
   const blobPaths = collectReachableBlobPaths(snapshot);
-  return buildZipBytes(snapshot, (path) => recordPaths.has(path) || blobPaths.has(path));
+  for (const blobPath of blobPaths) {
+    const bytes = snapshot.files.get(blobPath);
+    if (bytes) {
+      entries.set(blobPath, bytes);
+    }
+  }
+
+  const sortedEntries = [...entries.entries()].sort(([a], [b]) => a.localeCompare(b));
+  return zipSync(Object.fromEntries(sortedEntries), { level: 0 });
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
