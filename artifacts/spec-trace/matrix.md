@@ -1,9 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:16:53.043Z
-
-## Testable requirements with no tests
-- GC-001 — Reachable blob set is computed from blob references
+Generated: 2026-01-05T09:23:47.608Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -248,8 +245,8 @@ Tests (1):
 - tests/core.blobs.test.js — "VAL-BLOB-002: blob bytes must match referenced digest"
 
 ## GC-001 — Reachable blob set is computed from blob references (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "GC-001: reachable blob set includes references from fields"
 
 ## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
 Tests (1):
@@ -293,8 +290,8 @@ Tests (1):
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## EXP-002 — Record-only export
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-002: record-only export excludes non-graph files"
 
 ## EXP-006 — Record-only export includes reachable blobs (testable=true)
 Tests (2):
@@ -306,16 +303,16 @@ Tests (1):
 - tests/core.roundtrip.test.js — "EXP-003: canonical dataset export round-trips bytes and graph"
 
 ## EXP-004 — Path stability
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-004: export canonicalizes record/type file paths"
 
 ## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
 Tests (1):
 - apps/web/src/export/exportZip.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/export/exportZip.test.ts — "EXP-005: export preserves bytes exactly"
 
 ## UI-001 — Desktop + mobile usable (testable=false)
 Tests (0):

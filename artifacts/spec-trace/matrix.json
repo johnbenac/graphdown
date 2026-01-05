@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T09:16:53.043Z",
+  "generatedAt": "2026-01-05T09:23:47.608Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -789,7 +789,13 @@
       "title": "Reachable blob set is computed from blob references",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "GC-001",
+          "testTitle": "GC-001: reachable blob set includes references from fields",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "GC-002",
@@ -938,7 +944,13 @@
       "title": "Record-only export",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-002",
+          "testTitle": "EXP-002: record-only export excludes non-graph files",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-006",
@@ -976,7 +988,13 @@
       "title": "Path stability",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-004",
+          "testTitle": "EXP-004: export canonicalizes record/type file paths",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-HIER-001",
@@ -996,7 +1014,13 @@
       "title": "Content preservation (no “reformat the universe”)",
       "testable": null,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-005",
+          "testTitle": "EXP-005: export preserves bytes exactly",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        }
+      ]
     },
     {
       "id": "UI-001",
@@ -1077,10 +1101,5 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": [
-    {
-      "id": "GC-001",
-      "title": "Reachable blob set is computed from blob references"
-    }
-  ]
+  "missingTestable": []
 }
