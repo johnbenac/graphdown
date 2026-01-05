@@ -1,7 +1,7 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import { test } from "vitest";
 
-const { validateDatasetSnapshot } = require('../dist/core');
+import { validateDatasetSnapshot } from "../../core";
 
 const encoder = new TextEncoder();
 

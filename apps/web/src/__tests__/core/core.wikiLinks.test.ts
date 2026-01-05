@@ -1,7 +1,7 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import { test } from "vitest";
 
-const { extractRecordRefs, extractBlobRefs } = require('../dist/core');
+import { extractRecordRefs, extractBlobRefs } from "../../core";
 
 test('REL-003: extracts record references from wiki-link tokens', () => {
   assert.deepEqual(extractRecordRefs('see [[note:one]] and [[note:two]]'), ['note:one', 'note:two']);

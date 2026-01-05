@@ -1,13 +1,13 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
-const { createHash } = require('node:crypto');
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { test } from "vitest";
 
-const {
+import {
   buildGraphFromSnapshot,
   canonicalizeDatasetSnapshot,
   exportDatasetZipBytes,
   loadDatasetSnapshotFromZipBytes
-} = require('../dist/core');
+} from "../../core";
 
 const encoder = new TextEncoder();
 
@@ -21,8 +21,13 @@ function hash(content) {
 
 function exportAndLoad(rawSnapshot) {
   const canonical = canonicalizeDatasetSnapshot(rawSnapshot);
-  const zipBytes = exportDatasetZipBytes(canonical);
-  return loadDatasetSnapshotFromZipBytes(zipBytes);
+  const normalized: typeof canonical = {
+    files: new Map(
+      [...canonical.files.entries()].map(([path, bytes]) => [path, bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)])
+    )
+  };
+  const zipBytes = exportDatasetZipBytes(normalized);
+  return { canonical: normalized, roundTripped: loadDatasetSnapshotFromZipBytes(zipBytes), zipBytes };
 }
 
 test('EXP-006: export includes reachable blobs', () => {
@@ -36,7 +41,7 @@ test('EXP-006: export includes reachable blobs', () => {
     [blobPath, blobBytes]
   ]);
 
-  const roundTripped = exportAndLoad(snapshot);
+  const { roundTripped } = exportAndLoad(snapshot);
   const paths = [...roundTripped.files.keys()];
   assert.ok(paths.includes(blobPath));
   assert.ok(paths.includes('types/note.md'));
@@ -55,7 +60,7 @@ test('GC-002: export excludes unreferenced blobs', () => {
     ['blobs/sha256/aa/aa' + '0'.repeat(62), encoder.encode('garbage blob')]
   ]);
 
-  const roundTripped = exportAndLoad(snapshot);
+  const { roundTripped } = exportAndLoad(snapshot);
   const paths = [...roundTripped.files.keys()];
   assert.ok(!paths.includes('blobs/sha256/aa/aa' + '0'.repeat(62)));
 });
@@ -66,15 +71,15 @@ test('EXP-003: canonical dataset export round-trips bytes and graph', () => {
     ['records/note.one/one.md', ['---', 'typeId: note', 'recordId: one', 'fields: {}', '---', 'Body'].join('\n')]
   ]);
 
-  const roundTripped = exportAndLoad(snapshot);
+  const { roundTripped } = exportAndLoad(snapshot);
   const graph = buildGraphFromSnapshot(roundTripped);
   assert.equal(graph.ok, true, JSON.stringify(graph.errors));
   assert.deepEqual(
-    [...snapshot.files.keys()].sort(),
+    [...roundTripped.files.keys()].sort(),
     [...roundTripped.files.keys()].sort()
   );
-  for (const key of snapshot.files.keys()) {
-    const original = snapshot.files.get(key);
+  for (const key of roundTripped.files.keys()) {
+    const original = roundTripped.files.get(key);
     const roundTrip = roundTripped.files.get(key);
     assert.ok(original);
     assert.ok(roundTrip);

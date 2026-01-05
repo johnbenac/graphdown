@@ -1,10 +1,10 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { test } from "vitest";
 
-const { buildGraphFromSnapshot } = require('../dist/core');
+import { buildGraphFromSnapshot } from "../../core";
 
 function loadDatasetSnapshotFromFs(root) {
   const files = new Map();

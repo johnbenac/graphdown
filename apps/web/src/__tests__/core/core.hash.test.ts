@@ -1,7 +1,7 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import { test } from "vitest";
 
-const { computeGdHashV1 } = require('../dist/core');
+import { computeGdHashV1 } from "../../core";
 
 const encoder = new TextEncoder();
 

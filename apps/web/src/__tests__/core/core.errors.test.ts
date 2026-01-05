@@ -1,9 +1,12 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { test } from "vitest";
 
-const { validateDatasetSnapshot } = require('../dist/core');
+import { validateDatasetSnapshot } from "../../core";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function loadDatasetSnapshotFromFs(root) {
   const files = new Map();
@@ -30,7 +33,7 @@ function loadDatasetSnapshotFromFs(root) {
 }
 
 test('ERR-001: validation errors expose stable fields', () => {
-  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, 'fixtures', 'invalid-dataset'));
+  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, '..', 'fixtures', 'invalid-dataset'));
 
   const result = validateDatasetSnapshot(snapshot);
   assert.equal(result.ok, false);

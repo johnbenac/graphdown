@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:33:27.068Z
+Generated: 2026-01-05T09:49:38.087Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -8,7 +8,7 @@ Tests (0):
 
 ## GOV-002 — Verification matrix must match spec (testable=true)
 Tests (1):
-- tests/spec-trace-matrix.test.js — "GOV-002: spec-trace output matches committed matrix"
+- apps/web/src/__tests__/core/spec-trace-matrix.test.ts — "GOV-002: spec-trace output matches committed matrix"
 
 ## P-001 — Repository-first, Markdown-canonical (testable=false)
 Tests (0):
@@ -28,11 +28,11 @@ Tests (0):
 
 ## NR-UI-002 — UI hint keys are ignored by core validation (testable=true)
 Tests (1):
-- tests/core.gaps.test.js — "NR-UI-002: arbitrary keys inside fields are accepted"
+- apps/web/src/__tests__/core/core.gaps.test.ts — "NR-UI-002: arbitrary keys inside fields are accepted"
 
 ## NR-SEM-001 — No semantic validation of fields (testable=true)
 Tests (1):
-- tests/core.gaps.test.js — "NR-SEM-001: semantic shapes are ignored by validation"
+- apps/web/src/__tests__/core/core.gaps.test.ts — "NR-SEM-001: semantic shapes are ignored by validation"
 
 ## NR-SEC-001 — No security hardening requirement (testable=false)
 Tests (0):
@@ -40,47 +40,47 @@ Tests (0):
 
 ## NR-LINK-001 — No requirement that links resolve
 Tests (1):
-- tests/core.gaps.test.js — "NR-LINK-001: missing record links are allowed (except composition)"
+- apps/web/src/__tests__/core/core.gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):
-- tests/core.ids.test.js — "ID-001: accepts valid identifiers"
-- tests/core.ids.test.js — "ID-001: rejects recordId with colon"
-- tests/core.ids.test.js — "ID-001: rejects typeId with invalid characters"
+- apps/web/src/__tests__/core/core.ids.test.ts — "ID-001: accepts valid identifiers"
+- apps/web/src/__tests__/core/core.ids.test.ts — "ID-001: rejects recordId with colon"
+- apps/web/src/__tests__/core/core.ids.test.ts — "ID-001: rejects typeId with invalid characters"
 
 ## ID-002 — Reserved typeId for blob references (testable=true)
 Tests (1):
-- tests/core.ids.test.js — "ID-002: rejects reserved gdblob typeId"
+- apps/web/src/__tests__/core/core.ids.test.ts — "ID-002: rejects reserved gdblob typeId"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (3):
-- tests/core.hash.test.js — "HASH-001: duplicate identities fail hashing"
-- tests/core.hash.test.js — "HASH-001: line ending normalization yields stable hashes"
-- tests/core.hash.test.js — "HASH-001: non-record files are ignored"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-001: duplicate identities fail hashing"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-001: line ending normalization yields stable hashes"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-001: non-record files are ignored"
 
 ## HASH-002 — Schema fingerprint (types only)
 Tests (1):
-- tests/core.hash.test.js — "HASH-002: schema fingerprint ignores record object changes"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-002: schema fingerprint ignores record object changes"
 
 ## HASH-003 — Snapshot fingerprint (types + record objects)
 Tests (1):
-- tests/core.hash.test.js — "HASH-003: snapshot hash is path-independent for record files"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-003: snapshot hash is path-independent for record files"
 
 ## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
 Tests (1):
-- tests/core.hash.test.js — "HASH-004: invalid hash scope fails with E_USAGE"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-004: invalid hash scope fails with E_USAGE"
 
 ## HASH-005 — Blob content is committed by reference digests (testable=true)
 Tests (1):
-- tests/core.hash.test.js — "HASH-005: snapshot hash ignores blob store bytes"
+- apps/web/src/__tests__/core/core.hash.test.ts — "HASH-005: snapshot hash ignores blob store bytes"
 
 ## BLOB-001 — Canonical blob digest (sha256) (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "BLOB-001: computeBlobDigest hashes raw bytes"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-001: computeBlobDigest hashes raw bytes"
 
 ## BLOB-002 — BlobId format is deterministic (testable=true)
 Tests (1):
-- tests/core.wikiLinks.test.js — "BLOB-002: blob ids must be 64 lowercase hex characters"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "BLOB-002: blob ids must be 64 lowercase hex characters"
 
 ## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
 Tests (1):
@@ -88,29 +88,29 @@ Tests (1):
 
 ## LAYOUT-002 — One object per file (testable=true)
 Tests (1):
-- tests/core.layout.test.js — "LAYOUT-002: only first front matter block defines a record object"
+- apps/web/src/__tests__/core/core.layout.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
 ## BLOB-LAYOUT-001 — Blob store paths are derived from BlobId (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "BLOB-LAYOUT-001: canonical blob path is accepted"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-LAYOUT-001: canonical blob path is accepted"
 
 ## BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "BLOB-LAYOUT-002: invalid blob path shape fails validation"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-LAYOUT-002: invalid blob path shape fails validation"
 
 ## BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation"
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
+- apps/web/src/__tests__/core/core.frontMatter.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
+- apps/web/src/__tests__/core/core.frontMatter.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
+- apps/web/src/__tests__/core/core.yaml.test.ts — "FR-MD-020: invalid YAML fails parsing"
+- apps/web/src/__tests__/core/core.yaml.test.ts — "FR-MD-020: non-object YAML front matter is invalid"
+- apps/web/src/__tests__/core/core.yaml.test.ts — "FR-MD-020: parses YAML objects"
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-020: invalid YAML fails validation"
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "FR-MD-020: missing YAML front matter fails validation"
-- tests/core.frontMatter.test.js — "FR-MD-020: extracts yaml and body for valid front matter"
-- tests/core.frontMatter.test.js — "FR-MD-020: missing YAML front matter fails parsing"
-- tests/core.yaml.test.js — "FR-MD-020: invalid YAML fails parsing"
-- tests/core.yaml.test.js — "FR-MD-020: non-object YAML front matter is invalid"
-- tests/core.yaml.test.js — "FR-MD-020: parses YAML objects"
 
 ## FR-MD-021 — Required top-level keys for type objects (testable=true)
 Tests (2):
@@ -128,43 +128,43 @@ Tests (1):
 
 ## EXT-001 — Top-level vocabulary is fixed (testable=true)
 Tests (2):
+- apps/web/src/__tests__/core/ext.reserved-vocabulary.test.ts — "EXT-001: extra top-level keys are forbidden"
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "EXT-001: extra top-level keys are rejected"
-- tests/ext.reserved-vocabulary.test.js — "EXT-001: extra top-level keys are forbidden"
 
 ## EXT-002 — `fields` is open
 Tests (1):
-- tests/ext.reserved-vocabulary.test.js — "EXT-002: accepts arbitrary shapes within fields"
+- apps/web/src/__tests__/core/ext.reserved-vocabulary.test.ts — "EXT-002: accepts arbitrary shapes within fields"
 
 ## TYPE-001 — Types are defined by type objects (testable=true)
 Tests (1):
-- tests/core.ids.test.js — "TYPE-001: type object without recordId is valid"
+- apps/web/src/__tests__/core/core.ids.test.ts — "TYPE-001: type object without recordId is valid"
 
 ## TYPE-002 — typeId uniqueness (testable=true)
 Tests (1):
-- tests/core.ids.test.js — "TYPE-002: duplicate typeId fails validation"
+- apps/web/src/__tests__/core/core.ids.test.ts — "TYPE-002: duplicate typeId fails validation"
 
 ## TYPE-004 — fieldDefs shape (testable=true)
 Tests (1):
-- tests/core.gaps.test.js — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
+- apps/web/src/__tests__/core/core.gaps.test.ts — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
 
 ## TYPE-COMP-001 — composition shape (testable=true)
 Tests (2):
-- tests/core.composition.test.js — "TYPE-COMP-001: composition component must include required boolean"
-- tests/core.composition.test.js — "TYPE-COMP-001: composition must be a map with only typeId + required"
+- apps/web/src/__tests__/core/core.composition.test.ts — "TYPE-COMP-001: composition component must include required boolean"
+- apps/web/src/__tests__/core/core.composition.test.ts — "TYPE-COMP-001: composition must be a map with only typeId + required"
 
 ## REL-001 — Record relationships use composite wiki-links (testable=true)
 Tests (1):
-- tests/core.wikiLinks.test.js — "REL-001: blob references are not treated as record relationships"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "REL-001: blob references are not treated as record relationships"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
 Tests (2):
-- tests/core.graph.test.js — "REL-002: does not synthesize links across separate string values"
-- tests/core.graph.test.js — "REL-002: extracts record links from bodies and fields"
+- apps/web/src/__tests__/core/core.graph.test.ts — "REL-002: does not synthesize links across separate string values"
+- apps/web/src/__tests__/core/core.graph.test.ts — "REL-002: extracts record links from bodies and fields"
 
 ## REL-003 — Record reference normalization (testable=true)
 Tests (2):
-- tests/core.wikiLinks.test.js — "REL-003: extracts record references from wiki-link tokens"
-- tests/core.wikiLinks.test.js — "REL-003: ignores malformed record tokens and aliases"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "REL-003: extracts record references from wiki-link tokens"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "REL-003: ignores malformed record tokens and aliases"
 
 ## REL-004 — Preservation: do not rewrite link spellings (testable=false)
 Tests (0):
@@ -181,12 +181,12 @@ Tests (1):
 
 ## BLOB-REF-001 — Blob references use composite wiki-link tokens (testable=true)
 Tests (2):
-- tests/core.blobs.test.js — "BLOB-REF-001: split strings do not synthesize blob references"
-- tests/core.wikiLinks.test.js — "BLOB-REF-001: extracts blob references"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-REF-001: split strings do not synthesize blob references"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "BLOB-REF-001: extracts blob references"
 
 ## BLOB-REF-002 — Blob reference normalization is strict (testable=true)
 Tests (1):
-- tests/core.wikiLinks.test.js — "BLOB-REF-002: ignores malformed blob references"
+- apps/web/src/__tests__/core/core.wikiLinks.test.ts — "BLOB-REF-002: ignores malformed blob references"
 
 ## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
 Tests (1):
@@ -198,8 +198,8 @@ Tests (1):
 
 ## VAL-002 — Identity uniqueness rules (testable=true)
 Tests (2):
+- apps/web/src/__tests__/core/core.graph.test.ts — "VAL-002: duplicate record identity fails graph build"
 - apps/web/src/core/validateDatasetSnapshot.test.ts — "VAL-002: duplicate record identity fails validation"
-- tests/core.graph.test.js — "VAL-002: duplicate record identity fails graph build"
 
 ## VAL-003 — Record objects must reference an existing type (testable=true)
 Tests (1):
@@ -215,13 +215,13 @@ Tests (1):
 
 ## VAL-COMP-001 — Composition referenced types must exist
 Tests (1):
-- tests/core.composition.test.js — "VAL-COMP-001: composition referenced types must exist"
+- apps/web/src/__tests__/core/core.composition.test.ts — "VAL-COMP-001: composition referenced types must exist"
 
 ## VAL-COMP-002 — Required components must be satisfied by outgoing record links
 Tests (3):
-- tests/core.composition.test.js — "VAL-COMP-002: link to wrong type does not satisfy requirement"
-- tests/core.composition.test.js — "VAL-COMP-002: missing required component link fails"
-- tests/core.composition.test.js — "VAL-COMP-002: required component link resolves to correct type"
+- apps/web/src/__tests__/core/core.composition.test.ts — "VAL-COMP-002: link to wrong type does not satisfy requirement"
+- apps/web/src/__tests__/core/core.composition.test.ts — "VAL-COMP-002: missing required component link fails"
+- apps/web/src/__tests__/core/core.composition.test.ts — "VAL-COMP-002: required component link resolves to correct type"
 
 ## VAL-PARENT-001 — Parent field shape is strict (testable=true)
 Tests (1):
@@ -238,11 +238,11 @@ Tests (2):
 
 ## VAL-BLOB-001 — Blob references must resolve to matching blob bytes (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "VAL-BLOB-001: referenced blob must exist"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "VAL-BLOB-001: referenced blob must exist"
 
 ## VAL-BLOB-002 — Blob store files must match their path digest (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "VAL-BLOB-002: blob bytes must match referenced digest"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "VAL-BLOB-002: blob bytes must match referenced digest"
 
 ## GC-001 — Reachable blob set is computed from blob references (testable=true)
 Tests (1):
@@ -250,15 +250,15 @@ Tests (1):
 
 ## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
 Tests (1):
-- tests/core.roundtrip.test.js — "GC-002: export excludes unreferenced blobs"
+- apps/web/src/__tests__/core/core.roundtrip.test.ts — "GC-002: export excludes unreferenced blobs"
 
 ## GC-003 — Garbage blobs do not make a dataset invalid (testable=true)
 Tests (1):
-- tests/core.blobs.test.js — "GC-003: unreferenced but valid blobs do not fail validation"
+- apps/web/src/__tests__/core/core.blobs.test.ts — "GC-003: unreferenced but valid blobs do not fail validation"
 
 ## ERR-001 — File-specific errors when possible
 Tests (1):
-- tests/core.errors.test.js — "ERR-001: validation errors expose stable fields"
+- apps/web/src/__tests__/core/core.errors.test.ts — "ERR-001: validation errors expose stable fields"
 
 ## ERR-002 — Clear failure categories for GitHub import
 Tests (2):
@@ -295,12 +295,12 @@ Tests (1):
 
 ## EXP-006 — Record-only export includes reachable blobs (testable=true)
 Tests (2):
+- apps/web/src/__tests__/core/core.roundtrip.test.ts — "EXP-006: export includes reachable blobs"
 - apps/web/src/export/exportZip.test.ts — "EXP-006: includes only referenced blobs alongside canonical records/types"
-- tests/core.roundtrip.test.js — "EXP-006: export includes reachable blobs"
 
 ## EXP-003 — Whole-repo export
 Tests (1):
-- tests/core.roundtrip.test.js — "EXP-003: canonical dataset export round-trips bytes and graph"
+- apps/web/src/__tests__/core/core.roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
 
 ## EXP-004 — Path stability
 Tests (1):

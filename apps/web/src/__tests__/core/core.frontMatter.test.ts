@@ -1,7 +1,7 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import { test } from "vitest";
 
-const { extractFrontMatter } = require('../dist/core');
+import { extractFrontMatter } from "../../core";
 
 test('FR-MD-020: extracts yaml and body for valid front matter', () => {
   const content = ['---', 'id: dataset:demo', '---', 'Body text'].join('\n');

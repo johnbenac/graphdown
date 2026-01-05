@@ -1,8 +1,8 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
-const { createHash } = require('node:crypto');
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { test } from "vitest";
 
-const { validateDatasetSnapshot, computeBlobDigest } = require('../dist/core');
+import { validateDatasetSnapshot, computeBlobDigest } from "../../core";
 
 const encoder = new TextEncoder();
 

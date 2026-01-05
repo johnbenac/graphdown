@@ -1,7 +1,7 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import { test } from "vitest";
 
-const { parseYamlObject } = require('../dist/core');
+import { parseYamlObject } from "../../core";
 
 test('FR-MD-020: parses YAML objects', () => {
   assert.deepEqual(parseYamlObject('a: 1'), { a: 1 });

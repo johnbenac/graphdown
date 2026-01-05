@@ -1,13 +1,19 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
-const test = require('node:test');
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import { test } from "vitest";
 
-const { generateSpecTrace } = require('../tools/spec-trace.cjs');
+// tools/spec-trace.cjs is CommonJS; load via createRequire
+const require = createRequire(import.meta.url);
+const { generateSpecTrace } = require("../../../../../tools/spec-trace.cjs");
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 test('GOV-002: spec-trace output matches committed matrix', () => {
-  const repoRoot = path.resolve(__dirname, '..');
+  const repoRoot = path.resolve(__dirname, '../../../../../');
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-trace-'));
   let committed;
   let regenerated;
