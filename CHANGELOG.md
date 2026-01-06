@@ -1,3 +1,10 @@
+## [0.13.1](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.13.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* correct ignored path computation and plugin coverage ([fb61f6f](https://github.com/johnbenac/graphdown/commit/fb61f6fedcb5daab58e437c3d4cc48f8cffca515))
+
 # [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.13.0) (2026-01-06)
 
 
