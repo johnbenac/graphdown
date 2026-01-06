@@ -1,3 +1,10 @@
+# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.2...v0.14.0) (2026-01-06)
+
+
+### Features
+
+* support record-level plugins and robust manifest handling ([f6d34c2](https://github.com/johnbenac/graphdown/commit/f6d34c23e7c4b2399a7643a58ca80d681bac35d2))
+
 ## [0.13.2](https://github.com/johnbenac/graphdown/compare/v0.13.1...v0.13.2) (2026-01-06)
 
 
