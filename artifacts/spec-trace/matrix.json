@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-06T08:51:15.345Z",
+  "generatedAt": "2026-01-06T11:50:27.592Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1105,6 +1105,26 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: canonicalization rewrites plugin artifacts and UI config to canonical locations",
+          "filePath": "apps/web/src/core/canonicalizeDatasetSnapshot.plugins.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: export includes canonical plugin artifacts + graphdown.ui.json with byte preservation",
+          "filePath": "apps/web/src/export/exportZip.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: GitHub import discovers plugins/config from arbitrary paths and preserves bytes",
+          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: ZIP import discovers plugins/config from any paths and preserves bytes",
+          "filePath": "apps/web/src/import/readZipSnapshot.test.ts"
+        },
         {
           "reqId": "UI-PLUGIN-001",
           "testTitle": "UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots",

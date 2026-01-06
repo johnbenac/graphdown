@@ -114,7 +114,11 @@ export function discoverUiPluginPackages(
   return result;
 }
 
-export function selectUiConfigPath(files: Map<string, Uint8Array>): string | null {
-  const candidates = [...files.keys()].filter(isUiConfigCandidate).sort((a, b) => a.localeCompare(b));
+export function selectUiConfigPathFromPaths(paths: Iterable<string>): string | null {
+  const candidates = [...paths].filter(isUiConfigCandidate).sort((a, b) => a.localeCompare(b));
   return candidates[0] ?? null;
+}
+
+export function selectUiConfigPath(files: Map<string, Uint8Array>): string | null {
+  return selectUiConfigPathFromPaths(files.keys());
 }

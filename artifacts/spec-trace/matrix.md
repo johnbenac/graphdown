@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-06T08:51:15.345Z
+Generated: 2026-01-06T11:50:27.592Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -345,7 +345,11 @@ Tests (0):
 - (none)
 
 ## UI-PLUGIN-001 — Plugin artifacts are importable and preserved (testable=true)
-Tests (1):
+Tests (5):
+- apps/web/src/core/canonicalizeDatasetSnapshot.plugins.test.ts — "UI-PLUGIN-001: canonicalization rewrites plugin artifacts and UI config to canonical locations"
+- apps/web/src/export/exportZip.test.ts — "UI-PLUGIN-001: export includes canonical plugin artifacts + graphdown.ui.json with byte preservation"
+- apps/web/src/import/github/loadGitHubSnapshot.test.ts — "UI-PLUGIN-001: GitHub import discovers plugins/config from arbitrary paths and preserves bytes"
+- apps/web/src/import/readZipSnapshot.test.ts — "UI-PLUGIN-001: ZIP import discovers plugins/config from any paths and preserves bytes"
 - apps/web/src/routes/DatasetRoute.plugins.test.tsx — "UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots"
 
 ## UI-PLUGIN-002 — Plugin artifacts are non-semantic for validation and hashing (testable=true)

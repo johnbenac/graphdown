@@ -11,7 +11,7 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
 }
 
 describe("canonicalizeDatasetSnapshot plugins", () => {
-  it("rewrites plugin artifacts and UI config to canonical locations", () => {
+  it("UI-PLUGIN-001: canonicalization rewrites plugin artifacts and UI config to canonical locations", () => {
     const pluginJson = JSON.stringify({
       schemaVersion: 1,
       id: "boolean-01",

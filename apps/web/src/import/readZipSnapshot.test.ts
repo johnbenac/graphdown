@@ -39,10 +39,13 @@ describe("readZipSnapshot", () => {
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
-    expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
+    expect(ignored).toEqual(["assets/logo.png", "docs/readme.md"]);
+    for (const path of ignored) {
+      expect(snapshot.files.has(path)).toBe(false);
+    }
   });
 
-  it("imports plugins and UI config from any paths and ignores other files", async () => {
+  it("UI-PLUGIN-001: ZIP import discovers plugins/config from any paths and preserves bytes", async () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
       "records/note/record-1.md": new Uint8Array(strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")),
@@ -76,5 +79,8 @@ describe("readZipSnapshot", () => {
     expect(snapshot.files.has("cfg/graphdown.ui.json")).toBe(true);
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
     expect(ignored).toContain("docs/readme.md");
+    for (const path of ignored) {
+      expect(snapshot.files.has(path)).toBe(false);
+    }
   });
 });

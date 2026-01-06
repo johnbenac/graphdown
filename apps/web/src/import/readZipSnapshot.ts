@@ -1,6 +1,7 @@
 import { unzipSync } from "fflate";
 import { parseGraphdownFile } from "../core/datasetObjects";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
+import { computeIgnoredPaths } from "./computeIgnoredPaths";
 import {
   discoverUiPluginPackages,
   isUiConfigCandidate,
@@ -71,7 +72,7 @@ export async function readZipSnapshot(
   const configPath = selectUiConfigPath(fileMap);
 
   const files = new Map<string, Uint8Array>();
-  const ignored: string[] = [];
+  const sourcePaths = finalEntries.map((entry) => entry.path);
 
   for (const entry of finalEntries) {
     const { path, contents } = entry;
@@ -99,9 +100,9 @@ export async function readZipSnapshot(
         continue;
       }
     }
-
-    ignored.push(path);
   }
+
+  const ignored = computeIgnoredPaths(sourcePaths, files.keys());
 
   return { snapshot: { files }, ignored };
 }

@@ -6,10 +6,11 @@ import {
   isUiPluginManifestCandidate,
   isUnderDir,
   parseUiPluginManifest,
-  selectUiConfigPath
+  selectUiConfigPathFromPaths
 } from "../../core/uiPluginArtifacts";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
+import { computeIgnoredPaths } from "../computeIgnoredPaths";
 
 const API_BASE = "https://api.github.com";
 const RAW_BASE = "https://raw.githubusercontent.com";
@@ -67,38 +68,33 @@ export async function loadGitHubSnapshot(input: {
     `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
   );
 
-  const ignored: string[] = [];
-
-  const blobCandidates: string[] = [];
-  const manifestCandidates: string[] = [];
-  const configCandidates: string[] = [];
-  const mdCandidates: string[] = [];
+  const allBlobPaths: string[] = [];
+  const blobStorePaths: string[] = [];
+  const manifestCandidatePaths: string[] = [];
+  const configCandidatePaths: string[] = [];
 
   for (const entry of treeResponse.tree) {
     if (entry.type !== "blob") continue;
     const snapshotPath = entry.path;
     if (!snapshotPath) continue;
+    allBlobPaths.push(snapshotPath);
     const lower = snapshotPath.toLowerCase();
     if (snapshotPath.startsWith("blobs/sha256/")) {
-      blobCandidates.push(snapshotPath);
+      blobStorePaths.push(snapshotPath);
       continue;
     }
     if (isUiPluginManifestCandidate(snapshotPath)) {
-      manifestCandidates.push(snapshotPath);
+      manifestCandidatePaths.push(snapshotPath);
       continue;
     }
     if (isUiConfigCandidate(snapshotPath)) {
-      configCandidates.push(snapshotPath);
+      configCandidatePaths.push(snapshotPath);
       continue;
     }
-    if (lower.endsWith(".md")) {
-      mdCandidates.push(snapshotPath);
-      continue;
-    }
+    if (lower.endsWith(".md")) continue;
   }
 
-  const files = new Map<string, Uint8Array>();
-  const manifestBytes = new Map<string, Uint8Array>();
+  const downloadedBytesByPath = new Map<string, Uint8Array>();
   const pluginRootsById = new Map<string, string>();
 
   const downloadFile = async (path: string): Promise<Uint8Array> => {
@@ -112,88 +108,58 @@ export async function loadGitHubSnapshot(input: {
   };
 
   // Phase 2: fetch manifests first
-  manifestCandidates.sort((a, b) => a.localeCompare(b));
-  for (const path of manifestCandidates) {
+  manifestCandidatePaths.sort((a, b) => a.localeCompare(b));
+  for (const path of manifestCandidatePaths) {
     const bytes = await downloadFile(path);
+    downloadedBytesByPath.set(path, bytes);
     const parsed = parseUiPluginManifest(bytes);
-    if (!parsed) {
-      ignored.push(path);
-      continue;
-    }
-    if (pluginRootsById.has(parsed.id)) {
-      continue;
-    }
+    if (!parsed) continue;
+    if (pluginRootsById.has(parsed.id)) continue;
     const rootDir = dirname(path);
-    if (!rootDir) {
-      ignored.push(path);
-      continue;
-    }
+    if (!rootDir) continue;
     pluginRootsById.set(parsed.id, rootDir);
-    manifestBytes.set(path, bytes);
   }
 
   const pluginRoots = [...pluginRootsById.values()];
 
-  const configPath = selectUiConfigPath(new Map(configCandidates.map((p) => [p, new Uint8Array()]))); // lex smallest
-  for (const cfg of configCandidates) {
-    if (!configPath || cfg !== configPath) {
-      ignored.push(cfg);
-    }
-  }
-
+  const configPath = selectUiConfigPathFromPaths(configCandidatePaths);
   const pathsToDownload = new Set<string>();
-  blobCandidates.forEach((p) => pathsToDownload.add(p));
-  if (configPath) {
-    pathsToDownload.add(configPath);
-  }
-  for (const root of pluginRoots) {
-    for (const entry of treeResponse.tree) {
-      if (entry.type !== "blob") continue;
-      if (isUnderDir(entry.path, root)) {
-        pathsToDownload.add(entry.path);
-      }
-    }
-  }
-  for (const mdPath of mdCandidates) {
-    if (pluginRoots.some((root) => isUnderDir(mdPath, root))) {
+  blobStorePaths.forEach((p) => pathsToDownload.add(p));
+  if (configPath) pathsToDownload.add(configPath);
+  for (const path of allBlobPaths) {
+    const lower = path.toLowerCase();
+    const underPluginRoot = pluginRoots.some((root) => isUnderDir(path, root));
+    if (underPluginRoot) {
+      pathsToDownload.add(path);
       continue;
     }
-    pathsToDownload.add(mdPath);
+    if (lower.endsWith(".md")) {
+      pathsToDownload.add(path);
+    }
   }
 
-  const manifestPaths = new Set(manifestBytes.keys());
-  const downloadQueue = [...pathsToDownload].filter((p) => !manifestPaths.has(p)).sort((a, b) => a.localeCompare(b));
+  const downloadQueue = [...pathsToDownload].sort((a, b) => a.localeCompare(b));
 
-  onProgress?.({ phase: "downloading_files", completed: 0, total: downloadQueue.length + manifestBytes.size });
+  onProgress?.({ phase: "downloading_files", completed: 0, total: downloadQueue.length });
 
   let completed = 0;
   for (const path of downloadQueue) {
-    const bytes = await downloadFile(path);
-    files.set(path, bytes);
+    if (!downloadedBytesByPath.has(path)) {
+      const bytes = await downloadFile(path);
+      downloadedBytesByPath.set(path, bytes);
+    }
     completed += 1;
     onProgress?.({
       phase: "downloading_files",
       completed,
-      total: downloadQueue.length + manifestBytes.size,
-      detail: path
-    });
-  }
-
-  // include manifest bytes (already downloaded)
-  for (const [path, bytes] of manifestBytes.entries()) {
-    files.set(path, bytes);
-    completed += 1;
-    onProgress?.({
-      phase: "downloading_files",
-      completed,
-      total: downloadQueue.length + manifestBytes.size,
+      total: downloadQueue.length,
       detail: path
     });
   }
 
   // Apply inclusion rules
   const finalFiles = new Map<string, Uint8Array>();
-  for (const [path, bytes] of files.entries()) {
+  for (const [path, bytes] of downloadedBytesByPath.entries()) {
     const lower = path.toLowerCase();
     if (path.startsWith("blobs/sha256/")) {
       finalFiles.set(path, bytes);
@@ -214,8 +180,9 @@ export async function loadGitHubSnapshot(input: {
         continue;
       }
     }
-    ignored.push(path);
   }
+
+  const ignored = computeIgnoredPaths(allBlobPaths, finalFiles.keys());
 
   return { snapshot: { files: finalFiles }, ignored };
 }

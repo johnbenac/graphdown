@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
-import { strToU8 } from "fflate";
+import { strToU8, unzipSync, zipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 import { canonicalizeDatasetSnapshot } from "../core/canonicalizeDatasetSnapshot";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { exportDatasetZipBytes } from "../core/export";
 import { loadDatasetSnapshotFromZipBytes } from "../core/zipSnapshot";
+import { readZipSnapshot } from "../import/readZipSnapshot";
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
@@ -113,5 +114,65 @@ describe("exportDatasetZipBytes", () => {
     const imported = exportAndLoad(snapshot);
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(["records/photo.one/one.md", "types/photo.md", blobPath].sort());
+  });
+
+  it("UI-PLUGIN-001: export includes canonical plugin artifacts + graphdown.ui.json with byte preservation", async () => {
+    const pluginManifestBytes = new Uint8Array(
+      strToU8(
+        JSON.stringify({
+          schemaVersion: 1,
+          id: "boolean-01",
+          version: "1.0.0",
+          provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+        })
+      )
+    );
+    const pluginJsBytes = new Uint8Array(strToU8("export function renderField() { return 'ok'; }\n"));
+    const configBytes = new Uint8Array(
+      strToU8(
+        JSON.stringify({
+          schemaVersion: 1,
+          resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
+        })
+      )
+    );
+    const recordBytes = new Uint8Array(
+      strToU8(["---", "typeId: flag", "recordId: demo", "fields: {}", "---", "Body"].join("\n"))
+    );
+    const typeBytes = new Uint8Array(strToU8(["---", "typeId: flag", "fields: {}", "---"].join("\n")));
+
+    const zipBytes = zipSync({
+      "types/flag.md": typeBytes,
+      "records/flag/demo.md": recordBytes,
+      "ui/renderers/boolean-01/plugin.json": pluginManifestBytes,
+      "ui/renderers/boolean-01/plugin.js": pluginJsBytes,
+      "ui/config/graphdown.ui.json": configBytes
+    });
+
+    const file = {
+      arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
+    } as File;
+
+    const { snapshot: rawSnapshot } = await readZipSnapshot(file);
+    const canonicalSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
+    const exportedZipBytes = exportDatasetZipBytes(canonicalSnapshot);
+    const exportedEntries = unzipSync(exportedZipBytes);
+    const exportedPaths = Object.keys(exportedEntries)
+      .filter((path) => !path.endsWith("/"))
+      .sort();
+
+    expect(exportedPaths).toContain("plugins/boolean-01/plugin.json");
+    expect(exportedPaths).toContain("plugins/boolean-01/plugin.js");
+    expect(exportedPaths).toContain("graphdown.ui.json");
+    expect(exportedPaths).toContain("types/flag.md");
+    expect(exportedPaths).toContain("records/flag.demo/demo.md");
+
+    expect(exportedPaths).not.toContain("ui/renderers/boolean-01/plugin.json");
+    expect(exportedPaths).not.toContain("ui/config/graphdown.ui.json");
+    expect(exportedPaths).not.toContain("records/flag/demo.md");
+
+    expect(exportedEntries["plugins/boolean-01/plugin.json"]).toEqual(pluginManifestBytes);
+    expect(exportedEntries["plugins/boolean-01/plugin.js"]).toEqual(pluginJsBytes);
+    expect(exportedEntries["graphdown.ui.json"]).toEqual(configBytes);
   });
 });
