@@ -1,7 +1,7 @@
 import { isObject } from './types';
 
 const PLUGIN_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
-const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+const MANIFEST_BASENAMES = new Set(["plugin.json", "manifest.json"]);
 
 export function basename(path: string): string {
   const segments = path.split('/');
@@ -24,73 +24,36 @@ export function isUiConfigCandidate(path: string): boolean {
 }
 
 export function isUiPluginManifestCandidate(path: string): boolean {
-  return basename(path) === 'plugin.json';
+  return MANIFEST_BASENAMES.has(basename(path));
 }
 
-type ParsedProvider = {
-  capability: string;
-  match: Record<string, string>;
-  entry: string;
-};
-
-export type ParsedUiPluginManifest = {
-  schemaVersion: 1;
-  id: string;
-  version: string;
-  main: string;
-  provides: ParsedProvider[];
-};
-
-function isMatchObject(value: unknown): value is Record<string, string> {
-  if (!isObject(value)) return false;
-  return Object.values(value).every((entry) => typeof entry === 'string');
+export class PluginManifestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PluginManifestError';
+  }
 }
 
-function isValidMainPath(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
-  if (!value.trim()) return false;
-  if (value.startsWith('/')) return false;
-  if (value.includes('\\')) return false;
-  const segments = value.split('/');
-  if (segments.some((segment) => !segment || segment === '.' || segment === '..')) return false;
-  return true;
-}
-
-function validateProvider(value: unknown): value is ParsedProvider {
-  if (!isObject(value)) return false;
-  if (value.capability !== 'field.view') return false;
-  if (!isMatchObject(value.match)) return false;
-  if (typeof value.entry !== 'string') return false;
-  return true;
-}
-
-export function parseUiPluginManifest(bytes: Uint8Array): ParsedUiPluginManifest | null {
+export function parseUiPluginManifest(bytes: Uint8Array, path: string): { pluginId: string } {
   let text: string;
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
-    return null;
+    throw new PluginManifestError(`Plugin manifest at ${path} is not valid UTF-8`);
   }
   let raw: unknown;
   try {
     raw = JSON.parse(text);
   } catch {
-    return null;
+    throw new PluginManifestError(`Plugin manifest at ${path} is not valid JSON`);
   }
-  if (!isObject(raw)) return null;
-  if (raw.schemaVersion !== 1) return null;
-  if (typeof raw.id !== 'string' || !PLUGIN_ID_PATTERN.test(raw.id)) return null;
-  if (typeof raw.version !== 'string' || !VERSION_PATTERN.test(raw.version)) return null;
-  const main = raw.main === undefined ? 'plugin.js' : raw.main;
-  if (!isValidMainPath(main)) return null;
-  if (!Array.isArray(raw.provides) || !raw.provides.every(validateProvider)) return null;
-  return {
-    schemaVersion: 1,
-    id: raw.id,
-    version: raw.version,
-    main,
-    provides: raw.provides,
-  };
+  if (!isObject(raw)) {
+    throw new PluginManifestError(`Plugin manifest at ${path} must be a JSON object`);
+  }
+  if (typeof raw.id !== 'string' || !PLUGIN_ID_PATTERN.test(raw.id)) {
+    throw new PluginManifestError(`Plugin manifest at ${path} is missing a valid string id`);
+  }
+  return { pluginId: raw.id };
 }
 
 export function discoverUiPluginPackages(
@@ -102,14 +65,19 @@ export function discoverUiPluginPackages(
   for (const path of paths) {
     if (!isUiPluginManifestCandidate(path)) continue;
     const rootDir = dirname(path);
-    if (!rootDir) continue; // disallow dataset-root plugin
+    if (!rootDir) {
+      throw new PluginManifestError(`Plugin manifest must not be at dataset root: ${path}`);
+    }
     const bytes = files.get(path);
     if (!bytes) continue;
-    const manifest = parseUiPluginManifest(bytes);
-    if (!manifest) continue;
-    if (seen.has(manifest.id)) continue; // first manifest wins (paths are sorted)
-    seen.add(manifest.id);
-    result.push({ pluginId: manifest.id, rootDir, manifestPath: path });
+    const manifest = parseUiPluginManifest(bytes, path);
+    if (seen.has(manifest.pluginId)) {
+      throw new PluginManifestError(
+        `Duplicate plugin id "${manifest.pluginId}" discovered at ${path}`
+      );
+    }
+    seen.add(manifest.pluginId);
+    result.push({ pluginId: manifest.pluginId, rootDir, manifestPath: path });
   }
   return result;
 }

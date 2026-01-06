@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { loadGitHubSnapshot } from "./loadGitHubSnapshot";
+import { PluginManifestError } from "../../core/uiPluginArtifacts";
 import { expectPartitionedImport } from "../testHelpers";
 
 const jsonResponse = (data: unknown) =>
@@ -107,7 +108,7 @@ describe("loadGitHubSnapshot", () => {
       { path: "types/note.md", type: "blob" },
       { path: "records/note/record-1.md", type: "blob" },
       { path: "blobs/sha256/aa/aa00", type: "blob" },
-      { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
+      { path: "custom/ui/boolean-01/manifest.json", type: "blob" },
       { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
       { path: "custom/ui/boolean-01/README.md", type: "blob" },
       { path: "cfg/graphdown.ui.json", type: "blob" },
@@ -133,12 +134,10 @@ describe("loadGitHubSnapshot", () => {
         return new Response(body, init);
       };
 
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.json")) {
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/manifest.json")) {
         return respond(
           JSON.stringify({
-            schemaVersion: 1,
             id: "boolean-01",
-            version: "1.0.0",
             provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
           })
         );
@@ -181,8 +180,8 @@ describe("loadGitHubSnapshot", () => {
       "blobs/sha256/aa/aa00",
       "cfg/graphdown.ui.json",
       "custom/ui/boolean-01/README.md",
+      "custom/ui/boolean-01/manifest.json",
       "custom/ui/boolean-01/plugin.js",
-      "custom/ui/boolean-01/plugin.json",
       "records/note/record-1.md",
       "types/note.md"
     ]);
@@ -197,28 +196,18 @@ describe("loadGitHubSnapshot", () => {
     });
   });
 
-  it("import ignored paths: does not report included plugin artifacts/config as ignored", async () => {
+  it("fails fast when a plugin manifest cannot be parsed", async () => {
     const tree = [
-      { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
-      { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
-      { path: "custom/ui/boolean-01/README.md", type: "blob" },
-      { path: "custom/ui/boolean-01/graphdown.ui.json", type: "blob" },
-      { path: "custom/ui/boolean-01/00/plugin.json", type: "blob" },
-      { path: "cfg/graphdown.ui.json", type: "blob" },
-      { path: "zzz/graphdown.ui.json", type: "blob" },
-      { path: "assets/logo.png", type: "blob" },
-      { path: "docs/readme.md", type: "blob" },
+      { path: "plugins/ok/plugin.json", type: "blob" },
+      { path: "plugins/bad/plugin.json", type: "blob" },
       { path: "types/note.md", type: "blob" },
-      { path: "records/note/record-1.md", type: "blob" },
-      { path: "other/plugin.json", type: "blob" }
+      { path: "records/note/record-1.md", type: "blob" }
     ];
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlStr = String(url);
       if (urlStr.includes("/repos/owner/repo")) {
         if (urlStr.includes("/git/trees/")) {
-          return jsonResponse({
-            tree
-          });
+          return jsonResponse({ tree });
         }
         return jsonResponse({ default_branch: "main" });
       }
@@ -232,48 +221,11 @@ describe("loadGitHubSnapshot", () => {
         return new Response(body, init);
       };
 
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.json")) {
-        return respond(
-          JSON.stringify({
-            schemaVersion: 1,
-            id: "boolean-01",
-            version: "1.0.0",
-            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
-          })
-        );
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/plugins/ok/plugin.json")) {
+        return respond(JSON.stringify({ id: "ok" }));
       }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.js")) {
-        return respond("return { renderField() { return 'ok'; } };");
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/README.md")) {
-        return respond("# plugin docs");
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/graphdown.ui.json")) {
-        return respond(
-          JSON.stringify({
-            schemaVersion: 1,
-            resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
-          })
-        );
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/cfg/graphdown.ui.json")) {
-        return respond(
-          JSON.stringify({
-            schemaVersion: 1,
-            resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
-          })
-        );
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/zzz/graphdown.ui.json")) {
-        return respond(
-          JSON.stringify({
-            schemaVersion: 1,
-            resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
-          })
-        );
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/00/plugin.json")) {
-        return respond("{ invalid json");
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/plugins/bad/plugin.json")) {
+        return respond("not json");
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/types/note.md")) {
         return respond(["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"));
@@ -281,42 +233,15 @@ describe("loadGitHubSnapshot", () => {
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/records/note/record-1.md")) {
         return respond(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"));
       }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/docs/readme.md")) {
-        return respond("# Readme");
-      }
-      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/other/plugin.json")) {
-        return respond("not a manifest");
-      }
 
       throw new Error(`Unexpected fetch: ${urlStr}`);
     });
 
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
-
-    expect(snapshot.files.has("custom/ui/boolean-01/plugin.json")).toBe(true);
-    expect(snapshot.files.has("custom/ui/boolean-01/plugin.js")).toBe(true);
-    expect(snapshot.files.has("custom/ui/boolean-01/README.md")).toBe(true);
-    expect(snapshot.files.has("custom/ui/boolean-01/graphdown.ui.json")).toBe(true);
-    expect(snapshot.files.has("custom/ui/boolean-01/00/plugin.json")).toBe(true);
-    expect(snapshot.files.has("cfg/graphdown.ui.json")).toBe(true);
-    expect(snapshot.files.has("zzz/graphdown.ui.json")).toBe(false);
-    expect(snapshot.files.has("assets/logo.png")).toBe(false);
-    expect(snapshot.files.has("docs/readme.md")).toBe(false);
-    expect(snapshot.files.has("other/plugin.json")).toBe(false);
-
-    expect(ignored).toEqual(["assets/logo.png", "docs/readme.md", "other/plugin.json", "zzz/graphdown.ui.json"]);
-    expect(new Set(ignored).size).toBe(ignored.length);
-    expect(ignored).toEqual([...ignored].sort((a, b) => a.localeCompare(b)));
-    for (const path of ignored) {
-      expect(snapshot.files.has(path)).toBe(false);
-    }
-    expectPartitionedImport({
-      sourcePaths: tree.map((entry) => entry.path),
-      includedPaths: snapshot.files.keys(),
-      ignored
-    });
+    await expect(loadGitHubSnapshot({ owner: "owner", repo: "repo" })).rejects.toBeInstanceOf(
+      PluginManifestError
+    );
   });
 
   it("reports progress for plugin discovery and remaining downloads", async () => {
@@ -348,15 +273,13 @@ describe("loadGitHubSnapshot", () => {
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/a/plugin.json")) {
         return respond(
           JSON.stringify({
-            schemaVersion: 1,
             id: "alpha",
-            version: "1.0.0",
             provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
           })
         );
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/b/plugin.json")) {
-        return respond("not a manifest");
+        return respond(JSON.stringify({ id: "beta" }));
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/a/plugin.js")) {
         return respond("return { renderField() { return 'ok'; } };");

@@ -6,6 +6,7 @@ import {
   isUiPluginManifestCandidate,
   isUnderDir,
   parseUiPluginManifest,
+  PluginManifestError,
   selectUiConfigPathFromPaths
 } from "../../core/uiPluginArtifacts";
 import type { ImportProgress } from "../../state/DatasetContext";
@@ -119,13 +120,18 @@ export async function loadGitHubSnapshot(input: {
   for (const path of manifestCandidatePaths) {
     const bytes = await downloadFile(path);
     downloadedBytesByPath.set(path, bytes);
-    const parsed = parseUiPluginManifest(bytes);
-    if (parsed && !pluginRootsById.has(parsed.id)) {
-      const rootDir = dirname(path);
-      if (rootDir) {
-        pluginRootsById.set(parsed.id, rootDir);
-      }
+    const parsed = parseUiPluginManifest(bytes, path);
+    const rootDir = dirname(path);
+    if (!rootDir) {
+      throw new PluginManifestError(`Plugin manifest must not be at dataset root: ${path}`);
     }
+    const existingRoot = pluginRootsById.get(parsed.pluginId);
+    if (existingRoot) {
+      throw new PluginManifestError(
+        `Duplicate plugin id "${parsed.pluginId}" discovered at ${path}`
+      );
+    }
+    pluginRootsById.set(parsed.pluginId, rootDir);
     manifestCompleted += 1;
     onProgress?.({
       phase: "discovering_plugins",

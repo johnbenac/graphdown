@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
 import { readZipSnapshot } from "./readZipSnapshot";
 import { expectPartitionedImport } from "./testHelpers";
+import { PluginManifestError } from "../core/uiPluginArtifacts";
 
 describe("readZipSnapshot", () => {
   it("strips a single top-level folder in GitHub-style zips", async () => {
@@ -60,13 +61,11 @@ describe("readZipSnapshot", () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
       "records/note/record-1.md": new Uint8Array(strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")),
-      "x/y/boolean-01/plugin.json": new Uint8Array(
+      "x/y/boolean-01/manifest.json": new Uint8Array(
         strToU8(
           JSON.stringify({
-            schemaVersion: 1,
             id: "boolean-01",
-            version: "1.0.0",
-            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+            foo: "bar"
           })
         )
       ),
@@ -84,7 +83,7 @@ describe("readZipSnapshot", () => {
     } as File;
     const { snapshot, ignored } = await readZipSnapshot(file);
 
-    expect(snapshot.files.has("x/y/boolean-01/plugin.json")).toBe(true);
+    expect(snapshot.files.has("x/y/boolean-01/manifest.json")).toBe(true);
     expect(snapshot.files.has("x/y/boolean-01/plugin.js")).toBe(true);
     expect(snapshot.files.has("x/y/boolean-01/README.md")).toBe(true);
     expect(snapshot.files.has("cfg/graphdown.ui.json")).toBe(true);
@@ -97,7 +96,7 @@ describe("readZipSnapshot", () => {
       sourcePaths: [
         "types/note.md",
         "records/note/record-1.md",
-        "x/y/boolean-01/plugin.json",
+        "x/y/boolean-01/manifest.json",
         "x/y/boolean-01/plugin.js",
         "x/y/boolean-01/README.md",
         "cfg/graphdown.ui.json",
@@ -106,5 +105,14 @@ describe("readZipSnapshot", () => {
       includedPaths: snapshot.files.keys(),
       ignored
     });
+  });
+
+  it("fails fast when a plugin manifest is invalid", async () => {
+    const zipBytes = zipSync({
+      "plugins/bad/manifest.json": new Uint8Array(strToU8("{}"))
+    });
+    const buffer = Uint8Array.from(zipBytes).buffer;
+    const file = { arrayBuffer: async () => buffer } as File;
+    await expect(readZipSnapshot(file)).rejects.toBeInstanceOf(PluginManifestError);
   });
 });
