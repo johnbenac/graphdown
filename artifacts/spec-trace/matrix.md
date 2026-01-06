@@ -1,6 +1,11 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:49:38.087Z
+Generated: 2026-01-05T23:27:14.990Z
+
+## Testable requirements with no tests
+- UI-PLUGIN-001 — Reserved UI plugin artifacts are importable and preserved
+- UI-PLUGIN-002 — UI plugin artifacts are non-semantic
+- UI-PLUGIN-003 — Deterministic UI plugin resolution with ambiguity warnings
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -101,6 +106,14 @@ Tests (1):
 ## BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic (testable=true)
 Tests (1):
 - apps/web/src/__tests__/core/core.blobs.test.ts — "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation"
+
+## UI-PLUGIN-001 — Reserved UI plugin artifacts are importable and preserved (testable=true)
+Tests (0):
+- (none)
+
+## UI-PLUGIN-002 — UI plugin artifacts are non-semantic (testable=true)
+Tests (0):
+- (none)
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
@@ -341,5 +354,9 @@ Tests (0):
 - (none)
 
 ## NFR-031 — New field kinds without rewriting CRUD (testable=false)
+Tests (0):
+- (none)
+
+## UI-PLUGIN-003 — Deterministic UI plugin resolution with ambiguity warnings (testable=true)
 Tests (0):
 - (none)

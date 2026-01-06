@@ -120,15 +120,18 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 })
       )
       // blob
-      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
+      // docs
+      .mockResolvedValueOnce(new Response("# readme", { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
       "blobs/sha256/aa/aa00",
+      "docs/readme.md",
       "records/note/record-1.md",
       "types/note.md"
     ]);
-    expect(ignored).toEqual(["docs/readme.md"]);
+    expect(ignored).toEqual([]);
   });
 });

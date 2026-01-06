@@ -18,7 +18,9 @@ function WarningList({ title, sample }: { title: string; sample: string[] }) {
 
 export function hasImportWarnings(report?: ImportReport | null): report is ImportReport {
   if (!report) return false;
-  return report.ignoredFileCount > 0 || report.droppedBlobCount > 0;
+  return (
+    report.ignoredFileCount > 0 || report.droppedBlobCount > 0 || report.pluginWarningCount > 0
+  );
 }
 
 export default function ImportWarningBanner({ report }: { report?: ImportReport | null }) {
@@ -26,8 +28,10 @@ export default function ImportWarningBanner({ report }: { report?: ImportReport 
   const ignoredFileSample = report?.ignoredFileSample ?? [];
   const droppedBlobCount = report?.droppedBlobCount ?? 0;
   const droppedBlobSample = report?.droppedBlobSample ?? [];
+  const pluginWarningCount = report?.pluginWarningCount ?? 0;
+  const pluginWarningSample = report?.pluginWarningSample ?? [];
 
-  if (!report || (!ignoredFileCount && !droppedBlobCount)) {
+  if (!report || (!ignoredFileCount && !droppedBlobCount && !pluginWarningCount)) {
     return null;
   }
 
@@ -58,6 +62,18 @@ export default function ImportWarningBanner({ report }: { report?: ImportReport 
             <WarningList
               title={`View sample (${droppedBlobSample.length} shown)`}
               sample={droppedBlobSample}
+            />
+          </div>
+        ) : null}
+        {pluginWarningCount > 0 ? (
+          <div className="warning-banner__item">
+            <p>
+              Found {pluginWarningCount} UI plugin warning{pluginWarningCount === 1 ? "" : "s"} during
+              import.
+            </p>
+            <WarningList
+              title={`View sample (${pluginWarningSample.length} shown)`}
+              sample={pluginWarningSample}
             />
           </div>
         ) : null}

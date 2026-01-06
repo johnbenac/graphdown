@@ -385,6 +385,22 @@ Validation MUST fail if any file exists under `blobs/sha256/` that does not matc
 
 Files that are not record files (LAYOUT-001) and are not blob store files (BLOB-LAYOUT-001) MUST be ignored by core for identity, linking, and validation semantics.
 
+<!-- req:id=UI-PLUGIN-001 title="Reserved UI plugin artifacts are importable and preserved" testable=true -->
+### UI-PLUGIN-001 — Reserved UI plugin artifacts are importable and preserved
+
+The dataset root MAY include:
+
+* `plugins/` (dataset-embedded UI plugins), and
+* `graphdown.ui.json` (dataset UI resolution config).
+
+These artifacts MUST be included in dataset imports and MUST be preserved byte-for-byte through canonicalization/export at the same paths.
+
+<!-- req:id=UI-PLUGIN-002 title="UI plugin artifacts are non-semantic" testable=true -->
+### UI-PLUGIN-002 — UI plugin artifacts are non-semantic
+
+Files under `plugins/` and the optional `graphdown.ui.json` MUST NOT affect core validation, identity, linking, or hashing.
+Invalid plugin manifests or UI config files MUST NOT make a dataset invalid.
+
 ---
 
 ## 5. Markdown record file format
@@ -953,6 +969,18 @@ Plugins MAY:
 * add alternative navigation or views,
 
 …but core MUST remain correct without them.
+
+<!-- req:id=UI-PLUGIN-003 title="Deterministic UI plugin resolution with ambiguity warnings" testable=true -->
+### UI-PLUGIN-003 — Deterministic UI plugin resolution with ambiguity warnings
+
+When multiple UI plugins provide the same capability, Graphdown MUST resolve providers deterministically using:
+
+1. highest specificity score,
+2. highest semantic version,
+3. ascending plugin id, then
+4. manifest provider index.
+
+If the top-matching group remains ambiguous and no dataset resolution was used, import MUST emit a warning that includes the capability + selector, the chosen plugin id, and the competing plugin ids.
 
 ---
 

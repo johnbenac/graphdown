@@ -24,6 +24,10 @@ describe("readZipSnapshot", () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
       "records/note/record-1.md": new Uint8Array(strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")),
+      "plugins/boolean/plugin.json": new Uint8Array(
+        strToU8('{"schemaVersion":1,"id":"boolean","version":"1.0.0","main":"plugin.js","provides":[]}')
+      ),
+      "graphdown.ui.json": new Uint8Array(strToU8('{"schemaVersion":1}')),
       "docs/readme.md": new Uint8Array(strToU8("# readme")),
       "assets/logo.png": new Uint8Array([0, 1, 2])
     });
@@ -36,6 +40,8 @@ describe("readZipSnapshot", () => {
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
+    expect(snapshot.files.has("plugins/boolean/plugin.json")).toBe(true);
+    expect(snapshot.files.has("graphdown.ui.json")).toBe(true);
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });

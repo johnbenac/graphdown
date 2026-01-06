@@ -45,6 +45,7 @@ vi.mock("../state/DatasetContext", () => ({
       datasetSnapshot: { files: new Map([["types/note.md", new Uint8Array()]]) },
       parsedGraph: graph
     },
+    uiPlugins: { renderField: vi.fn() },
     error: undefined,
     importDatasetZip: vi.fn(),
     importDatasetFromGitHub: vi.fn(),
