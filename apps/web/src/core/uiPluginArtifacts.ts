@@ -3,6 +3,13 @@ import { isObject } from './types';
 const PLUGIN_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 const MANIFEST_BASENAMES = new Set(["plugin.json", "manifest.json"]);
 
+type SeenPlugin = {
+  pluginId: string;
+  rootDir: string;
+  source: "canonical" | "discovered";
+  manifestPath: string | null;
+};
+
 export function basename(path: string): string {
   const segments = path.split('/');
   return segments[segments.length - 1] ?? '';
@@ -78,20 +85,50 @@ export function discoverUiPluginPackages(
   files: Map<string, Uint8Array>
 ): Array<{ pluginId: string; rootDir: string; manifestPath: string | null }> {
   const result: Array<{ pluginId: string; rootDir: string; manifestPath: string | null }> = [];
-  const seen = new Map<string, string>();
+  const seen = new Map<string, SeenPlugin>();
   const paths = [...files.keys()].sort((a, b) => a.localeCompare(b));
 
-  const register = (pluginId: string, rootDir: string, manifestPath: string | null) => {
-    const existing = seen.get(pluginId);
-    if (existing && existing.startsWith('plugins/')) {
-      throw new PluginManifestError(`Duplicate plugin id "${pluginId}" discovered at ${manifestPath ?? rootDir}`);
+  const upsertResult = (entry: { pluginId: string; rootDir: string; manifestPath: string | null }) => {
+    const existingIdx = result.findIndex((item) => item.pluginId === entry.pluginId);
+    if (existingIdx === -1) {
+      result.push(entry);
+    } else {
+      result[existingIdx] = entry;
     }
-    if (existing) {
-      // keep first (lexicographically smallest path wins)
+  };
+
+  const register = (next: SeenPlugin) => {
+    const existing = seen.get(next.pluginId);
+    if (!existing) {
+      seen.set(next.pluginId, next);
+      upsertResult({ pluginId: next.pluginId, rootDir: next.rootDir, manifestPath: next.manifestPath });
       return;
     }
-    seen.set(pluginId, manifestPath ?? rootDir);
-    result.push({ pluginId, rootDir, manifestPath });
+
+    // Same plugin root seen again (e.g., multiple files in the same directory) is fine.
+    if (existing.rootDir === next.rootDir) {
+      if (!existing.manifestPath && next.manifestPath) {
+        const updated: SeenPlugin = { ...existing, manifestPath: next.manifestPath };
+        seen.set(next.pluginId, updated);
+        upsertResult({ pluginId: updated.pluginId, rootDir: updated.rootDir, manifestPath: updated.manifestPath });
+      }
+      return;
+    }
+
+    // Canonical plugins always win over discovered locations.
+    if (existing.source === "canonical" && next.source === "discovered") {
+      return;
+    }
+    if (existing.source === "discovered" && next.source === "canonical") {
+      seen.set(next.pluginId, next);
+      upsertResult({ pluginId: next.pluginId, rootDir: next.rootDir, manifestPath: next.manifestPath });
+      return;
+    }
+
+    // Two distinct roots for the same plugin id is a real conflict.
+    throw new PluginManifestError(
+      `Duplicate plugin id "${next.pluginId}" discovered at ${next.manifestPath ?? next.rootDir}; previously at ${existing.manifestPath ?? existing.rootDir}`
+    );
   };
 
   for (const path of paths) {
@@ -115,7 +152,7 @@ export function discoverUiPluginPackages(
           );
         }
       }
-      register(pluginId, rootDir, null);
+      register({ pluginId, rootDir, source: 'canonical', manifestPath: null });
       continue;
     }
 
@@ -126,7 +163,7 @@ export function discoverUiPluginPackages(
     if (!parsed) continue;
     const rootDir = dirname(path);
     if (!rootDir) continue; // ignore dataset-root manifests
-    register(parsed.pluginId, rootDir, path);
+    register({ pluginId: parsed.pluginId, rootDir, source: 'discovered', manifestPath: path });
   }
 
   return result;

@@ -107,6 +107,32 @@ describe("readZipSnapshot", () => {
     });
   });
 
+  it("UI-PLUGIN-001: canonical plugins with multiple files do not raise duplicate id errors", async () => {
+    const zipBytes = zipSync({
+      "plugins/pack-viz/manifest.json": new Uint8Array(strToU8(JSON.stringify({ id: "pack-viz" }))),
+      "plugins/pack-viz/pack-viz.js": new Uint8Array(strToU8("export default {};")),
+      "plugins/pack-viz/README.md": new Uint8Array(strToU8("# pack-viz"))
+    });
+
+    const buffer = Uint8Array.from(zipBytes).buffer;
+    const file = {
+      arrayBuffer: async () => buffer
+    } as File;
+    const { snapshot, ignored } = await readZipSnapshot(file);
+
+    expect([...snapshot.files.keys()].sort()).toEqual([
+      "plugins/pack-viz/README.md",
+      "plugins/pack-viz/manifest.json",
+      "plugins/pack-viz/pack-viz.js"
+    ]);
+    expect(ignored).toEqual([]);
+    expectPartitionedImport({
+      sourcePaths: ["plugins/pack-viz/manifest.json", "plugins/pack-viz/pack-viz.js", "plugins/pack-viz/README.md"],
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
+  });
+
   it("fails fast when a plugin manifest is invalid", async () => {
     const zipBytes = zipSync({
       "plugins/bad/manifest.json": new Uint8Array(strToU8("{}"))

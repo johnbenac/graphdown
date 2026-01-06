@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-06T11:50:27.592Z
+Generated: 2026-01-06T22:32:56.922Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -345,10 +345,12 @@ Tests (0):
 - (none)
 
 ## UI-PLUGIN-001 — Plugin artifacts are importable and preserved (testable=true)
-Tests (5):
+Tests (7):
 - apps/web/src/core/canonicalizeDatasetSnapshot.plugins.test.ts — "UI-PLUGIN-001: canonicalization rewrites plugin artifacts and UI config to canonical locations"
 - apps/web/src/export/exportZip.test.ts — "UI-PLUGIN-001: export includes canonical plugin artifacts + graphdown.ui.json with byte preservation"
+- apps/web/src/import/github/loadGitHubSnapshot.test.ts — "UI-PLUGIN-001: canonical plugin directory with multiple files does not trigger duplicate id"
 - apps/web/src/import/github/loadGitHubSnapshot.test.ts — "UI-PLUGIN-001: GitHub import discovers plugins/config from arbitrary paths and preserves bytes"
+- apps/web/src/import/readZipSnapshot.test.ts — "UI-PLUGIN-001: canonical plugins with multiple files do not raise duplicate id errors"
 - apps/web/src/import/readZipSnapshot.test.ts — "UI-PLUGIN-001: ZIP import discovers plugins/config from any paths and preserves bytes"
 - apps/web/src/routes/DatasetRoute.plugins.test.tsx — "UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots"
 

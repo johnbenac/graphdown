@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-06T11:50:27.592Z",
+  "generatedAt": "2026-01-06T22:32:56.922Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1117,8 +1117,18 @@
         },
         {
           "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: canonical plugin directory with multiple files does not trigger duplicate id",
+          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-001",
           "testTitle": "UI-PLUGIN-001: GitHub import discovers plugins/config from arbitrary paths and preserves bytes",
           "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: canonical plugins with multiple files do not raise duplicate id errors",
+          "filePath": "apps/web/src/import/readZipSnapshot.test.ts"
         },
         {
           "reqId": "UI-PLUGIN-001",

@@ -108,7 +108,8 @@ export async function loadGitHubSnapshot(input: {
   }
 
   const downloadedBytesByPath = new Map<string, Uint8Array>();
-  const pluginRootsById = new Map<string, string>(canonicalPluginRoots);
+  const pluginRootsById = new Map<string, string>();
+  const canonicalPluginIds = new Set(canonicalPluginRoots.keys());
 
   const downloadFile = async (path: string): Promise<Uint8Array> => {
     const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${path}`);
@@ -146,12 +147,13 @@ export async function loadGitHubSnapshot(input: {
         );
       }
       const existingRoot = pluginRootsById.get(parsed.pluginId);
-      if (existingRoot && existingRoot.startsWith("plugins/")) {
+      const canonicalRoot = `plugins/${pluginIdFromPath}`;
+      if (existingRoot && existingRoot !== canonicalRoot) {
         throw new PluginManifestError(
           `Duplicate plugin id "${parsed.pluginId}" discovered at ${path}`
         );
       }
-      pluginRootsById.set(parsed.pluginId, `plugins/${pluginIdFromPath}`);
+      pluginRootsById.set(parsed.pluginId, canonicalRoot);
     } else {
       const parsed = tryParseUiPluginId(bytes);
       if (!parsed) {
@@ -175,7 +177,9 @@ export async function loadGitHubSnapshot(input: {
         continue;
       }
       const existingRoot = pluginRootsById.get(parsed.pluginId);
-      if (existingRoot && existingRoot.startsWith("plugins/")) {
+      if (canonicalPluginIds.has(parsed.pluginId)) {
+        // Prefer canonical; ignore discovered duplicates of canonical ids.
+      } else if (existingRoot && isUnderDir(existingRoot, "plugins")) {
         // keep canonical
       } else if (!existingRoot) {
         pluginRootsById.set(parsed.pluginId, rootDir);

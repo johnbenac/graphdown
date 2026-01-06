@@ -244,6 +244,60 @@ describe("loadGitHubSnapshot", () => {
     );
   });
 
+  it("UI-PLUGIN-001: canonical plugin directory with multiple files does not trigger duplicate id", async () => {
+    const tree = [
+      { path: "plugins/pack-viz/manifest.json", type: "blob" },
+      { path: "plugins/pack-viz/pack-viz.js", type: "blob" },
+      { path: "plugins/pack-viz/README.md", type: "blob" }
+    ];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/repos/owner/repo")) {
+        if (urlStr.includes("/git/trees/")) {
+          return jsonResponse({ tree });
+        }
+        return jsonResponse({ default_branch: "main" });
+      }
+
+      const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) => {
+        if (body instanceof Uint8Array) {
+          const arrayBuffer = new ArrayBuffer(body.byteLength);
+          new Uint8Array(arrayBuffer).set(body);
+          return new Response(arrayBuffer, init);
+        }
+        return new Response(body, init);
+      };
+
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/plugins/pack-viz/manifest.json")) {
+        return respond(JSON.stringify({ id: "pack-viz" }));
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/plugins/pack-viz/pack-viz.js")) {
+        return respond("export default {};");
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/plugins/pack-viz/README.md")) {
+        return respond("# docs");
+      }
+
+      throw new Error(`Unexpected fetch: ${urlStr}`);
+    });
+
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+
+    expect([...snapshot.files.keys()].sort()).toEqual([
+      "plugins/pack-viz/README.md",
+      "plugins/pack-viz/manifest.json",
+      "plugins/pack-viz/pack-viz.js"
+    ]);
+    expect(ignored).toEqual([]);
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
+  });
+
   it("reports progress for plugin discovery and remaining downloads", async () => {
     const tree = [
       { path: "a/plugin.json", type: "blob" },
