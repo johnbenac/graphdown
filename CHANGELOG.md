@@ -1,3 +1,10 @@
+# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.13.0) (2026-01-06)
+
+
+### Features
+
+* canonicalize dataset plugins and config ([d3b250f](https://github.com/johnbenac/graphdown/commit/d3b250f80ba211e3924c0934dac677e9bbdabe7b))
+
 # [0.12.0](https://github.com/johnbenac/graphdown/compare/v0.11.0...v0.12.0) (2026-01-05)
 
 
