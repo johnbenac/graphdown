@@ -1,3 +1,10 @@
+## [0.14.2](https://github.com/johnbenac/graphdown/compare/v0.14.1...v0.14.2) (2026-01-06)
+
+
+### Bug Fixes
+
+* handle plugin duplicate detection ([7010ea0](https://github.com/johnbenac/graphdown/commit/7010ea027fc3af3ad9c762cfa8ee3a35d61ad2a0))
+
 ## [0.14.1](https://github.com/johnbenac/graphdown/compare/v0.14.0...v0.14.1) (2026-01-06)
 
 
