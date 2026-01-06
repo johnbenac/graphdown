@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:49:38.087Z
+Generated: 2026-01-05T23:38:19.121Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -343,3 +343,17 @@ Tests (0):
 ## NFR-031 — New field kinds without rewriting CRUD (testable=false)
 Tests (0):
 - (none)
+
+## UI-PLUGIN-001 — Plugin artifacts are importable and preserved (testable=true)
+Tests (1):
+- apps/web/src/routes/DatasetRoute.plugins.test.tsx — "UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots"
+
+## UI-PLUGIN-002 — Plugin artifacts are non-semantic for validation and hashing (testable=true)
+Tests (1):
+- apps/web/src/core/validateDatasetSnapshot.test.ts — "UI-PLUGIN-002: plugin artifacts do not affect validation"
+
+## UI-PLUGIN-003 — Deterministic plugin resolution and ambiguity warnings (testable=true)
+Tests (3):
+- apps/web/src/routes/DatasetRoute.plugins.test.tsx — "UI-PLUGIN-003: reports ambiguity warnings when no resolution is provided"
+- apps/web/src/uiPlugins/resolve.test.ts — "UI-PLUGIN-003: chooses lexicographic plugin id on a deterministic tie"
+- apps/web/src/uiPlugins/resolve.test.ts — "UI-PLUGIN-003: respects dataset resolution overrides"

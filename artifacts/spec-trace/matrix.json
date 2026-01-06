@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T09:49:38.087Z",
+  "generatedAt": "2026-01-05T23:38:19.121Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1098,6 +1098,55 @@
       "testable": false,
       "verify": null,
       "tests": []
+    },
+    {
+      "id": "UI-PLUGIN-001",
+      "title": "Plugin artifacts are importable and preserved",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "UI-PLUGIN-001",
+          "testTitle": "UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots",
+          "filePath": "apps/web/src/routes/DatasetRoute.plugins.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "UI-PLUGIN-002",
+      "title": "Plugin artifacts are non-semantic for validation and hashing",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "UI-PLUGIN-002",
+          "testTitle": "UI-PLUGIN-002: plugin artifacts do not affect validation",
+          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "UI-PLUGIN-003",
+      "title": "Deterministic plugin resolution and ambiguity warnings",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "UI-PLUGIN-003",
+          "testTitle": "UI-PLUGIN-003: reports ambiguity warnings when no resolution is provided",
+          "filePath": "apps/web/src/routes/DatasetRoute.plugins.test.tsx"
+        },
+        {
+          "reqId": "UI-PLUGIN-003",
+          "testTitle": "UI-PLUGIN-003: chooses lexicographic plugin id on a deterministic tie",
+          "filePath": "apps/web/src/uiPlugins/resolve.test.ts"
+        },
+        {
+          "reqId": "UI-PLUGIN-003",
+          "testTitle": "UI-PLUGIN-003: respects dataset resolution overrides",
+          "filePath": "apps/web/src/uiPlugins/resolve.test.ts"
+        }
+      ]
     }
   ],
   "unknownReferences": [],

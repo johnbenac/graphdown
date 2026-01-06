@@ -1,0 +1,189 @@
+import { render, screen } from "@testing-library/react";
+import { strToU8, zipSync } from "fflate";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { canonicalizeDatasetSnapshot } from "../core/canonicalizeDatasetSnapshot";
+import { buildGraphFromSnapshot } from "../core/graph";
+import { readZipSnapshot } from "../import/readZipSnapshot";
+import type { LoadedDataset } from "../persistence/types";
+import { createUiPluginHost } from "../uiPlugins/host";
+import DatasetRoute from "./DatasetRoute";
+
+let mockDataset: LoadedDataset | undefined;
+let mockUiPlugins: ReturnType<typeof createUiPluginHost> | null = null;
+
+vi.mock("../state/DatasetContext", () => ({
+  useDataset: () => ({
+    status: mockDataset ? "ready" : "idle",
+    progress: { phase: "done" as const },
+    activeDataset: mockDataset,
+    uiPlugins: mockUiPlugins,
+    error: undefined,
+    importDatasetZip: vi.fn(),
+    importDatasetFromGitHub: vi.fn(),
+    clearPersistence: vi.fn(),
+    updateRecord: vi.fn(),
+    createRecord: vi.fn()
+  })
+}));
+
+beforeEach(() => {
+  mockDataset = undefined;
+  mockUiPlugins = null;
+});
+
+function buildZip({ includeConfig }: { includeConfig: boolean }) {
+  const typeContent = [
+    "---",
+    "typeId: flag",
+    "fields:",
+    "  displayName: Flag",
+    "  pluralName: Flags",
+    "  fieldDefs:",
+    "    value:",
+    "      required: true",
+    "      kind: boolean",
+    "---"
+  ].join("\n");
+
+  const recordContent = [
+    "---",
+    "typeId: flag",
+    "recordId: demo",
+    "fields:",
+    "  value: true",
+    "---",
+    "Demo boolean record."
+  ].join("\n");
+
+  const redGreenManifest = JSON.stringify({
+    schemaVersion: 1,
+    id: "boolean-redgreen",
+    version: "1.0.0",
+    main: "plugin.js",
+    provides: [
+      {
+        capability: "field.view",
+        match: { kind: "boolean" },
+        entry: "renderField"
+      }
+    ]
+  });
+
+  const redGreenCode = [
+    "return {",
+    "  renderField(ctx) {",
+    "    return ctx.value === true ? \"🟢 true\" : \"🔴 false\";",
+    "  }",
+    "};"
+  ].join("\n");
+
+  const booleanManifest = JSON.stringify({
+    schemaVersion: 1,
+    id: "boolean-01",
+    version: "1.0.0",
+    main: "plugin.js",
+    provides: [
+      {
+        capability: "field.view",
+        match: { kind: "boolean" },
+        entry: "renderField"
+      }
+    ]
+  });
+
+  const booleanCode = [
+    "return {",
+    "  renderField(ctx) {",
+    "    return ctx.value === true ? \"1\" : \"0\";",
+    "  }",
+    "};"
+  ].join("\n");
+
+  const toBytes = (value: string) => new Uint8Array(strToU8(value));
+  const files: Record<string, Uint8Array> = {
+    "types/flag.md": toBytes(typeContent),
+    "records/flag/demo.md": toBytes(recordContent),
+    "plugins/boolean-redgreen/plugin.json": toBytes(redGreenManifest),
+    "plugins/boolean-redgreen/plugin.js": toBytes(redGreenCode),
+    "plugins/boolean-01/plugin.json": toBytes(booleanManifest),
+    "plugins/boolean-01/plugin.js": toBytes(booleanCode)
+  };
+
+  if (includeConfig) {
+    const config = JSON.stringify({
+      schemaVersion: 1,
+      resolutions: [
+        {
+          capability: "field.view",
+          match: { kind: "boolean" },
+          use: "boolean-01"
+        }
+      ]
+    });
+    files["graphdown.ui.json"] = toBytes(config);
+  }
+
+  return zipSync(files);
+}
+
+async function buildDataset(includeConfig: boolean) {
+  const zipBytes = buildZip({ includeConfig });
+  const file = {
+    name: "demo.zip",
+    arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
+  } as File;
+  const { snapshot } = await readZipSnapshot(file);
+  const canonicalSnapshot = canonicalizeDatasetSnapshot(snapshot);
+  const graphResult = buildGraphFromSnapshot(canonicalSnapshot);
+  if (!graphResult.ok) {
+    throw new Error("Graph build failed in test setup");
+  }
+  const now = Date.now();
+  const meta = {
+    id: "active",
+    createdAt: now,
+    updatedAt: now,
+    snapshotFormatVersion: 1,
+    graphFormatVersion: 1,
+    uiStateFormatVersion: 1,
+    label: "demo.zip",
+    source: "import",
+    importReport: {
+      ignoredFileCount: 0,
+      ignoredFileSample: [],
+      droppedBlobCount: 0,
+      droppedBlobSample: [],
+      pluginWarningCount: includeConfig ? 0 : 1,
+      pluginWarningSample: includeConfig ? [] : ["Ambiguous field.view provider"]
+    }
+  };
+  mockDataset = { meta, datasetSnapshot: canonicalSnapshot, parsedGraph: graphResult.graph };
+  mockUiPlugins = createUiPluginHost(canonicalSnapshot, graphResult.graph);
+}
+
+function renderRoute() {
+  render(
+    <MemoryRouter initialEntries={["/datasets/flag"]}>
+      <Routes>
+        <Route path="/datasets/:recordTypeId" element={<DatasetRoute />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+describe("DatasetRoute UI plugins", () => {
+  it("UI-PLUGIN-001: renders dataset-embedded plugins from imported snapshots", async () => {
+    await buildDataset(true);
+    renderRoute();
+    const rendered = await screen.findByTestId("rendered-field-value", {}, { timeout: 3000 });
+    expect(rendered).toHaveTextContent("1");
+  });
+
+  it("UI-PLUGIN-003: reports ambiguity warnings when no resolution is provided", async () => {
+    await buildDataset(false);
+    renderRoute();
+    const warningBanner = await screen.findByTestId("import-warning", {}, { timeout: 3000 });
+    expect(warningBanner).toHaveTextContent("plugin warning");
+  });
+});

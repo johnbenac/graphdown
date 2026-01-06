@@ -102,5 +102,11 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     }
   }
 
+  for (const [path, bytes] of snapshot.files.entries()) {
+    if (path.startsWith('plugins/') || path === 'graphdown.ui.json') {
+      outputFiles.set(path, bytes);
+    }
+  }
+
   return { files: outputFiles };
 }

@@ -1,4 +1,5 @@
 import { unzipSync } from "fflate";
+import { isRecordFileBytes } from "../core/datasetObjects";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
 
 const ROOT_DIRS = new Set(["types", "records"]);
@@ -28,15 +29,18 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-function isDatasetPath(path: string): boolean {
-  const lower = path.toLowerCase();
-  if (path.startsWith("types/") && lower.endsWith(".md")) {
-    return true;
-  }
-  if (path.startsWith("records/") && lower.endsWith(".md")) {
-    return true;
-  }
+function shouldInclude(path: string, bytes: Uint8Array): boolean {
   if (path.startsWith("blobs/sha256/")) {
+    return true;
+  }
+  if (path.startsWith("plugins/")) {
+    return true;
+  }
+  if (path === "graphdown.ui.json") {
+    return true;
+  }
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".md") && isRecordFileBytes(path, bytes)) {
     return true;
   }
   return false;
@@ -72,7 +76,7 @@ export async function readZipSnapshot(
     if (!finalPath) {
       continue;
     }
-    if (isDatasetPath(finalPath)) {
+    if (shouldInclude(finalPath, entry.contents)) {
       files.set(finalPath, entry.contents);
     } else {
       ignored.push(finalPath);
