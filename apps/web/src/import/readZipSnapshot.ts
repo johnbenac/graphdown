@@ -1,8 +1,8 @@
 import { unzipSync } from "fflate";
-import { isRecordFileBytes } from "../core/datasetObjects";
+import { parseGraphdownFile } from "../core/datasetObjects";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
 
-const ROOT_DIRS = new Set(["types", "records"]);
+const ROOT_DIRS = new Set(["types", "records", "plugins", "blobs"]);
 
 function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {
@@ -40,8 +40,11 @@ function shouldInclude(path: string, bytes: Uint8Array): boolean {
     return true;
   }
   const lower = path.toLowerCase();
-  if (lower.endsWith(".md") && isRecordFileBytes(path, bytes)) {
-    return true;
+  if (lower.endsWith(".md")) {
+    const parsed = parseGraphdownFile(path, bytes);
+    if (parsed.kind === "type" || parsed.kind === "record") return true;
+    if (parsed.kind === "error") return true;
+    return false;
   }
   return false;
 }

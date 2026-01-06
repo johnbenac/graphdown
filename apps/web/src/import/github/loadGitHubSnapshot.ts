@@ -1,3 +1,4 @@
+import { parseGraphdownFile } from "../../core/datasetObjects";
 import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
@@ -103,7 +104,17 @@ export async function loadGitHubSnapshot(input: {
       throw new GitHubImportError(mapGitHubError(response, message));
     }
     const buffer = await response.arrayBuffer();
-    files.set(file.snapshotPath, new Uint8Array(buffer));
+    const bytes = new Uint8Array(buffer);
+    if (isMarkdownFile(file.snapshotPath) && !file.snapshotPath.startsWith("plugins/")) {
+      const parsed = parseGraphdownFile(file.snapshotPath, bytes);
+      if (parsed.kind === "type" || parsed.kind === "record" || parsed.kind === "error") {
+        files.set(file.snapshotPath, bytes);
+      } else {
+        ignored.push(file.snapshotPath);
+      }
+    } else {
+      files.set(file.snapshotPath, bytes);
+    }
     completed += 1;
     onProgress?.({
       phase: "downloading_files",

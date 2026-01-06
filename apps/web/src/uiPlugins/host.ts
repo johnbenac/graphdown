@@ -20,6 +20,7 @@ function buildRequirement(ctx: FieldViewContext): UiRequirement {
 export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiPluginHost {
   const { config } = loadUiConfig(snapshot);
   const { catalog } = discoverPlugins(snapshot);
+  const exportCache = new Map<string, Record<string, unknown> | null>();
 
   return {
     renderField(ctx: FieldViewContext) {
@@ -35,7 +36,7 @@ export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiP
       const warn = (warning: UiPluginWarning) => {
         console.warn("UI plugin warning:", warning.message);
       };
-      return invokeFieldView({ snapshot, manifest, provider: resolved.chosen, ctx, onWarning: warn });
+      return invokeFieldView({ snapshot, manifest, provider: resolved.chosen, ctx, cache: exportCache, onWarning: warn });
     }
   };
 }
