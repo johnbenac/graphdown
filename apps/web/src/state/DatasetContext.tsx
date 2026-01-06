@@ -52,6 +52,7 @@ export type ImportPhase =
   | "validating_url"
   | "fetching_repo"
   | "listing_files"
+  | "discovering_plugins"
   | "downloading_files"
   | "validating_dataset"
   | "building_graph"
@@ -60,7 +61,8 @@ export type ImportPhase =
 
 export type ImportProgress =
   | { phase: "idle" }
-  | { phase: Exclude<ImportPhase, "downloading_files">; detail?: string }
+  | { phase: Exclude<ImportPhase, "downloading_files" | "discovering_plugins">; detail?: string }
+  | { phase: "discovering_plugins"; completed: number; total: number; detail?: string }
   | { phase: "downloading_files"; completed: number; total: number; detail?: string };
 
 export type DatasetContextValue = {

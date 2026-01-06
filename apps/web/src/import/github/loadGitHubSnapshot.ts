@@ -107,17 +107,32 @@ export async function loadGitHubSnapshot(input: {
     return new Uint8Array(buffer);
   };
 
-  // Phase 2: fetch manifests first
+  // Phase 2: fetch manifests first with dedicated progress
   manifestCandidatePaths.sort((a, b) => a.localeCompare(b));
+  onProgress?.({
+    phase: "discovering_plugins",
+    completed: 0,
+    total: manifestCandidatePaths.length
+  });
+
+  let manifestCompleted = 0;
   for (const path of manifestCandidatePaths) {
     const bytes = await downloadFile(path);
     downloadedBytesByPath.set(path, bytes);
     const parsed = parseUiPluginManifest(bytes);
-    if (!parsed) continue;
-    if (pluginRootsById.has(parsed.id)) continue;
-    const rootDir = dirname(path);
-    if (!rootDir) continue;
-    pluginRootsById.set(parsed.id, rootDir);
+    if (parsed && !pluginRootsById.has(parsed.id)) {
+      const rootDir = dirname(path);
+      if (rootDir) {
+        pluginRootsById.set(parsed.id, rootDir);
+      }
+    }
+    manifestCompleted += 1;
+    onProgress?.({
+      phase: "discovering_plugins",
+      completed: manifestCompleted,
+      total: manifestCandidatePaths.length,
+      detail: path
+    });
   }
 
   const pluginRoots = [...pluginRootsById.values()];
@@ -138,7 +153,9 @@ export async function loadGitHubSnapshot(input: {
     }
   }
 
-  const downloadQueue = [...pathsToDownload].sort((a, b) => a.localeCompare(b));
+  const downloadQueue = [...pathsToDownload]
+    .filter((path) => !downloadedBytesByPath.has(path))
+    .sort((a, b) => a.localeCompare(b));
 
   onProgress?.({ phase: "downloading_files", completed: 0, total: downloadQueue.length });
 

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { loadGitHubSnapshot } from "./loadGitHubSnapshot";
+import { expectPartitionedImport } from "../testHelpers";
 
 const jsonResponse = (data: unknown) =>
   new Response(JSON.stringify(data), {
@@ -13,6 +14,10 @@ describe("loadGitHubSnapshot", () => {
   });
 
   it("GH-008: does not send Authorization headers for public fetches", async () => {
+    const tree = [
+      { path: "types/note.md", type: "blob" },
+      { path: "records/note/record-1.md", type: "blob" }
+    ];
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -22,10 +27,7 @@ describe("loadGitHubSnapshot", () => {
       // Tree listing
       .mockResolvedValueOnce(
         jsonResponse({
-          tree: [
-            { path: "types/note.md", type: "blob" },
-            { path: "records/note/record-1.md", type: "blob" }
-          ]
+          tree
         })
       )
       // Raw file fetches
@@ -37,7 +39,13 @@ describe("loadGitHubSnapshot", () => {
       )
       .mockResolvedValueOnce(new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 }));
 
-    await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
 
     // All fetch calls should omit Authorization headers
     for (const [, options] of fetchMock.mock.calls) {
@@ -49,6 +57,10 @@ describe("loadGitHubSnapshot", () => {
   });
 
   it("GH-002: falls back to main when default_branch is missing", async () => {
+    const tree = [
+      { path: "types/note.md", type: "blob" },
+      { path: "records/note/record-1.md", type: "blob" }
+    ];
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -58,10 +70,7 @@ describe("loadGitHubSnapshot", () => {
       // Tree listing should use main
       .mockResolvedValueOnce(
         jsonResponse({
-          tree: [
-            { path: "types/note.md", type: "blob" },
-            { path: "records/note/record-1.md", type: "blob" }
-          ]
+          tree
         })
       )
       // Raw file fetches (type, record)
@@ -73,9 +82,14 @@ describe("loadGitHubSnapshot", () => {
       )
       .mockResolvedValueOnce(new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 }));
 
-    const { snapshot } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
 
     const treeCall = fetchMock.mock.calls.find(
       ([url]) => typeof url === "string" && url.includes("/git/trees/")
@@ -89,21 +103,22 @@ describe("loadGitHubSnapshot", () => {
   });
 
   it("UI-PLUGIN-001: GitHub import discovers plugins/config from arbitrary paths and preserves bytes", async () => {
+    const tree = [
+      { path: "types/note.md", type: "blob" },
+      { path: "records/note/record-1.md", type: "blob" },
+      { path: "blobs/sha256/aa/aa00", type: "blob" },
+      { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
+      { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
+      { path: "custom/ui/boolean-01/README.md", type: "blob" },
+      { path: "cfg/graphdown.ui.json", type: "blob" },
+      { path: "docs/readme.md", type: "blob" }
+    ];
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlStr = String(url);
       if (urlStr.includes("/repos/owner/repo")) {
         if (urlStr.includes("/git/trees/")) {
           return jsonResponse({
-            tree: [
-              { path: "types/note.md", type: "blob" },
-              { path: "records/note/record-1.md", type: "blob" },
-              { path: "blobs/sha256/aa/aa00", type: "blob" },
-              { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
-              { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
-              { path: "custom/ui/boolean-01/README.md", type: "blob" },
-              { path: "cfg/graphdown.ui.json", type: "blob" },
-              { path: "docs/readme.md", type: "blob" }
-            ]
+            tree
           });
         }
         return jsonResponse({ default_branch: "main" });
@@ -175,28 +190,34 @@ describe("loadGitHubSnapshot", () => {
     for (const path of ignored) {
       expect(snapshot.files.has(path)).toBe(false);
     }
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
   });
 
   it("import ignored paths: does not report included plugin artifacts/config as ignored", async () => {
+    const tree = [
+      { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
+      { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
+      { path: "custom/ui/boolean-01/README.md", type: "blob" },
+      { path: "custom/ui/boolean-01/graphdown.ui.json", type: "blob" },
+      { path: "custom/ui/boolean-01/00/plugin.json", type: "blob" },
+      { path: "cfg/graphdown.ui.json", type: "blob" },
+      { path: "zzz/graphdown.ui.json", type: "blob" },
+      { path: "assets/logo.png", type: "blob" },
+      { path: "docs/readme.md", type: "blob" },
+      { path: "types/note.md", type: "blob" },
+      { path: "records/note/record-1.md", type: "blob" },
+      { path: "other/plugin.json", type: "blob" }
+    ];
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlStr = String(url);
       if (urlStr.includes("/repos/owner/repo")) {
         if (urlStr.includes("/git/trees/")) {
           return jsonResponse({
-            tree: [
-              { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
-              { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
-              { path: "custom/ui/boolean-01/README.md", type: "blob" },
-              { path: "custom/ui/boolean-01/graphdown.ui.json", type: "blob" },
-              { path: "custom/ui/boolean-01/00/plugin.json", type: "blob" },
-              { path: "cfg/graphdown.ui.json", type: "blob" },
-              { path: "zzz/graphdown.ui.json", type: "blob" },
-              { path: "assets/logo.png", type: "blob" },
-              { path: "docs/readme.md", type: "blob" },
-              { path: "types/note.md", type: "blob" },
-              { path: "records/note/record-1.md", type: "blob" },
-              { path: "other/plugin.json", type: "blob" }
-            ]
+            tree
           });
         }
         return jsonResponse({ default_branch: "main" });
@@ -291,5 +312,106 @@ describe("loadGitHubSnapshot", () => {
     for (const path of ignored) {
       expect(snapshot.files.has(path)).toBe(false);
     }
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
+  });
+
+  it("reports progress for plugin discovery and remaining downloads", async () => {
+    const tree = [
+      { path: "a/plugin.json", type: "blob" },
+      { path: "a/plugin.js", type: "blob" },
+      { path: "b/plugin.json", type: "blob" },
+      { path: "types/note.md", type: "blob" },
+      { path: "records/note/record-1.md", type: "blob" }
+    ];
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/repos/owner/repo")) {
+        if (urlStr.includes("/git/trees/")) {
+          return jsonResponse({ tree });
+        }
+        return jsonResponse({ default_branch: "main" });
+      }
+
+      const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) => {
+        if (body instanceof Uint8Array) {
+          const arrayBuffer = new ArrayBuffer(body.byteLength);
+          new Uint8Array(arrayBuffer).set(body);
+          return new Response(arrayBuffer, init);
+        }
+        return new Response(body, init);
+      };
+
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/a/plugin.json")) {
+        return respond(
+          JSON.stringify({
+            schemaVersion: 1,
+            id: "alpha",
+            version: "1.0.0",
+            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+          })
+        );
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/b/plugin.json")) {
+        return respond("not a manifest");
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/a/plugin.js")) {
+        return respond("return { renderField() { return 'ok'; } };");
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/types/note.md")) {
+        return respond(["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"));
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/records/note/record-1.md")) {
+        return respond(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"));
+      }
+
+      throw new Error(`Unexpected fetch: ${urlStr}`);
+    });
+
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const onProgress = vi.fn();
+
+    const { snapshot, ignored } = await loadGitHubSnapshot({
+      owner: "owner",
+      repo: "repo",
+      onProgress
+    });
+
+    const discoveryCalls = onProgress.mock.calls
+      .map(([progress]) => progress)
+      .filter((progress) => progress.phase === "discovering_plugins");
+    expect(discoveryCalls.length).toBeGreaterThan(0);
+    const discoveryTotal = discoveryCalls[0].total;
+    expect(discoveryTotal).toBe(2);
+    expect(discoveryCalls[discoveryCalls.length - 1].completed).toBe(discoveryTotal);
+    let discoveryPrev = 0;
+    for (const progress of discoveryCalls) {
+      expect(progress.completed).toBeGreaterThanOrEqual(discoveryPrev);
+      expect(progress.completed).toBeLessThanOrEqual(progress.total);
+      discoveryPrev = progress.completed;
+    }
+
+    const downloadCalls = onProgress.mock.calls
+      .map(([progress]) => progress)
+      .filter((progress) => progress.phase === "downloading_files");
+    expect(downloadCalls.length).toBeGreaterThan(0);
+    const downloadTotal = downloadCalls[0].total;
+    expect(downloadTotal).toBe(3);
+    expect(downloadCalls[downloadCalls.length - 1].completed).toBe(downloadTotal);
+    let downloadPrev = 0;
+    for (const progress of downloadCalls) {
+      expect(progress.completed).toBeGreaterThanOrEqual(downloadPrev);
+      expect(progress.completed).toBeLessThanOrEqual(progress.total);
+      downloadPrev = progress.completed;
+    }
+
+    expectPartitionedImport({
+      sourcePaths: tree.map((entry) => entry.path),
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computeIgnoredPaths } from "./computeIgnoredPaths";
+import { expectPartitionedImport } from "./testHelpers";
 
 describe("computeIgnoredPaths", () => {
   it("returns sorted, unique paths that are present in source but not included", () => {
@@ -11,5 +12,18 @@ describe("computeIgnoredPaths", () => {
     expect(ignored).toEqual(["a/file.txt", "c/file.txt"]);
     expect(new Set(ignored).size).toBe(ignored.length);
     expect(ignored).toEqual([...ignored].sort((a, b) => a.localeCompare(b)));
+  });
+
+  it("partitions source paths without overlap or phantoms", () => {
+    const source = ["alpha.md", "beta.md", "gamma.md"];
+    const included = ["beta.md", "gamma.md"];
+
+    const ignored = computeIgnoredPaths(source, included);
+
+    expectPartitionedImport({
+      sourcePaths: source,
+      includedPaths: included,
+      ignored
+    });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
 import { readZipSnapshot } from "./readZipSnapshot";
+import { expectPartitionedImport } from "./testHelpers";
 
 describe("readZipSnapshot", () => {
   it("strips a single top-level folder in GitHub-style zips", async () => {
@@ -20,6 +21,11 @@ describe("readZipSnapshot", () => {
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
     expect(ignored).toEqual([]);
+    expectPartitionedImport({
+      sourcePaths: ["types/note.md", "records/note/record-1.md"],
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
   });
 
   it("drops non-dataset files and records them as ignored", async () => {
@@ -43,6 +49,11 @@ describe("readZipSnapshot", () => {
     for (const path of ignored) {
       expect(snapshot.files.has(path)).toBe(false);
     }
+    expectPartitionedImport({
+      sourcePaths: ["types/note.md", "records/note/record-1.md", "docs/readme.md", "assets/logo.png"],
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
   });
 
   it("UI-PLUGIN-001: ZIP import discovers plugins/config from any paths and preserves bytes", async () => {
@@ -82,5 +93,18 @@ describe("readZipSnapshot", () => {
     for (const path of ignored) {
       expect(snapshot.files.has(path)).toBe(false);
     }
+    expectPartitionedImport({
+      sourcePaths: [
+        "types/note.md",
+        "records/note/record-1.md",
+        "x/y/boolean-01/plugin.json",
+        "x/y/boolean-01/plugin.js",
+        "x/y/boolean-01/README.md",
+        "cfg/graphdown.ui.json",
+        "docs/readme.md"
+      ],
+      includedPaths: snapshot.files.keys(),
+      ignored
+    });
   });
 });

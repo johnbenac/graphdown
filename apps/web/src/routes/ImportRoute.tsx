@@ -10,6 +10,7 @@ const PROGRESS_STEPS: Array<{ phase: ImportProgress["phase"]; label: string }> =
   { phase: "validating_url", label: "Validating URL" },
   { phase: "fetching_repo", label: "Fetching repo metadata" },
   { phase: "listing_files", label: "Listing dataset files" },
+  { phase: "discovering_plugins", label: "Discovering plugins" },
   { phase: "downloading_files", label: "Downloading files" },
   { phase: "validating_dataset", label: "Validating dataset" },
   { phase: "building_graph", label: "Building graph" },
@@ -104,7 +105,8 @@ export default function ImportRoute() {
                 }`}
               >
                 <span>{step.label}</span>
-                {step.phase === "downloading_files" && progress.phase === "downloading_files" ? (
+                {(step.phase === "downloading_files" || step.phase === "discovering_plugins") &&
+                progress.phase === step.phase ? (
                   <span className="import-progress__detail">
                     {progress.completed} / {progress.total}
                     {progress.detail ? ` — ${progress.detail}` : ""}
