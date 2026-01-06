@@ -110,7 +110,7 @@ describe("loadGitHubSnapshot", () => {
       }
 
       const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) =>
-        body instanceof Uint8Array ? new Response(body, init) : new Response(body, init);
+        body instanceof Uint8Array ? new Response(body.buffer, init) : new Response(body, init);
 
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.json")) {
         return respond(
