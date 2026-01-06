@@ -109,8 +109,14 @@ describe("loadGitHubSnapshot", () => {
         return jsonResponse({ default_branch: "main" });
       }
 
-      const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) =>
-        body instanceof Uint8Array ? new Response(body.buffer, init) : new Response(body, init);
+      const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) => {
+        if (body instanceof Uint8Array) {
+          const arrayBuffer = new ArrayBuffer(body.byteLength);
+          new Uint8Array(arrayBuffer).set(body);
+          return new Response(arrayBuffer, init);
+        }
+        return new Response(body, init);
+      };
 
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.json")) {
         return respond(
