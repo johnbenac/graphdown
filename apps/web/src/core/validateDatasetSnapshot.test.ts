@@ -54,6 +54,21 @@ describe("validateDatasetSnapshot", () => {
     expect(getErrorCodes(snapshot)).toContain("E_FORBIDDEN_TOP_LEVEL_KEY");
   });
 
+  it("UI-PLUGIN-002: plugin artifacts do not affect validation", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/flag.md", ["typeId: flag", "fields: {}"]),
+      rec("records/flag/demo.md", ["typeId: flag", "recordId: demo", "fields: {}"]),
+      ["plugins/boolean-demo/plugin.json", "{ \"schemaVersion\": 1 }"],
+      ["plugins/boolean-demo/plugin.js", "return { renderField() { return \"ok\"; } };"],
+      [
+        "graphdown.ui.json",
+        JSON.stringify({ schemaVersion: 1, resolutions: [{ capability: "field.view", match: {}, use: "boolean-demo" }] })
+      ]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("FR-MD-021: type objects must not define parent", () => {
     const snapshot = snapshotFromEntries([
       rec("type.md", ["typeId: note", "parent: note:one", "fields: {}"])

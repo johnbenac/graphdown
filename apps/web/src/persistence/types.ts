@@ -38,4 +38,6 @@ export type ImportReport = {
   ignoredFileSample: string[];
   droppedBlobCount: number;
   droppedBlobSample: string[];
+  pluginWarningCount: number;
+  pluginWarningSample: string[];
 };

@@ -11,8 +11,9 @@ export function buildImportReport(input: {
   rawSnapshot: DatasetSnapshot;
   canonicalSnapshot: DatasetSnapshot;
   ignored: string[];
+  pluginWarnings?: string[];
 }): ImportReport {
-  const { rawSnapshot, canonicalSnapshot, ignored } = input;
+  const { rawSnapshot, canonicalSnapshot, ignored, pluginWarnings = [] } = input;
   const canonicalBlobs = new Set(listBlobs(canonicalSnapshot));
   const droppedBlobs = listBlobs(rawSnapshot).filter((path) => !canonicalBlobs.has(path));
 
@@ -20,6 +21,8 @@ export function buildImportReport(input: {
     ignoredFileCount: ignored.length,
     ignoredFileSample: ignored.slice(0, SAMPLE_LIMIT),
     droppedBlobCount: droppedBlobs.length,
-    droppedBlobSample: droppedBlobs.slice(0, SAMPLE_LIMIT)
+    droppedBlobSample: droppedBlobs.slice(0, SAMPLE_LIMIT),
+    pluginWarningCount: pluginWarnings.length,
+    pluginWarningSample: pluginWarnings.slice(0, SAMPLE_LIMIT)
   };
 }

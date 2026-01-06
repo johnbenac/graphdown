@@ -11,7 +11,7 @@ import TypeNav, { getTypeLabel } from "../components/TypeNav";
 import { useDataset } from "../state/DatasetContext";
 
 export default function DatasetRoute() {
-  const { activeDataset, status } = useDataset();
+  const { activeDataset, status, uiPlugins } = useDataset();
   const [selectedRecordKey, setSelectedRecordKey] = useState<string | null>(null);
   const [editorMode, setEditorMode] = useState<"view" | "edit" | "create">("view");
   const [previousRecordKey, setPreviousRecordKey] = useState<string | null>(null);
@@ -206,6 +206,7 @@ export default function DatasetRoute() {
                       typeDef={selectedTypeDef}
                       outgoingLinks={outgoingLinks}
                       incomingLinks={incomingLinks}
+                      uiPlugins={uiPlugins}
                     />
                   )
                 ) : (
