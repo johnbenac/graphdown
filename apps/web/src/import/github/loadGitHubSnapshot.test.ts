@@ -82,48 +82,86 @@ describe("loadGitHubSnapshot", () => {
     );
     expect(treeCall?.[0]).toContain("/git/trees/main?recursive=1");
 
-    const rawCall = fetchMock.mock.calls.find(
-      ([url]) => typeof url === "string" && url.includes("/raw.githubusercontent.com/")
+    const typeCall = fetchMock.mock.calls.find(
+      ([url]) => typeof url === "string" && url.includes("/raw.githubusercontent.com/") && url.includes("/types/note.md")
     );
-    expect(rawCall?.[0]).toContain("/main/types/note.md");
+    expect(typeCall?.[0]).toContain("/main/types/note.md");
   });
 
-  it("includes blobs under blobs/sha256 and reports ignored files", async () => {
-    const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+  it("imports plugins and config from arbitrary paths, ignores non-dataset files, and includes blobs", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const urlStr = String(url);
+      if (urlStr.includes("/repos/owner/repo")) {
+        if (urlStr.includes("/git/trees/")) {
+          return jsonResponse({
+            tree: [
+              { path: "types/note.md", type: "blob" },
+              { path: "records/note/record-1.md", type: "blob" },
+              { path: "blobs/sha256/aa/aa00", type: "blob" },
+              { path: "custom/ui/boolean-01/plugin.json", type: "blob" },
+              { path: "custom/ui/boolean-01/plugin.js", type: "blob" },
+              { path: "custom/ui/boolean-01/README.md", type: "blob" },
+              { path: "cfg/graphdown.ui.json", type: "blob" },
+              { path: "docs/readme.md", type: "blob" }
+            ]
+          });
+        }
+        return jsonResponse({ default_branch: "main" });
+      }
 
-    fetchMock
-      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
-      .mockResolvedValueOnce(
-        jsonResponse({
-          tree: [
-            { path: "types/note.md", type: "blob" },
-            { path: "records/note/record-1.md", type: "blob" },
-            { path: "blobs/sha256/aa/aa00", type: "blob" },
-            { path: "docs/readme.md", type: "blob" }
-          ]
-        })
-      )
-      // type
-      .mockResolvedValueOnce(
-        new Response(
-          ["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"),
-          { status: 200 }
-        )
-      )
-      // record
-      .mockResolvedValueOnce(
-        new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 })
-      )
-      // blob
-      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
-      // docs
-      .mockResolvedValueOnce(new Response(["# Readme", "hello"].join("\n"), { status: 200 }));
+      const respond = (body: string | Uint8Array, init: ResponseInit = { status: 200 }) =>
+        body instanceof Uint8Array ? new Response(body, init) : new Response(body, init);
+
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.json")) {
+        return respond(
+          JSON.stringify({
+            schemaVersion: 1,
+            id: "boolean-01",
+            version: "1.0.0",
+            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+          })
+        );
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.js")) {
+        return respond("return { renderField() { return 'ok'; } };");
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/README.md")) {
+        return respond("# plugin docs");
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/cfg/graphdown.ui.json")) {
+        return respond(
+          JSON.stringify({
+            schemaVersion: 1,
+            resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
+          })
+        );
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/types/note.md")) {
+        return respond(["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"));
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/records/note/record-1.md")) {
+        return respond(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"));
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/blobs/sha256/aa/aa00")) {
+        return respond(new Uint8Array([1, 2, 3]));
+      }
+      if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/docs/readme.md")) {
+        return respond("# Readme");
+      }
+
+      throw new Error(`Unexpected fetch: ${urlStr}`);
+    });
+
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
       "blobs/sha256/aa/aa00",
+      "cfg/graphdown.ui.json",
+      "custom/ui/boolean-01/README.md",
+      "custom/ui/boolean-01/plugin.js",
+      "custom/ui/boolean-01/plugin.json",
       "records/note/record-1.md",
       "types/note.md"
     ]);

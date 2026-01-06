@@ -1,6 +1,12 @@
 import { unzipSync } from "fflate";
 import { parseGraphdownFile } from "../core/datasetObjects";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
+import {
+  discoverUiPluginPackages,
+  isUiConfigCandidate,
+  isUnderDir,
+  selectUiConfigPath
+} from "../core/uiPluginArtifacts";
 
 const ROOT_DIRS = new Set(["types", "records", "plugins", "blobs"]);
 
@@ -29,30 +35,6 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-function shouldInclude(path: string, bytes: Uint8Array): boolean {
-  if (path.startsWith("blobs/sha256/")) {
-    return true;
-  }
-  if (path.startsWith("plugins/")) {
-    return true;
-  }
-  if (path === "graphdown.ui.json") {
-    return true;
-  }
-  const lower = path.toLowerCase();
-  if (lower.endsWith(".md")) {
-    const parsed = parseGraphdownFile(path, bytes);
-    if (parsed.kind === "type" || parsed.kind === "record") {
-      return true;
-    }
-    if (parsed.kind === "error") {
-      return true;
-    }
-    return false;
-  }
-  return false;
-}
-
 export async function readZipSnapshot(
   file: File
 ): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
@@ -76,18 +58,50 @@ export async function readZipSnapshot(
     Boolean(root) &&
     !ROOT_DIRS.has(root) &&
     normalizedEntries.every((entry) => entry.path.startsWith(`${root}/`));
-  const files = new Map<string, Uint8Array>();
-  const ignored: string[] = [];
+  const finalEntries: Array<{ path: string; contents: Uint8Array }> = [];
   for (const entry of normalizedEntries) {
     const finalPath = shouldStripRoot ? entry.path.split("/").slice(1).join("/") : entry.path;
-    if (!finalPath) {
+    if (!finalPath) continue;
+    finalEntries.push({ path: finalPath, contents: entry.contents });
+  }
+
+  const fileMap = new Map<string, Uint8Array>(finalEntries.map((entry) => [entry.path, entry.contents]));
+  const packages = discoverUiPluginPackages(fileMap);
+  const pluginDirs = packages.map((pkg) => pkg.rootDir);
+  const configPath = selectUiConfigPath(fileMap);
+
+  const files = new Map<string, Uint8Array>();
+  const ignored: string[] = [];
+
+  for (const entry of finalEntries) {
+    const { path, contents } = entry;
+    const lower = path.toLowerCase();
+
+    if (path.startsWith("blobs/sha256/")) {
+      files.set(path, contents);
       continue;
     }
-    if (shouldInclude(finalPath, entry.contents)) {
-      files.set(finalPath, entry.contents);
-    } else {
-      ignored.push(finalPath);
+
+    if (configPath && path === configPath) {
+      files.set(path, contents);
+      continue;
     }
+
+    if (pluginDirs.some((dir) => isUnderDir(path, dir))) {
+      files.set(path, contents);
+      continue;
+    }
+
+    if (lower.endsWith(".md")) {
+      const parsed = parseGraphdownFile(path, contents);
+      if (parsed.kind === "type" || parsed.kind === "record" || parsed.kind === "error") {
+        files.set(path, contents);
+        continue;
+      }
+    }
+
+    ignored.push(path);
   }
+
   return { snapshot: { files }, ignored };
 }

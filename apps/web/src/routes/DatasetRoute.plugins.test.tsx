@@ -104,10 +104,10 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
   const files: Record<string, Uint8Array> = {
     "types/flag.md": toBytes(typeContent),
     "records/flag/demo.md": toBytes(recordContent),
-    "plugins/boolean-redgreen/plugin.json": toBytes(redGreenManifest),
-    "plugins/boolean-redgreen/plugin.js": toBytes(redGreenCode),
-    "plugins/boolean-01/plugin.json": toBytes(booleanManifest),
-    "plugins/boolean-01/plugin.js": toBytes(booleanCode)
+    "ui/renderers/boolean-redgreen/plugin.json": toBytes(redGreenManifest),
+    "ui/renderers/boolean-redgreen/plugin.js": toBytes(redGreenCode),
+    "ui/renderers/boolean-01/plugin.json": toBytes(booleanManifest),
+    "ui/renderers/boolean-01/plugin.js": toBytes(booleanCode)
   };
 
   if (includeConfig) {
@@ -121,7 +121,7 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
         }
       ]
     });
-    files["graphdown.ui.json"] = toBytes(config);
+    files["ui/config/graphdown.ui.json"] = toBytes(config);
   }
 
   return zipSync(files);
@@ -160,6 +160,13 @@ async function buildDataset(includeConfig: boolean) {
   };
   mockDataset = { meta, datasetSnapshot: canonicalSnapshot, parsedGraph: graphResult.graph };
   mockUiPlugins = createUiPluginHost(canonicalSnapshot, graphResult.graph);
+
+  expect(canonicalSnapshot.files.has("plugins/boolean-01/plugin.json")).toBe(true);
+  expect(canonicalSnapshot.files.has("plugins/boolean-01/plugin.js")).toBe(true);
+  expect(canonicalSnapshot.files.has("plugins/boolean-redgreen/plugin.json")).toBe(true);
+  expect(canonicalSnapshot.files.has("graphdown.ui.json")).toBe(includeConfig);
+  expect(canonicalSnapshot.files.has("ui/renderers/boolean-01/plugin.json")).toBe(false);
+  expect(canonicalSnapshot.files.has("ui/config/graphdown.ui.json")).toBe(false);
 }
 
 function renderRoute() {

@@ -1,6 +1,7 @@
 import { discoverGraphdownObjects, type ParsedRecordObject } from './datasetObjects';
 import type { DatasetSnapshot } from './snapshotTypes';
 import { isObject } from './types';
+import { discoverUiPluginPackages, isUnderDir, selectUiConfigPath } from './uiPluginArtifacts';
 import { extractBlobRefs } from './wikiLinks';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
@@ -46,7 +47,19 @@ function collectReachableBlobPaths(
 }
 
 export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetSnapshot {
-  const parsed = discoverGraphdownObjects(snapshot);
+  const packages = discoverUiPluginPackages(snapshot.files);
+  const pluginDirs = packages.map((pkg) => pkg.rootDir);
+  const configPath = selectUiConfigPath(snapshot.files);
+
+  const filteredFiles = new Map<string, Uint8Array>();
+  for (const [path, bytes] of snapshot.files.entries()) {
+    if (pluginDirs.some((dir) => isUnderDir(path, dir))) {
+      continue;
+    }
+    filteredFiles.set(path, bytes);
+  }
+
+  const parsed = discoverGraphdownObjects({ files: filteredFiles });
   const outputFiles = new Map<string, Uint8Array>();
 
   for (const typeObj of parsed.typeObjects) {
@@ -102,9 +115,24 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     }
   }
 
-  for (const [path, bytes] of snapshot.files.entries()) {
-    if (path.startsWith('plugins/') || path === 'graphdown.ui.json') {
-      outputFiles.set(path, bytes);
+  if (configPath) {
+    const bytes = snapshot.files.get(configPath);
+    if (bytes) {
+      outputFiles.set('graphdown.ui.json', bytes);
+    }
+  }
+
+  const sortedPaths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
+  for (const pkg of packages) {
+    for (const path of sortedPaths) {
+      if (!isUnderDir(path, pkg.rootDir)) {
+        continue;
+      }
+      const bytes = snapshot.files.get(path);
+      if (!bytes) continue;
+      const relative = path.slice(pkg.rootDir.length + 1);
+      if (!relative) continue;
+      outputFiles.set(`plugins/${pkg.pluginId}/${relative}`, bytes);
     }
   }
 
