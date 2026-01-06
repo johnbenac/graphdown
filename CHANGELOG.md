@@ -1,3 +1,10 @@
+## [0.13.2](https://github.com/johnbenac/graphdown/compare/v0.13.1...v0.13.2) (2026-01-06)
+
+
+### Bug Fixes
+
+* enforce strict plugin manifest parsing ([6a86b86](https://github.com/johnbenac/graphdown/commit/6a86b8660df7dc86f1e4c881f7bb577edef70621))
+
 ## [0.13.1](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.13.1) (2026-01-06)
 
 
