@@ -1,3 +1,10 @@
+## [0.14.1](https://github.com/johnbenac/graphdown/compare/v0.14.0...v0.14.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* avoid null plugin warning paths ([475a793](https://github.com/johnbenac/graphdown/commit/475a793f639915a6689da10bf6642dd3e7c76bea))
+
 # [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.2...v0.14.0) (2026-01-06)
 
 
