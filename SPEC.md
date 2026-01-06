@@ -954,6 +954,38 @@ Plugins MAY:
 
 …but core MUST remain correct without them.
 
+<!-- req:id=PLUG-001 title="Dataset-embedded plugin artifacts are preserved" testable=true -->
+### PLUG-001 — Dataset-embedded plugin artifacts are preserved
+
+Datasets MAY include the reserved artifacts:
+
+* `plugins/**` (dataset-embedded UI plugins)
+* `graphdown.ui.json` (dataset-level UI resolver configuration)
+
+Importers MUST include these paths in dataset snapshots, and canonicalization/export MUST preserve them byte-for-byte at the same paths.
+
+<!-- req:id=PLUG-002 title="Plugin artifacts are non-semantic" testable=true -->
+### PLUG-002 — Plugin artifacts are non-semantic
+
+Validation semantics MUST ignore plugin artifacts. Invalid or missing plugin files MUST NOT make a dataset invalid.
+
+<!-- req:id=PLUG-003 title="Deterministic UI plugin resolution with warnings" testable=true -->
+### PLUG-003 — Deterministic UI plugin resolution with warnings
+
+When multiple plugins match a UI rendering requirement, the resolver MUST choose deterministically by:
+
+1. highest specificity score,
+2. highest semver version (MAJOR, MINOR, PATCH),
+3. lexicographically smallest plugin id,
+4. provider order in the plugin manifest.
+
+If multiple candidates share the top specificity + version and no dataset resolution is used, import MUST emit a warning describing:
+
+* the capability,
+* the selector,
+* the chosen plugin id,
+* the competing plugin ids.
+
 ---
 
 ## 15. System-level acceptance criteria

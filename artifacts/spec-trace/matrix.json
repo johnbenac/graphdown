@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T09:49:38.087Z",
+  "generatedAt": "2026-01-05T23:22:55.189Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1098,8 +1098,42 @@
       "testable": false,
       "verify": null,
       "tests": []
+    },
+    {
+      "id": "PLUG-001",
+      "title": "Dataset-embedded plugin artifacts are preserved",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-002",
+      "title": "Plugin artifacts are non-semantic",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-003",
+      "title": "Deterministic UI plugin resolution with warnings",
+      "testable": true,
+      "verify": null,
+      "tests": []
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [
+    {
+      "id": "PLUG-001",
+      "title": "Dataset-embedded plugin artifacts are preserved"
+    },
+    {
+      "id": "PLUG-002",
+      "title": "Plugin artifacts are non-semantic"
+    },
+    {
+      "id": "PLUG-003",
+      "title": "Deterministic UI plugin resolution with warnings"
+    }
+  ]
 }

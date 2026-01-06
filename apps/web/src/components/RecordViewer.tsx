@@ -1,5 +1,7 @@
 import YAML from "yaml";
 import type { GraphRecordNode, GraphTypeNode } from "../core/graph";
+import { isObject } from "../core/types";
+import { useDataset } from "../state/DatasetContext";
 
 type RecordViewerProps = {
   record: GraphRecordNode;
@@ -14,8 +16,20 @@ export default function RecordViewer({
   outgoingLinks,
   incomingLinks
 }: RecordViewerProps) {
+  const { uiPlugins } = useDataset();
   const bodyValue = record.body ?? "";
   const fieldsYaml = YAML.stringify(record.fields ?? {}, { indent: 2 });
+  const recordFields = record.fields ?? {};
+  const fieldDefs = isObject(typeDef.fields) ? typeDef.fields.fieldDefs : undefined;
+  const fieldDefsMap = isObject(fieldDefs) ? fieldDefs : null;
+
+  const renderValue = (value: unknown) => {
+    if (typeof value === "string") {
+      return value;
+    }
+    const json = JSON.stringify(value);
+    return json ?? String(value);
+  };
 
   return (
     <div className="record-card">
@@ -23,6 +37,37 @@ export default function RecordViewer({
         <strong>{record.recordId}</strong>
       </p>
       <p>Type: {typeDef.typeId}</p>
+      <div>
+        <h3>Rendered Fields</h3>
+        {Object.entries(recordFields).length ? (
+          <div className="record-rendered-fields">
+            {Object.entries(recordFields).map(([fieldName, value]) => {
+              const fieldDef = fieldDefsMap?.[fieldName];
+              const kind =
+                fieldDef && isObject(fieldDef) && typeof fieldDef.kind === "string"
+                  ? fieldDef.kind
+                  : undefined;
+              const rendered = uiPlugins?.renderField({
+                typeId: record.typeId,
+                recordId: record.recordId,
+                recordKey: record.recordKey,
+                fieldName,
+                kind,
+                value,
+                recordFields,
+                typeFields: typeDef.fields
+              });
+              return (
+                <div key={fieldName} data-testid={`rendered-field-${fieldName}`}>
+                  <strong>{fieldName}:</strong> {rendered ?? renderValue(value)}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p>(no fields)</p>
+        )}
+      </div>
       <div>
         <h3>Fields</h3>
         <pre>{fieldsYaml}</pre>

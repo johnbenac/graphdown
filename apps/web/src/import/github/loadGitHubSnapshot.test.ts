@@ -104,6 +104,9 @@ describe("loadGitHubSnapshot", () => {
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
             { path: "blobs/sha256/aa/aa00", type: "blob" },
+            { path: "plugins/boolean-01/plugin.json", type: "blob" },
+            { path: "plugins/boolean-01/plugin.js", type: "blob" },
+            { path: "graphdown.ui.json", type: "blob" },
             { path: "docs/readme.md", type: "blob" }
           ]
         })
@@ -120,12 +123,41 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 })
       )
       // blob
-      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
+      // plugin manifest
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify(
+            {
+              schemaVersion: 1,
+              id: "boolean-01",
+              version: "1.0.0",
+              provides: [
+                {
+                  capability: "field.view",
+                  match: { kind: "boolean" },
+                  entry: "renderField"
+                }
+              ]
+            },
+            null,
+            2
+          ),
+          { status: 200 }
+        )
+      )
+      // plugin main
+      .mockResolvedValueOnce(new Response("return { renderField() { return '1'; } };", { status: 200 }))
+      // graphdown ui config
+      .mockResolvedValueOnce(new Response(JSON.stringify({ schemaVersion: 1, resolutions: [] }), { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
       "blobs/sha256/aa/aa00",
+      "graphdown.ui.json",
+      "plugins/boolean-01/plugin.js",
+      "plugins/boolean-01/plugin.json",
       "records/note/record-1.md",
       "types/note.md"
     ]);
