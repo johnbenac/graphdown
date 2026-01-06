@@ -192,31 +192,32 @@ export function discoverPlugins(snapshot: DatasetSnapshot): {
   }
 
   for (const [pluginId, info] of pluginRoots.entries()) {
-    if (!info.manifestPath) {
+    const manifestPath = info.manifestPath;
+    if (!manifestPath) {
       warnings.push({ message: `Plugin "${pluginId}" missing manifest`, pluginId });
       continue;
     }
-    const bytes = snapshot.files.get(info.manifestPath);
+    const bytes = snapshot.files.get(manifestPath);
     if (!bytes) continue;
     const text = decodeUtf8(bytes);
     if (!text) {
-      warnings.push({ message: `Plugin manifest at ${info.manifestPath} is not valid UTF-8`, path: info.manifestPath, pluginId });
+      warnings.push({ message: `Plugin manifest at ${manifestPath} is not valid UTF-8`, path: manifestPath, pluginId });
       continue;
     }
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
     } catch {
-      warnings.push({ message: `Plugin manifest at ${info.manifestPath} is invalid JSON`, path: info.manifestPath, pluginId });
+      warnings.push({ message: `Plugin manifest at ${manifestPath} is invalid JSON`, path: manifestPath, pluginId });
       continue;
     }
     const { manifest, warnings: manifestWarnings } = validateManifest(parsed, pluginId, filesSet);
-    warnings.push(...manifestWarnings.map((w) => ({ ...w, path: w.path ?? info.manifestPath })));
+    warnings.push(...manifestWarnings.map((w) => ({ ...w, path: w.path ?? manifestPath })));
     if (!manifest) {
       continue;
     }
     if (manifestsById.has(manifest.id)) {
-      warnings.push({ message: `Duplicate plugin id "${manifest.id}" at ${info.manifestPath} was ignored`, path: info.manifestPath, pluginId });
+      warnings.push({ message: `Duplicate plugin id "${manifest.id}" at ${manifestPath} was ignored`, path: manifestPath, pluginId });
       continue;
     }
     manifestsById.set(manifest.id, manifest);
