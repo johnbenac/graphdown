@@ -5,9 +5,10 @@ import {
   isUiConfigCandidate,
   isUiPluginManifestCandidate,
   isUnderDir,
-  parseUiPluginManifest,
+  parseUiPluginIdOrThrow,
   PluginManifestError,
-  selectUiConfigPathFromPaths
+  selectUiConfigPathFromPaths,
+  tryParseUiPluginId
 } from "../../core/uiPluginArtifacts";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
@@ -15,6 +16,7 @@ import { computeIgnoredPaths } from "../computeIgnoredPaths";
 
 const API_BASE = "https://api.github.com";
 const RAW_BASE = "https://raw.githubusercontent.com";
+const PLUGIN_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
 type GitHubRepoMetadata = {
   default_branch?: string;
@@ -73,6 +75,7 @@ export async function loadGitHubSnapshot(input: {
   const blobStorePaths: string[] = [];
   const manifestCandidatePaths: string[] = [];
   const configCandidatePaths: string[] = [];
+  const canonicalPluginRoots = new Map<string, string>();
 
   for (const entry of treeResponse.tree) {
     if (entry.type !== "blob") continue;
@@ -80,6 +83,15 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) continue;
     allBlobPaths.push(snapshotPath);
     const lower = snapshotPath.toLowerCase();
+    if (snapshotPath.startsWith("plugins/")) {
+      const segments = snapshotPath.split("/");
+      const pluginId = segments[1];
+      if (pluginId && PLUGIN_ID_PATTERN.test(pluginId)) {
+        if (!canonicalPluginRoots.has(pluginId)) {
+          canonicalPluginRoots.set(pluginId, `plugins/${pluginId}`);
+        }
+      }
+    }
     if (snapshotPath.startsWith("blobs/sha256/")) {
       blobStorePaths.push(snapshotPath);
       continue;
@@ -96,7 +108,7 @@ export async function loadGitHubSnapshot(input: {
   }
 
   const downloadedBytesByPath = new Map<string, Uint8Array>();
-  const pluginRootsById = new Map<string, string>();
+  const pluginRootsById = new Map<string, string>(canonicalPluginRoots);
 
   const downloadFile = async (path: string): Promise<Uint8Array> => {
     const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${path}`);
@@ -120,18 +132,55 @@ export async function loadGitHubSnapshot(input: {
   for (const path of manifestCandidatePaths) {
     const bytes = await downloadFile(path);
     downloadedBytesByPath.set(path, bytes);
-    const parsed = parseUiPluginManifest(bytes, path);
     const rootDir = dirname(path);
-    if (!rootDir) {
-      throw new PluginManifestError(`Plugin manifest must not be at dataset root: ${path}`);
+    if (path.startsWith("plugins/")) {
+      const segments = path.split("/");
+      const pluginIdFromPath = segments[1];
+      const parsed = parseUiPluginIdOrThrow(bytes, path);
+      if (!pluginIdFromPath || !PLUGIN_ID_PATTERN.test(pluginIdFromPath)) {
+        throw new PluginManifestError(`Plugin manifest must not be at dataset root: ${path}`);
+      }
+      if (pluginIdFromPath !== parsed.pluginId) {
+        throw new PluginManifestError(
+          `Plugin id mismatch for manifest at ${path}: expected ${pluginIdFromPath}, found ${parsed.pluginId}`
+        );
+      }
+      const existingRoot = pluginRootsById.get(parsed.pluginId);
+      if (existingRoot && existingRoot.startsWith("plugins/")) {
+        throw new PluginManifestError(
+          `Duplicate plugin id "${parsed.pluginId}" discovered at ${path}`
+        );
+      }
+      pluginRootsById.set(parsed.pluginId, `plugins/${pluginIdFromPath}`);
+    } else {
+      const parsed = tryParseUiPluginId(bytes);
+      if (!parsed) {
+        manifestCompleted += 1;
+        onProgress?.({
+          phase: "discovering_plugins",
+          completed: manifestCompleted,
+          total: manifestCandidatePaths.length,
+          detail: path
+        });
+        continue;
+      }
+      if (!rootDir) {
+        manifestCompleted += 1;
+        onProgress?.({
+          phase: "discovering_plugins",
+          completed: manifestCompleted,
+          total: manifestCandidatePaths.length,
+          detail: path
+        });
+        continue;
+      }
+      const existingRoot = pluginRootsById.get(parsed.pluginId);
+      if (existingRoot && existingRoot.startsWith("plugins/")) {
+        // keep canonical
+      } else if (!existingRoot) {
+        pluginRootsById.set(parsed.pluginId, rootDir);
+      }
     }
-    const existingRoot = pluginRootsById.get(parsed.pluginId);
-    if (existingRoot) {
-      throw new PluginManifestError(
-        `Duplicate plugin id "${parsed.pluginId}" discovered at ${path}`
-      );
-    }
-    pluginRootsById.set(parsed.pluginId, rootDir);
     manifestCompleted += 1;
     onProgress?.({
       phase: "discovering_plugins",
@@ -146,6 +195,11 @@ export async function loadGitHubSnapshot(input: {
   const configPath = selectUiConfigPathFromPaths(configCandidatePaths);
   const pathsToDownload = new Set<string>();
   blobStorePaths.forEach((p) => pathsToDownload.add(p));
+  allBlobPaths.forEach((p) => {
+    if (p.startsWith("plugins/")) {
+      pathsToDownload.add(p);
+    }
+  });
   if (configPath) pathsToDownload.add(configPath);
   for (const path of allBlobPaths) {
     const lower = path.toLowerCase();
@@ -185,6 +239,10 @@ export async function loadGitHubSnapshot(input: {
   for (const [path, bytes] of downloadedBytesByPath.entries()) {
     const lower = path.toLowerCase();
     if (path.startsWith("blobs/sha256/")) {
+      finalFiles.set(path, bytes);
+      continue;
+    }
+    if (path.startsWith("plugins/")) {
       finalFiles.set(path, bytes);
       continue;
     }

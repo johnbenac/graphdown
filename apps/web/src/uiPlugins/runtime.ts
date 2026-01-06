@@ -1,6 +1,12 @@
 import React from "react";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
-import type { FieldViewContext, ProviderRef, UiPluginManifest, UiPluginWarning } from "./types";
+import type {
+  FieldViewContext,
+  ProviderRef,
+  RecordViewContext,
+  UiPluginManifest,
+  UiPluginWarning
+} from "./types";
 
 function decodeUtf8(bytes: Uint8Array): string | null {
   try {
@@ -86,6 +92,33 @@ export function invokeFieldView(input: {
   }
   try {
     return (entry as (ctx: FieldViewContext) => React.ReactNode)(ctx);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    onWarning?.({ message: `Plugin "${provider.pluginId}" threw during render: ${message}`, pluginId: provider.pluginId });
+    return null;
+  }
+}
+
+export function invokeRecordView(input: {
+  snapshot: DatasetSnapshot;
+  manifest: UiPluginManifest;
+  provider: ProviderRef;
+  ctx: RecordViewContext;
+  cache: Map<string, Record<string, unknown> | null>;
+  onWarning?: (warning: UiPluginWarning) => void;
+}): React.ReactNode | null {
+  const { snapshot, manifest, provider, ctx, cache, onWarning } = input;
+  const exportsValue = loadPluginExports(snapshot, manifest, cache, onWarning);
+  const entry = exportsValue[provider.entry];
+  if (typeof entry !== "function") {
+    onWarning?.({
+      message: `Plugin "${provider.pluginId}" missing entry "${provider.entry}"`,
+      pluginId: provider.pluginId
+    });
+    return null;
+  }
+  try {
+    return (entry as (ctx: RecordViewContext) => React.ReactNode)(ctx);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     onWarning?.({ message: `Plugin "${provider.pluginId}" threw during render: ${message}`, pluginId: provider.pluginId });

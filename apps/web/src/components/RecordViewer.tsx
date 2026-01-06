@@ -1,13 +1,15 @@
+import { useEffect, useMemo, useState } from "react";
 import YAML from "yaml";
 import type { GraphRecordNode, GraphTypeNode } from "../core/graph";
 import { isObject } from "../core/types";
-import type { FieldViewContext, UiPluginHost } from "../uiPlugins/types";
+import type { FieldViewContext, ProviderRef, RecordViewContext, UiPluginHost } from "../uiPlugins/types";
 
 type RecordViewerProps = {
   record: GraphRecordNode;
   typeDef: GraphTypeNode;
   outgoingLinks: string[];
   incomingLinks: string[];
+  graph?: unknown;
   uiPlugins?: UiPluginHost | null;
 };
 
@@ -16,6 +18,7 @@ export default function RecordViewer({
   typeDef,
   outgoingLinks,
   incomingLinks,
+  graph,
   uiPlugins
 }: RecordViewerProps) {
   const bodyValue = record.body ?? "";
@@ -38,12 +41,67 @@ export default function RecordViewer({
     return <pre>{JSON.stringify(value, null, 2)}</pre>;
   };
 
+  const recordViewCtx: RecordViewContext = useMemo(
+    () => ({
+      typeId: typeDef.typeId,
+      recordId: record.recordId,
+      recordKey: record.recordKey,
+      recordFields,
+      recordBody: bodyValue,
+      typeFields,
+      outgoingLinks,
+      incomingLinks,
+      graph
+    }),
+    [bodyValue, graph, incomingLinks, outgoingLinks, record.recordId, record.recordKey, recordFields, typeDef.typeId, typeFields]
+  );
+
+  const recordViewProviders = uiPlugins?.listRecordViews(recordViewCtx) ?? [];
+  const resolvedRecordView = uiPlugins?.resolveRecordView(recordViewCtx) ?? null;
+  const defaultProvider = resolvedRecordView?.chosen ?? recordViewProviders[0] ?? null;
+  const [selectedRecordView, setSelectedRecordView] = useState<ProviderRef | null>(defaultProvider);
+
+  useEffect(() => {
+    setSelectedRecordView(defaultProvider ?? null);
+  }, [defaultProvider]);
+
+  const selectedViewNode =
+    selectedRecordView && uiPlugins
+      ? uiPlugins.renderRecordView(recordViewCtx, selectedRecordView)
+      : null;
+
   return (
     <div className="record-card">
       <p>
         <strong>{record.recordId}</strong>
       </p>
       <p>Type: {typeDef.typeId}</p>
+      {recordViewProviders.length ? (
+        <div>
+          <h3>Views</h3>
+          <div className="record-view-selector">
+            <label>
+              Select view:{" "}
+              <select
+                value={selectedRecordView ? `${selectedRecordView.pluginId}:${selectedRecordView.entry}` : ""}
+                onChange={(e) => {
+                  const next = recordViewProviders.find(
+                    (p) => `${p.pluginId}:${p.entry}` === e.target.value
+                  );
+                  setSelectedRecordView(next ?? null);
+                }}
+              >
+                {recordViewProviders.map((provider) => (
+                  <option key={`${provider.pluginId}:${provider.entry}`} value={`${provider.pluginId}:${provider.entry}`}>
+                    {provider.pluginId} / {provider.entry}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div data-testid="record-view-output">{selectedViewNode ?? <em>(no output)</em>}</div>
+        </div>
+      ) : null}
       <div>
         <h3>Rendered Fields</h3>
         {fieldEntries.length ? (

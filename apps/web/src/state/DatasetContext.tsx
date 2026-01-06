@@ -22,6 +22,7 @@ import { loadUiConfig } from "../uiPlugins/loadConfig";
 import { resolveProvider } from "../uiPlugins/resolve";
 import type { UiPluginHost, UiPluginWarning } from "../uiPlugins/types";
 import { buildImportReport } from "./importReport";
+import { PluginManifestError } from "../core/uiPluginArtifacts";
 
 export type ImportErrorCategory =
   | "invalid_url"
@@ -166,15 +167,17 @@ function collectPluginWarnings(snapshot: DatasetSnapshot, graph: Graph): string[
       if (!resolved) {
         continue;
       }
-      if (resolved.ambiguousTopGroup.length > 1 && !resolved.usedResolution) {
+      if (!resolved.usedResolution) {
         const competingIds = [
           ...new Set(resolved.ambiguousTopGroup.map((provider) => provider.pluginId))
         ].sort((a, b) => a.localeCompare(b));
-        warnings.push({
-          message: `Ambiguous field.view provider for selector ${JSON.stringify(
-            selector
-          )}: chose \"${resolved.chosen.pluginId}\" among ${competingIds.join(", ")}`
-        });
+        if (competingIds.length > 1) {
+          warnings.push({
+            message: `Ambiguous field.view provider for selector ${JSON.stringify(
+              selector
+            )}: chose \"${resolved.chosen.pluginId}\" among ${competingIds.join(", ")}`
+          });
+        }
       }
     }
   }
@@ -310,11 +313,20 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         console.warn("Failed to import dataset.", err);
         setStatus("error");
-        setError({
-          category: "unknown",
-          title: "Import failed",
-          message: err instanceof Error ? err.message : "Failed to import dataset."
-        });
+        if (err instanceof PluginManifestError) {
+          setError({
+            category: "dataset_invalid",
+            title: "Invalid plugin manifest",
+            message: err.message,
+            errors: []
+          });
+        } else {
+          setError({
+            category: "unknown",
+            title: "Import failed",
+            message: err instanceof Error ? err.message : "Failed to import dataset."
+          });
+        }
       }
     },
     [saveActiveDataset]
@@ -405,11 +417,20 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         }
-        setError({
-          category: "unknown",
-          title: "Import failed",
-          message: err instanceof Error ? err.message : "Failed to import dataset."
-        });
+        if (err instanceof PluginManifestError) {
+          setError({
+            category: "dataset_invalid",
+            title: "Invalid plugin manifest",
+            message: err.message,
+            errors: []
+          });
+        } else {
+          setError({
+            category: "unknown",
+            title: "Import failed",
+            message: err instanceof Error ? err.message : "Failed to import dataset."
+          });
+        }
       }
     },
     [saveActiveDataset]

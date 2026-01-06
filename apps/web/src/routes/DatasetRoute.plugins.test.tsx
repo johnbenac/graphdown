@@ -100,6 +100,25 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
     "};"
   ].join("\n");
 
+  const recordViewManifest = JSON.stringify({
+    id: "record-viewer",
+    provides: [
+      {
+        capability: "recordView",
+        match: { typeId: "flag" },
+        entry: "renderRecord"
+      }
+    ]
+  });
+
+  const recordViewCode = [
+    "return {",
+    "  renderRecord(ctx) {",
+    "    return `VIEW:${ctx.recordId}`;",
+    "  }",
+    "};"
+  ].join("\n");
+
   const toBytes = (value: string) => new Uint8Array(strToU8(value));
   const files: Record<string, Uint8Array> = {
     "types/flag.md": toBytes(typeContent),
@@ -107,7 +126,9 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
     "ui/renderers/boolean-redgreen/plugin.json": toBytes(redGreenManifest),
     "ui/renderers/boolean-redgreen/plugin.js": toBytes(redGreenCode),
     "ui/renderers/boolean-01/plugin.json": toBytes(booleanManifest),
-    "ui/renderers/boolean-01/plugin.js": toBytes(booleanCode)
+    "ui/renderers/boolean-01/plugin.js": toBytes(booleanCode),
+    "ui/views/flag/manifest.json": toBytes(recordViewManifest),
+    "ui/views/flag/plugin.js": toBytes(recordViewCode)
   };
 
   if (includeConfig) {
@@ -164,6 +185,8 @@ async function buildDataset(includeConfig: boolean) {
   expect(canonicalSnapshot.files.has("plugins/boolean-01/plugin.json")).toBe(true);
   expect(canonicalSnapshot.files.has("plugins/boolean-01/plugin.js")).toBe(true);
   expect(canonicalSnapshot.files.has("plugins/boolean-redgreen/plugin.json")).toBe(true);
+  expect(canonicalSnapshot.files.has("plugins/record-viewer/manifest.json")).toBe(true);
+  expect(canonicalSnapshot.files.has("plugins/record-viewer/plugin.js")).toBe(true);
   expect(canonicalSnapshot.files.has("graphdown.ui.json")).toBe(includeConfig);
   expect(canonicalSnapshot.files.has("ui/renderers/boolean-01/plugin.json")).toBe(false);
   expect(canonicalSnapshot.files.has("ui/config/graphdown.ui.json")).toBe(false);
@@ -185,6 +208,8 @@ describe("DatasetRoute UI plugins", () => {
     renderRoute();
     const rendered = await screen.findByTestId("rendered-field-value", {}, { timeout: 3000 });
     expect(rendered).toHaveTextContent("1");
+    const recordView = await screen.findByTestId("record-view-output", {}, { timeout: 3000 });
+    expect(recordView).toHaveTextContent("VIEW:demo");
   });
 
   it("UI-PLUGIN-003: reports ambiguity warnings when no resolution is provided", async () => {

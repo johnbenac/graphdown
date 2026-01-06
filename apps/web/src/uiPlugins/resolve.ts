@@ -9,6 +9,8 @@ import type {
 import type { PluginCatalog, UiResolutionConfig } from "./types";
 
 const SPECIFICITY_SCORES: Record<string, number> = {
+  recordKey: 200,
+  recordId: 150,
   typeId: 100,
   fieldName: 50,
   kind: 10
@@ -61,7 +63,8 @@ function resolveResolution(
   const matches = config.resolutions
     .map((resolution, index) => ({ resolution, index }))
     .filter(({ resolution }) =>
-      resolution.capability === requirement.capability && matchSelector(requirement.selector, resolution.match)
+      resolution.capability === requirement.capability &&
+      matchSelector(requirement.selector, resolution.match)
     );
   if (!matches.length) {
     return { resolution: null, usedResolution: false };
@@ -82,9 +85,11 @@ export function resolveProvider(input: {
 }): ResolvedProvider | null {
   const { requirement, catalog, config, onWarning } = input;
 
-  const matches = catalog.providers.filter(
-    (provider) => provider.capability === requirement.capability && matchSelector(requirement.selector, provider.match)
-  );
+  const matches = catalog.providers.filter((provider) => {
+    if (provider.capability !== requirement.capability) return false;
+    if (!matchSelector(requirement.selector, provider.match)) return false;
+    return true;
+  });
   if (!matches.length) {
     return null;
   }
@@ -94,7 +99,11 @@ export function resolveProvider(input: {
 
   const { resolution, usedResolution: hasResolution } = resolveResolution(requirement, config);
   if (hasResolution && resolution) {
-    const filtered = matches.filter((provider) => provider.pluginId === resolution.use);
+    const filtered = matches.filter((provider) => {
+      if (provider.pluginId !== resolution.use) return false;
+      if (resolution.entry && provider.entry !== resolution.entry) return false;
+      return true;
+    });
     if (filtered.length > 0) {
       candidates = filtered;
       usedResolution = true;

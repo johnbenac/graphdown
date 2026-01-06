@@ -18,13 +18,13 @@ function validateResolution(value: unknown): value is UiResolutionConfig {
   if (typeof value.capability !== "string") {
     return false;
   }
-  if (value.capability !== "field.view") {
-    return false;
-  }
   if (!isMatchObject(value.match)) {
     return false;
   }
   if (typeof value.use !== "string") {
+    return false;
+  }
+  if (value.entry !== undefined && typeof value.entry !== "string") {
     return false;
   }
   return true;

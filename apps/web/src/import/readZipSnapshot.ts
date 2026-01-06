@@ -78,6 +78,11 @@ export async function readZipSnapshot(
     const { path, contents } = entry;
     const lower = path.toLowerCase();
 
+    if (path.startsWith("plugins/")) {
+      files.set(path, contents);
+      continue;
+    }
+
     if (path.startsWith("blobs/sha256/")) {
       files.set(path, contents);
       continue;

@@ -115,4 +115,17 @@ describe("readZipSnapshot", () => {
     const file = { arrayBuffer: async () => buffer } as File;
     await expect(readZipSnapshot(file)).rejects.toBeInstanceOf(PluginManifestError);
   });
+
+  it("ignores unrelated manifest.json files outside plugins", async () => {
+    const zipBytes = zipSync({
+      "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
+      "records/note/record-1.md": new Uint8Array(strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")),
+      "docs/manifest.json": new Uint8Array(strToU8("{}"))
+    });
+    const buffer = Uint8Array.from(zipBytes).buffer;
+    const file = { arrayBuffer: async () => buffer } as File;
+    const { snapshot, ignored } = await readZipSnapshot(file);
+    expect(snapshot.files.has("docs/manifest.json")).toBe(false);
+    expect(ignored).toContain("docs/manifest.json");
+  });
 });

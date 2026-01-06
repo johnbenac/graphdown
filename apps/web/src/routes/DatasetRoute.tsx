@@ -202,10 +202,12 @@ export default function DatasetRoute() {
                     />
                   ) : (
                     <RecordViewer
+                      key={selectedRecordNode.recordKey}
                       record={selectedRecordNode}
                       typeDef={selectedTypeDef}
                       outgoingLinks={outgoingLinks}
                       incomingLinks={incomingLinks}
+                      graph={graph}
                       uiPlugins={uiPlugins}
                     />
                   )

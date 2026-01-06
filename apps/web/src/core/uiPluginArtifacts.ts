@@ -34,7 +34,25 @@ export class PluginManifestError extends Error {
   }
 }
 
-export function parseUiPluginManifest(bytes: Uint8Array, path: string): { pluginId: string } {
+export function tryParseUiPluginId(bytes: Uint8Array): { pluginId: string } | null {
+  let text: string;
+  try {
+    text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!isObject(raw)) return null;
+  if (typeof raw.id !== 'string' || !PLUGIN_ID_PATTERN.test(raw.id)) return null;
+  return { pluginId: raw.id };
+}
+
+export function parseUiPluginIdOrThrow(bytes: Uint8Array, path: string): { pluginId: string } {
   let text: string;
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
@@ -58,27 +76,59 @@ export function parseUiPluginManifest(bytes: Uint8Array, path: string): { plugin
 
 export function discoverUiPluginPackages(
   files: Map<string, Uint8Array>
-): Array<{ pluginId: string; rootDir: string; manifestPath: string }> {
-  const result: Array<{ pluginId: string; rootDir: string; manifestPath: string }> = [];
-  const seen = new Set<string>();
+): Array<{ pluginId: string; rootDir: string; manifestPath: string | null }> {
+  const result: Array<{ pluginId: string; rootDir: string; manifestPath: string | null }> = [];
+  const seen = new Map<string, string>();
   const paths = [...files.keys()].sort((a, b) => a.localeCompare(b));
-  for (const path of paths) {
-    if (!isUiPluginManifestCandidate(path)) continue;
-    const rootDir = dirname(path);
-    if (!rootDir) {
-      throw new PluginManifestError(`Plugin manifest must not be at dataset root: ${path}`);
+
+  const register = (pluginId: string, rootDir: string, manifestPath: string | null) => {
+    const existing = seen.get(pluginId);
+    if (existing && existing.startsWith('plugins/')) {
+      throw new PluginManifestError(`Duplicate plugin id "${pluginId}" discovered at ${manifestPath ?? rootDir}`);
     }
+    if (existing) {
+      // keep first (lexicographically smallest path wins)
+      return;
+    }
+    seen.set(pluginId, manifestPath ?? rootDir);
+    result.push({ pluginId, rootDir, manifestPath });
+  };
+
+  for (const path of paths) {
+    if (path.startsWith('plugins/')) {
+      const segments = path.split('/');
+      if (segments.length < 2) continue;
+      const pluginId = segments[1];
+      if (!PLUGIN_ID_PATTERN.test(pluginId)) {
+        throw new PluginManifestError(`Plugin id "${pluginId}" is invalid (path: ${path})`);
+      }
+      const rootDir = `plugins/${pluginId}`;
+      if (isUiPluginManifestCandidate(path)) {
+        const bytes = files.get(path);
+        if (!bytes) {
+          throw new PluginManifestError(`Plugin manifest missing bytes at ${path}`);
+        }
+        const parsed = parseUiPluginIdOrThrow(bytes, path);
+        if (parsed.pluginId !== pluginId) {
+          throw new PluginManifestError(
+            `Plugin id mismatch for manifest at ${path}: expected ${pluginId}, found ${parsed.pluginId}`
+          );
+        }
+      }
+      register(pluginId, rootDir, null);
+      continue;
+    }
+
+    if (!isUiPluginManifestCandidate(path)) continue;
     const bytes = files.get(path);
     if (!bytes) continue;
-    const manifest = parseUiPluginManifest(bytes, path);
-    if (seen.has(manifest.pluginId)) {
-      throw new PluginManifestError(
-        `Duplicate plugin id "${manifest.pluginId}" discovered at ${path}`
-      );
-    }
-    seen.add(manifest.pluginId);
-    result.push({ pluginId: manifest.pluginId, rootDir, manifestPath: path });
+    const parsed = tryParseUiPluginId(bytes);
+    if (!parsed) continue;
+    const rootDir = dirname(path);
+    if (!rootDir) continue; // ignore dataset-root manifests
+    register(parsed.pluginId, rootDir, path);
   }
+
   return result;
 }
 

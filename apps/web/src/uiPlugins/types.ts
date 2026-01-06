@@ -1,6 +1,6 @@
 import type React from "react";
 
-export type UiCapability = "field.view";
+export type UiCapability = string;
 
 export type UiMatch = Record<string, string>;
 
@@ -8,6 +8,7 @@ export type UiResolutionConfig = {
   capability: UiCapability;
   match: UiMatch;
   use: string;
+  entry?: string;
 };
 
 export type DatasetUiConfig = {
@@ -73,6 +74,21 @@ export type FieldViewContext = {
   typeFields: Record<string, unknown>;
 };
 
+export type RecordViewContext = {
+  typeId: string;
+  recordId: string;
+  recordKey: string;
+  recordFields: Record<string, unknown>;
+  recordBody: string;
+  typeFields: Record<string, unknown>;
+  outgoingLinks: string[];
+  incomingLinks: string[];
+  graph?: unknown;
+};
+
 export type UiPluginHost = {
   renderField: (ctx: FieldViewContext) => React.ReactNode | null;
+  listRecordViews: (ctx: RecordViewContext) => ProviderRef[];
+  resolveRecordView: (ctx: RecordViewContext) => ResolvedProvider | null;
+  renderRecordView: (ctx: RecordViewContext, provider: ProviderRef) => React.ReactNode | null;
 };

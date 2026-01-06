@@ -51,6 +51,31 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
   const pluginDirs = packages.map((pkg) => pkg.rootDir);
   const configPath = selectUiConfigPath(snapshot.files);
 
+  const equalBytes = (a: Uint8Array, b: Uint8Array): boolean => {
+    if (a.byteLength !== b.byteLength) return false;
+    for (let i = 0; i < a.byteLength; i += 1) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  };
+
+  const outputFiles = new Map<string, Uint8Array>();
+
+  const setWithCollisionCheck = (path: string, bytes: Uint8Array) => {
+    const existing = outputFiles.get(path);
+    if (existing && !equalBytes(existing, bytes)) {
+      throw new Error(`Conflicting plugin artifact output for path ${path}`);
+    }
+    outputFiles.set(path, bytes);
+  };
+
+  // Preserve already-canonical plugins before any rewrites
+  for (const [path, bytes] of snapshot.files.entries()) {
+    if (path.startsWith('plugins/')) {
+      setWithCollisionCheck(path, bytes);
+    }
+  }
+
   const filteredFiles = new Map<string, Uint8Array>();
   for (const [path, bytes] of snapshot.files.entries()) {
     if (pluginDirs.some((dir) => isUnderDir(path, dir))) {
@@ -60,7 +85,6 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
   }
 
   const parsed = discoverGraphdownObjects({ files: filteredFiles });
-  const outputFiles = new Map<string, Uint8Array>();
 
   for (const typeObj of parsed.typeObjects) {
     const bytes = snapshot.files.get(typeObj.file);
@@ -132,7 +156,7 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
       if (!bytes) continue;
       const relative = path.slice(pkg.rootDir.length + 1);
       if (!relative) continue;
-      outputFiles.set(`plugins/${pkg.pluginId}/${relative}`, bytes);
+      setWithCollisionCheck(`plugins/${pkg.pluginId}/${relative}`, bytes);
     }
   }
 
