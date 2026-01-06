@@ -842,12 +842,15 @@ Record-only export MUST include all blob store files whose digests are in the re
 
 Export MUST support exporting the entire repository snapshot (including non-record files) as a zip archive.
 
-<!-- req:id=EXP-004 title="Path stability" -->
-### EXP-004 — Path stability
+<!-- req:id=EXP-004 title="Export paths are canonical and identity-derived" -->
+### EXP-004 — Export paths are canonical and identity-derived
 
-Whole-repo export (EXP-003) SHOULD preserve the imported snapshot paths (unless the user explicitly relocates files). Paths carry no semantic meaning but may be preserved for user convenience.
+Export MUST determine output paths solely from canonical layout rules and MUST NOT attempt to preserve pre-import paths for any file kind.
 
-Record-only export (EXP-002) MUST ignore imported record/type file paths and MUST use the canonical layout in EXP-HIER-001.
+Canonical layouts are:
+* record/type objects: EXP-HIER-001
+* blob store files: BLOB-LAYOUT-001
+* UI plugins and dataset UI configuration: UI-PLUGIN-001
 
 <!-- req:id=EXP-HIER-001 title="Canonical parent-based export layout" testable=true -->
 ### EXP-HIER-001 — Canonical parent-based export layout
@@ -957,14 +960,16 @@ Plugins MAY:
 <!-- req:id=UI-PLUGIN-001 title="Plugin artifacts are importable and preserved" testable=true -->
 ### UI-PLUGIN-001 — Plugin artifacts are importable and preserved
 
-Datasets MAY include dataset-embedded UI plugins under `plugins/` and an optional dataset UI configuration file at the repository root named `graphdown.ui.json`.
+Datasets MAY include dataset-embedded UI plugins and an optional dataset UI configuration file named `graphdown.ui.json`.
 
-Import, canonicalization, and export MUST preserve these files byte-for-byte at their original paths.
+Plugin discovery MUST be path-agnostic: plugin artifacts MAY appear anywhere in the repository before import. Import MUST preserve plugin and UI configuration bytes exactly.
+
+Canonicalization and export MUST write plugin artifacts to the canonical plugin layout (`plugins/...`) and the UI configuration file to `graphdown.ui.json` at the dataset root, regardless of their pre-import paths.
 
 <!-- req:id=UI-PLUGIN-002 title="Plugin artifacts are non-semantic for validation and hashing" testable=true -->
 ### UI-PLUGIN-002 — Plugin artifacts are non-semantic for validation and hashing
 
-Core validation, identity, and hashing MUST ignore files under `plugins/` and `graphdown.ui.json`.
+Core validation, identity, and hashing MUST ignore UI plugin artifacts and the dataset UI configuration defined in UI-PLUGIN-001.
 Their presence or absence MUST NOT make a dataset invalid.
 
 <!-- req:id=UI-PLUGIN-003 title="Deterministic plugin resolution and ambiguity warnings" testable=true -->

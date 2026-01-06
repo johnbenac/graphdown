@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T23:38:19.121Z
+Generated: 2026-01-06T08:51:15.345Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -302,7 +302,7 @@ Tests (2):
 Tests (1):
 - apps/web/src/__tests__/core/core.roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
 
-## EXP-004 — Path stability
+## EXP-004 — Export paths are canonical and identity-derived
 Tests (1):
 - apps/web/src/export/exportZip.test.ts — "EXP-004: export canonicalizes record/type file paths"
 

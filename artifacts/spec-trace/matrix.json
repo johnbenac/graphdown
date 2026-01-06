@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T23:38:19.121Z",
+  "generatedAt": "2026-01-06T08:51:15.345Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -985,7 +985,7 @@
     },
     {
       "id": "EXP-004",
-      "title": "Path stability",
+      "title": "Export paths are canonical and identity-derived",
       "testable": null,
       "verify": null,
       "tests": [
