@@ -2,8 +2,6 @@ import React from "react";
 import type { DatasetSnapshot } from "../core/snapshotTypes";
 import type { FieldViewContext, ProviderRef, UiPluginManifest, UiPluginWarning } from "./types";
 
-const exportCache = new Map<string, Record<string, unknown> | null>();
-
 function decodeUtf8(bytes: Uint8Array): string | null {
   try {
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
@@ -19,10 +17,11 @@ function getCacheKey(manifest: UiPluginManifest): string {
 export function loadPluginExports(
   snapshot: DatasetSnapshot,
   manifest: UiPluginManifest,
+  cache: Map<string, Record<string, unknown> | null>,
   onWarning?: (warning: UiPluginWarning) => void
 ): Record<string, unknown> {
   const cacheKey = getCacheKey(manifest);
-  const cached = exportCache.get(cacheKey);
+  const cached = cache.get(cacheKey);
   if (cached !== undefined) {
     return cached ?? {};
   }
@@ -32,14 +31,14 @@ export function loadPluginExports(
   const bytes = snapshot.files.get(filePath);
   if (!bytes) {
     onWarning?.({ message: `Plugin "${manifest.id}" missing entry file ${filePath}`, pluginId: manifest.id });
-    exportCache.set(cacheKey, null);
+    cache.set(cacheKey, null);
     return {};
   }
 
   const code = decodeUtf8(bytes);
   if (!code) {
     onWarning?.({ message: `Plugin "${manifest.id}" entry ${filePath} is not valid UTF-8`, pluginId: manifest.id });
-    exportCache.set(cacheKey, null);
+    cache.set(cacheKey, null);
     return {};
   }
 
@@ -54,15 +53,15 @@ export function loadPluginExports(
     const exportsValue = factory(api);
     if (!exportsValue || typeof exportsValue !== "object") {
       onWarning?.({ message: `Plugin "${manifest.id}" did not return an exports object`, pluginId: manifest.id });
-      exportCache.set(cacheKey, null);
+      cache.set(cacheKey, null);
       return {};
     }
-    exportCache.set(cacheKey, exportsValue as Record<string, unknown>);
+    cache.set(cacheKey, exportsValue as Record<string, unknown>);
     return exportsValue as Record<string, unknown>;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     onWarning?.({ message: `Plugin "${manifest.id}" failed to load: ${message}`, pluginId: manifest.id });
-    exportCache.set(cacheKey, null);
+    cache.set(cacheKey, null);
     return {};
   }
 }
@@ -72,10 +71,11 @@ export function invokeFieldView(input: {
   manifest: UiPluginManifest;
   provider: ProviderRef;
   ctx: FieldViewContext;
+  cache: Map<string, Record<string, unknown> | null>;
   onWarning?: (warning: UiPluginWarning) => void;
 }): React.ReactNode | null {
-  const { snapshot, manifest, provider, ctx, onWarning } = input;
-  const exportsValue = loadPluginExports(snapshot, manifest, onWarning);
+  const { snapshot, manifest, provider, ctx, cache, onWarning } = input;
+  const exportsValue = loadPluginExports(snapshot, manifest, cache, onWarning);
   const entry = exportsValue[provider.entry];
   if (typeof entry !== "function") {
     onWarning?.({

@@ -31,13 +31,11 @@ describe("loadGitHubSnapshot", () => {
       // Raw file fetches
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
+          ["---", "typeId: note", "fields: {}", "---"].join("\n"),
           { status: 200 }
         )
       )
-      .mockResolvedValueOnce(
-        new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
-      );
+      .mockResolvedValueOnce(new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 }));
 
     await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
@@ -69,13 +67,11 @@ describe("loadGitHubSnapshot", () => {
       // Raw file fetches (type, record)
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
+          ["---", "typeId: note", "fields: {}", "---"].join("\n"),
           { status: 200 }
         )
       )
-      .mockResolvedValueOnce(
-        new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
-      );
+      .mockResolvedValueOnce(new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 }));
 
     const { snapshot } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
@@ -122,16 +118,15 @@ describe("loadGitHubSnapshot", () => {
       // blob
       .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
       // docs
-      .mockResolvedValueOnce(new Response(["---", "typeId: note", "fields: {}", "---"].join("\n"), { status: 200 }));
+      .mockResolvedValueOnce(new Response(["# Readme", "hello"].join("\n"), { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
       "blobs/sha256/aa/aa00",
-      "docs/readme.md",
       "records/note/record-1.md",
       "types/note.md"
     ]);
-    expect(ignored).toEqual([]);
+    expect(ignored).toEqual(["docs/readme.md"]);
   });
 });
