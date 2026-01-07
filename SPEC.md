@@ -824,7 +824,7 @@ Markdown with YAML front matter per §5 and are intended to be tracked in versio
 
 Export MUST support exporting the Graphdown record subset:
 
-* all type objects (FR-MD-021) 
+* all type objects (FR-MD-021)
 * all record objects (FR-MD-023)
 * all reachable blob files (GC-001) at their canonical blob store paths (BLOB-LAYOUT-001)
 
