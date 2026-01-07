@@ -1,3 +1,10 @@
+## [0.14.3](https://github.com/johnbenac/graphdown/compare/v0.14.2...v0.14.3) (2026-01-07)
+
+
+### Bug Fixes
+
+* narrow plugin cleanup handler type ([c8ec3bd](https://github.com/johnbenac/graphdown/commit/c8ec3bdbdd13d868a91771bd45f161cbd2747516))
+
 ## [0.14.2](https://github.com/johnbenac/graphdown/compare/v0.14.1...v0.14.2) (2026-01-06)
 
 
