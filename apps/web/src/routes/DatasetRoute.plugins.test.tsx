@@ -57,64 +57,66 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
   ].join("\n");
 
   const redGreenManifest = JSON.stringify({
-    schemaVersion: 1,
     id: "boolean-redgreen",
     version: "1.0.0",
-    main: "plugin.js",
-    provides: [
+    entry: "plugin.js",
+    providers: [
       {
+        id: "default",
         capability: "field.view",
         match: { kind: "boolean" },
-        entry: "renderField"
+        title: "Red/Green boolean"
       }
     ]
   });
 
   const redGreenCode = [
-    "return {",
-    "  renderField(ctx) {",
-    "    return ctx.value === true ? \"🟢 true\" : \"🔴 false\";",
+    "export default {",
+    "  default({ container, ctx }) {",
+    "    container.textContent = ctx.value === true ? \"🟢 true\" : \"🔴 false\";",
     "  }",
     "};"
   ].join("\n");
 
   const booleanManifest = JSON.stringify({
-    schemaVersion: 1,
     id: "boolean-01",
     version: "1.0.0",
-    main: "plugin.js",
-    provides: [
+    entry: "plugin.js",
+    providers: [
       {
+        id: "default",
         capability: "field.view",
         match: { kind: "boolean" },
-        entry: "renderField"
+        title: "0/1 boolean"
       }
     ]
   });
 
   const booleanCode = [
-    "return {",
-    "  renderField(ctx) {",
-    "    return ctx.value === true ? \"1\" : \"0\";",
+    "export default {",
+    "  default({ container, ctx }) {",
+    "    container.textContent = ctx.value === true ? \"1\" : \"0\";",
     "  }",
     "};"
   ].join("\n");
 
   const recordViewManifest = JSON.stringify({
     id: "record-viewer",
-    provides: [
+    entry: "plugin.js",
+    providers: [
       {
-        capability: "recordView",
+        id: "default",
+        capability: "record.view",
         match: { typeId: "flag" },
-        entry: "renderRecord"
+        title: "Default view"
       }
     ]
   });
 
   const recordViewCode = [
-    "return {",
-    "  renderRecord(ctx) {",
-    "    return `VIEW:${ctx.recordId}`;",
+    "export default {",
+    "  default({ container, ctx }) {",
+    "    container.textContent = `VIEW:${ctx.recordId}`;",
     "  }",
     "};"
   ].join("\n");
@@ -133,7 +135,6 @@ function buildZip({ includeConfig }: { includeConfig: boolean }) {
 
   if (includeConfig) {
     const config = JSON.stringify({
-      schemaVersion: 1,
       resolutions: [
         {
           capability: "field.view",

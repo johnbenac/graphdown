@@ -8,26 +8,25 @@ export type UiResolutionConfig = {
   capability: UiCapability;
   match: UiMatch;
   use: string;
-  entry?: string;
+  providerId?: string;
 };
 
 export type DatasetUiConfig = {
-  schemaVersion: 1;
-  resolutions?: UiResolutionConfig[];
+  resolutions: UiResolutionConfig[];
 };
 
 export type UiPluginProvider = {
+  id: string;
   capability: UiCapability;
   match: UiMatch;
-  entry: string;
+  title?: string;
 };
 
 export type UiPluginManifest = {
-  schemaVersion: 1;
   id: string;
   version: string;
-  main?: string;
-  provides: UiPluginProvider[];
+  entry: string;
+  providers: UiPluginProvider[];
 };
 
 export type UiPluginWarning = {
@@ -39,10 +38,11 @@ export type UiPluginWarning = {
 export type ProviderRef = {
   pluginId: string;
   version: string;
-  main: string;
+  entry: string;
   capability: UiCapability;
   match: UiMatch;
-  entry: string;
+  providerId: string;
+  title?: string;
   providerIndex: number;
 };
 

@@ -83,17 +83,20 @@ export default function RecordViewer({
             <label>
               Select view:{" "}
               <select
-                value={selectedRecordView ? `${selectedRecordView.pluginId}:${selectedRecordView.entry}` : ""}
+                value={selectedRecordView ? `${selectedRecordView.pluginId}:${selectedRecordView.providerId}` : ""}
                 onChange={(e) => {
                   const next = recordViewProviders.find(
-                    (p) => `${p.pluginId}:${p.entry}` === e.target.value
+                    (p) => `${p.pluginId}:${p.providerId}` === e.target.value
                   );
                   setSelectedRecordView(next ?? null);
                 }}
               >
                 {recordViewProviders.map((provider) => (
-                  <option key={`${provider.pluginId}:${provider.entry}`} value={`${provider.pluginId}:${provider.entry}`}>
-                    {provider.pluginId} / {provider.entry}
+                  <option
+                    key={`${provider.pluginId}:${provider.providerId}`}
+                    value={`${provider.pluginId}:${provider.providerId}`}
+                  >
+                    {provider.pluginId} / {provider.title ?? provider.providerId}
                   </option>
                 ))}
               </select>

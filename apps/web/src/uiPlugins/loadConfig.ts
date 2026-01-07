@@ -11,50 +11,25 @@ function isMatchObject(value: unknown): value is Record<string, string> {
   return Object.values(value).every((entry) => typeof entry === "string");
 }
 
-function validateResolution(value: unknown): value is UiResolutionConfig {
+function parseResolution(value: unknown): UiResolutionConfig | null {
   if (!isObject(value)) {
-    return false;
+    return null;
   }
   if (typeof value.capability !== "string") {
-    return false;
+    return null;
   }
   if (!isMatchObject(value.match)) {
-    return false;
+    return null;
   }
   if (typeof value.use !== "string") {
-    return false;
-  }
-  if (value.entry !== undefined && typeof value.entry !== "string") {
-    return false;
-  }
-  return true;
-}
-
-function parseConfig(text: string): DatasetUiConfig | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
     return null;
   }
-  if (!isObject(parsed)) {
-    return null;
-  }
-  if (parsed.schemaVersion !== 1) {
-    return null;
-  }
-  if (parsed.resolutions === undefined) {
-    return { schemaVersion: 1, resolutions: [] };
-  }
-  if (!Array.isArray(parsed.resolutions)) {
-    return null;
-  }
-  if (!parsed.resolutions.every(validateResolution)) {
-    return null;
-  }
+  const providerId = typeof value.providerId === "string" ? value.providerId : undefined;
   return {
-    schemaVersion: 1,
-    resolutions: parsed.resolutions
+    capability: value.capability,
+    match: value.match,
+    use: value.use,
+    ...(providerId ? { providerId } : {})
   };
 }
 
@@ -67,6 +42,8 @@ export function loadUiConfig(snapshot: DatasetSnapshot): {
     return { config: null, warnings: [] };
   }
 
+  const warnings: UiPluginWarning[] = [];
+
   let text: string;
   try {
     text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
@@ -77,13 +54,45 @@ export function loadUiConfig(snapshot: DatasetSnapshot): {
     };
   }
 
-  const config = parseConfig(text);
-  if (!config) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
     return {
       config: null,
-      warnings: [{ message: "graphdown.ui.json is invalid; ignoring UI resolutions", path: CONFIG_PATH }]
+      warnings: [{ message: "graphdown.ui.json is invalid JSON; ignoring UI resolutions", path: CONFIG_PATH }]
     };
   }
 
-  return { config, warnings: [] };
+  if (!isObject(parsed)) {
+    return {
+      config: null,
+      warnings: [{ message: "graphdown.ui.json must be a JSON object; ignoring UI resolutions", path: CONFIG_PATH }]
+    };
+  }
+
+  const rawResolutions = (parsed as Record<string, unknown>).resolutions;
+  if (rawResolutions === undefined) {
+    return { config: { resolutions: [] }, warnings };
+  }
+
+  if (!Array.isArray(rawResolutions)) {
+    warnings.push({
+      message: "graphdown.ui.json resolutions must be an array; ignoring",
+      path: CONFIG_PATH
+    });
+    return { config: { resolutions: [] }, warnings };
+  }
+
+  const resolutions: UiResolutionConfig[] = [];
+  for (const entry of rawResolutions) {
+    const parsedResolution = parseResolution(entry);
+    if (!parsedResolution) {
+      warnings.push({ message: "Invalid resolution entry ignored", path: CONFIG_PATH });
+      continue;
+    }
+    resolutions.push(parsedResolution);
+  }
+
+  return { config: { resolutions }, warnings };
 }

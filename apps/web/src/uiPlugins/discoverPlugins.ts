@@ -27,7 +27,7 @@ function isMatchObject(value: unknown): value is Record<string, string> {
   return Object.values(value).every((entry) => typeof entry === "string");
 }
 
-function isValidMainPath(value: unknown): value is string {
+function isValidEntryPath(value: unknown): value is string {
   if (typeof value !== "string") {
     return false;
   }
@@ -53,38 +53,54 @@ function normalizeCapability(value: unknown): string | null {
   return value;
 }
 
-function validateProvider(value: unknown): UiPluginProvider | null {
+function validateProvider(
+  value: unknown,
+  pluginId: string,
+  index: number
+): { provider: UiPluginProvider | null; warnings: UiPluginWarning[] } {
+  const warnings: UiPluginWarning[] = [];
   if (!isObject(value)) {
-    return null;
+    return { provider: null, warnings };
   }
   const capability = normalizeCapability(value.capability);
   if (!capability) {
-    return null;
+    return { provider: null, warnings };
   }
   if (!isMatchObject(value.match)) {
-    return null;
+    return { provider: null, warnings };
   }
-  if (typeof value.entry !== "string") {
-    return null;
+  let providerId = typeof value.id === "string" && value.id.trim() ? value.id : "";
+  if (!providerId) {
+    providerId = `provider-${index}`;
+    warnings.push({ message: `Provider missing id; synthesized ${providerId}`, pluginId });
   }
+  const title = typeof value.title === "string" ? value.title : undefined;
   return {
-    capability,
-    match: value.match,
-    entry: value.entry
+    provider: {
+      id: providerId,
+      capability,
+      match: value.match,
+      ...(title ? { title } : {})
+    },
+    warnings
   };
 }
 
-function pickMain(pluginId: string, rawMain: unknown, files: Set<string>): { main: string; warning?: UiPluginWarning } | null {
-  if (rawMain !== undefined) {
-    if (!isValidMainPath(rawMain)) {
+function pickEntry(
+  pluginId: string,
+  rawEntry: unknown,
+  files: Set<string>
+): { entry: string; warning?: UiPluginWarning } | null {
+  if (rawEntry !== undefined) {
+    if (!isValidEntryPath(rawEntry)) {
       return null;
     }
-    return { main: rawMain };
+    return { entry: rawEntry };
   }
   const root = `plugins/${pluginId}/`;
   const preferred = [`${root}plugin.js`, `${root}${pluginId}.js`].find((p) => files.has(p));
   if (preferred) {
-    return { main: preferred.slice(root.length) };
+    return { entry: preferred.slice(root.length) };
   }
   const candidates = [...files]
     .filter((p) => p.startsWith(root) && !p.slice(root.length).includes("/") && p.endsWith(".js"))
@@ -92,14 +108,18 @@ function pickMain(pluginId: string, rawMain: unknown, files: Set<string>): { mai
   if (candidates.length) {
     const picked = candidates[0];
     return {
-      main: picked.slice(root.length),
-      warning: { message: `Inferred main "${picked.slice(root.length)}" for plugin "${pluginId}"`, pluginId }
+      entry: picked.slice(root.length),
+      warning: { message: `Inferred entry "${picked.slice(root.length)}" for plugin "${pluginId}"`, pluginId }
     };
   }
   return null;
 }
 
-function validateManifest(raw: unknown, pluginId: string, fileSet: Set<string>): { manifest: UiPluginManifest | null; warnings: UiPluginWarning[] } {
+function validateManifest(
+  raw: unknown,
+  pluginId: string,
+  fileSet: Set<string>
+): { manifest: UiPluginManifest | null; warnings: UiPluginWarning[] } {
   const warnings: UiPluginWarning[] = [];
   if (!isObject(raw)) {
     return { manifest: null, warnings };
@@ -108,10 +128,7 @@ function validateManifest(raw: unknown, pluginId: string, fileSet: Set<string>):
     warnings.push({ message: `Plugin id mismatch for ${pluginId}`, pluginId });
     return { manifest: null, warnings };
   }
-  if (raw.schemaVersion !== undefined && raw.schemaVersion !== 1) {
-    warnings.push({ message: `Unsupported schemaVersion for plugin "${pluginId}"`, pluginId });
-    return { manifest: null, warnings };
-  }
+
   let version = "0.0.0";
   if (typeof raw.version === "string" && VERSION_PATTERN.test(raw.version)) {
     version = raw.version;
@@ -119,40 +136,41 @@ function validateManifest(raw: unknown, pluginId: string, fileSet: Set<string>):
     warnings.push({ message: `Invalid version for plugin "${pluginId}", defaulting to 0.0.0`, pluginId });
   }
 
-  const provides: UiPluginProvider[] = [];
-  if (Array.isArray(raw.provides)) {
-    for (const value of raw.provides) {
-      const provider = validateProvider(value);
-      if (provider) {
-        provides.push(provider);
+  const entryResult = pickEntry(pluginId, raw.entry, fileSet);
+  if (!entryResult) {
+    warnings.push({ message: `Plugin "${pluginId}" missing entry point`, pluginId });
+    return { manifest: null, warnings };
+  }
+  if (entryResult.warning) {
+    warnings.push(entryResult.warning);
+  }
+
+  const providers: UiPluginProvider[] = [];
+  if (Array.isArray(raw.providers)) {
+    raw.providers.forEach((value, index) => {
+      const parsed = validateProvider(value, pluginId, index);
+      warnings.push(...parsed.warnings);
+      if (parsed.provider) {
+        providers.push(parsed.provider);
       } else {
         warnings.push({ message: `Invalid provider entry in plugin "${pluginId}" ignored`, pluginId });
       }
-    }
-  } else if (raw.provides !== undefined) {
-    warnings.push({ message: `Plugin "${pluginId}" provides must be an array`, pluginId });
+    });
+  } else if (raw.providers !== undefined) {
+    warnings.push({ message: `Plugin "${pluginId}" providers must be an array`, pluginId });
   }
-  if (!provides.length) {
+
+  if (!providers.length) {
     warnings.push({ message: `Plugin "${pluginId}" has no valid providers`, pluginId });
     return { manifest: null, warnings };
   }
 
-  const mainResult = pickMain(pluginId, raw.main, fileSet);
-  if (!mainResult) {
-    warnings.push({ message: `Plugin "${pluginId}" missing entry point`, pluginId });
-    return { manifest: null, warnings };
-  }
-  if (mainResult.warning) {
-    warnings.push(mainResult.warning);
-  }
-
   return {
     manifest: {
-      schemaVersion: 1,
       id: pluginId,
       version,
-      main: mainResult.main,
-      provides
+      entry: entryResult.entry,
+      providers
     },
     warnings
   };
@@ -221,14 +239,15 @@ export function discoverPlugins(snapshot: DatasetSnapshot): {
       continue;
     }
     manifestsById.set(manifest.id, manifest);
-    manifest.provides.forEach((provider, index) => {
+    manifest.providers.forEach((provider, index) => {
       providers.push({
         pluginId: manifest.id,
         version: manifest.version,
-        main: manifest.main ?? "plugin.js",
+        entry: manifest.entry,
         capability: provider.capability,
         match: provider.match,
-        entry: provider.entry,
+        providerId: provider.id,
+        title: provider.title,
         providerIndex: index
       });
     });

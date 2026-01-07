@@ -13,14 +13,12 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
 describe("canonicalizeDatasetSnapshot plugins", () => {
   it("UI-PLUGIN-001: canonicalization rewrites plugin artifacts and UI config to canonical locations", () => {
     const pluginJson = JSON.stringify({
-      schemaVersion: 1,
       id: "boolean-01",
       version: "1.0.0",
-      main: "plugin.js",
-      provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+      entry: "plugin.js",
+      providers: [{ id: "default", capability: "field.view", match: { kind: "boolean" } }]
     });
     const configJson = JSON.stringify({
-      schemaVersion: 1,
       resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
     });
     const snapshot = snapshotFromEntries([

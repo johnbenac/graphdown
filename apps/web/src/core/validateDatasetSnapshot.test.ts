@@ -58,11 +58,19 @@ describe("validateDatasetSnapshot", () => {
     const snapshot = snapshotFromEntries([
       rec("types/flag.md", ["typeId: flag", "fields: {}"]),
       rec("records/flag/demo.md", ["typeId: flag", "recordId: demo", "fields: {}"]),
-      ["plugins/boolean-demo/plugin.json", "{ \"schemaVersion\": 1 }"],
-      ["plugins/boolean-demo/plugin.js", "return { renderField() { return \"ok\"; } };"],
+      [
+        "plugins/boolean-demo/plugin.json",
+        JSON.stringify({
+          id: "boolean-demo",
+          version: "1.0.0",
+          entry: "plugin.js",
+          providers: [{ id: "default", capability: "field.view", match: {} }]
+        })
+      ],
+      ["plugins/boolean-demo/plugin.js", "export default { default() { return; } };"],
       [
         "graphdown.ui.json",
-        JSON.stringify({ schemaVersion: 1, resolutions: [{ capability: "field.view", match: {}, use: "boolean-demo" }] })
+        JSON.stringify({ resolutions: [{ capability: "field.view", match: {}, use: "boolean-demo" }] })
       ]
     ]);
     const result = validateDatasetSnapshot(snapshot);

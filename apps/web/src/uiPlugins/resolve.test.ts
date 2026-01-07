@@ -7,14 +7,16 @@ function makeProvider(input: {
   version: string;
   match: Record<string, string>;
   providerIndex?: number;
+  providerId?: string;
 }): ProviderRef {
   return {
     pluginId: input.pluginId,
     version: input.version,
-    main: "plugin.js",
+    entry: "plugin.js",
     capability: "field.view",
     match: input.match,
-    entry: "renderField",
+    providerId: input.providerId ?? "renderField",
+    title: undefined,
     providerIndex: input.providerIndex ?? 0
   };
 }
@@ -53,12 +55,9 @@ describe("resolveProvider", () => {
     const resolved = resolveProvider({
       requirement: { capability: "field.view", selector: { kind: "boolean" } },
       catalog: makeCatalog(providers),
-      config: {
-        schemaVersion: 1,
-        resolutions: [
-          { capability: "field.view", match: { kind: "boolean" }, use: "boolean-redgreen" }
-        ]
-      }
+    config: {
+      resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-redgreen" }]
+    }
     });
 
     expect(resolved?.chosen.pluginId).toBe("boolean-redgreen");

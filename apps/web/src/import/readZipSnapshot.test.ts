@@ -72,7 +72,7 @@ describe("readZipSnapshot", () => {
       "x/y/boolean-01/plugin.js": new Uint8Array(strToU8("return { renderField() { return 'ok'; } };")),
       "x/y/boolean-01/README.md": new Uint8Array(strToU8("# plugin docs")),
       "cfg/graphdown.ui.json": new Uint8Array(
-        strToU8(JSON.stringify({ schemaVersion: 1, resolutions: [{ capability: "field.view", match: {}, use: "boolean-01" }] }))
+        strToU8(JSON.stringify({ resolutions: [{ capability: "field.view", match: {}, use: "boolean-01" }] }))
       ),
       "docs/readme.md": new Uint8Array(strToU8("# ignore me"))
     });

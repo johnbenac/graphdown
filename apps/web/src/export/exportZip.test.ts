@@ -120,18 +120,27 @@ describe("exportDatasetZipBytes", () => {
     const pluginManifestBytes = new Uint8Array(
       strToU8(
         JSON.stringify({
-          schemaVersion: 1,
           id: "boolean-01",
           version: "1.0.0",
-          provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+          entry: "plugin.js",
+          providers: [{ id: "default", capability: "field.view", match: { kind: "boolean" } }]
         })
       )
     );
-    const pluginJsBytes = new Uint8Array(strToU8("export function renderField() { return 'ok'; }\n"));
+    const pluginJsBytes = new Uint8Array(
+      strToU8(
+        [
+          "export default {",
+          "  default({ container }) {",
+          "    container.textContent = 'ok';",
+          "  }",
+          "};"
+        ].join("\n")
+      )
+    );
     const configBytes = new Uint8Array(
       strToU8(
         JSON.stringify({
-          schemaVersion: 1,
           resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
         })
       )

@@ -138,12 +138,22 @@ describe("loadGitHubSnapshot", () => {
         return respond(
           JSON.stringify({
             id: "boolean-01",
-            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+            version: "1.0.0",
+            entry: "plugin.js",
+            providers: [{ id: "default", capability: "field.view", match: { kind: "boolean" } }]
           })
         );
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/plugin.js")) {
-        return respond("return { renderField() { return 'ok'; } };");
+        return respond(
+          [
+            "export default {",
+            "  default({ container }) {",
+            "    container.textContent = 'ok';",
+            "  }",
+            "};"
+          ].join("\n")
+        );
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/custom/ui/boolean-01/README.md")) {
         return respond("# plugin docs");
@@ -151,7 +161,6 @@ describe("loadGitHubSnapshot", () => {
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/cfg/graphdown.ui.json")) {
         return respond(
           JSON.stringify({
-            schemaVersion: 1,
             resolutions: [{ capability: "field.view", match: { kind: "boolean" }, use: "boolean-01" }]
           })
         );
@@ -328,15 +337,25 @@ describe("loadGitHubSnapshot", () => {
         return respond(
           JSON.stringify({
             id: "alpha",
-            provides: [{ capability: "field.view", match: { kind: "boolean" }, entry: "renderField" }]
+            version: "1.0.0",
+            entry: "plugin.js",
+            providers: [{ id: "default", capability: "field.view", match: { kind: "boolean" } }]
           })
         );
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/b/plugin.json")) {
-        return respond(JSON.stringify({ id: "beta" }));
+        return respond(JSON.stringify({ id: "beta", entry: "plugin.js", providers: [] }));
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/a/plugin.js")) {
-        return respond("return { renderField() { return 'ok'; } };");
+        return respond(
+          [
+            "export default {",
+            "  default({ container }) {",
+            "    container.textContent = 'ok';",
+            "  }",
+            "};"
+          ].join("\n")
+        );
       }
       if (urlStr.includes("/raw.githubusercontent.com/owner/repo/main/types/note.md")) {
         return respond(["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"));

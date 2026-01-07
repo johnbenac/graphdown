@@ -101,7 +101,7 @@ export function resolveProvider(input: {
   if (hasResolution && resolution) {
     const filtered = matches.filter((provider) => {
       if (provider.pluginId !== resolution.use) return false;
-      if (resolution.entry && provider.entry !== resolution.entry) return false;
+      if (resolution.providerId && provider.providerId !== resolution.providerId) return false;
       return true;
     });
     if (filtered.length > 0) {

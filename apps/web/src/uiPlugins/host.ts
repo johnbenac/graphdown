@@ -3,7 +3,7 @@ import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { discoverPlugins } from "./discoverPlugins";
 import { loadUiConfig } from "./loadConfig";
 import { resolveProvider } from "./resolve";
-import { invokeFieldView, invokeRecordView } from "./runtime";
+import { renderFieldProvider, renderRecordProvider } from "./runtime";
 import type {
   FieldViewContext,
   ProviderRef,
@@ -38,7 +38,7 @@ function buildRecordRequirement(ctx: RecordViewContext): UiRequirement {
 export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiPluginHost {
   const { config } = loadUiConfig(snapshot);
   const { catalog } = discoverPlugins(snapshot);
-  const exportCache = new Map<string, Record<string, unknown> | null>();
+  const moduleCache = new Map<string, Promise<Record<string, unknown>> | null>();
 
   return {
     renderField(ctx: FieldViewContext) {
@@ -54,7 +54,7 @@ export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiP
       const warn = (warning: UiPluginWarning) => {
         console.warn("UI plugin warning:", warning.message);
       };
-      return invokeFieldView({ snapshot, manifest, provider: resolved.chosen, ctx, cache: exportCache, onWarning: warn });
+      return renderFieldProvider({ snapshot, manifest, provider: resolved.chosen, ctx, cache: moduleCache, onWarning: warn });
     },
     listRecordViews(ctx: RecordViewContext) {
       const requirement = buildRecordRequirement(ctx);
@@ -67,6 +67,7 @@ export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiP
         .sort((a, b) => {
           if (a.pluginId !== b.pluginId) return a.pluginId.localeCompare(b.pluginId);
           if (a.providerIndex !== b.providerIndex) return a.providerIndex - b.providerIndex;
+          if (a.providerId !== b.providerId) return a.providerId.localeCompare(b.providerId);
           return a.entry.localeCompare(b.entry);
         });
       return matches;
@@ -83,7 +84,7 @@ export function createUiPluginHost(snapshot: DatasetSnapshot, graph: Graph): UiP
       const warn = (warning: UiPluginWarning) => {
         console.warn("UI plugin warning:", warning.message);
       };
-      return invokeRecordView({ snapshot, manifest, provider, ctx, cache: exportCache, onWarning: warn });
+      return renderRecordProvider({ snapshot, manifest, provider, ctx, cache: moduleCache, onWarning: warn });
     }
   };
 }
