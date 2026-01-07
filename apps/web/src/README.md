@@ -1,0 +1,57 @@
+# Web app source overview
+
+This directory contains the React + Vite front-end for Graphdown. It wires the
+routing shell, dataset lifecycle, and shared UI styles used by the rest of the
+app-specific subfolders.
+
+## Entry points
+
+- `main.tsx` is the Vite bootstrap that mounts the React tree, pulls in global
+  fonts, and applies `styles.css` before rendering the app root.
+- `App.tsx` defines the route table, sets the router basename, and wraps the
+  router in the `DatasetProvider` so every screen can access dataset state.
+- `styles.css` contains the global styles for layout, typography, and component
+  classes referenced throughout the components and routes.
+
+## App routing
+
+`App.tsx` builds the `appRoutes` array and feeds it into `createBrowserRouter`.
+The routes themselves live in `routes/` and are rendered through the
+`RouterProvider`, with the default route redirecting to `/import`.
+
+## Dataset lifecycle (high level)
+
+1. **Import**
+   - Import screens call into `DatasetContext` actions to validate GitHub URLs or
+     read zip files.
+2. **Validation & canonicalization**
+   - `core/` utilities validate the dataset, normalize file layout, and prune
+     unused blobs.
+3. **Graph building**
+   - The dataset snapshot becomes a graph of types/records and relationship
+     edges used by the UI.
+4. **Persistence**
+   - The snapshot and graph are serialized into storage and rehydrated on load.
+5. **Editing**
+   - Edits from the record editor update snapshot files and commit back through
+     validation and persistence.
+
+## Directory map
+
+- `components/` - reusable UI components (navigation, record editor/viewer, UI
+  wrappers).
+- `core/` - dataset parsing, validation, graph building, hashing, zip handling,
+  and front matter parsing.
+- `export/` - downloading dataset exports from the browser.
+- `import/` - zip parsing + GitHub import helpers.
+- `persistence/` - snapshot/graph serialization and persistence orchestration.
+- `routes/` - route-level screens and navigation flows.
+- `state/` - dataset context, import progress, and import reports.
+- `storage/` - storage adapters for IndexedDB and in-memory fallbacks.
+- `utils/` - small UI-friendly helpers (ex: wiki link helpers for refs).
+
+## Testing entry points
+
+Tests for UI and dataset logic live alongside their modules (for example
+`App.test.tsx`, `__tests__/`, and the per-module `*.test.ts(x)` files in
+subdirectories). The test utilities are wired in `setupTests.ts`.
