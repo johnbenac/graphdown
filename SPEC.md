@@ -820,7 +820,7 @@ Export produces repository snapshots as files (not a JSON/database dump). Graphd
 Markdown with YAML front matter per §5 and are intended to be tracked in version control.
 
 <!-- req:id=EXP-002 title="Record-only export" -->
-### EXP-002 — Record-only export
+### EXP-002 — Record-only export 
 
 Export MUST support exporting the Graphdown record subset:
 
