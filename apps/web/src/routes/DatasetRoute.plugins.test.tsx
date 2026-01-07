@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -208,7 +208,7 @@ describe("DatasetRoute UI plugins", () => {
     await buildDataset(true);
     renderRoute();
     const rendered = await screen.findByTestId("rendered-field-value", {}, { timeout: 3000 });
-    expect(rendered).toHaveTextContent("1");
+    await waitFor(() => expect(rendered).toHaveTextContent("1"));
     const recordView = await screen.findByTestId("record-view-output", {}, { timeout: 3000 });
     expect(recordView).toHaveTextContent("VIEW:demo");
   });
