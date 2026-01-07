@@ -1,6 +1,6 @@
 # Graphdown Web (Developer Guide)
 
-This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It drives the same core validation logic as the CLI and persists the active dataset in the browser (IndexedDB by default, in-memory when `?storage=memory` is set).
+This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It uses the shared core validation library and persists the active dataset in the browser (IndexedDB by default, in-memory when `?storage=memory` is set).
 
 ## Run the app
 From the repo root:
