@@ -147,12 +147,12 @@ function UiPluginSlot<TCtx>({
     const warn = (message: string) => onWarning?.({ message, pluginId: provider.pluginId });
 
     const applyCleanup = (cleanup: unknown) => {
-      if (typeof cleanup === "function") {
-        if (cancelled) {
-          cleanup();
-        } else {
-          cleanupRef.current = cleanup;
-        }
+      if (typeof cleanup !== "function") return;
+      const cleanupFn = cleanup as () => void;
+      if (cancelled) {
+        cleanupFn();
+      } else {
+        cleanupRef.current = cleanupFn;
       }
     };
 
