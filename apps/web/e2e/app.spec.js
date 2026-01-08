@@ -149,7 +149,7 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
     await route.fulfill({ status: 404 });
   });
 
-  await page.goto("/import?storage=memory");
+  await page.goto("/import");
   await page.getByLabel("GitHub URL").fill("https://github.com/owner/repo");
   await page.getByRole("button", { name: "Import from GitHub" }).click();
 
@@ -188,7 +188,7 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
 });
 
 test("ERR-002: shows invalid_url category for unsupported GitHub URLs (e2e)", async ({ page }) => {
-  await page.goto("/import?storage=memory");
+  await page.goto("/import");
   await page.getByLabel("GitHub URL").fill("https://github.com/owner/repo/blob/main/readme.md");
   await page.getByRole("button", { name: "Import from GitHub" }).click();
 

@@ -29,7 +29,7 @@ npm run dev:web   # http://localhost:5173
 
 ## Web app capabilities
 - Import datasets from GitHub repo roots or `/tree/<ref>` URLs (datasets/, types/, and records/ paths are fetched) or from uploaded zip archives. File/issue/subdirectory URLs are rejected.
-- Runs the validator, builds a link graph, and persists the loaded snapshot offline (IndexedDB with in-memory fallback).
+- Runs the validator, builds a link graph, and persists the loaded snapshot offline (IndexedDB required).
 - Browse by type, view incoming/outgoing wiki-links, create/edit records using type schemas (`fieldDefs`, `bodyField`), and keep edits in the persisted snapshot.
 - Export dataset Markdown (`types/` + `records/`) as zips.
 

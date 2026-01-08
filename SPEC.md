@@ -902,6 +902,13 @@ UI shall provide consistent CRUD + relationship affordances (non-testable intent
 In the Graphdown web UI, performing CRUD actions MUST NOT trigger a full document navigation/reload.
 Specifically, after the initial page load, CRUD actions MUST NOT cause the top-level document `load` event to fire again.
 
+<!-- req:id=NFR-PERSIST-001 title="Web persistence requires IndexedDB; no fallback" testable=true -->
+### NFR-PERSIST-001 — Web persistence requires IndexedDB; no fallback
+
+In the Graphdown web UI, persistence of the active dataset MUST use IndexedDB.
+If IndexedDB is unavailable or fails, the UI MUST fail with a clear error and MUST NOT fall back to in-memory persistence.
+The failure MUST be surfaced to the user and logged to the console.
+
 <!-- req:id=NFR-010 title="Read-only offline after initial load" testable=true -->
 ### NFR-010 — Read-only offline after initial load
 
