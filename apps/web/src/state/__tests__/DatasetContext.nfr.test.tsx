@@ -3,12 +3,11 @@ import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { DatasetSnapshot } from "../../graphdown";
-import { buildGraphFromSnapshot } from "../../graphdown";
+import { buildRecordLinkGraphFromSnapshot } from "../../graphdown";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { createPersistence } from "../../persistence/persistence";
-import { FORMAT_VERSIONS } from "../../persistence/versions";
 
 let store: IndexedDbStore;
 
@@ -37,26 +36,20 @@ function makeSnapshot(): DatasetSnapshot {
 async function seedActiveDataset() {
   if (!store) throw new Error("Persist store not initialized");
   const snapshot = makeSnapshot();
-  const graphResult = buildGraphFromSnapshot(snapshot);
+  const graphResult = buildRecordLinkGraphFromSnapshot(snapshot);
   if (!graphResult.ok) {
-    throw new Error(`Graph build failed: ${JSON.stringify(graphResult.errors)}`);
+    throw new Error(`Record Link Graph build failed: ${JSON.stringify(graphResult.errors)}`);
   }
-  const persistence = createPersistence({
-    store,
-    parseGraph: async () => graphResult.graph
-  });
+  const persistence = createPersistence({ store });
   const meta = {
     id: "active",
     createdAt: Date.now(),
-    updatedAt: Date.now(),
-    snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
-    graphFormatVersion: FORMAT_VERSIONS.graph,
-    uiStateFormatVersion: FORMAT_VERSIONS.uiState
+    updatedAt: Date.now()
   };
   await persistence.saveActiveDataset({
     meta,
     datasetSnapshot: snapshot,
-    parsedGraph: graphResult.graph
+    recordLinkGraph: graphResult.graph
   });
 }
 

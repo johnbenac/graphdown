@@ -5,7 +5,7 @@ export type ImportPhase =
   | "listing_files"
   | "downloading_files"
   | "validating_dataset"
-  | "building_graph"
+  | "building_record_link_graph"
   | "persisting"
   | "done";
 

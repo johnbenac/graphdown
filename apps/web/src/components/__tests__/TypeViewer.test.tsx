@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import type { GraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraphTypeNode } from "../../graphdown";
 import TypeViewer from "../TypeViewer";
 
-const baseType: GraphTypeNode = {
+const baseType: RecordLinkGraphTypeNode = {
   kind: "type",
   typeId: "note",
   fields: { name: "Note", description: "A note record" },

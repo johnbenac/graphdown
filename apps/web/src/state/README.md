@@ -11,7 +11,7 @@ components to load, edit, and persist datasets.
     1) import (zip or GitHub)
     2) validation (`validateDatasetSnapshot`)
     3) canonical record-only layout (`canonicalizeDatasetSnapshot`)
-    4) Record Link Graph build (`buildGraphFromSnapshot`)
+    4) Record Link Graph build (`buildRecordLinkGraphFromSnapshot`)
     5) persistence (IndexedDB; required)
 
   - Tracks import progress stages, error states, and the active dataset.

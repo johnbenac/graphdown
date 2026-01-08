@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-08T07:03:06.004Z
+Generated: 2026-01-08T08:55:44.210Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -326,7 +326,7 @@ Tests (0):
 Tests (1):
 - apps/web/src/state/__tests__/DatasetContext.nfr.test.tsx — "NFR-001: CRUD actions do not trigger a full document load event"
 
-## NFR-PERSIST-001 — Web persistence requires IndexedDB; no fallback (testable=true)
+## NFR-PERSIST-001 — Web persistence requires IndexedDB (testable=true)
 Tests (1):
 - apps/web/src/state/__tests__/DatasetContext.test.tsx — "NFR-PERSIST-001: reports persistence_unavailable when IndexedDB is missing"
 

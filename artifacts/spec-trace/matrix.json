@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-08T07:03:06.004Z",
+  "generatedAt": "2026-01-08T08:55:44.210Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1051,7 +1051,7 @@
     },
     {
       "id": "NFR-PERSIST-001",
-      "title": "Web persistence requires IndexedDB; no fallback",
+      "title": "Web persistence requires IndexedDB",
       "testable": true,
       "verify": null,
       "tests": [

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { GraphRecordNode } from "../graphdown";
+import type { RecordLinkGraphRecordNode } from "../graphdown";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import ImportWarningBanner from "../components/ImportWarningBanner";
@@ -15,40 +15,41 @@ export default function DatasetRoute() {
   const [selectedRecordKey, setSelectedRecordKey] = useState<string | null>(null);
   const [editorMode, setEditorMode] = useState<"view" | "edit" | "create">("view");
   const [previousRecordKey, setPreviousRecordKey] = useState<string | null>(null);
-  const { recordTypeId } = useParams();
+  const { typeId } = useParams();
   const navigate = useNavigate();
 
-  const graph = activeDataset?.parsedGraph;
+  const recordLinkGraph = activeDataset?.recordLinkGraph;
 
   const sortedTypeIds = useMemo(() => {
-    if (!graph) {
+    if (!recordLinkGraph) {
       return [];
     }
-    return [...graph.typesByRecordTypeId.keys()].sort((a, b) => a.localeCompare(b));
-  }, [graph]);
+    return [...recordLinkGraph.typesById.keys()].sort((a, b) => a.localeCompare(b));
+  }, [recordLinkGraph]);
 
   useEffect(() => {
-    if (!graph || sortedTypeIds.length === 0) {
+    if (!recordLinkGraph || sortedTypeIds.length === 0) {
       return;
     }
-    const isValidType = recordTypeId && graph.typesByRecordTypeId.has(recordTypeId);
+    const isValidType = typeId && recordLinkGraph.typesById.has(typeId);
     if (!isValidType) {
       navigate(`/datasets/${sortedTypeIds[0]}`, { replace: true });
     }
-  }, [graph, sortedTypeIds, recordTypeId, navigate]);
+  }, [recordLinkGraph, sortedTypeIds, typeId, navigate]);
 
-  const selectedTypeId =
-    recordTypeId && graph?.typesByRecordTypeId.has(recordTypeId) ? recordTypeId : null;
-  const selectedTypeDef = selectedTypeId ? graph?.typesByRecordTypeId.get(selectedTypeId) ?? null : null;
+  const selectedTypeId = typeId && recordLinkGraph?.typesById.has(typeId) ? typeId : null;
+  const selectedTypeDef = selectedTypeId ? recordLinkGraph?.typesById.get(selectedTypeId) ?? null : null;
 
   const recordsForSelectedType = useMemo(() => {
-    if (!graph || !selectedTypeId) {
+    if (!recordLinkGraph || !selectedTypeId) {
       return [];
     }
-    return [...graph.nodesById.values()]
-      .filter((node): node is GraphRecordNode => node.kind === "record" && node.typeId === selectedTypeId)
+    return [...recordLinkGraph.nodesByIdentity.values()]
+      .filter(
+        (node): node is RecordLinkGraphRecordNode => node.kind === "record" && node.typeId === selectedTypeId
+      )
       .sort((a, b) => a.recordId.localeCompare(b.recordId));
-  }, [graph, selectedTypeId]);
+  }, [recordLinkGraph, selectedTypeId]);
 
   useEffect(() => {
     if (!selectedTypeId) {
@@ -71,11 +72,17 @@ export default function DatasetRoute() {
     setPreviousRecordKey(null);
   }, [selectedTypeId]);
 
-  const selectedRecord = selectedRecordKey ? graph?.nodesById.get(selectedRecordKey) ?? null : null;
+  const selectedRecord = selectedRecordKey
+    ? recordLinkGraph?.nodesByIdentity.get(selectedRecordKey) ?? null
+    : null;
   const selectedRecordNode =
     selectedRecord && selectedRecord.kind === "record" ? selectedRecord : null;
-  const outgoingLinks = selectedRecordNode ? graph?.getLinksFrom(selectedRecordNode.recordKey) ?? [] : [];
-  const incomingLinks = selectedRecordNode ? graph?.getLinksTo(selectedRecordNode.recordKey) ?? [] : [];
+  const outgoingLinks = selectedRecordNode
+    ? recordLinkGraph?.getOutgoingRecordLinks(selectedRecordNode.recordKey) ?? []
+    : [];
+  const incomingLinks = selectedRecordNode
+    ? recordLinkGraph?.getIncomingRecordLinks(selectedRecordNode.recordKey) ?? []
+    : [];
 
   return (
     <AppShell
@@ -86,7 +93,7 @@ export default function DatasetRoute() {
               <p>Active dataset:</p>
               <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
             </div>
-            {graph ? <TypeNav graph={graph} /> : null}
+            {recordLinkGraph ? <TypeNav recordLinkGraph={recordLinkGraph} /> : null}
             <Link to="/import">Import another dataset</Link>
           </div>
         ) : (
@@ -96,7 +103,7 @@ export default function DatasetRoute() {
     >
       <section data-testid="dataset-screen">
         <h1>{selectedTypeDef ? getTypeLabel(selectedTypeDef) : "Datasets"}</h1>
-        {activeDataset && graph ? (
+        {activeDataset && recordLinkGraph ? (
           sortedTypeIds.length ? (
             <div className="dataset-browse">
               <div className="dataset-summary">
@@ -175,7 +182,7 @@ export default function DatasetRoute() {
                     </button>
                   ) : null}
                 </div>
-                {editorMode === "create" && selectedTypeDef && graph ? (
+                {editorMode === "create" && selectedTypeDef && recordLinkGraph ? (
                   <RecordEditor
                     mode="create"
                     typeDef={selectedTypeDef}
@@ -188,7 +195,7 @@ export default function DatasetRoute() {
                       setSelectedRecordKey(newId);
                     }}
                   />
-                ) : selectedRecordNode && selectedTypeDef && graph ? (
+                ) : selectedRecordNode && selectedTypeDef && recordLinkGraph ? (
                   editorMode === "edit" ? (
                     <RecordEditor
                       mode="edit"
