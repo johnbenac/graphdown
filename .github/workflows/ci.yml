@@ -26,6 +26,8 @@ jobs:
         run: npm run build:web
       - name: Web unit tests (vitest)
         run: npm run test:web
+      - name: Web test layout check
+        run: npm run check:web:test-layout
       - name: Spec trace
         id: spec_trace
         run: npm run spec:trace
