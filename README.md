@@ -1,95 +1,156 @@
 # Graphdown
 
-Graphdown is a toolkit for Markdown-first datasets defined by the Graphdown standard. It ships the spec, a web app for importing/browsing/editing datasets, and core libraries for working with dataset snapshots.
+Graphdown is a toolkit for **Markdown-first datasets** defined by the **Graphdown Standard**.
+It ships:
 
-## What’s inside
-- **Spec:** `SPEC.md` (v0.4 draft) is the single source of truth. The older `docs/spec/dataset-validity.md` is a tombstone.
-- **Web app:** `apps/web` to import from GitHub or zip, browse/edit records, and export dataset zips.
-- **Core library:** utilities for parsing Markdown records, building graphs, validating composition, hashing datasets, and exporting/importing zip snapshots.
+- the **standard** (`SPEC.md`) — the single source of truth
+- a **web app** (`apps/web`) for importing/browsing/editing datasets
+- a **core domain library** (`apps/web/src/graphdown`) for parsing, validation, hashing, and export/import helpers
 
-## Requirements
-- Node.js 20+
-- Playwright browsers (for `npm run verify:web`; install with `npm --workspace apps/web run playwright:install`)
+> If anything conflicts with `SPEC.md`, `SPEC.md` wins.
 
-## Quick start
-- Install deps: `npm ci`
+## What is a Graphdown dataset?
 
-Web app:
-```bash
-npm run dev:web   # http://localhost:5173
-# Import a GitHub repo root or /tree/<ref> URL, or upload a dataset zip.
+A Graphdown dataset is a collection of Markdown “record files” (and optional blob files).
+Records are defined by **YAML front matter** plus a raw Markdown body.
+
+### Record identity (SPEC v0.4+)
+
+Records are identified by the pair:
+
+- `typeId` — which type the record belongs to
+- `recordId` — the record’s ID within that type
+
+Together they form the globally unique computed identity:
+
+- `recordKey = typeId:recordId`
+
+Record relationships use wiki-links: `[[typeId:recordId]]`.
+
+## Quick start (developers)
+
+Install dependencies:
+
+```sh
+npm ci
 ```
 
-## Validation rules
-- Requires `types/` and `records/`; record files must live under `records/<recordTypeId>/`.
-- Records and types must be Markdown with YAML front matter containing `id`, `typeId`, `createdAt`, `updatedAt`, and a `fields` object.
-- Type records: `id` must start with `type:`, `typeId` must be `sys:type`, and `fields.recordTypeId` must match `/^[A-Za-z0-9][A-Za-z0-9_-]*$/`. Duplicate `recordTypeId`s and IDs are errors.
-- Required fields are derived from `fields.fieldDefs.*.required === true` on type records and enforced on matching data records.
-- Composition: types may declare `fields.composition.<name> = { recordTypeId, min?, max? }`. Records must satisfy the min/max counts via wiki-links (`[[id]]`) found in front matter and Markdown bodies. Unknown component types and constraint violations are reported.
+Run the web app:
 
-## Web app capabilities
-- Import datasets from GitHub repo roots or `/tree/<ref>` URLs (datasets/, types/, and records/ paths are fetched) or from uploaded zip archives. File/issue/subdirectory URLs are rejected.
-- Runs the validator, builds a link graph, and persists the loaded snapshot offline (IndexedDB required).
-- Browse by type, view incoming/outgoing wiki-links, create/edit records using type schemas (`fieldDefs`, `bodyField`), and keep edits in the persisted snapshot.
-- Export dataset Markdown (`types/` + `records/`) as zips.
-
-## Dataset layout
-```
-dataset-root/
-├── types/
-│   ├── type--<name>.md            # type records (id starts with type:, typeId: sys:type)
-└── records/
-    ├── <recordTypeId>/
-    │   └── <record>.md
+```sh
+npm run dev:web
+# Vite defaults to http://localhost:5173
 ```
 
-### Record format (example type record)
-```markdown
+Run tests:
+
+```sh
+npm --workspace apps/web run test
+npm --workspace apps/web run verify
+```
+
+Regenerate spec trace artifacts (when editing SPEC requirements):
+
+```sh
+npm run spec:trace
+```
+
+## Dataset format (minimal examples)
+
+Graphdown distinguishes **type objects** and **record objects**.
+
+### Type object (FR-MD-021)
+
+A type object is a record file whose YAML contains:
+
+* `typeId` (string)
+* `fields` (object)
+
+It MUST NOT contain `recordId`, `parent`, or any other top-level keys.
+
+```md
 ---
-id: "type:example"
-typeId: "sys:type"
-createdAt: 2025-12-28T00:00:00Z
-updatedAt: 2025-12-28T00:00:00Z
+typeId: note
 fields:
-  recordTypeId: "example"
+  displayName: Notes
   fieldDefs:
     title:
-      kind: "text"
       required: true
   composition:
-    related:
-      recordTypeId: "example"
-      min: 0
+    tag:
+      typeId: tag
+      required: false
 ---
 
-# Type body (optional)
+Optional Markdown body describing the type.
 ```
 
-### Record format (example data record)
-```markdown
+### Record object (FR-MD-023)
+
+A record object is a record file whose YAML contains:
+
+* `typeId` (string)
+* `recordId` (string)
+* `fields` (object)
+* optional `parent` (string record reference or null)
+
+```md
 ---
-id: "example:123"
-typeId: "example"
-createdAt: 2025-12-28T00:00:00Z
-updatedAt: 2025-12-28T00:00:00Z
+typeId: note
+recordId: one
 fields:
-  title: "Sample record"
-  related: ["[[example:other]]"]
+  title: First note
 ---
 
-Body content with links like [[example:other]].
+This note links to [[note:two]].
 ```
 
-## Snapshots, hashing, and exports
-- Snapshots can be loaded from zip (`loadDatasetSnapshotFromZipBytes`).
-- Deterministic dataset fingerprints: `computeGdHashV1(snapshot, 'schema' | 'snapshot')` (gdhash-v1) normalize line endings, enforce UTF-8, and error on duplicate IDs.
-- Export helpers generate zips for dataset Markdown (`types/` + `records/`).
+### Parent hierarchy (HIER-001)
+
+Records may define a parent pointer:
+
+```md
+---
+typeId: note
+recordId: child
+parent: note:one
+fields: {}
+---
+```
+
+Parent pointers:
+
+* MUST resolve to an existing record
+* MUST be acyclic
+
+Parent pointers are structural. They are not “relationships” under REL-001.
+
+## Relationships and “graphs” (terminology)
+
+This codebase contains multiple graph-like structures. In docs, avoid saying “graph” without specifying which one.
+
+* **Record Link Graph**: wiki-link relationships extracted from record bodies and record field strings
+* **Record Hierarchy**: parent pointer structure (`parent:`)
+* **Type Composition Dependencies**: type → type requirements (`fields.composition`)
+* **Blob Dependency Graph**: record → blob digest references (`[[gdblob:sha256-...]]`)
+* **Canonical Layout Tree**: deterministic export directory tree (EXP-HIER-001)
+
+See:
+
+* `docs/terminology.md`
+* `docs/concepts/graphs.md`
 
 ## Example datasets
-- https://github.com/johnbenac/product-tracker-dataset
-- https://github.com/johnbenac/research-lab-dataset
 
-## Development
-- Run all Node tests: `npm test` (builds first).
-- Frontend tests + Playwright E2E: `npm run verify:web` (requires browsers installed).
-- Spec tracing: `npm run spec:trace` regenerates `artifacts/spec-trace/matrix.json` from `SPEC.md`.
+Reference datasets used for compatibility checks:
+
+* [https://github.com/johnbenac/product-tracker-dataset](https://github.com/johnbenac/product-tracker-dataset)
+* [https://github.com/johnbenac/research-lab-dataset](https://github.com/johnbenac/research-lab-dataset)
+
+## Repo layout (implementation)
+
+* `SPEC.md` — Graphdown standard (normative)
+* `apps/web/` — React/Vite web app
+* `apps/web/src/graphdown/` — core parsing/validation/hashing/export/import utilities
+* `docs/` — developer concept docs (glossary, graphs, snapshots/layout)
+* `artifacts/spec-trace/` — generated spec-to-test traceability artifacts

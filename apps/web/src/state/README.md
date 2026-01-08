@@ -6,12 +6,21 @@ components to load, edit, and persist datasets.
 ## Dataset context
 
 - `DatasetContext.tsx`
-  - Exposes `DatasetProvider` and `useDataset` for the rest of the app.
-  - Orchestrates import flows (zip or GitHub), validation, canonicalization,
-    graph building, and persistence.
+  - Exposes `DatasetProvider` and `useDataset`.
+  - Orchestrates:
+    1) import (zip or GitHub)
+    2) validation (`validateDatasetSnapshot`)
+    3) canonical record-only layout (`canonicalizeDatasetSnapshot`)
+    4) Record Link Graph build (`buildGraphFromSnapshot`)
+    5) persistence (IndexedDB; required)
+
   - Tracks import progress stages, error states, and the active dataset.
-  - Provides record editing helpers (`updateRecord`, `createRecord`) that update
-    the snapshot, re-validate it, rebuild the graph, and save changes.
+  - Provides record editing helpers (`updateRecord`, `createRecord`) that:
+    - update snapshot files
+    - re-validate the snapshot
+    - rebuild the Record Link Graph
+    - persist changes
+
   - Registers a debug helper on `window.__appDebug` to clear persistence.
 
 ## Import reports
