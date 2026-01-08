@@ -29,7 +29,8 @@
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
     "verify:web": "npm --workspace apps/web run verify",
     "burndown": "node tools/burndown.js",
-    "spec:verify": "node tools/check-spec-coverage.js"
+    "spec:verify": "node tools/check-spec-coverage.js",
+    "check:web:test-layout": "node tools/check-web-test-layout.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
