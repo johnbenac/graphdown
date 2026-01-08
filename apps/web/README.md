@@ -39,7 +39,7 @@ npm --workspace apps/web run build
 1. **Import (zip or GitHub)** → loaders build a raw `DatasetSnapshot` from bytes or GitHub files.
 2. **Validate** → `validateDatasetSnapshot` enforces Graphdown structural rules; errors bubble to the UI.
 3. **Canonicalize layout** → `canonicalizeDatasetSnapshot` rewrites paths into the canonical record-only layout and prunes unreachable blobs; `importReport` summarizes changes.
-4. **Build Record Link Graph** → `buildGraphFromSnapshot` builds the Record Link Graph index used by the UI (incoming/outgoing wiki-link relationships).
+4. **Build Record Link Graph** → `buildRecordLinkGraphFromSnapshot` builds the Record Link Graph index used by the UI (incoming/outgoing wiki-link relationships).
 5. **Persist** → `createPersistence` writes snapshot + Record Link Graph cache + UI state to storage.
 6. **View/Edit** → `DatasetRoute` renders record/type views using data from `DatasetContext`.
 7. **Export** → export helpers serialize the current snapshot back to a zip.

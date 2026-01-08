@@ -1,14 +1,13 @@
 import "fake-indexeddb/auto";
-import { describe, expect, it, vi } from "vitest";
-import type { GraphTypeNode } from "../../graphdown";
+import { describe, expect, it } from "vitest";
+import type { RecordLinkGraphTypeNode } from "../../graphdown";
 import type { DatasetSnapshot } from "../../graphdown";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { KEY } from "../keys";
 import { createPersistence } from "../persistence";
-import { deserializeGraph } from "../serializeGraph";
+import { deserializeRecordLinkGraphCache } from "../recordLinkGraphCache";
 import { serializeSnapshot } from "../serializeSnapshot";
-import type { PersistedGraph } from "../types";
-import { FORMAT_VERSIONS } from "../versions";
+import type { PersistedRecordLinkGraphCache } from "../types";
 
 function makeDbName(prefix: string) {
   return `${prefix}-${Math.random().toString(16).slice(2)}`;
@@ -25,7 +24,7 @@ const sampleSnapshot: DatasetSnapshot = {
   ])
 };
 
-const sampleType: GraphTypeNode = {
+const sampleType: RecordLinkGraphTypeNode = {
   kind: "type",
   typeId: "note",
   fields: { name: "Note" },
@@ -33,11 +32,11 @@ const sampleType: GraphTypeNode = {
   file: "types/note.md"
 };
 
-const samplePersistedGraph: PersistedGraph = {
+const samplePersistedGraph: PersistedRecordLinkGraphCache = {
   types: [sampleType],
   records: [],
-  outgoing: [],
-  incoming: []
+  outgoingRecordLinks: [],
+  incomingRecordLinks: []
 };
 
 describe("persistence service", () => {
@@ -49,39 +48,37 @@ describe("persistence service", () => {
       meta: {
         id: "dataset-1",
         createdAt: 1,
-        updatedAt: 1,
-        snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
-        graphFormatVersion: FORMAT_VERSIONS.graph,
-        uiStateFormatVersion: FORMAT_VERSIONS.uiState
+        updatedAt: 1
       },
       datasetSnapshot: sampleSnapshot,
-      parsedGraph: deserializeGraph(samplePersistedGraph)
+      recordLinkGraph: deserializeRecordLinkGraphCache(samplePersistedGraph)
     });
 
     const loaded = await persistence.loadActiveDataset();
     expect(loaded?.meta.id).toBe("dataset-1");
     expect(loaded?.datasetSnapshot.files.size).toBe(1);
-    expect(loaded?.parsedGraph?.nodesById.size).toBe(1);
+    expect(loaded?.recordLinkGraph?.nodesByIdentity.size).toBe(1);
   });
 
-  it("rebuilds the graph when the format version changes", async () => {
+  it("clears the active dataset when the graph cache is missing", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
-    const parseGraph = vi.fn(async () => deserializeGraph(samplePersistedGraph));
-    const persistence = createPersistence({ store, parseGraph });
+    const persistence = createPersistence({ store });
 
     await store.set(KEY.activeSnapshot, serializeSnapshot(sampleSnapshot));
     await store.set(KEY.activeMeta, {
       id: "dataset-2",
       createdAt: 1,
-      updatedAt: 1,
-      snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
-      graphFormatVersion: 0,
-      uiStateFormatVersion: FORMAT_VERSIONS.uiState
+      updatedAt: 1
     });
 
     const loaded = await persistence.loadActiveDataset();
-    expect(parseGraph).toHaveBeenCalledOnce();
-    expect(loaded?.parsedGraph?.nodesById.size).toBe(1);
+    expect(loaded).toBeUndefined();
+    const meta = await store.get(KEY.activeMeta);
+    const snapshot = await store.get(KEY.activeSnapshot);
+    const graphCache = await store.get(KEY.activeRecordLinkGraphCache);
+    expect(meta).toBeUndefined();
+    expect(snapshot).toBeUndefined();
+    expect(graphCache).toBeUndefined();
   });
 
   it("clears the active dataset when records are missing", async () => {
