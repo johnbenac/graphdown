@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T09:49:38.087Z",
+  "generatedAt": "2026-01-08T00:16:15.129Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1059,6 +1059,29 @@
           "reqId": "NFR-010",
           "testTitle": "NFR-010: uses persisted dataset for read-only access when offline",
           "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "NFR-PERSIST-001",
+      "title": "Web persistence requires IndexedDB; no fallback",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "NFR-PERSIST-001",
+          "testTitle": "NFR-PERSIST-001: surfaces persistence unavailable on startup",
+          "filePath": "apps/web/src/state/DatasetContext.persistence.test.tsx"
+        },
+        {
+          "reqId": "NFR-PERSIST-001",
+          "testTitle": "NFR-PERSIST-001: returns IndexedDbStore when IndexedDB exists",
+          "filePath": "apps/web/src/storage/createPersistStore.test.ts"
+        },
+        {
+          "reqId": "NFR-PERSIST-001",
+          "testTitle": "NFR-PERSIST-001: throws when IndexedDB is unavailable",
+          "filePath": "apps/web/src/storage/createPersistStore.test.ts"
         }
       ]
     },

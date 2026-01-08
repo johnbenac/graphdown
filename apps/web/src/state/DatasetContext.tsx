@@ -22,6 +22,7 @@ export type ImportErrorCategory =
   | "auth_required"
   | "rate_limited"
   | "dataset_invalid"
+  | "persistence_unavailable"
   | "network"
   | "unknown";
 
@@ -117,18 +118,47 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<ImportErrorState | undefined>(undefined);
   const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
 
-  const store = useMemo(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const forceMemory = searchParams.get("storage") === "memory";
-    return createPersistStore({ forceMemory, logger: console });
+  const storeResult = useMemo(() => {
+    try {
+      return { store: createPersistStore({ logger: console }) };
+    } catch (err) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error("IndexedDB failed. Graphdown requires IndexedDB and does not fall back.");
+      return { error };
+    }
   }, []);
 
   const persistence = useMemo(
-    () => createPersistence({ store, parseGraph, logger: console }),
-    [store]
+    () =>
+      storeResult.store
+        ? createPersistence({ store: storeResult.store, parseGraph, logger: console })
+        : null,
+    [storeResult.store]
+  );
+
+  const setPersistenceUnavailable = useCallback(
+    (err?: unknown) => {
+      console.error("Persistence is required but failed to initialize/use IndexedDB.", err);
+      setActiveDataset(undefined);
+      setStatus("error");
+      setError({
+        category: "persistence_unavailable",
+        title: "Browser storage required",
+        message:
+          err instanceof Error
+            ? err.message
+            : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
+      });
+    },
+    [setStatus, setError, setActiveDataset]
   );
 
   const loadActive = useCallback(async () => {
+    if (!persistence) {
+      return;
+    }
     setStatus("loading");
     setError(undefined);
     setProgress({ phase: "idle" });
@@ -137,22 +167,25 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setActiveDataset(dataset);
       setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
-      console.warn("Failed to load persisted dataset.", err);
-      setActiveDataset(undefined);
-      setStatus("error");
-      setError({
-        category: "unknown",
-        title: "Failed to load dataset",
-        message: err instanceof Error ? err.message : "Failed to load dataset."
-      });
+      setPersistenceUnavailable(err);
     }
-  }, [persistence]);
+  }, [persistence, setPersistenceUnavailable]);
 
   useEffect(() => {
+    if (storeResult.error) {
+      setPersistenceUnavailable(storeResult.error);
+      return;
+    }
+    if (!persistence) {
+      return;
+    }
     loadActive();
-  }, [loadActive]);
+  }, [loadActive, persistence, setPersistenceUnavailable, storeResult.error]);
 
   useEffect(() => {
+    if (!persistence) {
+      return;
+    }
     (window as Window & { __appDebug?: { clearPersistence: () => Promise<void> } }).__appDebug = {
       clearPersistence: async () => {
         await persistence.clearActiveDataset();
@@ -170,6 +203,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       parsedGraph: Awaited<ReturnType<typeof parseGraph>>,
       importReport?: ImportReport
     ) => {
+      if (!persistence) {
+        setPersistenceUnavailable();
+        return;
+      }
       const now = Date.now();
       const meta = {
         id: "active",
@@ -185,14 +222,19 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       await persistence.saveActiveDataset({ meta, datasetSnapshot, parsedGraph });
       setActiveDataset({ meta, datasetSnapshot, parsedGraph });
     },
-    [persistence]
+    [persistence, setPersistenceUnavailable]
   );
 
   const importDatasetZip = useCallback(
     async (file: File) => {
+      if (!persistence) {
+        setPersistenceUnavailable();
+        return;
+      }
       setStatus("loading");
       setError(undefined);
-      setProgress({ phase: "validating_dataset" });
+      let currentPhase: ImportPhase = "validating_dataset";
+      setProgress({ phase: currentPhase });
       try {
         const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
         const validation = validateDatasetSnapshot(rawSnapshot);
@@ -212,7 +254,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_graph" });
+        currentPhase = "building_graph";
+        setProgress({ phase: currentPhase });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
@@ -224,11 +267,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         }
-        setProgress({ phase: "persisting" });
+        currentPhase = "persisting";
+        setProgress({ phase: currentPhase });
         await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (currentPhase === "persisting") {
+          setPersistenceUnavailable(err);
+          return;
+        }
         console.warn("Failed to import dataset.", err);
         setStatus("error");
         setError({
@@ -238,14 +286,19 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [saveActiveDataset]
+    [persistence, saveActiveDataset, setPersistenceUnavailable]
   );
 
   const importDatasetFromGitHub = useCallback(
     async (url: string) => {
+      if (!persistence) {
+        setPersistenceUnavailable();
+        return;
+      }
       setStatus("loading");
       setError(undefined);
-      setProgress({ phase: "validating_url" });
+      let currentPhase: ImportPhase = "validating_url";
+      setProgress({ phase: currentPhase });
 
       const parsed = parseGitHubUrl(url);
       if (!parsed.ok) {
@@ -267,7 +320,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           onProgress: (progress) => setProgress(progress)
         });
 
-        setProgress({ phase: "validating_dataset" });
+        currentPhase = "validating_dataset";
+        setProgress({ phase: currentPhase });
         const validation = validateDatasetSnapshot(rawSnapshot);
         if (!validation.ok) {
           setStatus("error");
@@ -286,7 +340,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_graph" });
+        currentPhase = "building_graph";
+        setProgress({ phase: currentPhase });
         const graphResult = buildGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
@@ -299,11 +354,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        setProgress({ phase: "persisting" });
+        currentPhase = "persisting";
+        setProgress({ phase: currentPhase });
         await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (currentPhase === "persisting") {
+          setPersistenceUnavailable(err);
+          return;
+        }
         console.warn("Failed to import dataset from GitHub.", err);
         setStatus("error");
         if (err instanceof GitHubImportError) {
@@ -331,15 +391,19 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [saveActiveDataset]
+    [persistence, saveActiveDataset, setPersistenceUnavailable]
   );
 
   const clearPersistence = useCallback(async () => {
+    if (!persistence) {
+      setPersistenceUnavailable();
+      return;
+    }
     await persistence.clearActiveDataset();
     setActiveDataset(undefined);
     setStatus("ready");
     setProgress({ phase: "idle" });
-  }, [persistence]);
+  }, [persistence, setPersistenceUnavailable]);
 
   const commitSnapshot = useCallback(
     async (
@@ -348,6 +412,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       | { ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> }
       | { ok: false; errors: ValidationError[] }
     > => {
+      if (!persistence) {
+        setPersistenceUnavailable();
+        return {
+          ok: false,
+          errors: [makeError("E_INTERNAL", "Persistence unavailable.")]
+        } as const;
+      }
       const validation = validateDatasetSnapshot(nextSnapshot);
       if (!validation.ok) {
         return { ok: false, errors: validation.errors } as const;
@@ -371,7 +442,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
       return { ok: true, parsedGraph: graphResult.graph } as const;
     },
-    [activeDataset, persistence]
+    [activeDataset, persistence, setPersistenceUnavailable]
   );
 
   const updateRecord = useCallback<DatasetContextValue["updateRecord"]>(

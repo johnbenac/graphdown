@@ -1,8 +1,7 @@
 # Storage adapters
 
-The storage layer abstracts persistence behind a small `PersistStore` interface
-so the app can use IndexedDB when available and gracefully fall back to memory
-in restricted environments.
+The storage layer abstracts persistence behind a small `PersistStore` interface.
+In production, Graphdown Web requires IndexedDB for persistence.
 
 ## Interface
 
@@ -16,15 +15,14 @@ in restricted environments.
   - Wraps IndexedDB with a key-value object store.
   - Lazily opens the database and serializes operations through `withStore`.
 - `MemoryStore.ts`
-  - Simple in-memory `Map` store used in tests or when IndexedDB fails.
+  - Simple in-memory `Map` store used in tests only.
 
-## Factory + fallback
+## Factory
 
 - `createPersistStore.ts`
-  - Builds the primary store and wraps it in a `FallbackStore` that switches to
-    `MemoryStore` if IndexedDB throws errors.
-  - Supports a `forceMemory` option (query param in the app) and optional
-    database configuration.
+  - Enforces IndexedDB availability and returns an `IndexedDbStore`.
+  - Throws with a clear error (and logs) when IndexedDB is unavailable.
+  - Supports optional database configuration.
 
 ## Tests
 
