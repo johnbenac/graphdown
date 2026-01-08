@@ -82,7 +82,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/core');
+          const { validateDatasetSnapshot } = require('./dist/graphdown');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -118,7 +118,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/core');
+          const { validateDatasetSnapshot } = require('./dist/graphdown');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
