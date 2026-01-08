@@ -4,9 +4,9 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
 import { extractRecordRefs } from '../parse/wikiRefs';
 
-export type GraphNodeKind = 'type' | 'record';
+export type RecordLinkGraphNodeKind = 'type' | 'record';
 
-export interface GraphTypeNode {
+export interface RecordLinkGraphTypeNode {
   kind: 'type';
   typeId: string;
   fields: Record<string, unknown>;
@@ -14,7 +14,7 @@ export interface GraphTypeNode {
   file: string;
 }
 
-export interface GraphRecordNode {
+export interface RecordLinkGraphRecordNode {
   kind: 'record';
   typeId: string;
   recordId: string;
@@ -24,23 +24,22 @@ export interface GraphRecordNode {
   file: string;
 }
 
-export interface Graph {
-  typesById: Map<string, GraphTypeNode>;
-  recordsByKey: Map<string, GraphRecordNode>;
-  nodesById: Map<string, GraphTypeNode | GraphRecordNode>;
-  typesByRecordTypeId: Map<string, GraphTypeNode>;
-  outgoing: Map<string, Set<string>>;
-  incoming: Map<string, Set<string>>;
-  getLinksFrom(recordKey: string): string[];
-  getLinksTo(recordKey: string): string[];
-  getType(typeId: string): GraphTypeNode | null;
-  getRecord(recordKey: string): GraphRecordNode | null;
-  getTypeForRecord(recordKey: string): GraphTypeNode | null;
-  getRecordTypeId(recordKey: string): string | null;
+export interface RecordLinkGraph {
+  typesById: Map<string, RecordLinkGraphTypeNode>;
+  recordsByKey: Map<string, RecordLinkGraphRecordNode>;
+  nodesByIdentity: Map<string, RecordLinkGraphTypeNode | RecordLinkGraphRecordNode>;
+  outgoingRecordLinks: Map<string, Set<string>>;
+  incomingRecordLinks: Map<string, Set<string>>;
+  getOutgoingRecordLinks(recordKey: string): string[];
+  getIncomingRecordLinks(recordKey: string): string[];
+  getType(typeId: string): RecordLinkGraphTypeNode | null;
+  getRecord(recordKey: string): RecordLinkGraphRecordNode | null;
+  getTypeForRecord(recordKey: string): RecordLinkGraphTypeNode | null;
+  getTypeIdForIdentity(identity: string): string | null;
 }
 
-export type BuildGraphResult =
-  | { ok: true; graph: Graph }
+export type BuildRecordLinkGraphResult =
+  | { ok: true; graph: RecordLinkGraph }
   | { ok: false; errors: ValidationError[] };
 
 function collectStringValues(value: unknown, into: Set<string>): void {
@@ -74,69 +73,67 @@ function collectRecordRefsFromRecord(fields: Record<string, unknown>, body: stri
   return refs;
 }
 
-class GraphImpl implements Graph {
+class RecordLinkGraphImpl implements RecordLinkGraph {
   constructor(
-    public typesById: Map<string, GraphTypeNode>,
-    public recordsByKey: Map<string, GraphRecordNode>,
-    public nodesById: Map<string, GraphTypeNode | GraphRecordNode>,
-    public typesByRecordTypeId: Map<string, GraphTypeNode>,
-    public outgoing: Map<string, Set<string>>,
-    public incoming: Map<string, Set<string>>
+    public typesById: Map<string, RecordLinkGraphTypeNode>,
+    public recordsByKey: Map<string, RecordLinkGraphRecordNode>,
+    public nodesByIdentity: Map<string, RecordLinkGraphTypeNode | RecordLinkGraphRecordNode>,
+    public outgoingRecordLinks: Map<string, Set<string>>,
+    public incomingRecordLinks: Map<string, Set<string>>
   ) {}
 
-  getLinksFrom(recordKey: string): string[] {
-    const links = this.outgoing.get(recordKey);
+  getOutgoingRecordLinks(recordKey: string): string[] {
+    const links = this.outgoingRecordLinks.get(recordKey);
     return links ? [...links].sort((a, b) => a.localeCompare(b)) : [];
   }
 
-  getLinksTo(recordKey: string): string[] {
-    const links = this.incoming.get(recordKey);
+  getIncomingRecordLinks(recordKey: string): string[] {
+    const links = this.incomingRecordLinks.get(recordKey);
     return links ? [...links].sort((a, b) => a.localeCompare(b)) : [];
   }
 
-  getType(typeId: string): GraphTypeNode | null {
+  getType(typeId: string): RecordLinkGraphTypeNode | null {
     return this.typesById.get(typeId) ?? null;
   }
 
-  getRecord(recordKey: string): GraphRecordNode | null {
+  getRecord(recordKey: string): RecordLinkGraphRecordNode | null {
     return this.recordsByKey.get(recordKey) ?? null;
   }
 
-  getTypeForRecord(recordKey: string): GraphTypeNode | null {
+  getTypeForRecord(recordKey: string): RecordLinkGraphTypeNode | null {
     const record = this.recordsByKey.get(recordKey);
     if (!record) return null;
     return this.typesById.get(record.typeId) ?? null;
   }
 
-  getRecordTypeId(recordKey: string): string | null {
-    const record = this.recordsByKey.get(recordKey);
+  getTypeIdForIdentity(identity: string): string | null {
+    const record = this.recordsByKey.get(identity);
     if (record) return record.typeId;
-    const type = this.typesById.get(recordKey);
+    const type = this.typesById.get(identity);
     if (type) return type.typeId;
     return null;
   }
 }
 
-export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphResult {
+export function buildRecordLinkGraphFromSnapshot(snapshot: DatasetSnapshot): BuildRecordLinkGraphResult {
   const parsed = discoverGraphdownObjects(snapshot);
   if (parsed.errors.length) {
     return { ok: false, errors: parsed.errors };
   }
 
   const errors: ValidationError[] = [];
-  const typesById = new Map<string, GraphTypeNode>();
-  const typesByRecordTypeId = typesById; // alias for compatibility
-  const recordsByKey = new Map<string, GraphRecordNode>();
-  const nodesById = new Map<string, GraphTypeNode | GraphRecordNode>();
-  const outgoing = new Map<string, Set<string>>();
-  const incoming = new Map<string, Set<string>>();
+  const typesById = new Map<string, RecordLinkGraphTypeNode>();
+  const recordsByKey = new Map<string, RecordLinkGraphRecordNode>();
+  const nodesByIdentity = new Map<string, RecordLinkGraphTypeNode | RecordLinkGraphRecordNode>();
+  const outgoingRecordLinks = new Map<string, Set<string>>();
+  const incomingRecordLinks = new Map<string, Set<string>>();
 
   for (const typeObj of parsed.typeObjects) {
     if (typesById.has(typeObj.typeId)) {
       errors.push(makeError('E_DUPLICATE_ID', `Duplicate typeId ${typeObj.typeId}`, typeObj.file));
       continue;
     }
-    const typeNode: GraphTypeNode = {
+    const typeNode: RecordLinkGraphTypeNode = {
       kind: 'type',
       typeId: typeObj.typeId,
       fields: typeObj.fields,
@@ -144,7 +141,7 @@ export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphRes
       file: typeObj.file,
     };
     typesById.set(typeObj.typeId, typeNode);
-    nodesById.set(typeObj.typeId, typeNode);
+    nodesByIdentity.set(typeObj.typeId, typeNode);
   }
 
   for (const recordObj of parsed.recordObjects) {
@@ -157,7 +154,7 @@ export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphRes
         makeError('E_TYPEID_MISMATCH', `Record ${recordObj.identity} references missing typeId ${recordObj.typeId}`, recordObj.file)
       );
     }
-    const recordNode: GraphRecordNode = {
+    const recordNode: RecordLinkGraphRecordNode = {
       kind: 'record',
       typeId: recordObj.typeId,
       recordId: recordObj.recordId,
@@ -167,18 +164,18 @@ export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphRes
       file: recordObj.file,
     };
     recordsByKey.set(recordObj.identity, recordNode);
-    nodesById.set(recordObj.identity, recordNode);
+    nodesByIdentity.set(recordObj.identity, recordNode);
   }
 
   for (const record of recordsByKey.values()) {
     const refs = collectRecordRefsFromRecord(record.fields, record.body);
     if (!refs.size) continue;
-    outgoing.set(record.recordKey, refs);
+    outgoingRecordLinks.set(record.recordKey, refs);
     for (const ref of refs) {
-      if (!incoming.has(ref)) {
-        incoming.set(ref, new Set());
+      if (!incomingRecordLinks.has(ref)) {
+        incomingRecordLinks.set(ref, new Set());
       }
-      incoming.get(ref)?.add(record.recordKey);
+      incomingRecordLinks.get(ref)?.add(record.recordKey);
     }
   }
 
@@ -188,6 +185,12 @@ export function buildGraphFromSnapshot(snapshot: DatasetSnapshot): BuildGraphRes
 
   return {
     ok: true,
-    graph: new GraphImpl(typesById, recordsByKey, nodesById, typesByRecordTypeId, outgoing, incoming),
+    graph: new RecordLinkGraphImpl(
+      typesById,
+      recordsByKey,
+      nodesByIdentity,
+      outgoingRecordLinks,
+      incomingRecordLinks
+    ),
   };
 }

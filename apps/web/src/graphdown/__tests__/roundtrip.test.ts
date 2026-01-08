@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 import { test } from "vitest";
 
 import {
-  buildGraphFromSnapshot,
+  buildRecordLinkGraphFromSnapshot,
   canonicalizeDatasetSnapshot,
   buildDatasetZipBytes,
   loadDatasetSnapshotFromZipBytes
 } from "..";
-import type { BuildGraphResult, DatasetSnapshot } from "..";
+import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "..";
 
 const encoder = new TextEncoder();
 
@@ -40,7 +40,9 @@ function exportAndLoad(rawSnapshot: DatasetSnapshot) {
   return { canonical: normalized, roundTripped: loadDatasetSnapshotFromZipBytes(zipBytes), zipBytes };
 }
 
-function expectGraphOk(result: BuildGraphResult): asserts result is Extract<BuildGraphResult, { ok: true }> {
+function expectGraphOk(
+  result: BuildRecordLinkGraphResult
+): asserts result is Extract<BuildRecordLinkGraphResult, { ok: true }> {
   if (!result.ok) {
     throw new Error(JSON.stringify(result.errors));
   }
@@ -94,7 +96,7 @@ test('EXP-003: canonical dataset export round-trips bytes and graph', () => {
   ]);
 
   const { roundTripped } = exportAndLoad(snapshot);
-  const graph = buildGraphFromSnapshot(roundTripped);
+  const graph = buildRecordLinkGraphFromSnapshot(roundTripped);
   expectGraphOk(graph);
   assert.deepEqual(
     [...roundTripped.files.keys()].sort(),

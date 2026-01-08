@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { Graph, GraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "../../graphdown";
 import DatasetRoute from "../DatasetRoute";
 
-const typeNode: GraphTypeNode = {
+const typeNode: RecordLinkGraphTypeNode = {
   kind: "type",
   typeId: "note",
   fields: { name: "Note", description: "Docs" },
@@ -12,19 +12,18 @@ const typeNode: GraphTypeNode = {
   file: "types/note.md"
 };
 
-const graph: Graph = {
+const graph: RecordLinkGraph = {
   typesById: new Map([[typeNode.typeId, typeNode]]),
   recordsByKey: new Map(),
-  nodesById: new Map([[typeNode.typeId, typeNode]]),
-  typesByRecordTypeId: new Map([[typeNode.typeId, typeNode]]),
-  outgoing: new Map(),
-  incoming: new Map(),
-  getLinksFrom: () => [],
-  getLinksTo: () => [],
+  nodesByIdentity: new Map([[typeNode.typeId, typeNode]]),
+  outgoingRecordLinks: new Map(),
+  incomingRecordLinks: new Map(),
+  getOutgoingRecordLinks: () => [],
+  getIncomingRecordLinks: () => [],
   getType: () => typeNode,
   getRecord: () => null,
   getTypeForRecord: () => typeNode,
-  getRecordTypeId: () => typeNode.typeId
+  getTypeIdForIdentity: () => typeNode.typeId
 };
 
 vi.mock("../../state/DatasetContext", () => ({
@@ -36,14 +35,11 @@ vi.mock("../../state/DatasetContext", () => ({
         id: "active",
         createdAt: 0,
         updatedAt: 0,
-        snapshotFormatVersion: 1,
-        graphFormatVersion: 1,
-        uiStateFormatVersion: 1,
         label: "Test dataset",
         source: "import"
       },
       datasetSnapshot: { files: new Map([["types/note.md", new Uint8Array()]]) },
-      parsedGraph: graph
+      recordLinkGraph: graph
     },
     error: undefined,
     importDatasetZip: vi.fn(),
@@ -59,7 +55,7 @@ function renderDatasetRoute(path = "/datasets/note") {
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/datasets" element={<DatasetRoute />} />
-        <Route path="/datasets/:recordTypeId" element={<DatasetRoute />} />
+        <Route path="/datasets/:typeId" element={<DatasetRoute />} />
       </Routes>
     </MemoryRouter>
   );

@@ -28,15 +28,15 @@ Those are handled in `validate/` and `snapshot/`.
 
 ## Key exports
 
-- `buildGraphFromSnapshot` (`graph.ts`)
+- `buildRecordLinkGraphFromSnapshot` (`graph.ts`)
   - Parses a `DatasetSnapshot` and returns either a graph index or validation errors.
   - Builds:
     - `typesById`
     - `recordsByKey`
-    - `nodesById`
-    - per-record incoming/outgoing link sets
+    - `nodesByIdentity`
+    - per-record incoming/outgoing record link sets
 
-- `Graph` interface
+- `RecordLinkGraph` interface
   - Lookup helpers for types/records
   - Sorted incoming/outgoing link lists
 
