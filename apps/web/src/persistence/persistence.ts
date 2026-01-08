@@ -1,5 +1,5 @@
-import type { Graph } from "../core/graph";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { Graph } from "../graphdown";
+import type { DatasetSnapshot } from "../graphdown";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
 import { serializeGraph, deserializeGraph } from "./serializeGraph";

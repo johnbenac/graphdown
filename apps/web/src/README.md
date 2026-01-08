@@ -25,7 +25,7 @@ The routes themselves live in `routes/` and are rendered through the
    - Import screens call into `DatasetContext` actions to validate GitHub URLs or
      read zip files.
 2. **Validation & canonicalization**
-   - `core/` utilities validate the dataset, normalize file layout, and prune
+   - `graphdown/` utilities validate the dataset, normalize file layout, and prune
      unused blobs.
 3. **Graph building**
    - The dataset snapshot becomes a graph of types/records and relationship
@@ -40,9 +40,9 @@ The routes themselves live in `routes/` and are rendered through the
 
 - `components/` - reusable UI components (navigation, record editor/viewer, UI
   wrappers).
-- `core/` - dataset parsing, validation, graph building, hashing, zip handling,
+- `graphdown/` - dataset parsing, validation, graph building, hashing, zip handling,
   and front matter parsing.
-- `export/` - downloading dataset exports from the browser.
+- `features/export/` - downloading dataset exports from the browser.
 - `import/` - zip parsing + GitHub import helpers.
 - `persistence/` - snapshot/graph serialization and persistence orchestration.
 - `routes/` - route-level screens and navigation flows.

@@ -15,7 +15,7 @@ Each screen composes `components/` and reads from the dataset context.
   - Drives the record editor/viewer modes for create/edit/read flows.
 - `ExportRoute.tsx` (`/export`)
   - Provides dataset export options for the active snapshot.
-  - Uses `exportDatasetZipBytes` + `downloadZipBytes` to generate zip downloads.
+  - Uses `buildDatasetZipBytes` + `downloadZipBytes` to generate zip downloads.
 
 ## Tests
 

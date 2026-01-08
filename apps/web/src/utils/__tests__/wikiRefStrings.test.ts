@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { readRef, readRefs, writeRef, writeRefs } from "../wikiLinks";
+import { readRef, readRefs, writeRef, writeRefs } from "../wikiRefStrings";
 
-describe("wikiLinks helpers", () => {
+describe("wikiRefStrings helpers", () => {
   it("REL-005: writeRef writes wiki-links", () => {
     expect(writeRef("record:1")).toBe("[[record:1]]");
     expect(writeRef("")).toBeUndefined();

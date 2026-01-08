@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import { exportDatasetZipBytes } from "../core/export";
-import { downloadZipBytes } from "../export/downloadZip";
+import { buildDatasetZipBytes } from "../graphdown";
+import { downloadZipBytes } from "../features/export";
 import { useDataset } from "../state/DatasetContext";
 
 function sanitizeLabel(label: string): string {
@@ -60,7 +60,7 @@ export default function ExportRoute() {
                     if (!activeDataset) {
                       return;
                     }
-                    const bytes = exportDatasetZipBytes(activeDataset.datasetSnapshot);
+                    const bytes = buildDatasetZipBytes(activeDataset.datasetSnapshot);
                     downloadZipBytes(bytes, `graphdown-export--${safeLabel}.zip`);
                   }}
                 >

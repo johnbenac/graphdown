@@ -1,6 +1,6 @@
 import { unzipSync, zipSync } from 'fflate';
 
-import type { DatasetSnapshot } from './snapshotTypes';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
 
 export interface ExportZipOptions {
   include?: (path: string) => boolean;
