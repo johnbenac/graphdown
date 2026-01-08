@@ -18,7 +18,7 @@ export const appRoutes = [
     element: <DatasetRoute />,
   },
   {
-    path: "/datasets/:recordTypeId",
+    path: "/datasets/:typeId",
     element: <DatasetRoute />,
   },
   {

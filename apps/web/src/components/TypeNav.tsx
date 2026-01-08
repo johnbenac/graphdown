@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
-import type { Graph, GraphTypeNode } from "../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "../graphdown";
 
 type TypeNavProps = {
-  graph: Graph;
+  recordLinkGraph: RecordLinkGraph;
   basePath?: string;
 };
 
-export function getTypeLabel(type: GraphTypeNode): string {
+export function getTypeLabel(type: RecordLinkGraphTypeNode): string {
   const fields = type.fields ?? {};
   const pluralName = typeof fields.pluralName === "string" ? fields.pluralName : null;
   const displayName = typeof fields.displayName === "string" ? fields.displayName : null;
@@ -14,13 +14,13 @@ export function getTypeLabel(type: GraphTypeNode): string {
   return pluralName ?? displayName ?? name ?? type.typeId;
 }
 
-export default function TypeNav({ graph, basePath = "/datasets" }: TypeNavProps) {
-  const types = [...graph.typesByRecordTypeId.values()].sort((a, b) =>
+export default function TypeNav({ recordLinkGraph, basePath = "/datasets" }: TypeNavProps) {
+  const types = [...recordLinkGraph.typesById.values()].sort((a, b) =>
     a.typeId.localeCompare(b.typeId)
   );
 
   const counts = new Map<string, number>();
-  for (const node of graph.nodesById.values()) {
+  for (const node of recordLinkGraph.nodesByIdentity.values()) {
     if (node.kind !== "record") {
       continue;
     }
