@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-05T09:49:38.087Z",
+  "generatedAt": "2026-01-08T00:18:33.667Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1046,6 +1046,19 @@
           "reqId": "NFR-001",
           "testTitle": "NFR-001: CRUD actions do not trigger a full document load event",
           "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "NFR-PERSIST-001",
+      "title": "Web persistence requires IndexedDB; no fallback",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "NFR-PERSIST-001",
+          "testTitle": "NFR-PERSIST-001: reports persistence_unavailable when IndexedDB is missing",
+          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
         }
       ]
     },

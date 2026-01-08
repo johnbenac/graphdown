@@ -1,7 +1,7 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 
 function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
@@ -160,5 +160,30 @@ describe("DatasetContext zip import", () => {
       expect(ctx?.error?.category).toBe("dataset_invalid");
       expect(ctx?.error && "errors" in ctx.error).toBe(true);
     });
+  });
+});
+
+describe("DatasetContext persistence requirements", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("NFR-PERSIST-001: reports persistence_unavailable when IndexedDB is missing", async () => {
+    vi.stubGlobal("indexedDB", undefined);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    let ctx: ReturnType<typeof useDataset> | null = null;
+    render(
+      <DatasetProvider>
+        <TestHarness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await waitFor(() => {
+      expect(ctx?.status).toBe("error");
+      expect(ctx?.error?.category).toBe("persistence_unavailable");
+    });
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

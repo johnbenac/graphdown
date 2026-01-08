@@ -47,7 +47,7 @@ The routes themselves live in `routes/` and are rendered through the
 - `persistence/` - snapshot/graph serialization and persistence orchestration.
 - `routes/` - route-level screens and navigation flows.
 - `state/` - dataset context, import progress, and import reports.
-- `storage/` - storage adapters for IndexedDB and in-memory fallbacks.
+- `storage/` - IndexedDB-backed persistence plus the test-only memory store.
 - `utils/` - small UI-friendly helpers (ex: wiki link helpers for refs).
 
 ## Testing entry points
