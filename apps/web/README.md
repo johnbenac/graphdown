@@ -22,7 +22,7 @@ npm --workspace apps/web run build
 - `src/export/` bundles the active dataset back into a zip.
 - `src/state/` app-level state: `DatasetContext` orchestrates import pipeline → validation → canonicalization → graph build → persistence; `importReport` summarizes ignored/normalized files.
 - `src/persistence/` serializes dataset snapshots, graphs, and UI state; versioned via `versions.ts`; `serializeGraph`/`serializeSnapshot` define on-disk formats.
-- `src/storage/` persistence backends (`IndexedDbStore`, `MemoryStore` for tests) and the `PersistStore` wrapper.
+- `src/storage/` IndexedDB-backed persistence and the `PersistStore` wrapper.
 - `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 - `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
 - `src/utils/` small helpers (e.g., wiki link parsing).
@@ -33,7 +33,7 @@ npm --workspace apps/web run build
 1) **Import (zip or GitHub)** → `readZipSnapshot` or `loadGitHubSnapshot` loads raw files.  
 2) **Validate** → `validateDatasetSnapshot` enforces Graphdown schema; errors bubble to the UI.  
 3) **Canonicalize** → `canonicalizeDatasetSnapshot` normalizes ordering/paths; `importReport` captures ignored files.  
-4) **Graph build** → `buildGraphFromSnapshot` makes the in-memory graph used by the UI.  
+4) **Graph build** → `buildGraphFromSnapshot` makes the graph used by the UI.  
 5) **Persist** → `createPersistence` writes snapshot + graph + UI state to the configured store.  
 6) **View/Edit** → `DatasetRoute` renders `RecordViewer`/`RecordEditor` with data from `DatasetContext`.  
 7) **Export** → `export/` serializes the current snapshot back to a zip.

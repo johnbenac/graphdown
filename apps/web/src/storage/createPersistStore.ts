@@ -19,8 +19,7 @@ export function createPersistStore(options?: CreatePersistStoreOptions): Persist
       [
         "Graphdown Web requires IndexedDB for persistence, but IndexedDB is unavailable.",
         "",
-        "This environment is not supported (e.g. restricted webview, storage disabled, or non-browser runtime).",
-        "Graphdown does not fall back to in-memory storage."
+        "This environment is not supported (e.g. restricted webview, storage disabled, or non-browser runtime)."
       ].join("\n")
     );
     logger.error(err.message, err);
