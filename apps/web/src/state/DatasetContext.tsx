@@ -23,6 +23,7 @@ export type ImportErrorCategory =
   | "rate_limited"
   | "dataset_invalid"
   | "network"
+  | "persistence_unavailable"
   | "unknown";
 
 export type ImportErrorState =
@@ -118,9 +119,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
 
   const store = useMemo(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const forceMemory = searchParams.get("storage") === "memory";
-    return createPersistStore({ forceMemory, logger: console });
+    return createPersistStore({ logger: console });
   }, []);
 
   const persistence = useMemo(
@@ -137,13 +136,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setActiveDataset(dataset);
       setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
-      console.warn("Failed to load persisted dataset.", err);
+      console.error("Persistence is required but failed to initialize/use IndexedDB.", err);
       setActiveDataset(undefined);
       setStatus("error");
       setError({
-        category: "unknown",
-        title: "Failed to load dataset",
-        message: err instanceof Error ? err.message : "Failed to load dataset."
+        category: "persistence_unavailable",
+        title: "Browser storage required",
+        message:
+          err instanceof Error
+            ? err.message
+            : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
       });
     }
   }, [persistence]);
@@ -193,6 +195,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setStatus("loading");
       setError(undefined);
       setProgress({ phase: "validating_dataset" });
+      let failedDuringPersistence = false;
       try {
         const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
         const validation = validateDatasetSnapshot(rawSnapshot);
@@ -225,10 +228,24 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "persisting" });
+        failedDuringPersistence = true;
         await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (failedDuringPersistence) {
+          console.error("Dataset import failed while persisting to IndexedDB.", err);
+          setStatus("error");
+          setError({
+            category: "persistence_unavailable",
+            title: "Browser storage required",
+            message:
+              err instanceof Error
+                ? err.message
+                : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
+          });
+          return;
+        }
         console.warn("Failed to import dataset.", err);
         setStatus("error");
         setError({
@@ -246,6 +263,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setStatus("loading");
       setError(undefined);
       setProgress({ phase: "validating_url" });
+      let failedDuringPersistence = false;
 
       const parsed = parseGitHubUrl(url);
       if (!parsed.ok) {
@@ -300,10 +318,24 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "persisting" });
+        failedDuringPersistence = true;
         await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (failedDuringPersistence) {
+          console.error("Dataset import failed while persisting to IndexedDB.", err);
+          setStatus("error");
+          setError({
+            category: "persistence_unavailable",
+            title: "Browser storage required",
+            message:
+              err instanceof Error
+                ? err.message
+                : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
+          });
+          return;
+        }
         console.warn("Failed to import dataset from GitHub.", err);
         setStatus("error");
         if (err instanceof GitHubImportError) {

@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";

@@ -5,6 +5,7 @@ import type { DatasetSnapshot } from "../core/snapshotTypes";
 import { buildGraphFromSnapshot } from "../core/graph";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 import type { DatasetContextValue } from "./DatasetContext";
+import type { PersistStore } from "../storage/PersistStore";
 import { MemoryStore } from "../storage/MemoryStore";
 import { createPersistence } from "../persistence/persistence";
 import { FORMAT_VERSIONS } from "../persistence/versions";
@@ -123,5 +124,34 @@ describe("DatasetContext non-functional requirements", () => {
     });
 
     expect(loadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails loudly when persistence is unavailable on startup", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    store = {
+      async get() {
+        throw new Error("IndexedDB unavailable");
+      },
+      async set() {
+        throw new Error("IndexedDB unavailable");
+      },
+      async del() {
+        throw new Error("IndexedDB unavailable");
+      },
+      async clear() {
+        throw new Error("IndexedDB unavailable");
+      }
+    } satisfies PersistStore;
+
+    let ctx: DatasetContextValue | null = null;
+    render(
+      <DatasetProvider>
+        <Harness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await waitFor(() => expect(ctx?.status).toBe("error"));
+    expect(ctx?.error?.category).toBe("persistence_unavailable");
+    expect(errorSpy).toHaveBeenCalled();
   });
 });

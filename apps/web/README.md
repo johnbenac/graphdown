@@ -1,6 +1,6 @@
 # Graphdown Web (Developer Guide)
 
-This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It uses the shared core validation library and persists the active dataset in the browser (IndexedDB by default, in-memory when `?storage=memory` is set).
+This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It uses the shared core validation library and persists the active dataset in the browser via IndexedDB (required).
 
 ## Run the app
 From the repo root:
@@ -54,4 +54,4 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.spec.ts-snapshots/
 ## Notes for contributors
 - Keep `src/core/` pure and framework-agnostic; the UI should consume it, not reimplement logic.
 - When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
-- The app persists state in IndexedDB; use `?storage=memory` to force an ephemeral store during debugging.
+- The app requires IndexedDB for persistence; environments that block it are unsupported and will show an error.
