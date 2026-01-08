@@ -1,7 +1,7 @@
-import { discoverGraphdownObjects, type ParsedRecordObject } from './datasetObjects';
-import type { DatasetSnapshot } from './snapshotTypes';
-import { isObject } from './types';
-import { extractBlobRefs } from './wikiLinks';
+import { discoverGraphdownObjects, type ParsedRecordObject } from '../parse/datasetObjects';
+import { extractBlobRefs } from '../parse/wikiTokens';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
+import { isObject } from '../model/types';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {

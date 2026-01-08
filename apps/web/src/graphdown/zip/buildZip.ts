@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from './snapshotTypes';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { exportDatasetSnapshotToZipBytes } from './zipSnapshot';
 
 export function exportDatasetZipBytes(snapshot: DatasetSnapshot): Uint8Array {

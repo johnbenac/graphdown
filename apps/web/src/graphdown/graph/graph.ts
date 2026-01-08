@@ -1,8 +1,8 @@
-import { discoverGraphdownObjects } from './datasetObjects';
-import { makeError, type ValidationError } from './errors';
-import type { DatasetSnapshot } from './snapshotTypes';
-import { isObject } from './types';
-import { extractRecordRefs } from './wikiLinks';
+import { discoverGraphdownObjects } from '../parse/datasetObjects';
+import { extractRecordRefs } from '../parse/wikiTokens';
+import { makeError, type ValidationError } from '../model/errors';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
+import { isObject } from '../model/types';
 
 export type GraphNodeKind = 'type' | 'record';
 

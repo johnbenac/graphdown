@@ -1,9 +1,9 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex } from '@noble/hashes/utils';
 
+import { makeError, type ValidationError } from '../model/errors';
+import { isObject } from '../model/types';
 import { extractFrontMatter } from './frontMatter';
-import { makeError, type ValidationError } from './errors';
-import { isObject } from './types';
 import { parseYamlObject } from './yaml';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;

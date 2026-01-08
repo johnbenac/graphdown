@@ -1,5 +1,5 @@
+import { makeError, type ValidationError } from '../model/errors';
 import { extractFrontMatter, buildFrontMatter } from './frontMatter';
-import { makeError, type ValidationError } from './errors';
 import { stringifyYamlObject, parseYamlObject } from './yaml';
 
 export function parseMarkdownRecord(
