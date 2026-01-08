@@ -2,7 +2,7 @@ import { unzipSync, zipSync } from 'fflate';
 
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 
-export interface ExportZipOptions {
+export interface ZipBuildOptions {
   include?: (path: string) => boolean;
   excludeGit?: boolean;
 }
@@ -50,9 +50,9 @@ export function loadDatasetSnapshotFromZipBytes(zipBytes: Uint8Array): DatasetSn
   return { files };
 }
 
-export function exportDatasetSnapshotToZipBytes(
+export function buildZipBytesFromSnapshot(
   snapshot: DatasetSnapshot,
-  options: ExportZipOptions = {}
+  options: ZipBuildOptions = {}
 ): Uint8Array {
   const include = options.include ?? (() => true);
   const excludeGit = options.excludeGit ?? true;
@@ -75,3 +75,9 @@ export function exportDatasetSnapshotToZipBytes(
 
   return zipSync(entries, { level: 0 });
 }
+
+/** @deprecated Use buildZipBytesFromSnapshot */
+export const exportDatasetSnapshotToZipBytes = buildZipBytesFromSnapshot;
+
+/** @deprecated Use ZipBuildOptions */
+export type ExportZipOptions = ZipBuildOptions;

@@ -1,5 +1,5 @@
 import type { DatasetSnapshot } from "../../graphdown";
-import type { ImportProgress } from "../../state/DatasetContext";
+import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
