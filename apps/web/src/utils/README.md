@@ -1,6 +1,6 @@
 # Utilities
 
-Small helpers that are specific to the web UI (as opposed to core dataset logic)
+Small helpers that are specific to the web UI (as opposed to graphdown dataset logic)
 are placed in this directory.
 
 ## Wiki link helpers
@@ -10,7 +10,7 @@ are placed in this directory.
     raw strings or `{ ref }` / `{ refs }` shapes.
   - `writeRef` and `writeRefs` format IDs as wiki-link tokens (`[[id]]`) for
     display or serialization.
-  - Uses `core/ids.cleanId` and `core/types.isObject` to keep normalization
+  - Uses `graphdown/model/ids.cleanId` and `graphdown/model/types.isObject` to keep normalization
     behavior consistent with dataset parsing.
 
 ## Tests

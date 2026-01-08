@@ -1,5 +1,5 @@
-import type { Graph, GraphRecordNode, GraphTypeNode } from "../core/graph";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../graphdown/graph/graph";
+import type { DatasetSnapshot } from "../graphdown/model/snapshotTypes";
 
 export type DatasetMeta = {
   id: string;

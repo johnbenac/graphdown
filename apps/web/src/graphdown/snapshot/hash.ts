@@ -1,9 +1,9 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex } from '@noble/hashes/utils';
 
-import { isRecordFileBytes, parseGraphdownText } from './datasetObjects';
-import { makeError, type ValidationError } from './errors';
-import type { DatasetSnapshot } from './snapshotTypes';
+import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
+import { makeError, type ValidationError } from '../model/errors';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
 

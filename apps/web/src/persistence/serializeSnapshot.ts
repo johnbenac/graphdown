@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../graphdown/model/snapshotTypes";
 import type { PersistedDatasetSnapshot } from "./types";
 
 export function serializeSnapshot(snapshot: DatasetSnapshot): PersistedDatasetSnapshot {
