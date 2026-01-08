@@ -1,13 +1,18 @@
+import "fake-indexeddb/auto";
 import { describe, expect, it, vi } from "vitest";
 import type { GraphTypeNode } from "../../core/graph";
 import type { DatasetSnapshot } from "../../core/snapshotTypes";
-import { MemoryStore } from "../../storage/MemoryStore";
+import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { KEY } from "../keys";
 import { createPersistence } from "../persistence";
 import { deserializeGraph } from "../serializeGraph";
 import { serializeSnapshot } from "../serializeSnapshot";
 import type { PersistedGraph } from "../types";
 import { FORMAT_VERSIONS } from "../versions";
+
+function makeDbName(prefix: string) {
+  return `${prefix}-${Math.random().toString(16).slice(2)}`;
+}
 
 const sampleSnapshot: DatasetSnapshot = {
   files: new Map([
@@ -37,7 +42,7 @@ const samplePersistedGraph: PersistedGraph = {
 
 describe("persistence service", () => {
   it("saves and loads the active dataset", async () => {
-    const store = new MemoryStore();
+    const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const persistence = createPersistence({ store });
 
     await persistence.saveActiveDataset({
@@ -60,7 +65,7 @@ describe("persistence service", () => {
   });
 
   it("rebuilds the graph when the format version changes", async () => {
-    const store = new MemoryStore();
+    const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const parseGraph = vi.fn(async () => deserializeGraph(samplePersistedGraph));
     const persistence = createPersistence({ store, parseGraph });
 
@@ -80,7 +85,7 @@ describe("persistence service", () => {
   });
 
   it("clears the active dataset when records are missing", async () => {
-    const store = new MemoryStore();
+    const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const persistence = createPersistence({ store });
 
     const loaded = await persistence.loadActiveDataset();

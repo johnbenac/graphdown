@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
@@ -5,17 +6,21 @@ import type { DatasetSnapshot } from "../../core/snapshotTypes";
 import { buildGraphFromSnapshot } from "../../core/graph";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { MemoryStore } from "../../storage/MemoryStore";
+import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { createPersistence } from "../../persistence/persistence";
 import { FORMAT_VERSIONS } from "../../persistence/versions";
 
-let store: MemoryStore;
+let store: IndexedDbStore;
 
 vi.mock("../../storage/createPersistStore", () => ({
   createPersistStore: () => store
 }));
 
 const encoder = new TextEncoder();
+
+function makeDbName(prefix: string) {
+  return `${prefix}-${Math.random().toString(16).slice(2)}`;
+}
 
 function makeSnapshot(): DatasetSnapshot {
   return {
@@ -67,11 +72,12 @@ describe("DatasetContext non-functional requirements", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
-    store = new MemoryStore();
+    store = new IndexedDbStore({ dbName: makeDbName("dataset-context") });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     global.fetch = originalFetch;
+    await store?.clear();
   });
 
   it("NFR-010: uses persisted dataset for read-only access when offline", async () => {
