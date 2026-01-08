@@ -23,6 +23,7 @@ export type ImportErrorCategory =
   | "rate_limited"
   | "dataset_invalid"
   | "network"
+  | "persistence_unavailable"
   | "unknown";
 
 export type ImportErrorState =
@@ -111,24 +112,44 @@ async function parseGraph(snapshot: DatasetSnapshot) {
   return result.graph;
 }
 
+const persistenceUnavailableError = (err?: unknown): ImportErrorState => ({
+  category: "persistence_unavailable",
+  title: "Browser storage required",
+  message:
+    err instanceof Error
+      ? err.message
+      : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
+});
+
 export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<DatasetContextValue["status"]>("idle");
   const [activeDataset, setActiveDataset] = useState<LoadedDataset | undefined>(undefined);
   const [error, setError] = useState<ImportErrorState | undefined>(undefined);
   const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
+  const [store, setStore] = useState<ReturnType<typeof createPersistStore> | null>(null);
 
-  const store = useMemo(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const forceMemory = searchParams.get("storage") === "memory";
-    return createPersistStore({ forceMemory, logger: console });
+  useEffect(() => {
+    try {
+      setStore(createPersistStore({ logger: console }));
+    } catch (err) {
+      console.error("Persistence is required but IndexedDB is unavailable.", err);
+      setActiveDataset(undefined);
+      setStatus("error");
+      setError(persistenceUnavailableError(err));
+    }
   }, []);
 
-  const persistence = useMemo(
-    () => createPersistence({ store, parseGraph, logger: console }),
-    [store]
-  );
+  const persistence = useMemo(() => {
+    if (!store) {
+      return null;
+    }
+    return createPersistence({ store, parseGraph, logger: console });
+  }, [store]);
 
   const loadActive = useCallback(async () => {
+    if (!persistence) {
+      return;
+    }
     setStatus("loading");
     setError(undefined);
     setProgress({ phase: "idle" });
@@ -137,22 +158,23 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setActiveDataset(dataset);
       setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
-      console.warn("Failed to load persisted dataset.", err);
+      console.error("Persistence is required but failed to initialize/use IndexedDB.", err);
       setActiveDataset(undefined);
       setStatus("error");
-      setError({
-        category: "unknown",
-        title: "Failed to load dataset",
-        message: err instanceof Error ? err.message : "Failed to load dataset."
-      });
+      setError(persistenceUnavailableError(err));
     }
   }, [persistence]);
 
   useEffect(() => {
-    loadActive();
-  }, [loadActive]);
+    if (store) {
+      loadActive();
+    }
+  }, [loadActive, store]);
 
   useEffect(() => {
+    if (!persistence) {
+      return;
+    }
     (window as Window & { __appDebug?: { clearPersistence: () => Promise<void> } }).__appDebug = {
       clearPersistence: async () => {
         await persistence.clearActiveDataset();
@@ -170,6 +192,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       parsedGraph: Awaited<ReturnType<typeof parseGraph>>,
       importReport?: ImportReport
     ) => {
+      if (!persistence) {
+        throw new Error("IndexedDB is unavailable. Graphdown requires IndexedDB for persistence.");
+      }
       const now = Date.now();
       const meta = {
         id: "active",
@@ -190,9 +215,15 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const importDatasetZip = useCallback(
     async (file: File) => {
+      if (!persistence) {
+        setStatus("error");
+        setError(persistenceUnavailableError());
+        return;
+      }
       setStatus("loading");
       setError(undefined);
       setProgress({ phase: "validating_dataset" });
+      let failedDuringPersistence = false;
       try {
         const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
         const validation = validateDatasetSnapshot(rawSnapshot);
@@ -225,10 +256,17 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         setProgress({ phase: "persisting" });
+        failedDuringPersistence = true;
         await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (failedDuringPersistence) {
+          console.error("Persistence is required but failed to save the dataset.", err);
+          setStatus("error");
+          setError(persistenceUnavailableError(err));
+          return;
+        }
         console.warn("Failed to import dataset.", err);
         setStatus("error");
         setError({
@@ -243,6 +281,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const importDatasetFromGitHub = useCallback(
     async (url: string) => {
+      if (!persistence) {
+        setStatus("error");
+        setError(persistenceUnavailableError());
+        return;
+      }
       setStatus("loading");
       setError(undefined);
       setProgress({ phase: "validating_url" });
@@ -259,6 +302,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      let failedDuringPersistence = false;
       try {
         const { snapshot: rawSnapshot, ignored } = await loadGitHubSnapshot({
           owner: parsed.value.owner,
@@ -300,10 +344,17 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProgress({ phase: "persisting" });
+        failedDuringPersistence = true;
         await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
+        if (failedDuringPersistence) {
+          console.error("Persistence is required but failed to save the dataset.", err);
+          setStatus("error");
+          setError(persistenceUnavailableError(err));
+          return;
+        }
         console.warn("Failed to import dataset from GitHub.", err);
         setStatus("error");
         if (err instanceof GitHubImportError) {
@@ -335,6 +386,11 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   );
 
   const clearPersistence = useCallback(async () => {
+    if (!persistence) {
+      setStatus("error");
+      setError(persistenceUnavailableError());
+      return;
+    }
     await persistence.clearActiveDataset();
     setActiveDataset(undefined);
     setStatus("ready");
@@ -348,6 +404,14 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       | { ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> }
       | { ok: false; errors: ValidationError[] }
     > => {
+      if (!persistence) {
+        setStatus("error");
+        setError(persistenceUnavailableError());
+        return {
+          ok: false,
+          errors: [makeError("E_INTERNAL", "IndexedDB is unavailable. Graphdown requires persistence.")]
+        } as const;
+      }
       const validation = validateDatasetSnapshot(nextSnapshot);
       if (!validation.ok) {
         return { ok: false, errors: validation.errors } as const;

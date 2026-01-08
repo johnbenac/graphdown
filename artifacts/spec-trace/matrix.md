@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-05T09:49:38.087Z
+Generated: 2026-01-08T00:19:43.230Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -329,6 +329,11 @@ Tests (1):
 ## NFR-010 — Read-only offline after initial load (testable=true)
 Tests (1):
 - apps/web/src/state/DatasetContext.nfr.test.tsx — "NFR-010: uses persisted dataset for read-only access when offline"
+
+## NFR-PERSIST-001 — Web persistence requires IndexedDB; no fallback (testable=true)
+Tests (2):
+- apps/web/src/state/DatasetContext.persistence.test.tsx — "NFR-PERSIST-001: fails loud when IndexedDB is unavailable"
+- apps/web/src/storage/createPersistStore.test.ts — "NFR-PERSIST-001: throws when IndexedDB is missing"
 
 ## UI-RAW-001 — Schema-agnostic record editor (testable=true)
 Tests (3):

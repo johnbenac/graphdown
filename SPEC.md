@@ -907,6 +907,13 @@ Specifically, after the initial page load, CRUD actions MUST NOT cause the top-l
 
 After a dataset is loaded, the UI MUST allow read-only navigation of already-loaded records while the browser is offline.
 
+<!-- req:id=NFR-PERSIST-001 title="Web persistence requires IndexedDB; no fallback" testable=true -->
+### NFR-PERSIST-001 — Web persistence requires IndexedDB; no fallback
+
+In the Graphdown web UI, persistence of the active dataset MUST use IndexedDB.
+If IndexedDB is unavailable or fails, the UI MUST fail with a clear error and MUST NOT fall back to in-memory persistence.
+The failure MUST be surfaced to the user and logged to the console.
+
 <!-- req:id=UI-RAW-001 title="Schema-agnostic record editor" testable=true -->
 ### UI-RAW-001 — Schema-agnostic record editor
 

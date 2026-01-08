@@ -1,7 +1,8 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { indexedDB as fakeIndexedDB } from "fake-indexeddb";
 import { DatasetProvider, useDataset } from "./DatasetContext";
 
 function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
@@ -13,6 +14,15 @@ function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>
 }
 
 describe("DatasetContext GitHub import", () => {
+  beforeEach(() => {
+    vi.stubGlobal("indexedDB", fakeIndexedDB);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
   it("ERR-002: maps GitHub 404 repo responses to not_found", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -135,6 +145,15 @@ describe("DatasetContext GitHub import", () => {
 });
 
 describe("DatasetContext zip import", () => {
+  beforeEach(() => {
+    vi.stubGlobal("indexedDB", fakeIndexedDB);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
   it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: []\n---"))

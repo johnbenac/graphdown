@@ -1,6 +1,6 @@
 # Graphdown Web (Developer Guide)
 
-This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It uses the shared core validation library and persists the active dataset in the browser (IndexedDB by default, in-memory when `?storage=memory` is set).
+This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets. It uses the shared core validation library and persists the active dataset in the browser via IndexedDB. The app requires IndexedDB support; environments that block or disable IndexedDB are unsupported and will surface a runtime error.
 
 ## Run the app
 From the repo root:
@@ -22,7 +22,7 @@ npm --workspace apps/web run build
 - `src/export/` bundles the active dataset back into a zip.
 - `src/state/` app-level state: `DatasetContext` orchestrates import pipeline → validation → canonicalization → graph build → persistence; `importReport` summarizes ignored/normalized files.
 - `src/persistence/` serializes dataset snapshots, graphs, and UI state; versioned via `versions.ts`; `serializeGraph`/`serializeSnapshot` define on-disk formats.
-- `src/storage/` pluggable persistence backends (`IndexedDbStore`, `MemoryStore`, and the `PersistStore` wrapper).
+- `src/storage/` persistence backends (`IndexedDbStore`, `MemoryStore` for tests, and the `PersistStore` wrapper).
 - `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 - `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
 - `src/utils/` small helpers (e.g., wiki link parsing).
@@ -54,4 +54,4 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.spec.ts-snapshots/
 ## Notes for contributors
 - Keep `src/core/` pure and framework-agnostic; the UI should consume it, not reimplement logic.
 - When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
-- The app persists state in IndexedDB; use `?storage=memory` to force an ephemeral store during debugging.
+- The app requires IndexedDB for persistence; unsupported environments will surface an explicit error.
