@@ -2,7 +2,7 @@ import { act, render, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DatasetProvider, useDataset } from "./DatasetContext";
+import { DatasetProvider, useDataset } from "../DatasetContext";
 
 function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
   const ctx = useDataset();

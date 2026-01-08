@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseGitHubUrl } from "./parseGitHubUrl";
+import { parseGitHubUrl } from "../parseGitHubUrl";
 
 describe("parseGitHubUrl", () => {
   it("GH-001: accepts https repo URLs", () => {

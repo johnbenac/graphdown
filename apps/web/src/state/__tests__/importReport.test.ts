@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
-import { buildImportReport } from "./importReport";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
+import { buildImportReport } from "../importReport";
 
 const encoder = new TextEncoder();
 

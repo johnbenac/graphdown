@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { readZipSnapshot } from "./readZipSnapshot";
+import { readZipSnapshot } from "../readZipSnapshot";
 
 describe("readZipSnapshot", () => {
   it("strips a single top-level folder in GitHub-style zips", async () => {

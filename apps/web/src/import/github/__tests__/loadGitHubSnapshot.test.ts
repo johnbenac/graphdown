@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
-import { loadGitHubSnapshot } from "./loadGitHubSnapshot";
+import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
   new Response(JSON.stringify(data), {

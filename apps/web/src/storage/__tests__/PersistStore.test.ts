@@ -1,8 +1,8 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import { IndexedDbStore } from "./IndexedDbStore";
-import { MemoryStore } from "./MemoryStore";
-import type { PersistStore } from "./PersistStore";
+import { IndexedDbStore } from "../IndexedDbStore";
+import { MemoryStore } from "../MemoryStore";
+import type { PersistStore } from "../PersistStore";
 
 async function runStoreContract(makeStore: () => PersistStore) {
   const store = makeStore();
