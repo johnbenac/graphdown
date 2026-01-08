@@ -4,11 +4,11 @@ import {
   IDENTIFIER_PATTERN,
   type ParsedRecordObject,
   type ParsedTypeObject,
-} from './datasetObjects';
+} from '../parse/datasetObjects';
 import { makeError, type ValidationError } from './errors';
-import type { DatasetSnapshot } from './snapshotTypes';
-import { isObject } from './types';
-import { extractBlobRefs, extractRecordRefs } from './wikiLinks';
+import type { DatasetSnapshot } from '../model/snapshotTypes';
+import { isObject } from '../model/types';
+import { extractBlobRefs, extractRecordRefs } from '../parse/wikiRefs';
 
 export type ValidateDatasetResult =
   | { ok: true }

@@ -5,7 +5,7 @@ import { test } from "vitest";
 import {
   buildGraphFromSnapshot,
   canonicalizeDatasetSnapshot,
-  exportDatasetZipBytes,
+  buildDatasetZipBytes,
   loadDatasetSnapshotFromZipBytes
 } from "..";
 import type { BuildGraphResult, DatasetSnapshot } from "..";
@@ -36,7 +36,7 @@ function exportAndLoad(rawSnapshot: DatasetSnapshot) {
       ])
     )
   };
-  const zipBytes = exportDatasetZipBytes(normalized);
+  const zipBytes = buildDatasetZipBytes(normalized);
   return { canonical: normalized, roundTripped: loadDatasetSnapshotFromZipBytes(zipBytes), zipBytes };
 }
 

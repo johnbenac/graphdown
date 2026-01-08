@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "../graphdown";
 
 const ROOT_DIRS = new Set(["types", "records"]);
 

@@ -1,4 +1,4 @@
-import type { Graph, GraphRecordNode, GraphTypeNode } from "../core/graph";
+import type { Graph, GraphRecordNode, GraphTypeNode } from "../graphdown";
 import type { PersistedGraph } from "./types";
 
 class GraphImpl implements Graph {

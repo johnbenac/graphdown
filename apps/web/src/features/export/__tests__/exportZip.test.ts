@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
-import { canonicalizeDatasetSnapshot } from "../../core/canonicalizeDatasetSnapshot";
-import type { DatasetSnapshot } from "../../core/snapshotTypes";
-import { exportDatasetZipBytes } from "../../core/export";
-import { loadDatasetSnapshotFromZipBytes } from "../../core/zipSnapshot";
+import { canonicalizeDatasetSnapshot } from "../../../graphdown";
+import type { DatasetSnapshot } from "../../../graphdown";
+import { buildDatasetZipBytes } from "../../../graphdown";
+import { loadDatasetSnapshotFromZipBytes } from "../../../graphdown";
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
@@ -19,11 +19,11 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
 
 function exportAndLoad(rawSnapshot: DatasetSnapshot) {
   const canonical = canonicalizeDatasetSnapshot(rawSnapshot);
-  const zipBytes = exportDatasetZipBytes(canonical);
+  const zipBytes = buildDatasetZipBytes(canonical);
   return loadDatasetSnapshotFromZipBytes(zipBytes);
 }
 
-describe("exportDatasetZipBytes", () => {
+describe("buildDatasetZipBytes", () => {
   it("EXP-HIER-001: export uses canonical layout paths", () => {
     const snapshot = snapshotFromEntries([
       ["weird/type-location.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],

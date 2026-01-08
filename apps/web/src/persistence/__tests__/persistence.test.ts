@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it, vi } from "vitest";
-import type { GraphTypeNode } from "../../core/graph";
-import type { DatasetSnapshot } from "../../core/snapshotTypes";
+import type { GraphTypeNode } from "../../graphdown";
+import type { DatasetSnapshot } from "../../graphdown";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { KEY } from "../keys";
 import { createPersistence } from "../persistence";

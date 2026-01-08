@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "../../core/snapshotTypes";
+import type { DatasetSnapshot } from "../../graphdown";
 import type { ImportProgress } from "../../state/DatasetContext";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
