@@ -243,10 +243,10 @@ index 3e1b4dd..4a48d78 100644
 -  process.exitCode = code ?? 1;
 -});
 +}
-diff --git a/src/core/errors.ts b/src/core/errors.ts
+diff --git a/apps/web/src/graphdown/errors.ts b/apps/web/src/graphdown/errors.ts
 index afaafa9..bb45d11 100644
---- a/src/core/errors.ts
-+++ b/src/core/errors.ts
+--- a/apps/web/src/graphdown/errors.ts
++++ b/apps/web/src/graphdown/errors.ts
 @@ -15,6 +15,9 @@ export type ValidationErrorCode =
    | 'E_DUPLICATE_RECORD_TYPE_ID'
    | 'E_RECORD_TYPE_ID_INVALID'
@@ -257,10 +257,10 @@ index afaafa9..bb45d11 100644
    | 'E_GITHUB_URL_UNSUPPORTED'
    | 'E_USAGE'
    | 'E_INTERNAL';
-diff --git a/src/core/graph.ts b/src/core/graph.ts
+diff --git a/apps/web/src/graphdown/graph.ts b/apps/web/src/graphdown/graph.ts
 index d98d33b..a794cf4 100644
---- a/src/core/graph.ts
-+++ b/src/core/graph.ts
+--- a/apps/web/src/graphdown/graph.ts
++++ b/apps/web/src/graphdown/graph.ts
 @@ -1,6 +1,5 @@
  import { extractFrontMatter } from './frontMatter';
  import { makeError, ValidationError } from './errors';
@@ -316,10 +316,10 @@ index d98d33b..a794cf4 100644
        if (!target || target === node.id) {
          continue;
        }
-diff --git a/src/core/validateDatasetSnapshot.ts b/src/core/validateDatasetSnapshot.ts
+diff --git a/apps/web/src/graphdown/validateDatasetSnapshot.ts b/apps/web/src/graphdown/validateDatasetSnapshot.ts
 index 1167e2c..06a290a 100644
---- a/src/core/validateDatasetSnapshot.ts
-+++ b/src/core/validateDatasetSnapshot.ts
+--- a/apps/web/src/graphdown/validateDatasetSnapshot.ts
++++ b/apps/web/src/graphdown/validateDatasetSnapshot.ts
 @@ -1,12 +1,20 @@
  import { makeError, type ValidationError } from './errors';
 -import { parseMarkdownRecord, RECORD_TYPE_ID_PATTERN } from './graph';

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import ImportWarningBanner from "../components/ImportWarningBanner";
-import type { ImportProgress } from "../state/DatasetContext";
+import type { ImportProgress } from "../import/types";
 import { useDataset } from "../state/DatasetContext";
 
 const PROGRESS_STEPS: Array<{ phase: ImportProgress["phase"]; label: string }> = [
