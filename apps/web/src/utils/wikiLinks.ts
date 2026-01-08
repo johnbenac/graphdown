@@ -1,5 +1,5 @@
-import { cleanId } from "../core/ids";
-import { isObject } from "../core/types";
+import { cleanId } from "graphdown/model/ids";
+import { isObject } from "graphdown/model/types";
 
 function normalizeId(value: unknown): string | null {
   return cleanId(value);

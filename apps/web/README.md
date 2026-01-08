@@ -17,9 +17,9 @@ npm --workspace apps/web run build
 
 ## Project layout
 - `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-- `src/core/` shared, pure logic for dataset parsing/validation/graph construction (hashing, IDs, refs, markdown parsing, etc.).
+- `src/graphdown/` shared, pure logic for dataset parsing/validation/graph construction (hashing, IDs, refs, markdown parsing, etc.).
 - `src/import/` dataset ingest: `readZipSnapshot` for local zip uploads; `import/github/` parses GitHub URLs and fetches repo contents with error mapping.
-- `src/export/` bundles the active dataset back into a zip.
+- `src/features/export/` bundles the active dataset back into a zip.
 - `src/state/` app-level state: `DatasetContext` orchestrates import pipeline → validation → canonicalization → graph build → persistence; `importReport` summarizes ignored/normalized files.
 - `src/persistence/` serializes dataset snapshots, graphs, and UI state; versioned via `versions.ts`; `serializeGraph`/`serializeSnapshot` define on-disk formats.
 - `src/storage/` IndexedDB-backed persistence and the `PersistStore` wrapper.
@@ -36,7 +36,7 @@ npm --workspace apps/web run build
 4) **Graph build** → `buildGraphFromSnapshot` makes the graph used by the UI.  
 5) **Persist** → `createPersistence` writes snapshot + graph + UI state to the configured store.  
 6) **View/Edit** → `DatasetRoute` renders `RecordViewer`/`RecordEditor` with data from `DatasetContext`.  
-7) **Export** → `export/` serializes the current snapshot back to a zip.
+7) **Export** → `features/export/` serializes the current snapshot back to a zip.
 
 ## Testing
 From the repo root (uses workspace scripts):
@@ -52,6 +52,6 @@ npx playwright install --with-deps chromium
 Playwright snapshots live next to the spec: `apps/web/e2e/app.spec.ts-snapshots/`. Update them intentionally with `npm --workspace apps/web run test:e2e:update`.
 
 ## Notes for contributors
-- Keep `src/core/` pure and framework-agnostic; the UI should consume it, not reimplement logic.
+- Keep `src/graphdown/` pure and framework-agnostic; the UI should consume it, not reimplement logic.
 - When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
 - The app requires IndexedDB for persistence; environments that block it are unsupported.

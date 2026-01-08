@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
-import { canonicalizeDatasetSnapshot } from "../../core/canonicalizeDatasetSnapshot";
-import type { DatasetSnapshot } from "../../core/snapshotTypes";
-import { exportDatasetZipBytes } from "../../core/export";
-import { loadDatasetSnapshotFromZipBytes } from "../../core/zipSnapshot";
+import { canonicalizeDatasetSnapshot } from "graphdown/snapshot/canonicalizeDatasetSnapshot";
+import type { DatasetSnapshot } from "graphdown/model/snapshotTypes";
+import { exportDatasetZipBytes } from "graphdown/zip/buildZip";
+import { loadDatasetSnapshotFromZipBytes } from "graphdown/zip/zipSnapshot";
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {

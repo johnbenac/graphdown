@@ -1,7 +1,7 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex } from '@noble/hashes/utils';
 
-import { isRecordFileBytes, parseGraphdownText } from './datasetObjects';
+import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from './errors';
 import type { DatasetSnapshot } from './snapshotTypes';
 

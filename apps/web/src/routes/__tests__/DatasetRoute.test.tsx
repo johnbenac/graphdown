@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { Graph, GraphTypeNode } from "../../core/graph";
+import type { Graph, GraphTypeNode } from "graphdown/graph/graph";
 import DatasetRoute from "../DatasetRoute";
 
 const typeNode: GraphTypeNode = {

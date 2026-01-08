@@ -10,8 +10,8 @@ are placed in this directory.
     raw strings or `{ ref }` / `{ refs }` shapes.
   - `writeRef` and `writeRefs` format IDs as wiki-link tokens (`[[id]]`) for
     display or serialization.
-  - Uses `core/ids.cleanId` and `core/types.isObject` to keep normalization
-    behavior consistent with dataset parsing.
+  - Uses `graphdown/model/ids.cleanId` and `graphdown/model/types.isObject` to
+    keep normalization behavior consistent with dataset parsing.
 
 ## Tests
 

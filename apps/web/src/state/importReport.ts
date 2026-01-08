@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "../core/snapshotTypes";
+import type { DatasetSnapshot } from "graphdown/model/snapshotTypes";
 import type { ImportReport } from "../persistence/types";
 
 const SAMPLE_LIMIT = 20;

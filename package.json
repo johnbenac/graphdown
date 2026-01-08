@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "postinstall": "npm --workspace apps/web run playwright:install",
-    "lint": "eslint \"apps/web/src/core/**/*.ts\"",
+    "lint": "eslint \"apps/web/src/graphdown/**/*.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run build && node --test",

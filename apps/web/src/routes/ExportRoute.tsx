@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import { exportDatasetZipBytes } from "../core/export";
-import { downloadZipBytes } from "../export/downloadZip";
+import { exportDatasetZipBytes } from "graphdown/zip/buildZip";
+import { downloadZipBytes } from "../features/export";
 import { useDataset } from "../state/DatasetContext";
 
 function sanitizeLabel(label: string): string {

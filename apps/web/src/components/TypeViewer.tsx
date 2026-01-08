@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { GraphTypeNode } from "../core/graph";
+import type { GraphTypeNode } from "graphdown/graph/graph";
 import { getTypeLabel } from "./TypeNav";
 
 type TypeViewerProps = {
