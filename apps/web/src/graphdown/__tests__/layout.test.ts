@@ -50,11 +50,11 @@ test('LAYOUT-002: only first front matter block defines a record object', () => 
   const validation = validateDatasetSnapshot(snap);
   expectValidationOk(validation);
 
-  const graphResult = buildRecordLinkGraphFromSnapshot(snap);
-  expectGraphOk(graphResult);
-  const { graph } = graphResult;
+  const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(snap);
+  expectGraphOk(recordLinkGraphResult);
+  const { graph: recordLinkGraph } = recordLinkGraphResult;
 
-  assert.ok(graph.getRecord("note:one"));
-  assert.equal(graph.getRecord("note:two"), null);
-  assert.deepEqual(graph.getOutgoingRecordLinks("note:one"), []);
+  assert.ok(recordLinkGraph.getRecord("note:one"));
+  assert.equal(recordLinkGraph.getRecord("note:two"), null);
+  assert.deepEqual(recordLinkGraph.getOutgoingRecordLinks("note:one"), []);
 });

@@ -36,9 +36,9 @@ function makeSnapshot(): DatasetSnapshot {
 async function seedActiveDataset() {
   if (!store) throw new Error("Persist store not initialized");
   const snapshot = makeSnapshot();
-  const graphResult = buildRecordLinkGraphFromSnapshot(snapshot);
-  if (!graphResult.ok) {
-    throw new Error(`Record Link Graph build failed: ${JSON.stringify(graphResult.errors)}`);
+  const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(snapshot);
+  if (!recordLinkGraphResult.ok) {
+    throw new Error(`Record Link Graph build failed: ${JSON.stringify(recordLinkGraphResult.errors)}`);
   }
   const persistence = createPersistence({
     store
@@ -51,7 +51,7 @@ async function seedActiveDataset() {
   await persistence.saveActiveDataset({
     meta,
     datasetSnapshot: snapshot,
-    recordLinkGraph: graphResult.graph
+    recordLinkGraph: recordLinkGraphResult.graph
   });
 }
 

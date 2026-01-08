@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-08T08:56:02.501Z",
+  "generatedAt": "2026-01-08T17:01:24.148Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -629,7 +629,7 @@
       "tests": [
         {
           "reqId": "VAL-002",
-          "testTitle": "VAL-002: duplicate record identity fails graph build",
+          "testTitle": "VAL-002: duplicate record identity fails Record Link Graph build",
           "filePath": "apps/web/src/graphdown/__tests__/graph.test.ts"
         },
         {

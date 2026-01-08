@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-08T08:56:02.501Z
+Generated: 2026-01-08T17:01:24.148Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -198,7 +198,7 @@ Tests (1):
 
 ## VAL-002 — Identity uniqueness rules (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/graph.test.ts — "VAL-002: duplicate record identity fails graph build"
+- apps/web/src/graphdown/__tests__/graph.test.ts — "VAL-002: duplicate record identity fails Record Link Graph build"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-002: duplicate record identity fails validation"
 
 ## VAL-003 — Record objects must reference an existing type (testable=true)

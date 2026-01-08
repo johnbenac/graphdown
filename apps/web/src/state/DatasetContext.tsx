@@ -229,20 +229,20 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           ignored
         });
         setProgress({ phase: "building_record_link_graph" });
-        const graphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
-        if (!graphResult.ok) {
+        const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
+        if (!recordLinkGraphResult.ok) {
           setStatus("error");
           setError({
             category: "dataset_invalid",
             title: "Dataset invalid",
             message: "Dataset records could not be parsed.",
-            errors: graphResult.errors
+            errors: recordLinkGraphResult.errors
           });
           return;
         }
         setProgress({ phase: "persisting" });
         persisted = true;
-        await saveActiveDataset(file.name, datasetSnapshot, graphResult.graph, importReport);
+        await saveActiveDataset(file.name, datasetSnapshot, recordLinkGraphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -311,21 +311,21 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           ignored
         });
         setProgress({ phase: "building_record_link_graph" });
-        const graphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
-        if (!graphResult.ok) {
+        const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
+        if (!recordLinkGraphResult.ok) {
           setStatus("error");
           setError({
             category: "dataset_invalid",
             title: "Dataset invalid",
             message: "Dataset records could not be parsed.",
-            errors: graphResult.errors
+            errors: recordLinkGraphResult.errors
           });
           return;
         }
 
         setProgress({ phase: "persisting" });
         persisted = true;
-        await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, graphResult.graph, importReport);
+        await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, recordLinkGraphResult.graph, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -386,9 +386,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       if (!validation.ok) {
         return { ok: false, errors: validation.errors } as const;
       }
-      const graphResult = buildRecordLinkGraphFromSnapshot(nextSnapshot);
-      if (!graphResult.ok) {
-        return { ok: false, errors: graphResult.errors } as const;
+      const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(nextSnapshot);
+      if (!recordLinkGraphResult.ok) {
+        return { ok: false, errors: recordLinkGraphResult.errors } as const;
       }
       if (!activeDataset) {
         return {
@@ -406,10 +406,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       await persistence.saveActiveDataset({
         meta: nextMeta,
         datasetSnapshot: nextSnapshot,
-        recordLinkGraph: graphResult.graph
+        recordLinkGraph: recordLinkGraphResult.graph
       });
-      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, recordLinkGraph: graphResult.graph });
-      return { ok: true, recordLinkGraph: graphResult.graph } as const;
+      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, recordLinkGraph: recordLinkGraphResult.graph });
+      return { ok: true, recordLinkGraph: recordLinkGraphResult.graph } as const;
     },
     [activeDataset, persistence]
   );

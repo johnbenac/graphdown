@@ -49,7 +49,7 @@ function expectGraphOk(
   result: BuildRecordLinkGraphResult
 ): asserts result is Extract<BuildRecordLinkGraphResult, { ok: true }> {
   if (!result.ok) {
-    const message = result.errors ? JSON.stringify(result.errors) : "Graph build failed";
+    const message = result.errors ? JSON.stringify(result.errors) : "Record Link Graph build failed";
     throw new Error(message);
   }
 }
@@ -67,9 +67,9 @@ test('REL-002: extracts record links from bodies and fields', () => {
 
     const result = buildRecordLinkGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     expectGraphOk(result);
-    const { graph } = result;
-    assert.deepEqual(graph.getOutgoingRecordLinks("note:one"), ["note:two"]);
-    assert.deepEqual(graph.getIncomingRecordLinks("note:one"), ["note:two"]);
+    const { graph: recordLinkGraph } = result;
+    assert.deepEqual(recordLinkGraph.getOutgoingRecordLinks("note:one"), ["note:two"]);
+    assert.deepEqual(recordLinkGraph.getIncomingRecordLinks("note:one"), ["note:two"]);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -90,15 +90,15 @@ test('REL-002: does not synthesize links across separate string values', () => {
 
     const result = buildRecordLinkGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     expectGraphOk(result);
-    const { graph } = result;
-    assert.deepEqual(graph.getOutgoingRecordLinks("note:one"), []);
-    assert.deepEqual(graph.getIncomingRecordLinks("note:two"), []);
+    const { graph: recordLinkGraph } = result;
+    assert.deepEqual(recordLinkGraph.getOutgoingRecordLinks("note:one"), []);
+    assert.deepEqual(recordLinkGraph.getIncomingRecordLinks("note:two"), []);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
-test('Graph exposes type and record lookup by identity', () => {
+test('Record Link Graph exposes type and record lookup by identity', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
     writeFile(tempDir, "t.md", typeFile("note"));
@@ -106,18 +106,18 @@ test('Graph exposes type and record lookup by identity', () => {
 
     const result = buildRecordLinkGraphFromSnapshot(loadDatasetSnapshotFromFs(tempDir));
     expectGraphOk(result);
-    const { graph } = result;
-    const type = graph.getType("note");
+    const { graph: recordLinkGraph } = result;
+    const type = recordLinkGraph.getType("note");
     assert.ok(type);
-    const record = graph.getRecord("note:one");
+    const record = recordLinkGraph.getRecord("note:one");
     assert.ok(record);
-    assert.equal(graph.getTypeForRecord("note:one")?.typeId, "note");
+    assert.equal(recordLinkGraph.getTypeForRecord("note:one")?.typeId, "note");
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
 
-test('VAL-002: duplicate record identity fails graph build', () => {
+test('VAL-002: duplicate record identity fails Record Link Graph build', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
   try {
     writeFile(tempDir, "t.md", typeFile("note"));
