@@ -13,7 +13,7 @@ graph building behavior.
   relationships, composition rules, blobs, and error shapes
   (`validateDatasetSnapshot.test.ts`, `composition.test.ts`, `layout.test.ts`,
   `errors.test.ts`, `blobs.test.ts`).
-- **Graph + hashing**: graph link extraction and deterministic hashing
+- **Record Link Graph + hashing**: record link extraction and deterministic hashing
   (`graph.test.ts`, `hash.test.ts`).
 - **Utilities**: ID normalization and reserved vocabulary checks
   (`ids.test.ts`, `reserved-vocabulary.test.ts`).

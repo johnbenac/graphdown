@@ -31,7 +31,7 @@ describe("loadGitHubSnapshot", () => {
       // Raw file fetches
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
+          ["---", "id: type:note", "typeId: sys:type", "fields:", "  typeId: note", "---"].join("\n"),
           { status: 200 }
         )
       )
@@ -69,7 +69,7 @@ describe("loadGitHubSnapshot", () => {
       // Raw file fetches (type, record)
       .mockResolvedValueOnce(
         new Response(
-          ["---", "id: type:note", "typeId: sys:type", "fields:", "  recordTypeId: note", "---"].join("\n"),
+          ["---", "id: type:note", "typeId: sys:type", "fields:", "  typeId: note", "---"].join("\n"),
           { status: 200 }
         )
       )

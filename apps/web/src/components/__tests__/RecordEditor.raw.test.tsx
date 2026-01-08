@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "../RecordEditor";
-import type { GraphRecordNode, GraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../../graphdown";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();
@@ -13,7 +13,7 @@ vi.mock("../../state/DatasetContext", () => ({
   })
 }));
 
-const typeDef: GraphTypeNode = {
+const typeDef: RecordLinkGraphTypeNode = {
   kind: "type",
   typeId: "note",
   fields: { name: "Note" },
@@ -29,7 +29,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: edits arbitrary fields without kind semantics", async () => {
-    const record: GraphRecordNode = {
+    const record: RecordLinkGraphRecordNode = {
       recordKey: "note:record-1",
       recordId: "record-1",
       typeId: "note",
@@ -57,7 +57,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: edits fields outside any schema and persists them", async () => {
-    const record: GraphRecordNode = {
+    const record: RecordLinkGraphRecordNode = {
       recordKey: "note:record-2",
       recordId: "record-2",
       typeId: "note",
@@ -84,7 +84,7 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: removes fields when YAML omits them", async () => {
-    const record: GraphRecordNode = {
+    const record: RecordLinkGraphRecordNode = {
       recordKey: "note:record-3",
       recordId: "record-3",
       typeId: "note",

@@ -1,14 +1,15 @@
-import type { Graph } from "../graphdown";
-import type { DatasetSnapshot } from "../graphdown";
+import type { DatasetSnapshot, RecordLinkGraph } from "../graphdown";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
-import { serializeGraph, deserializeGraph } from "./serializeGraph";
+import {
+  serializeRecordLinkGraphCache,
+  deserializeRecordLinkGraphCache
+} from "./serializeRecordLinkGraphCache";
 import { deserializeSnapshot, serializeSnapshot } from "./serializeSnapshot";
-import { FORMAT_VERSIONS } from "./versions";
 import type {
   DatasetMeta,
   LoadedDataset,
-  PersistedGraph,
+  PersistedRecordLinkGraphCache,
   PersistedDatasetSnapshot,
   PersistedUiState
 } from "./types";
@@ -21,7 +22,7 @@ export interface Persistence {
   saveActiveDataset(input: {
     meta: DatasetMeta;
     datasetSnapshot: DatasetSnapshot;
-    parsedGraph?: Graph;
+    recordLinkGraph?: RecordLinkGraph;
     uiState?: PersistedUiState;
   }): Promise<void>;
   loadActiveDataset(): Promise<LoadedDataset | undefined>;
@@ -31,85 +32,57 @@ export interface Persistence {
 
 type CreatePersistenceOptions = {
   store: PersistStore;
-  parseGraph?: (snapshot: DatasetSnapshot) => Promise<Graph>;
   logger?: Logger;
 };
 
-function ensureMetaVersions(meta: DatasetMeta): DatasetMeta {
-  return {
-    ...meta,
-    snapshotFormatVersion: meta.snapshotFormatVersion ?? FORMAT_VERSIONS.snapshot,
-    graphFormatVersion: meta.graphFormatVersion ?? FORMAT_VERSIONS.graph,
-    uiStateFormatVersion: meta.uiStateFormatVersion ?? FORMAT_VERSIONS.uiState
-  };
-}
-
 export function createPersistence(options: CreatePersistenceOptions): Persistence {
-  const { store, parseGraph } = options;
+  const { store } = options;
   const logger = options.logger ?? console;
 
   return {
-    async saveActiveDataset({ meta, datasetSnapshot, parsedGraph, uiState }) {
+    async saveActiveDataset({ meta, datasetSnapshot, recordLinkGraph, uiState }) {
       const persistedSnapshot: PersistedDatasetSnapshot = serializeSnapshot(datasetSnapshot);
       await store.set(KEY.activeSnapshot, persistedSnapshot);
-      if (parsedGraph) {
-        const persistedGraph: PersistedGraph = serializeGraph(parsedGraph);
-        await store.set(KEY.activeGraph, persistedGraph);
+      if (recordLinkGraph) {
+        const persistedGraph: PersistedRecordLinkGraphCache =
+          serializeRecordLinkGraphCache(recordLinkGraph);
+        await store.set(KEY.activeRecordLinkGraphCache, persistedGraph);
       }
       if (uiState) {
         await store.set(KEY.activeUiState, uiState);
       }
-      await store.set(KEY.activeMeta, ensureMetaVersions(meta));
+      await store.set(KEY.activeMeta, meta);
     },
     async loadActiveDataset() {
-      let meta = await store.get<DatasetMeta>(KEY.activeMeta);
+      const meta = await store.get<DatasetMeta>(KEY.activeMeta);
       const snapshotPayload = await store.get<PersistedDatasetSnapshot>(KEY.activeSnapshot);
-      if (!meta || !snapshotPayload) {
+      const storedGraph = await store.get<PersistedRecordLinkGraphCache>(
+        KEY.activeRecordLinkGraphCache
+      );
+      if (!meta || !snapshotPayload || !storedGraph) {
         await store.del(KEY.activeMeta);
         await store.del(KEY.activeSnapshot);
-        return undefined;
-      }
-      if (meta.snapshotFormatVersion !== FORMAT_VERSIONS.snapshot) {
-        await store.del(KEY.activeMeta);
-        await store.del(KEY.activeSnapshot);
-        logger.warn("Snapshot format mismatch for active dataset; clearing cached data.");
+        await store.del(KEY.activeRecordLinkGraphCache);
+        await store.del(KEY.activeUiState);
         return undefined;
       }
       const datasetSnapshot = deserializeSnapshot(snapshotPayload);
-      let parsedGraph: Graph | undefined;
-      const storedGraph = await store.get<PersistedGraph>(KEY.activeGraph);
-      if (storedGraph && meta.graphFormatVersion === FORMAT_VERSIONS.graph) {
-        parsedGraph = deserializeGraph(storedGraph);
-      } else if (parseGraph) {
-        try {
-          parsedGraph = await parseGraph(datasetSnapshot);
-          await store.set(KEY.activeGraph, serializeGraph(parsedGraph));
-          const updatedMeta = {
-            ...meta,
-            graphFormatVersion: FORMAT_VERSIONS.graph,
-            updatedAt: Date.now()
-          };
-          await store.set(KEY.activeMeta, updatedMeta);
-          meta = updatedMeta;
-        } catch (error) {
-          logger.warn("Failed to rebuild graph from snapshot; continuing without cached graph.", error);
-        }
-      }
-      let uiState = await store.get<PersistedUiState>(KEY.activeUiState);
-      if (uiState && meta.uiStateFormatVersion !== FORMAT_VERSIONS.uiState) {
-        uiState = undefined;
-        await store.del(KEY.activeUiState);
-      }
-      return { meta, datasetSnapshot, parsedGraph, uiState };
+      const recordLinkGraph = deserializeRecordLinkGraphCache(storedGraph);
+      const uiState = await store.get<PersistedUiState>(KEY.activeUiState);
+      return { meta, datasetSnapshot, recordLinkGraph, uiState };
     },
     async clearActiveDataset() {
       await store.del(KEY.activeMeta);
       await store.del(KEY.activeSnapshot);
-      await store.del(KEY.activeGraph);
+      await store.del(KEY.activeRecordLinkGraphCache);
       await store.del(KEY.activeUiState);
     },
     async clearAll() {
-      await store.clear();
+      try {
+        await store.clear();
+      } catch (error) {
+        logger.warn("Failed to clear persistence store.", error);
+      }
     }
   };
 }

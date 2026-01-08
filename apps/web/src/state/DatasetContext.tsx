@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ValidationError } from "../graphdown";
 import { makeError } from "../graphdown";
 import { canonicalizeDatasetSnapshot } from "../graphdown";
-import { buildGraphFromSnapshot } from "../graphdown";
+import { buildRecordLinkGraphFromSnapshot } from "../graphdown";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "../graphdown";
 import type { DatasetSnapshot } from "../graphdown";
 import { validateDatasetSnapshot } from "../graphdown";
@@ -14,7 +14,6 @@ import { parseGitHubUrl } from "../import/github/parseGitHubUrl";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
-import { FORMAT_VERSIONS } from "../persistence/versions";
 import { createPersistStore } from "../storage/createPersistStore";
 import { buildImportReport } from "./importReport";
 
@@ -89,11 +88,11 @@ function encodeText(text: string): Uint8Array {
   return Uint8Array.from(text.split("").map((char) => char.charCodeAt(0)));
 }
 
-async function parseGraph(snapshot: DatasetSnapshot) {
-  const result = buildGraphFromSnapshot(snapshot);
+async function buildRecordLinkGraphOrThrow(snapshot: DatasetSnapshot) {
+  const result = buildRecordLinkGraphFromSnapshot(snapshot);
   if (!result.ok) {
     const errorMessages = result.errors.map((error) => error.message).join("\n");
-    throw new Error(`Graph parsing failed:\n${errorMessages}`);
+    throw new Error(`Record Link Graph build failed:\n${errorMessages}`);
   }
   return result.graph;
 }
@@ -127,7 +126,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     if (!store) {
       return null;
     }
-    return createPersistence({ store, parseGraph, logger: console });
+    return createPersistence({ store, logger: console });
   }, [store]);
 
   useEffect(() => {
@@ -183,7 +182,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       label: string,
       datasetSnapshot: DatasetSnapshot,
-      parsedGraph: Awaited<ReturnType<typeof parseGraph>>,
+      recordLinkGraph: Awaited<ReturnType<typeof buildRecordLinkGraphOrThrow>>,
       importReport?: ImportReport
     ) => {
       if (!persistence) {
@@ -194,15 +193,12 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         id: "active",
         createdAt: now,
         updatedAt: now,
-        snapshotFormatVersion: FORMAT_VERSIONS.snapshot,
-        graphFormatVersion: FORMAT_VERSIONS.graph,
-        uiStateFormatVersion: FORMAT_VERSIONS.uiState,
         label,
         source: "import",
         importReport
       };
-      await persistence.saveActiveDataset({ meta, datasetSnapshot, parsedGraph });
-      setActiveDataset({ meta, datasetSnapshot, parsedGraph });
+      await persistence.saveActiveDataset({ meta, datasetSnapshot, recordLinkGraph });
+      setActiveDataset({ meta, datasetSnapshot, recordLinkGraph });
     },
     [persistence]
   );
@@ -232,8 +228,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_graph" });
-        const graphResult = buildGraphFromSnapshot(datasetSnapshot);
+        setProgress({ phase: "building_record_link_graph" });
+        const graphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
           setError({
@@ -314,8 +310,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_graph" });
-        const graphResult = buildGraphFromSnapshot(datasetSnapshot);
+        setProgress({ phase: "building_record_link_graph" });
+        const graphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
         if (!graphResult.ok) {
           setStatus("error");
           setError({
@@ -383,14 +379,14 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       nextSnapshot: DatasetSnapshot
     ): Promise<
-      | { ok: true; parsedGraph: Awaited<ReturnType<typeof parseGraph>> }
+      | { ok: true; recordLinkGraph: Awaited<ReturnType<typeof buildRecordLinkGraphOrThrow>> }
       | { ok: false; errors: ValidationError[] }
     > => {
       const validation = validateDatasetSnapshot(nextSnapshot);
       if (!validation.ok) {
         return { ok: false, errors: validation.errors } as const;
       }
-      const graphResult = buildGraphFromSnapshot(nextSnapshot);
+      const graphResult = buildRecordLinkGraphFromSnapshot(nextSnapshot);
       if (!graphResult.ok) {
         return { ok: false, errors: graphResult.errors } as const;
       }
@@ -410,10 +406,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       await persistence.saveActiveDataset({
         meta: nextMeta,
         datasetSnapshot: nextSnapshot,
-        parsedGraph: graphResult.graph
+        recordLinkGraph: graphResult.graph
       });
-      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, parsedGraph: graphResult.graph });
-      return { ok: true, parsedGraph: graphResult.graph } as const;
+      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, recordLinkGraph: graphResult.graph });
+      return { ok: true, recordLinkGraph: graphResult.graph } as const;
     },
     [activeDataset, persistence]
   );
@@ -424,10 +420,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       nextFields: Record<string, unknown>;
       nextBody: string;
     }) => {
-      if (!activeDataset?.parsedGraph) {
+      if (!activeDataset?.recordLinkGraph) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
-      const node = activeDataset.parsedGraph.nodesById.get(input.recordKey);
+      const node = activeDataset.recordLinkGraph.nodesByIdentity.get(input.recordKey);
       if (!node || node.kind !== "record") {
         return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
@@ -471,21 +467,21 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const createRecord = useCallback<DatasetContextValue["createRecord"]>(
     async (input: { typeId: string; recordId: string; fields: Record<string, unknown>; body: string }) => {
-      if (!activeDataset?.parsedGraph) {
+      if (!activeDataset?.recordLinkGraph) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
       const trimmedRecordId = input.recordId.trim();
       if (!trimmedRecordId) {
         return { ok: false, errors: [makeError("E_USAGE", "Record ID is required.")] } as const;
       }
-      if (!activeDataset.parsedGraph.typesByRecordTypeId.has(input.typeId)) {
+      if (!activeDataset.recordLinkGraph.typesById.has(input.typeId)) {
         return {
           ok: false,
           errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.", input.typeId)]
         } as const;
       }
       const recordKey = `${input.typeId}:${trimmedRecordId}`;
-      if (activeDataset.parsedGraph.nodesById.has(recordKey)) {
+      if (activeDataset.recordLinkGraph.nodesByIdentity.has(recordKey)) {
         return {
           ok: false,
           errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedRecordId} already exists.`)]

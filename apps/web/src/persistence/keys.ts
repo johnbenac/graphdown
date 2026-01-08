@@ -1,6 +1,6 @@
 export const KEY = {
   activeMeta: "active:meta",
   activeSnapshot: "active:snapshot",
-  activeGraph: "active:graph",
+  activeRecordLinkGraphCache: "active:recordLinkGraphCache",
   activeUiState: "active:uiState"
 } as const;

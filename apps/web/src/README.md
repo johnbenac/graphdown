@@ -27,11 +27,12 @@ The routes themselves live in `routes/` and are rendered through the
 2. **Validation & canonicalization**
    - `graphdown/` utilities validate the dataset, normalize file layout, and prune
      unused blobs.
-3. **Graph building**
-   - The dataset snapshot becomes a graph of types/records and relationship
-     edges used by the UI.
+3. **Record Link Graph building**
+   - The dataset snapshot becomes a Record Link Graph of types/records and
+     wiki-link relationship edges used by the UI.
 4. **Persistence**
-   - The snapshot and graph are serialized into storage and rehydrated on load.
+   - The snapshot and Record Link Graph cache are serialized into storage and
+     rehydrated on load.
 5. **Editing**
    - Edits from the record editor update snapshot files and commit back through
      validation and persistence.
