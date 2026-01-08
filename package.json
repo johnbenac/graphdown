@@ -27,7 +27,7 @@
     "build:web": "npm --workspace apps/web run build",
     "test:web": "npm --workspace apps/web run test",
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
-    "verify:web": "npm --workspace apps/web run verify",
+    "verify:web": "npm --workspace apps/web run verify && npm run check:web:test-layout",
     "burndown": "node tools/burndown.js",
     "spec:verify": "node tools/check-spec-coverage.js",
     "check:web:test-layout": "node tools/check-web-test-layout.js"

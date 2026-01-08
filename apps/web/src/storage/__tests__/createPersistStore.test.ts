@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPersistStore } from "./createPersistStore";
-import { IndexedDbStore } from "./IndexedDbStore";
+import { createPersistStore } from "../createPersistStore";
+import { IndexedDbStore } from "../IndexedDbStore";
 
 describe("createPersistStore", () => {
   afterEach(() => {
