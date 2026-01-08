@@ -1,22 +1,47 @@
-# Graph utilities
+# Record Link Graph utilities
 
-`graph/` builds a link graph from parsed Graphdown datasets. The graph is used
-by the UI to look up types/records and render relationships.
+`graph/` builds the **Record Link Graph** from parsed Graphdown datasets.
+
+This graph is used by the UI for:
+- looking up type/record nodes by identity
+- rendering incoming/outgoing wiki-link relationships between records
+
+## What this graph represents
+
+**Record Link Graph**
+- Nodes: type objects and record objects (for lookup convenience)
+- Relationship edges: record -> record only
+- Edge source: wiki-link tokens `[[typeId:recordId]]` extracted from:
+  - record body
+  - any string anywhere inside record `fields` (nested arrays/objects included)
+
+Blob references (`[[gdblob:sha256-...]]`) are excluded from record relationships.
+
+## What this graph does NOT represent
+
+This module does **not** encode:
+- the **Record Hierarchy** defined by `parent:` pointers (see validation + canonicalization)
+- **Type Composition Dependencies** (`fields.composition`) or composition satisfaction
+- blob integrity or reachable blob sets
+
+Those are handled in `validate/` and `snapshot/`.
 
 ## Key exports
 
 - `buildGraphFromSnapshot` (`graph.ts`)
-  - Parses a `DatasetSnapshot` and returns either a `Graph` or validation
-    errors.
-  - Builds `typesById`, `recordsByKey`, and per-record incoming/outgoing link
-    sets by scanning record fields and markdown bodies.
-  - Filters out blob references (`gdblob:sha256-...`) when computing links.
+  - Parses a `DatasetSnapshot` and returns either a graph index or validation errors.
+  - Builds:
+    - `typesById`
+    - `recordsByKey`
+    - `nodesById`
+    - per-record incoming/outgoing link sets
+
 - `Graph` interface
-  - Provides lookup helpers for types and records plus sorted link lists.
+  - Lookup helpers for types/records
+  - Sorted incoming/outgoing link lists
 
-## Usage notes
+## Related modules
 
-- Graph building depends on parsing rules from `parse/` and validation error
-  shapes from `validate/`.
-- Link extraction operates on *all* string values in fields and body text, so
-  nested objects/arrays are traversed recursively.
+- Link parsing: `parse/wikiRefs.ts`
+- Dataset parsing: `parse/datasetObjects.ts`
+- Validity rules: `validate/validateDatasetSnapshot.ts`
