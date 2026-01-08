@@ -1,0 +1,27 @@
+import assert from "node:assert/strict";
+import { test } from "vitest";
+
+import { parseYamlObject } from "..";
+
+test('FR-MD-020: parses YAML objects', () => {
+  assert.deepEqual(parseYamlObject('a: 1'), { a: 1 });
+});
+
+test('FR-MD-020: invalid YAML fails parsing', () => {
+  assert.throws(() => parseYamlObject('a: [1, 2'), /./);
+});
+
+test('FR-MD-020: non-object YAML front matter is invalid', () => {
+  assert.throws(
+    () => parseYamlObject('- a\n- b'),
+    /YAML front matter is not a valid object/
+  );
+  assert.throws(
+    () => parseYamlObject('hello'),
+    /YAML front matter is not a valid object/
+  );
+  assert.throws(
+    () => parseYamlObject(''),
+    /YAML front matter is not a valid object/
+  );
+});
