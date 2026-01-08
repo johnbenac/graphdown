@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { Graph, GraphTypeNode } from "../core/graph";
-import DatasetRoute from "./DatasetRoute";
+import type { Graph, GraphTypeNode } from "../../core/graph";
+import DatasetRoute from "../DatasetRoute";
 
 const typeNode: GraphTypeNode = {
   kind: "type",
@@ -27,7 +27,7 @@ const graph: Graph = {
   getRecordTypeId: () => typeNode.typeId
 };
 
-vi.mock("../state/DatasetContext", () => ({
+vi.mock("../../state/DatasetContext", () => ({
   useDataset: () => ({
     status: "ready",
     progress: { phase: "done" as const },

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import type { GraphTypeNode } from "../core/graph";
-import TypeViewer from "./TypeViewer";
+import type { GraphTypeNode } from "../../core/graph";
+import TypeViewer from "../TypeViewer";
 
 const baseType: GraphTypeNode = {
   kind: "type",

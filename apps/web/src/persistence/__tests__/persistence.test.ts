@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GraphTypeNode } from "../core/graph";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
-import { MemoryStore } from "../storage/MemoryStore";
-import { KEY } from "./keys";
-import { createPersistence } from "./persistence";
-import { deserializeGraph } from "./serializeGraph";
-import { serializeSnapshot } from "./serializeSnapshot";
-import type { PersistedGraph } from "./types";
-import { FORMAT_VERSIONS } from "./versions";
+import type { GraphTypeNode } from "../../core/graph";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
+import { MemoryStore } from "../../storage/MemoryStore";
+import { KEY } from "../keys";
+import { createPersistence } from "../persistence";
+import { deserializeGraph } from "../serializeGraph";
+import { serializeSnapshot } from "../serializeSnapshot";
+import type { PersistedGraph } from "../types";
+import { FORMAT_VERSIONS } from "../versions";
 
 const sampleSnapshot: DatasetSnapshot = {
   files: new Map([

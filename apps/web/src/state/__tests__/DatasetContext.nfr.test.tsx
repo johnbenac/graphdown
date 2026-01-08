@@ -1,17 +1,17 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { DatasetSnapshot } from "../core/snapshotTypes";
-import { buildGraphFromSnapshot } from "../core/graph";
-import { DatasetProvider, useDataset } from "./DatasetContext";
-import type { DatasetContextValue } from "./DatasetContext";
-import { MemoryStore } from "../storage/MemoryStore";
-import { createPersistence } from "../persistence/persistence";
-import { FORMAT_VERSIONS } from "../persistence/versions";
+import type { DatasetSnapshot } from "../../core/snapshotTypes";
+import { buildGraphFromSnapshot } from "../../core/graph";
+import { DatasetProvider, useDataset } from "../DatasetContext";
+import type { DatasetContextValue } from "../DatasetContext";
+import { MemoryStore } from "../../storage/MemoryStore";
+import { createPersistence } from "../../persistence/persistence";
+import { FORMAT_VERSIONS } from "../../persistence/versions";
 
 let store: MemoryStore;
 
-vi.mock("../storage/createPersistStore", () => ({
+vi.mock("../../storage/createPersistStore", () => ({
   createPersistStore: () => store
 }));
 

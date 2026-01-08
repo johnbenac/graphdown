@@ -34,7 +34,7 @@ function loadDatasetSnapshotFromFs(root: string): DatasetSnapshot {
 }
 
 test('ERR-001: validation errors expose stable fields', () => {
-  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, '..', 'fixtures', 'invalid-dataset'));
+  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, "..", "__fixtures__", "invalid-dataset"));
 
   const result = validateDatasetSnapshot(snapshot);
   if (result.ok) {

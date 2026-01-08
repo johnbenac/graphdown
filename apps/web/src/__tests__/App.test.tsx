@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
-import { appRoutes } from "./App";
-import { DatasetProvider } from "./state/DatasetContext";
+import { appRoutes } from "../App";
+import { DatasetProvider } from "../state/DatasetContext";
 
 describe("App routes", () => {
   it("renders navigation links", async () => {

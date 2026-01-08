@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import RecordEditor from "./RecordEditor";
-import type { GraphRecordNode, GraphTypeNode } from "../core/graph";
+import RecordEditor from "../RecordEditor";
+import type { GraphRecordNode, GraphTypeNode } from "../../core/graph";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();
 const mockCreateRecord = vi.fn();
 
-vi.mock("../state/DatasetContext", () => ({
+vi.mock("../../state/DatasetContext", () => ({
   useDataset: () => ({
     updateRecord: mockUpdateRecord,
     createRecord: mockCreateRecord

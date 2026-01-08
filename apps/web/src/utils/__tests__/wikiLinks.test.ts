@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readRef, readRefs, writeRef, writeRefs } from "./wikiLinks";
+import { readRef, readRefs, writeRef, writeRefs } from "../wikiLinks";
 
 describe("wikiLinks helpers", () => {
   it("REL-005: writeRef writes wiki-links", () => {
