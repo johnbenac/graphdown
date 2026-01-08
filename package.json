@@ -23,6 +23,7 @@
     "test": "npm run build && node --test",
     "build": "tsc",
     "spec:trace": "node tools/spec-trace.cjs && npm run burndown --silent",
+    "test:placement:web": "node tools/check-web-test-placement.js",
     "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
     "build:web": "npm --workspace apps/web run build",
     "test:web": "npm --workspace apps/web run test",

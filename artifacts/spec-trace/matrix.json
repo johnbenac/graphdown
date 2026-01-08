@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-08T00:18:33.667Z",
+  "generatedAt": "2026-01-08T01:25:21.621Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -17,7 +17,7 @@
         {
           "reqId": "GOV-002",
           "testTitle": "GOV-002: spec-trace output matches committed matrix",
-          "filePath": "apps/web/src/__tests__/core/spec-trace-matrix.test.ts"
+          "filePath": "apps/web/src/__tests__/governance/spec-trace-matrix.test.ts"
         }
       ]
     },
@@ -58,7 +58,7 @@
         {
           "reqId": "NR-UI-002",
           "testTitle": "NR-UI-002: arbitrary keys inside fields are accepted",
-          "filePath": "apps/web/src/__tests__/core/core.gaps.test.ts"
+          "filePath": "apps/web/src/core/__tests__/gaps.test.ts"
         }
       ]
     },
@@ -71,7 +71,7 @@
         {
           "reqId": "NR-SEM-001",
           "testTitle": "NR-SEM-001: semantic shapes are ignored by validation",
-          "filePath": "apps/web/src/__tests__/core/core.gaps.test.ts"
+          "filePath": "apps/web/src/core/__tests__/gaps.test.ts"
         }
       ]
     },
@@ -91,7 +91,7 @@
         {
           "reqId": "NR-LINK-001",
           "testTitle": "NR-LINK-001: missing record links are allowed (except composition)",
-          "filePath": "apps/web/src/__tests__/core/core.gaps.test.ts"
+          "filePath": "apps/web/src/core/__tests__/gaps.test.ts"
         }
       ]
     },
@@ -104,17 +104,17 @@
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: accepts valid identifiers",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects recordId with colon",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects typeId with invalid characters",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         }
       ]
     },
@@ -127,7 +127,7 @@
         {
           "reqId": "ID-002",
           "testTitle": "ID-002: rejects reserved gdblob typeId",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         }
       ]
     },
@@ -140,17 +140,17 @@
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate identities fail hashing",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: line ending normalization yields stable hashes",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: non-record files are ignored",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         }
       ]
     },
@@ -163,7 +163,7 @@
         {
           "reqId": "HASH-002",
           "testTitle": "HASH-002: schema fingerprint ignores record object changes",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         }
       ]
     },
@@ -176,7 +176,7 @@
         {
           "reqId": "HASH-003",
           "testTitle": "HASH-003: snapshot hash is path-independent for record files",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         }
       ]
     },
@@ -189,7 +189,7 @@
         {
           "reqId": "HASH-004",
           "testTitle": "HASH-004: invalid hash scope fails with E_USAGE",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         }
       ]
     },
@@ -202,7 +202,7 @@
         {
           "reqId": "HASH-005",
           "testTitle": "HASH-005: snapshot hash ignores blob store bytes",
-          "filePath": "apps/web/src/__tests__/core/core.hash.test.ts"
+          "filePath": "apps/web/src/core/__tests__/hash.test.ts"
         }
       ]
     },
@@ -215,7 +215,7 @@
         {
           "reqId": "BLOB-001",
           "testTitle": "BLOB-001: computeBlobDigest hashes raw bytes",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -228,7 +228,7 @@
         {
           "reqId": "BLOB-002",
           "testTitle": "BLOB-002: blob ids must be 64 lowercase hex characters",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -241,7 +241,7 @@
         {
           "reqId": "LAYOUT-001",
           "testTitle": "LAYOUT-001: no recordId means the object is treated as a type",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -254,7 +254,7 @@
         {
           "reqId": "LAYOUT-002",
           "testTitle": "LAYOUT-002: only first front matter block defines a record object",
-          "filePath": "apps/web/src/__tests__/core/core.layout.test.ts"
+          "filePath": "apps/web/src/core/__tests__/layout.test.ts"
         }
       ]
     },
@@ -267,7 +267,7 @@
         {
           "reqId": "BLOB-LAYOUT-001",
           "testTitle": "BLOB-LAYOUT-001: canonical blob path is accepted",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -280,7 +280,7 @@
         {
           "reqId": "BLOB-LAYOUT-002",
           "testTitle": "BLOB-LAYOUT-002: invalid blob path shape fails validation",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -293,7 +293,7 @@
         {
           "reqId": "BLOB-LAYOUT-003",
           "testTitle": "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -306,37 +306,37 @@
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: extracts yaml and body for valid front matter",
-          "filePath": "apps/web/src/__tests__/core/core.frontMatter.test.ts"
+          "filePath": "apps/web/src/core/__tests__/frontMatter.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: missing YAML front matter fails parsing",
-          "filePath": "apps/web/src/__tests__/core/core.frontMatter.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: invalid YAML fails parsing",
-          "filePath": "apps/web/src/__tests__/core/core.yaml.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: non-object YAML front matter is invalid",
-          "filePath": "apps/web/src/__tests__/core/core.yaml.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: parses YAML objects",
-          "filePath": "apps/web/src/__tests__/core/core.yaml.test.ts"
+          "filePath": "apps/web/src/core/__tests__/frontMatter.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: invalid YAML fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: missing YAML front matter fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: invalid YAML fails parsing",
+          "filePath": "apps/web/src/core/__tests__/yaml.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: non-object YAML front matter is invalid",
+          "filePath": "apps/web/src/core/__tests__/yaml.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: parses YAML objects",
+          "filePath": "apps/web/src/core/__tests__/yaml.test.ts"
         }
       ]
     },
@@ -349,12 +349,12 @@
         {
           "reqId": "FR-MD-021",
           "testTitle": "FR-MD-021: fields must be an object",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         },
         {
           "reqId": "FR-MD-021",
           "testTitle": "FR-MD-021: type objects must not define parent",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -367,12 +367,12 @@
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: record objects may include parent",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: recordId must be a string identifier when present",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -385,7 +385,7 @@
         {
           "reqId": "FR-MD-022",
           "testTitle": "FR-MD-022: serializer preserves raw Markdown body and updated YAML",
-          "filePath": "apps/web/src/core/markdownRecord.test.ts"
+          "filePath": "apps/web/src/core/__tests__/markdownRecord.test.ts"
         }
       ]
     },
@@ -398,12 +398,12 @@
         {
           "reqId": "EXT-001",
           "testTitle": "EXT-001: extra top-level keys are forbidden",
-          "filePath": "apps/web/src/__tests__/core/ext.reserved-vocabulary.test.ts"
+          "filePath": "apps/web/src/core/__tests__/reserved-vocabulary.test.ts"
         },
         {
           "reqId": "EXT-001",
           "testTitle": "EXT-001: extra top-level keys are rejected",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -416,7 +416,7 @@
         {
           "reqId": "EXT-002",
           "testTitle": "EXT-002: accepts arbitrary shapes within fields",
-          "filePath": "apps/web/src/__tests__/core/ext.reserved-vocabulary.test.ts"
+          "filePath": "apps/web/src/core/__tests__/reserved-vocabulary.test.ts"
         }
       ]
     },
@@ -429,7 +429,7 @@
         {
           "reqId": "TYPE-001",
           "testTitle": "TYPE-001: type object without recordId is valid",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         }
       ]
     },
@@ -442,7 +442,7 @@
         {
           "reqId": "TYPE-002",
           "testTitle": "TYPE-002: duplicate typeId fails validation",
-          "filePath": "apps/web/src/__tests__/core/core.ids.test.ts"
+          "filePath": "apps/web/src/core/__tests__/ids.test.ts"
         }
       ]
     },
@@ -455,7 +455,7 @@
         {
           "reqId": "TYPE-004",
           "testTitle": "TYPE-004: fieldDefs must be map of objects; required must be boolean when present",
-          "filePath": "apps/web/src/__tests__/core/core.gaps.test.ts"
+          "filePath": "apps/web/src/core/__tests__/gaps.test.ts"
         }
       ]
     },
@@ -468,12 +468,12 @@
         {
           "reqId": "TYPE-COMP-001",
           "testTitle": "TYPE-COMP-001: composition component must include required boolean",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         },
         {
           "reqId": "TYPE-COMP-001",
           "testTitle": "TYPE-COMP-001: composition must be a map with only typeId + required",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         }
       ]
     },
@@ -486,7 +486,7 @@
         {
           "reqId": "REL-001",
           "testTitle": "REL-001: blob references are not treated as record relationships",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -499,12 +499,12 @@
         {
           "reqId": "REL-002",
           "testTitle": "REL-002: does not synthesize links across separate string values",
-          "filePath": "apps/web/src/__tests__/core/core.graph.test.ts"
+          "filePath": "apps/web/src/core/__tests__/graph.test.ts"
         },
         {
           "reqId": "REL-002",
           "testTitle": "REL-002: extracts record links from bodies and fields",
-          "filePath": "apps/web/src/__tests__/core/core.graph.test.ts"
+          "filePath": "apps/web/src/core/__tests__/graph.test.ts"
         }
       ]
     },
@@ -517,12 +517,12 @@
         {
           "reqId": "REL-003",
           "testTitle": "REL-003: extracts record references from wiki-link tokens",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         },
         {
           "reqId": "REL-003",
           "testTitle": "REL-003: ignores malformed record tokens and aliases",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -542,12 +542,12 @@
         {
           "reqId": "REL-005",
           "testTitle": "REL-005: writeRef writes wiki-links",
-          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
+          "filePath": "apps/web/src/utils/__tests__/wikiLinks.test.ts"
         },
         {
           "reqId": "REL-005",
           "testTitle": "REL-005: writeRefs writes wiki-link arrays",
-          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
+          "filePath": "apps/web/src/utils/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -560,7 +560,7 @@
         {
           "reqId": "REL-007",
           "testTitle": "REL-007: readRef/readRefs return cleaned ids from legacy shapes",
-          "filePath": "apps/web/src/utils/wikiLinks.test.ts"
+          "filePath": "apps/web/src/utils/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -573,12 +573,12 @@
         {
           "reqId": "BLOB-REF-001",
           "testTitle": "BLOB-REF-001: split strings do not synthesize blob references",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         },
         {
           "reqId": "BLOB-REF-001",
           "testTitle": "BLOB-REF-001: extracts blob references",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -591,7 +591,7 @@
         {
           "reqId": "BLOB-REF-002",
           "testTitle": "BLOB-REF-002: ignores malformed blob references",
-          "filePath": "apps/web/src/__tests__/core/core.wikiLinks.test.ts"
+          "filePath": "apps/web/src/core/__tests__/wikiLinks.test.ts"
         }
       ]
     },
@@ -604,7 +604,7 @@
         {
           "reqId": "HIER-001",
           "testTitle": "HIER-001: parent missing and parent null both define hierarchy roots",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -617,7 +617,7 @@
         {
           "reqId": "VAL-001",
           "testTitle": "VAL-001: invalid datasets are reported as dataset_invalid",
-          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.test.tsx"
         }
       ]
     },
@@ -630,12 +630,12 @@
         {
           "reqId": "VAL-002",
           "testTitle": "VAL-002: duplicate record identity fails graph build",
-          "filePath": "apps/web/src/__tests__/core/core.graph.test.ts"
+          "filePath": "apps/web/src/core/__tests__/graph.test.ts"
         },
         {
           "reqId": "VAL-002",
           "testTitle": "VAL-002: duplicate record identity fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -648,7 +648,7 @@
         {
           "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing missing type fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -661,7 +661,7 @@
         {
           "reqId": "VAL-005",
           "testTitle": "VAL-005: required fields enforced when fieldDefs.required = true",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -674,7 +674,7 @@
         {
           "reqId": "VAL-006",
           "testTitle": "VAL-006: semantic validation of field values is not enforced",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -687,7 +687,7 @@
         {
           "reqId": "VAL-COMP-001",
           "testTitle": "VAL-COMP-001: composition referenced types must exist",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         }
       ]
     },
@@ -700,17 +700,17 @@
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: link to wrong type does not satisfy requirement",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         },
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: missing required component link fails",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         },
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: required component link resolves to correct type",
-          "filePath": "apps/web/src/__tests__/core/core.composition.test.ts"
+          "filePath": "apps/web/src/core/__tests__/composition.test.ts"
         }
       ]
     },
@@ -723,7 +723,7 @@
         {
           "reqId": "VAL-PARENT-001",
           "testTitle": "VAL-PARENT-001: invalid parent shapes fail validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -736,7 +736,7 @@
         {
           "reqId": "VAL-PARENT-002",
           "testTitle": "VAL-PARENT-002: parent pointers must resolve to an existing record",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -749,12 +749,12 @@
         {
           "reqId": "VAL-PARENT-003",
           "testTitle": "VAL-PARENT-003: parent pointer cycles fail validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         },
         {
           "reqId": "VAL-PARENT-003",
           "testTitle": "VAL-PARENT-003: parent pointer self-cycle fails validation",
-          "filePath": "apps/web/src/core/validateDatasetSnapshot.test.ts"
+          "filePath": "apps/web/src/core/__tests__/validateDatasetSnapshot.test.ts"
         }
       ]
     },
@@ -767,7 +767,7 @@
         {
           "reqId": "VAL-BLOB-001",
           "testTitle": "VAL-BLOB-001: referenced blob must exist",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -780,7 +780,7 @@
         {
           "reqId": "VAL-BLOB-002",
           "testTitle": "VAL-BLOB-002: blob bytes must match referenced digest",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -793,7 +793,7 @@
         {
           "reqId": "GC-001",
           "testTitle": "GC-001: reachable blob set includes references from fields",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -806,7 +806,7 @@
         {
           "reqId": "GC-002",
           "testTitle": "GC-002: export excludes unreferenced blobs",
-          "filePath": "apps/web/src/__tests__/core/core.roundtrip.test.ts"
+          "filePath": "apps/web/src/core/__tests__/roundtrip.test.ts"
         }
       ]
     },
@@ -819,7 +819,7 @@
         {
           "reqId": "GC-003",
           "testTitle": "GC-003: unreferenced but valid blobs do not fail validation",
-          "filePath": "apps/web/src/__tests__/core/core.blobs.test.ts"
+          "filePath": "apps/web/src/core/__tests__/blobs.test.ts"
         }
       ]
     },
@@ -832,7 +832,7 @@
         {
           "reqId": "ERR-001",
           "testTitle": "ERR-001: validation errors expose stable fields",
-          "filePath": "apps/web/src/__tests__/core/core.errors.test.ts"
+          "filePath": "apps/web/src/core/__tests__/errors.test.ts"
         }
       ]
     },
@@ -845,12 +845,12 @@
         {
           "reqId": "ERR-002",
           "testTitle": "ERR-002: maps GitHub 404 repo responses to not_found",
-          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.test.tsx"
         },
         {
           "reqId": "ERR-002",
           "testTitle": "ERR-002: maps GitHub rate limits to rate_limited",
-          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.test.tsx"
         }
       ]
     },
@@ -863,27 +863,27 @@
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts /tree/<ref> URLs",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts https repo URLs",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts repo URLs with trailing slash and .git",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts scheme-less repo URLs",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: rejects malformed, non-github, or unsupported URLs",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         }
       ]
     },
@@ -896,7 +896,7 @@
         {
           "reqId": "GH-002",
           "testTitle": "GH-002: falls back to main when default_branch is missing",
-          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts"
         }
       ]
     },
@@ -909,7 +909,7 @@
         {
           "reqId": "GH-003",
           "testTitle": "GH-003: imports a dataset snapshot via tree listing + raw fetch",
-          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.test.tsx"
         }
       ]
     },
@@ -922,7 +922,7 @@
         {
           "reqId": "GH-005",
           "testTitle": "GH-005: rejects /tree/<ref>/<subdir> URLs",
-          "filePath": "apps/web/src/import/github/parseGitHubUrl.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.test.ts"
         }
       ]
     },
@@ -935,7 +935,7 @@
         {
           "reqId": "GH-008",
           "testTitle": "GH-008: does not send Authorization headers for public fetches",
-          "filePath": "apps/web/src/import/github/loadGitHubSnapshot.test.ts"
+          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts"
         }
       ]
     },
@@ -948,7 +948,7 @@
         {
           "reqId": "EXP-002",
           "testTitle": "EXP-002: record-only export excludes non-graph files",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -961,12 +961,12 @@
         {
           "reqId": "EXP-006",
           "testTitle": "EXP-006: export includes reachable blobs",
-          "filePath": "apps/web/src/__tests__/core/core.roundtrip.test.ts"
+          "filePath": "apps/web/src/core/__tests__/roundtrip.test.ts"
         },
         {
           "reqId": "EXP-006",
           "testTitle": "EXP-006: includes only referenced blobs alongside canonical records/types",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -979,7 +979,7 @@
         {
           "reqId": "EXP-003",
           "testTitle": "EXP-003: canonical dataset export round-trips bytes and graph",
-          "filePath": "apps/web/src/__tests__/core/core.roundtrip.test.ts"
+          "filePath": "apps/web/src/core/__tests__/roundtrip.test.ts"
         }
       ]
     },
@@ -992,7 +992,7 @@
         {
           "reqId": "EXP-004",
           "testTitle": "EXP-004: export canonicalizes record/type file paths",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -1005,7 +1005,7 @@
         {
           "reqId": "EXP-HIER-001",
           "testTitle": "EXP-HIER-001: export uses canonical layout paths",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -1018,7 +1018,7 @@
         {
           "reqId": "EXP-005",
           "testTitle": "EXP-005: export preserves bytes exactly",
-          "filePath": "apps/web/src/export/exportZip.test.ts"
+          "filePath": "apps/web/src/export/__tests__/exportZip.test.ts"
         }
       ]
     },
@@ -1045,7 +1045,7 @@
         {
           "reqId": "NFR-001",
           "testTitle": "NFR-001: CRUD actions do not trigger a full document load event",
-          "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.nfr.test.tsx"
         }
       ]
     },
@@ -1058,7 +1058,7 @@
         {
           "reqId": "NFR-PERSIST-001",
           "testTitle": "NFR-PERSIST-001: reports persistence_unavailable when IndexedDB is missing",
-          "filePath": "apps/web/src/state/DatasetContext.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.test.tsx"
         }
       ]
     },
@@ -1071,7 +1071,7 @@
         {
           "reqId": "NFR-010",
           "testTitle": "NFR-010: uses persisted dataset for read-only access when offline",
-          "filePath": "apps/web/src/state/DatasetContext.nfr.test.tsx"
+          "filePath": "apps/web/src/state/__tests__/DatasetContext.nfr.test.tsx"
         }
       ]
     },
@@ -1084,17 +1084,17 @@
         {
           "reqId": "UI-RAW-001",
           "testTitle": "UI-RAW-001: edits arbitrary fields without kind semantics",
-          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+          "filePath": "apps/web/src/components/__tests__/RecordEditor.raw.test.tsx"
         },
         {
           "reqId": "UI-RAW-001",
           "testTitle": "UI-RAW-001: edits fields outside any schema and persists them",
-          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+          "filePath": "apps/web/src/components/__tests__/RecordEditor.raw.test.tsx"
         },
         {
           "reqId": "UI-RAW-001",
           "testTitle": "UI-RAW-001: removes fields when YAML omits them",
-          "filePath": "apps/web/src/components/RecordEditor.raw.test.tsx"
+          "filePath": "apps/web/src/components/__tests__/RecordEditor.raw.test.tsx"
         }
       ]
     },
