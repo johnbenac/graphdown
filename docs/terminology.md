@@ -122,8 +122,8 @@ The deterministic directory layout described by **EXP-HIER-001** and produced by
 
 This is a path/layout concept. It is not a “graph” of relationships; it is a deterministic filesystem representation derived from identities + hierarchy.
 
-### Graph Cache (Persisted Record Link Graph Cache)
-The serialized adjacency/index stored by the persistence layer (`persistence/serializeGraph.ts`).
+### Record Link Graph Cache (Persisted)
+The serialized adjacency/index stored by the persistence layer (`persistence/serializeRecordLinkGraphCache.ts`).
 
 It exists for performance so the UI can rehydrate quickly without rebuilding the Record Link Graph from the snapshot every load.
 
