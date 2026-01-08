@@ -12,7 +12,7 @@ const typeNode: RecordLinkGraphTypeNode = {
   file: "types/note.md"
 };
 
-const graph: RecordLinkGraph = {
+const recordLinkGraph: RecordLinkGraph = {
   typesById: new Map([[typeNode.typeId, typeNode]]),
   recordsByKey: new Map(),
   nodesByIdentity: new Map([[typeNode.typeId, typeNode]]),
@@ -39,7 +39,7 @@ vi.mock("../../state/DatasetContext", () => ({
         source: "import"
       },
       datasetSnapshot: { files: new Map([["types/note.md", new Uint8Array()]]) },
-      recordLinkGraph: graph
+      recordLinkGraph
     },
     error: undefined,
     importDatasetZip: vi.fn(),
