@@ -10,7 +10,7 @@ structures used throughout the domain layer.
     helper used across parsing, validation, hashing, and graph building.
 - `validateDatasetSnapshot.ts`
   - Validates dataset layout, identifiers, parent relationships, required
-    fields, composition constraints, and blob store integrity.
+    fields, composition constraints, and block store integrity.
   - Returns `ValidationError` entries with codes and optional hints for the UI.
 
 ## Usage notes

@@ -1,5 +1,8 @@
+import { decodeDaslCidString } from '../cid/daslCid';
+
 const RECORD_REF_PATTERN = /^([A-Za-z0-9][A-Za-z0-9_-]*):([A-Za-z0-9][A-Za-z0-9_-]*)$/;
-const BLOB_REF_PATTERN = /^gdblob:sha256-([0-9a-f]{64})$/;
+const LEGACY_BLOB_TOKEN_PATTERN = /^gdblob:sha256-[0-9a-f]{64}$/;
+const CID_SHAPE_PATTERN = /^b[a-z2-7]{58}$/;
 
 function extractTokens(text: string): string[] {
   const results: string[] = [];
@@ -16,27 +19,42 @@ export function extractRecordRefs(text: string): string[] {
   const refs: string[] = [];
   for (const token of tokens) {
     const trimmed = token.trim();
-    if (BLOB_REF_PATTERN.test(trimmed)) {
-      continue; // blob refs are not record relationships
+    if (LEGACY_BLOB_TOKEN_PATTERN.test(trimmed)) {
+      continue;
     }
     const match = trimmed.match(RECORD_REF_PATTERN);
     if (!match) continue;
-    if (match[1] === 'gdblob') {
-      continue; // explicit guard: gdblob is reserved for blob references
-    }
     refs.push(`${match[1]}:${match[2]}`);
   }
   return refs;
 }
 
-export function extractBlobRefs(text: string): string[] {
+export type ExtractCidRefsResult = {
+  cids: string[];
+  invalidCidTokens: string[];
+  legacyBlobTokens: string[];
+};
+
+export function extractCidRefs(text: string): ExtractCidRefsResult {
   const tokens = extractTokens(text);
-  const refs: string[] = [];
+  const cids: string[] = [];
+  const invalidCidTokens: string[] = [];
+  const legacyBlobTokens: string[] = [];
   for (const token of tokens) {
     const trimmed = token.trim();
-    const match = trimmed.match(BLOB_REF_PATTERN);
-    if (!match) continue;
-    refs.push(match[1]);
+    if (LEGACY_BLOB_TOKEN_PATTERN.test(trimmed)) {
+      legacyBlobTokens.push(trimmed);
+      continue;
+    }
+    if (!CID_SHAPE_PATTERN.test(trimmed)) {
+      continue;
+    }
+    try {
+      decodeDaslCidString(trimmed);
+      cids.push(trimmed);
+    } catch {
+      invalidCidTokens.push(trimmed);
+    }
   }
-  return refs;
+  return { cids, invalidCidTokens, legacyBlobTokens };
 }

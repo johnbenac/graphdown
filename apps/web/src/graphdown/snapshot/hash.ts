@@ -1,5 +1,4 @@
 import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@noble/hashes/utils';
 
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
@@ -7,7 +6,7 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
 
-type HashResult = { ok: true; digest: string } | { ok: false; errors: ValidationError[] };
+type HashResult = { ok: true; cid: string } | { ok: false; errors: ValidationError[] };
 
 const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
 const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
@@ -38,6 +37,27 @@ function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   }
   if (a.length === b.length) return 0;
   return a.length < b.length ? -1 : 1;
+}
+
+function encodeBase32(bytes: Uint8Array): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
+  let output = '';
+  let buffer = 0;
+  let bits = 0;
+  for (const byte of bytes) {
+    buffer = (buffer << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      const index = (buffer >> (bits - 5)) & 31;
+      output += alphabet[index];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    const index = (buffer << (5 - bits)) & 31;
+    output += alphabet[index];
+  }
+  return output;
 }
 
 export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): HashResult {
@@ -104,6 +124,8 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     hash.update(Uint8Array.of(0));
   }
 
-  const digest = bytesToHex(hash.digest());
-  return { ok: true, digest };
+  const digestBytes = hash.digest();
+  const cidBytes = Uint8Array.of(0x01, 0x55, 0x12, 0x20, ...digestBytes);
+  const cid = `b${encodeBase32(cidBytes)}`;
+  return { ok: true, cid };
 }

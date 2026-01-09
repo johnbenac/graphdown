@@ -26,7 +26,7 @@ The routes themselves live in `routes/` and are rendered through the
      read zip files.
 2. **Validation & canonicalization**
    - `graphdown/` utilities validate the dataset, normalize file layout, and prune
-     unused blobs.
+     unused blocks.
 3. **Graph building**
    - The dataset snapshot becomes a graph of types/records and relationship
      edges used by the UI.

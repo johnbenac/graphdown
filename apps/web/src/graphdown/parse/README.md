@@ -17,13 +17,12 @@ validation, and extracting link references.
     entries.
   - `discoverGraphdownObjects` scans a `DatasetSnapshot` and returns parsed
     objects plus ignored files and errors.
-  - `computeBlobDigest` produces SHA-256 digests for blob files.
 - `markdownRecord.ts`
   - Focused parser/serializer for a single markdown record used in the record
     editor flows.
 - `wikiRefs.ts`
-  - Extracts record refs (`[[type:record]]`) and blob refs
-    (`[[gdblob:sha256-...]]`) from string content.
+  - Extracts record refs (`[[type:record]]`) and block refs (`[[<cid>]]`)
+    from string content.
 
 ## Usage notes
 

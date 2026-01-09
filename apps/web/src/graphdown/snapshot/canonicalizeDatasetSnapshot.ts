@@ -1,7 +1,8 @@
 import { discoverGraphdownObjects, type ParsedRecordObject } from '../parse/datasetObjects';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
-import { extractBlobRefs } from '../parse/wikiRefs';
+import { blockPathForCid } from '../cid/daslCid';
+import { extractCidRefs } from '../parse/wikiRefs';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
@@ -17,26 +18,30 @@ function collectStringValues(value: unknown, into: Set<string>): void {
   }
 }
 
-function collectReachableBlobPaths(
+function collectReachableBlockPaths(
   snapshot: DatasetSnapshot,
   recordObjects: ParsedRecordObject[]
 ): Set<string> {
-  const digests = new Set<string>();
+  const cids = new Set<string>();
 
   for (const record of recordObjects) {
     const strings = new Set<string>();
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
     for (const value of strings) {
-      for (const digest of extractBlobRefs(value)) {
-        digests.add(digest);
+      const { cids: foundCids, invalidCidTokens, legacyBlobTokens } = extractCidRefs(value);
+      if (invalidCidTokens.length > 0 || legacyBlobTokens.length > 0) {
+        throw new Error('Canonicalization requires validated CID references');
+      }
+      for (const cid of foundCids) {
+        cids.add(cid);
       }
     }
   }
 
   const paths = new Set<string>();
-  for (const digest of digests) {
-    const path = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+  for (const cid of cids) {
+    const path = blockPathForCid(cid);
     if (snapshot.files.has(path)) {
       paths.add(path);
     }
@@ -94,11 +99,11 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     outputFiles.set(`${recordDir}/${recordObj.recordId}.md`, bytes);
   }
 
-  const blobPaths = collectReachableBlobPaths(snapshot, parsed.recordObjects);
-  for (const blobPath of blobPaths) {
-    const bytes = snapshot.files.get(blobPath);
+  const blockPaths = collectReachableBlockPaths(snapshot, parsed.recordObjects);
+  for (const blockPath of blockPaths) {
+    const bytes = snapshot.files.get(blockPath);
     if (bytes) {
-      outputFiles.set(blobPath, bytes);
+      outputFiles.set(blockPath, bytes);
     }
   }
 
