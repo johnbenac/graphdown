@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-09T18:11:06.083Z
+Generated: 2026-01-09T21:38:30.633Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -103,8 +103,9 @@ Tests (1):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
 
 ## BLOCK-LAYOUT-002 — Only canonical block files are allowed in the block store (testable=true)
-Tests (1):
+Tests (2):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: invalid block path shape fails validation"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: non-canonical paths under blocks/ are rejected"
 
 ## BLOCK-LAYOUT-003 — Non-record, non-block-store files are non-semantic (testable=true)
 Tests (1):
@@ -253,6 +254,10 @@ Tests (1):
 Tests (2):
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
+
+## VAL-CID-001 — Invalid CID-shaped block reference tokens fail validation (testable=true)
+Tests (1):
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-CID-001: invalid CID-shaped tokens fail validation"
 
 ## VAL-BLOCK-001 — Block references must resolve to matching block bytes (testable=true)
 Tests (1):

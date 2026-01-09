@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "..";
+import { encodeBase32 } from "../cid/base32";
 import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
 
 const encoder = new TextEncoder();
@@ -111,6 +112,19 @@ test("CID-REF-001: split strings do not synthesize CID references", () => {
   expectOk(result);
 });
 
+test("VAL-CID-001: invalid CID-shaped tokens fail validation", () => {
+  const digest = new Uint8Array(32).fill(1);
+  const invalidCid = `b${encodeBase32(Uint8Array.of(0x02, 0x55, 0x12, 0x20, ...digest))}`;
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[${invalidCid}]]`)
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_CID_INVALID"));
+});
+
 test("GC-003: unreferenced but valid blocks do not fail validation", () => {
   const blockBytes = encoder.encode("tulip");
   const cid = cidFromRawBytes(blockBytes);
@@ -122,6 +136,18 @@ test("GC-003: unreferenced but valid blocks do not fail validation", () => {
     ])
   );
   expectOk(result);
+});
+
+test("BLOCK-LAYOUT-002: non-canonical paths under blocks/ are rejected", () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"]),
+      ["blocks/readme.md", encoder.encode("not a block")]
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
 });
 
 test("BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation", () => {

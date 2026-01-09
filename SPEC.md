@@ -387,9 +387,10 @@ Block files MUST be stored with the filename equal to `<cid>` exactly (no extens
 <!-- req:id=BLOCK-LAYOUT-002 title="Only canonical block files are allowed in the block store" testable=true -->
 ### BLOCK-LAYOUT-002 — Only canonical block files are allowed in the block store
 
-Any file located under `blocks/sha2-256/` MUST match the canonical block store path rules in BLOCK-LAYOUT-001.
+Any file located under `blocks/` MUST match the canonical block store path rules in BLOCK-LAYOUT-001.
 
-Validation MUST fail if any file exists under `blocks/sha2-256/` that does not match the required `.../<p>/<cid>` shape.
+Validation MUST fail if any file exists under `blocks/` that does not match the required `blocks/sha2-256/<p>/<cid>` shape.
+No other directories or files under `blocks/` are allowed.
 
 <!-- req:id=BLOCK-LAYOUT-003 title="Non-record, non-block-store files are non-semantic" testable=true -->
 ### BLOCK-LAYOUT-003 — Non-record, non-block-store files are non-semantic
@@ -602,7 +603,9 @@ When interpreting a CID reference token, core MUST:
 * trim surrounding whitespace
 * require the inner text to be a valid DASL CIDv1 string
 
-Tokens that do not match this shape MUST be ignored for block reference extraction.
+Tokens that are not CID-shaped MUST be ignored for block reference extraction.
+
+CID-shaped tokens that fail DASL CIDv1 decoding MUST be treated as invalid and MUST fail validation (VAL-CID-001).
 
 <!-- req:id=CID-LEGACY-001 title="Legacy gdblob references are invalid" testable=true -->
 ### CID-LEGACY-001 — Legacy gdblob references are invalid
@@ -732,6 +735,18 @@ Validation MUST fail otherwise.
 Following `parent` pointers from any record MUST terminate at a root record (missing/null `parent`).
 
 If any cycle is present (including self-parenting), validation MUST fail.
+
+<!-- req:id=VAL-CID-001 title="Invalid CID-shaped block reference tokens fail validation" testable=true -->
+### VAL-CID-001 — Invalid CID-shaped block reference tokens fail validation
+
+When extracting block references per CID-REF-001/CID-REF-002, validators MUST treat any wiki-link token whose inner text matches
+the CID lexical shape:
+
+`^b[a-z2-7]{58}$`
+
+but does not decode as a valid DASL CIDv1 string as an import-failing error.
+
+Validation MUST fail with error code `E_CID_INVALID`, attributing the error to the containing record file.
 
 <!-- req:id=VAL-BLOCK-001 title="Block references must resolve to matching block bytes" testable=true -->
 ### VAL-BLOCK-001 — Block references must resolve to matching block bytes
@@ -898,6 +913,7 @@ Reachable blocks:
 Export MUST NOT rewrite record content merely to “normalize” it, including:
 
 * rewriting wiki-links (§8)
+* rewriting block references `[[<cid>]]`
 * reformatting YAML keys or changing scalar spellings
 * rewrapping strings / changing quotes
 
