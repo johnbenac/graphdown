@@ -7,7 +7,7 @@ The import layer ingests datasets from zip files or GitHub repositories and retu
 
 ## Important: import scope vs core semantics
 
-The Graphdown core discovers record files by **content** (SPEC: LAYOUT-001) and ignores non-record/non-blob-store files for semantics (BLOB-LAYOUT-003).
+The Graphdown core discovers record files by **content** (SPEC: LAYOUT-001) and ignores non-record/non-block-store files for semantics (BLOCK-LAYOUT-003).
 
 The **web app importer** may choose to load only a subset of repository files for UX/performance. This is an application choice, not a dataset validity rule.
 
@@ -21,7 +21,7 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Filters entries to files relevant to the web app import flow:
     - `types/**/*.md`
     - `records/**/*.md`
-    - `blobs/sha256/**`
+    - `blocks/sha2-256/**`
   - Returns both the filtered snapshot and a list of ignored files.
 
 ## GitHub imports (`import/github`)

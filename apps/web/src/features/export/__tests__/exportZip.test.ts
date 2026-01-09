@@ -1,7 +1,6 @@
-import { createHash } from "node:crypto";
 import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
-import { canonicalizeDatasetSnapshot } from "../../../graphdown";
+import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes } from "../../../graphdown";
 import type { DatasetSnapshot } from "../../../graphdown";
 import { buildDatasetZipBytes } from "../../../graphdown";
 import { loadDatasetSnapshotFromZipBytes } from "../../../graphdown";
@@ -37,22 +36,22 @@ describe("buildDatasetZipBytes", () => {
     expect(paths).toEqual(["records/note.one/one.md", "types/note.md"]);
   });
 
-  it("GC-001: reachable blob set includes references from fields", () => {
-    const blobBytes = new Uint8Array(strToU8("orchid"));
-    const digest = createHash("sha256").update(Buffer.from(blobBytes)).digest("hex");
-    const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+  it("GC-001: reachable block set includes references from fields", () => {
+    const blockBytes = new Uint8Array(strToU8("orchid"));
+    const cid = cidFromRawBytes(blockBytes);
+    const blockPath = blockPathForCid(cid);
 
     const snapshot = snapshotFromEntries([
       ["types/photo.md", ["---", "typeId: photo", "fields: {}", "---"].join("\n")],
       [
         "records/photo-1.md",
-        ["---", "typeId: photo", "recordId: one", "fields:", `  ref: "[[gdblob:sha256-${digest}]]"`, "---", "Body"].join("\n")
+        ["---", "typeId: photo", "recordId: one", "fields:", `  ref: "[[${cid}]]"`, "---", "Body"].join("\n")
       ],
-      [blobPath, blobBytes]
+      [blockPath, blockBytes]
     ]);
 
     const imported = exportAndLoad(snapshot);
-    expect(imported.files.has(blobPath)).toBe(true);
+    expect(imported.files.has(blockPath)).toBe(true);
   });
 
   it("EXP-002: record-only export excludes non-graph files", () => {
@@ -95,23 +94,26 @@ describe("buildDatasetZipBytes", () => {
     expect(roundTrip).toEqual(original);
   });
 
-  it("EXP-006: includes only referenced blobs alongside canonical records/types", () => {
-    const blobBytes = new Uint8Array(strToU8("flower"));
-    const digest = createHash("sha256").update(Buffer.from(blobBytes)).digest("hex");
-    const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+  it("EXP-006: includes only referenced blocks alongside canonical records/types", () => {
+    const blockBytes = new Uint8Array(strToU8("flower"));
+    const cid = cidFromRawBytes(blockBytes);
+    const blockPath = blockPathForCid(cid);
+    const garbageBytes = new Uint8Array(strToU8("garbage"));
+    const garbageCid = cidFromRawBytes(garbageBytes);
+    const garbagePath = blockPathForCid(garbageCid);
 
     const snapshot = snapshotFromEntries([
       ["types/photo.md", ["---", "typeId: photo", "fields: {}", "---"].join("\n")],
       [
         "records/photo-1.md",
-        ["---", "typeId: photo", "recordId: one", "fields: {}", "---", `See [[gdblob:sha256-${digest}]].`].join("\n")
+        ["---", "typeId: photo", "recordId: one", "fields: {}", "---", `See [[${cid}]].`].join("\n")
       ],
-      [blobPath, blobBytes],
-      ["blobs/sha256/aa/" + "a".repeat(64), new Uint8Array(strToU8("garbage"))]
+      [blockPath, blockBytes],
+      [garbagePath, garbageBytes]
     ]);
 
     const imported = exportAndLoad(snapshot);
     const paths = [...imported.files.keys()].sort();
-    expect(paths).toEqual(["records/photo.one/one.md", "types/photo.md", blobPath].sort());
+    expect(paths).toEqual(["records/photo.one/one.md", "types/photo.md", blockPath].sort());
   });
 });

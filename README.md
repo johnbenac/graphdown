@@ -132,7 +132,7 @@ This codebase contains multiple graph-like structures. In docs, avoid saying “
 * **Record Link Graph**: wiki-link relationships extracted from record bodies and record field strings
 * **Record Hierarchy**: parent pointer structure (`parent:`)
 * **Type Composition Dependencies**: type → type requirements (`fields.composition`)
-* **Blob Dependency Graph**: record → blob digest references (`[[gdblob:sha256-...]]`)
+* **Block Dependency Graph**: record → block CID references (`[[bafk...]]`)
 * **Canonical Layout Tree**: deterministic export directory tree (EXP-HIER-001)
 
 See:

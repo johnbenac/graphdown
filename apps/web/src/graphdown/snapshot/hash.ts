@@ -1,13 +1,11 @@
 import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@noble/hashes/utils';
-
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
 
-type HashResult = { ok: true; digest: string } | { ok: false; errors: ValidationError[] };
+type HashResult = { ok: true; cid: string } | { ok: false; errors: ValidationError[] };
 
 const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
 const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
@@ -38,6 +36,28 @@ function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   }
   if (a.length === b.length) return 0;
   return a.length < b.length ? -1 : 1;
+}
+
+const BASE32_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
+
+function base32Encode(bytes: Uint8Array): string {
+  let output = '';
+  let buffer = 0;
+  let bits = 0;
+  for (const byte of bytes) {
+    buffer = (buffer << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      const index = (buffer >> (bits - 5)) & 31;
+      output += BASE32_ALPHABET[index];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    const index = (buffer << (5 - bits)) & 31;
+    output += BASE32_ALPHABET[index];
+  }
+  return output;
 }
 
 export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): HashResult {
@@ -104,6 +124,13 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     hash.update(Uint8Array.of(0));
   }
 
-  const digest = bytesToHex(hash.digest());
-  return { ok: true, digest };
+  const digestBytes = hash.digest();
+  const cidBytes = new Uint8Array(4 + digestBytes.length);
+  cidBytes[0] = 0x01;
+  cidBytes[1] = 0x55;
+  cidBytes[2] = 0x12;
+  cidBytes[3] = 0x20;
+  cidBytes.set(digestBytes, 4);
+  const cid = `b${base32Encode(cidBytes)}`;
+  return { ok: true, cid };
 }

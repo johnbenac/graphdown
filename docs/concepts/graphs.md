@@ -23,7 +23,7 @@ This document names each one precisely and points at the code that builds or val
 **Important properties:**
 - May contain cycles.
 - May contain dangling edges (links that do not resolve to existing records), per NR-LINK-001.
-- Blob references `[[gdblob:sha256-...]]` are explicitly excluded from record relationships.
+- Block references `[[<cid>]]` are explicitly excluded from record relationships.
 
 **UI usage:**
 - `RecordViewer` displays incoming and outgoing Record Links using the built graph index.
@@ -66,10 +66,10 @@ This creates a “two-layer” relationship:
 - schema layer: type -> required component type
 - data layer: record -> record links
 
-## 4) Blob Dependency Graph (record -> blob digest)
+## 4) Block Dependency Graph (record -> block CID)
 
-**Definition:** A record references a blob if it contains a blob wiki-link token:
-`[[gdblob:sha256-<digest>]]`
+**Definition:** A record references a block if it contains a CID wiki-link token:
+`[[bafk...]]`
 
 **Where references are extracted from:**
 - record body
@@ -78,11 +78,11 @@ This creates a “two-layer” relationship:
 **Key modules:**
 - Extraction: `apps/web/src/graphdown/parse/wikiRefs.ts`
 - Validation: `apps/web/src/graphdown/validate/validateDatasetSnapshot.ts`
-- Reachable blob pruning: `apps/web/src/graphdown/snapshot/canonicalizeDatasetSnapshot.ts`
+- Reachable block pruning: `apps/web/src/graphdown/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Validity constraints:**
-- referenced blob must exist at canonical path
-- blob bytes must hash to the referenced digest (VAL-BLOB-001/002)
+- referenced block must exist at canonical path
+- block bytes must hash to the referenced CID digest (VAL-BLOCK-001/002)
 
 ## 5) Canonical Layout Tree (filesystem paths)
 
@@ -97,7 +97,7 @@ This is not a semantic “relationship graph.” It is a derived directory tree 
 - type identities (`typeId`)
 - record identities (`typeId:recordId`)
 - record hierarchy (`parent` pointers)
-- reachable blob set (blob references)
+- reachable block set (CID references)
 
 **Output:**
-- a new `DatasetSnapshot` with canonical paths for type objects, record objects, and reachable blobs only
+- a new `DatasetSnapshot` with canonical paths for type objects, record objects, and reachable blocks only

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
+import { blockPathForCid } from "../../../graphdown";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -92,9 +93,12 @@ describe("loadGitHubSnapshot", () => {
     expect(rawCall?.[0]).toContain("/main/types/note.md");
   });
 
-  it("includes blobs under blobs/sha256 and reports ignored files", async () => {
+  it("includes blocks under blocks/sha2-256 and reports ignored files", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const blockPath = blockPathForCid(
+      "bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq"
+    );
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
@@ -103,7 +107,7 @@ describe("loadGitHubSnapshot", () => {
           tree: [
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
-            { path: "blobs/sha256/aa/aa00", type: "blob" },
+            { path: blockPath, type: "blob" },
             { path: "docs/readme.md", type: "blob" }
           ]
         })
@@ -119,13 +123,13 @@ describe("loadGitHubSnapshot", () => {
       .mockResolvedValueOnce(
         new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 })
       )
-      // blob
+      // block
       .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
-      "blobs/sha256/aa/aa00",
+      blockPath,
       "records/note/record-1.md",
       "types/note.md"
     ]);

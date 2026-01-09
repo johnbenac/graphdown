@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { computeGdHashV1 } from "..";
+import { blockPathForCid, cidFromRawBytes, computeGdHashV1 } from "..";
 import type { DatasetSnapshot, HashScope } from "..";
 
 const encoder = new TextEncoder();
@@ -35,7 +35,7 @@ function digest(result: ReturnType<typeof computeGdHashV1>): string {
   if (!result.ok) {
     assert.fail(JSON.stringify(result.errors));
   }
-  return result.digest;
+  return result.cid;
 }
 
 test('HASH-003: snapshot hash is path-independent for record files', () => {
@@ -79,16 +79,17 @@ test('HASH-004: invalid hash scope fails with E_USAGE', () => {
   assert.ok(result.errors.some((e) => e.code === "E_USAGE"));
 });
 
-test('HASH-005: snapshot hash ignores blob store bytes', () => {
+test('HASH-005: snapshot hash ignores block store bytes', () => {
   const type = typeFile("type.md", "note");
   const record = recordFile("r.md", "note", "one", "Body");
-  const blobDigest = "a".repeat(64);
-  const blobPath = `blobs/sha256/${blobDigest.slice(0, 2)}/${blobDigest}`;
-  const base = snapshot([type, record, [blobPath, encoder.encode("one")]]);
-  const changedBlob = snapshot([type, record, [blobPath, encoder.encode("two")]]);
+  const blockBytes = encoder.encode("one");
+  const cid = cidFromRawBytes(blockBytes);
+  const blockPath = blockPathForCid(cid);
+  const base = snapshot([type, record, [blockPath, blockBytes]]);
+  const changedBlock = snapshot([type, record, [blockPath, encoder.encode("two")]]);
 
   const baseDigest = digest(computeGdHashV1(base, "snapshot"));
-  const changedDigest = digest(computeGdHashV1(changedBlob, "snapshot"));
+  const changedDigest = digest(computeGdHashV1(changedBlock, "snapshot"));
   assert.equal(baseDigest, changedDigest);
 });
 

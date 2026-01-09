@@ -1,11 +1,16 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-08T17:01:24.148Z
+Generated: 2026-01-09T16:39:01.613Z
 Source: artifacts/spec-trace/matrix.json
 
-- Requirements (testable): 68
-- Covered: 68
-- Missing: 0
-- Coverage: 100.0%
+- Requirements (testable): 70
+- Covered: 69
+- Missing: 1
+- Coverage: 98.6%
 
-All requirements have at least one referenced test. 🎉
+The following requirements currently have **no referenced tests**:
+
+## ID (1)
+- ID-002 — No reserved typeId values
+
+_Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._

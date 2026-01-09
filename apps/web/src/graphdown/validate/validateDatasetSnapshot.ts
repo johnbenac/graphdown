@@ -1,14 +1,16 @@
+import { sha256 } from '@noble/hashes/sha256';
+
 import {
-  computeBlobDigest,
   discoverGraphdownObjects,
   IDENTIFIER_PATTERN,
   type ParsedRecordObject,
   type ParsedTypeObject,
 } from '../parse/datasetObjects';
+import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
 import { makeError, type ValidationError } from './errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
-import { extractBlobRefs, extractRecordRefs } from '../parse/wikiRefs';
+import { extractCidRefs, extractRecordRefs } from '../parse/wikiRefs';
 
 export type ValidateDatasetResult =
   | { ok: true }
@@ -178,73 +180,67 @@ function enforceCompositionShape(typeObj: ParsedTypeObject, errors: ValidationEr
   return components;
 }
 
-function validateBlobStore(
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function validateBlockStore(
   snapshot: DatasetSnapshot,
-  records: ParsedRecordObject[],
   errors: ValidationError[]
 ): void {
-  const blobFiles = [...snapshot.files.keys()].filter((p) => p.startsWith('blobs/sha256/'));
-  const digestToPath = new Map<string, string>();
+  const legacyBlobFiles = [...snapshot.files.keys()].filter((p) => p.startsWith('blobs/sha256/'));
+  for (const path of legacyBlobFiles) {
+    errors.push(makeError('E_LEGACY_BLOB_STORE', `Legacy blob store path ${path} is not supported`, path));
+  }
 
-  for (const path of blobFiles) {
+  const blockFiles = [...snapshot.files.keys()].filter((p) => p.startsWith('blocks/'));
+
+  for (const path of blockFiles) {
+    if (!path.startsWith('blocks/sha2-256/')) {
+      errors.push(makeError('E_BLOCK_PATH_INVALID', `Invalid block path ${path}`, path));
+      continue;
+    }
     const parts = path.split('/');
     if (parts.length !== 4) {
-      errors.push(makeError('E_BLOB_PATH_INVALID', `Invalid blob path ${path}`, path));
+      errors.push(makeError('E_BLOCK_PATH_INVALID', `Invalid block path ${path}`, path));
       continue;
     }
-    const [, algo, prefix, filename] = parts;
-    if (algo !== 'sha256') {
-      errors.push(makeError('E_BLOB_PATH_INVALID', `Invalid blob algorithm segment in ${path}`, path));
+    const [, algo, prefix, cid] = parts;
+    if (algo !== 'sha2-256') {
+      errors.push(makeError('E_BLOCK_PATH_INVALID', `Invalid block algorithm segment in ${path}`, path));
       continue;
     }
-    if (prefix.length !== 2) {
-      errors.push(makeError('E_BLOB_PATH_INVALID', `Invalid blob prefix ${prefix} in ${path}`, path));
+    if (!/^[0-9a-f]{2}$/.test(prefix)) {
+      errors.push(makeError('E_BLOCK_PATH_INVALID', `Invalid block prefix ${prefix} in ${path}`, path));
       continue;
     }
-    if (!/^[0-9a-f]{64}$/.test(filename)) {
-      errors.push(makeError('E_BLOB_PATH_INVALID', `Blob filename must be 64 hex chars in ${path}`, path));
+    let decoded;
+    try {
+      decoded = decodeDaslCidString(cid);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid CID';
+      errors.push(makeError('E_CID_INVALID', `Invalid CID in block path ${path}: ${message}`, path));
       continue;
     }
-    if (filename.slice(0, 2) !== prefix) {
-      errors.push(makeError('E_BLOB_PATH_INVALID', `Blob prefix ${prefix} does not match digest ${filename}`, path));
-      continue;
+    const expectedPath = blockPathForCid(cid);
+    if (expectedPath !== path) {
+      errors.push(makeError('E_BLOCK_PATH_INVALID', `Block path ${path} is not canonical`, path));
     }
     const bytes = snapshot.files.get(path);
     if (!bytes) {
       continue;
     }
-    const digest = computeBlobDigest(bytes);
-    if (digest !== filename) {
+    const digest = sha256(bytes);
+    if (!bytesEqual(digest, decoded.digest)) {
       errors.push(
-        makeError('E_BLOB_DIGEST_MISMATCH', `Blob file ${path} digest does not match its filename`, path)
+        makeError('E_BLOCK_DIGEST_MISMATCH', `Block file ${path} digest does not match its CID`, path)
       );
-      continue;
-    }
-    digestToPath.set(digest, path);
-  }
-
-  const referencedDigests = new Set<string>();
-  for (const record of records) {
-    const strings = new Set<string>();
-    collectStringValues(record.fields, strings);
-    collectStringValues(record.body, strings);
-    for (const value of strings) {
-      for (const digest of extractBlobRefs(value)) {
-        referencedDigests.add(digest);
-        if (!digestToPath.has(digest)) {
-          errors.push(
-            makeError(
-              'E_BLOB_REFERENCE_MISSING',
-              `Blob ${digest} referenced from ${record.identity} is missing`,
-              record.file
-            )
-          );
-        }
-      }
     }
   }
-
-  // referencedDigests used for GC/export; no validity failure for garbage blobs.
 }
 
 function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
@@ -258,6 +254,45 @@ function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
     }
   }
   return refs;
+}
+
+function validateBlockReferences(
+  snapshot: DatasetSnapshot,
+  records: ParsedRecordObject[],
+  errors: ValidationError[]
+): void {
+  for (const record of records) {
+    const strings = new Set<string>();
+    collectStringValues(record.fields, strings);
+    collectStringValues(record.body, strings);
+    for (const value of strings) {
+      const { cids, invalidCidTokens, legacyBlobTokens } = extractCidRefs(value);
+      for (const token of legacyBlobTokens) {
+        errors.push(
+          makeError(
+            'E_LEGACY_BLOB_REF',
+            `Legacy blob reference ${token} is not supported`,
+            record.file
+          )
+        );
+      }
+      for (const token of invalidCidTokens) {
+        errors.push(makeError('E_CID_INVALID', `Invalid CID reference ${token}`, record.file));
+      }
+      for (const cid of cids) {
+        const path = blockPathForCid(cid);
+        if (!snapshot.files.has(path)) {
+          errors.push(
+            makeError(
+              'E_BLOCK_REFERENCE_MISSING',
+              `Block ${cid} referenced from ${record.identity} is missing`,
+              record.file
+            )
+          );
+        }
+      }
+    }
+  }
 }
 
 export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateDatasetResult {
@@ -387,7 +422,8 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     }
   }
 
-  validateBlobStore(snapshot, parsed.recordObjects, errors);
+  validateBlockStore(snapshot, errors);
+  validateBlockReferences(snapshot, parsed.recordObjects, errors);
 
   if (errors.length) {
     return { ok: false, errors };

@@ -9,7 +9,7 @@ This codebase contains multiple graph-like structures. In docs, avoid saying “
 - **Record Link Graph** — wiki-link relationships between records (`[[typeId:recordId]]`)
 - **Record Hierarchy** — structural parent pointers (`parent:`)
 - **Type Composition Dependencies** — type → type requirements (`fields.composition`)
-- **Blob Dependency Graph** — record → blob references (`[[gdblob:sha256-...]]`)
+- **Block Dependency Graph** — record → block references (`[[bafy...]]`)
 - **Canonical Layout Tree** — deterministic filesystem layout for record-only exports
 
 See `docs/terminology.md` and `docs/concepts/graphs.md`.
@@ -37,16 +37,16 @@ See `docs/terminology.md` and `docs/concepts/graphs.md`.
 - `parse/markdownRecord.ts`
   - Focused parser/serializer for a single markdown record file used during record edits in the UI.
 - `parse/wikiRefs.ts`
-  - Extracts record refs (`[[typeId:recordId]]`) and blob refs (`[[gdblob:sha256-...]]`) from string content.
+  - Extracts record refs (`[[typeId:recordId]]`) and block refs (`[[<cid>]]`) from string content.
 
 ## Validation and canonicalization
 
 - `validate/validateDatasetSnapshot.ts`
-  - Validates dataset structure: identifiers, uniqueness, type existence, required fields, composition constraints, parent hierarchy, and blob integrity.
+  - Validates dataset structure: identifiers, uniqueness, type existence, required fields, composition constraints, parent hierarchy, and block integrity.
 - `validate/errors.ts`
   - Defines stable `ValidationError` codes.
 - `snapshot/canonicalizeDatasetSnapshot.ts`
-  - Rewrites snapshots into canonical record-only layout and keeps only reachable blobs.
+  - Rewrites snapshots into canonical record-only layout and keeps only reachable blocks.
 
 ## Record Link Graph building (for UI relationships)
 
