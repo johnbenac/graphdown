@@ -1,5 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
 
+import { encodeBase32 } from '../cid/base32';
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
@@ -37,27 +38,6 @@ function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   }
   if (a.length === b.length) return 0;
   return a.length < b.length ? -1 : 1;
-}
-
-function encodeBase32(bytes: Uint8Array): string {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
-  let output = '';
-  let buffer = 0;
-  let bits = 0;
-  for (const byte of bytes) {
-    buffer = (buffer << 8) | byte;
-    bits += 8;
-    while (bits >= 5) {
-      const index = (buffer >> (bits - 5)) & 31;
-      output += alphabet[index];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) {
-    const index = (buffer << (5 - bits)) & 31;
-    output += alphabet[index];
-  }
-  return output;
 }
 
 export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): HashResult {
