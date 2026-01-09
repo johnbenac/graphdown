@@ -93,6 +93,7 @@ describe("loadGitHubSnapshot", () => {
   });
 
   it("includes blocks under blocks and reports ignored files", async () => {
+    const legacyHash = "a".repeat(64);
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
@@ -104,6 +105,7 @@ describe("loadGitHubSnapshot", () => {
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
             { path: "blocks/sha2-256/aa/aa00", type: "blob" },
+            { path: `blobs/sha256/aa/${legacyHash}`, type: "blob" },
             { path: "docs/readme.md", type: "blob" }
           ]
         })
@@ -120,11 +122,14 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), { status: 200 })
       )
       // block
-      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+      .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
+      // legacy blob
+      .mockResolvedValueOnce(new Response(new Uint8Array([4, 5, 6]), { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual([
+      `blobs/sha256/aa/${legacyHash}`,
       "blocks/sha2-256/aa/aa00",
       "records/note/record-1.md",
       "types/note.md"
