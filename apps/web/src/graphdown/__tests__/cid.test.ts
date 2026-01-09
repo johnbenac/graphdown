@@ -33,3 +33,10 @@ test("CID-004: decodeDaslCidString round-trips and exposes digest", () => {
   assert.equal(Buffer.compare(Buffer.from(decoded.digest), Buffer.from(sha256(bytes))), 0);
   assert.equal(cid, cidFromRawBytes(bytes));
 });
+
+test("BLOCK-001: digest embedded in CID is sha2-256(bytes)", () => {
+  const bytes = utf8("hello");
+  const cid = cidFromRawBytes(bytes);
+  const decoded = decodeDaslCidString(cid);
+  assert.equal(Buffer.compare(Buffer.from(decoded.digest), Buffer.from(sha256(bytes))), 0);
+});
