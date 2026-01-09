@@ -81,6 +81,9 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) {
       continue;
     }
+    if (snapshotPath.startsWith("blobs/sha256/")) {
+      throw new Error(`Forbidden blob-store path found in repo: ${snapshotPath}`);
+    }
     if (isTypeFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
       allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;

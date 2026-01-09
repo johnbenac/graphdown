@@ -3,7 +3,6 @@ export * from './model/ids';
 export * from './model/refs';
 export * from './model/snapshotTypes';
 export * from './cid/daslCid';
-export * from './cid/daslCid';
 export * from './parse/frontMatter';
 export * from './parse/yaml';
 export * from './parse/wikiRefs';
