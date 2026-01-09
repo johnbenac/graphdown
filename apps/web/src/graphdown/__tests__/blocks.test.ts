@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "..";
+import { blockPathForCid, cidFromRawBytes, decodeDaslCidString, validateDatasetSnapshot } from "..";
+import { encodeBase32 } from "../cid/base32";
 import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
 
 const encoder = new TextEncoder();
@@ -78,6 +79,18 @@ test("BLOCK-LAYOUT-002: invalid block path shape fails validation", () => {
   assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
 });
 
+test("BLOCK-LAYOUT-002: reserved blocks namespace rejects non-canonical files", () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"]),
+      ["blocks/readme.md", encoder.encode("nope")]
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
+});
+
 test("BLOCK-LAYOUT-001: canonical block path is accepted", () => {
   const blockBytes = encoder.encode("rose");
   const cid = cidFromRawBytes(blockBytes);
@@ -89,6 +102,23 @@ test("BLOCK-LAYOUT-001: canonical block path is accepted", () => {
     ])
   );
   expectOk(result);
+});
+
+test("VAL-CID-001: CID-shaped tokens that fail decoding are invalid", () => {
+  const blockBytes = encoder.encode("orchid");
+  const validCid = cidFromRawBytes(blockBytes);
+  const decoded = decodeDaslCidString(validCid);
+  const invalidBytes = Uint8Array.from(decoded.cidBytes);
+  invalidBytes[0] = 0x02;
+  const invalidCid = `b${encodeBase32(invalidBytes)}`;
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[${invalidCid}]]`)
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_CID_INVALID"));
 });
 
 test("CID-REF-001: split strings do not synthesize CID references", () => {
