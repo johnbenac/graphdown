@@ -39,4 +39,20 @@ describe("readZipSnapshot", () => {
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });
+
+  it("rejects forbidden blob-store paths", async () => {
+    const zipBytes = zipSync({
+      "repo-main/types/note.md": new Uint8Array(strToU8("---\nid: type:note\n---")),
+      "repo-main/blobs/sha256/aa/aa00": new Uint8Array([0, 1, 2])
+    });
+
+    const buffer = Uint8Array.from(zipBytes).buffer;
+    const file = {
+      arrayBuffer: async () => buffer
+    } as File;
+
+    await expect(readZipSnapshot(file)).rejects.toThrow(
+      "Forbidden blob-store path found in zip: blobs/sha256/aa/aa00"
+    );
+  });
 });
