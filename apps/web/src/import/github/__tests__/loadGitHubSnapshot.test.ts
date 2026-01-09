@@ -131,4 +131,25 @@ describe("loadGitHubSnapshot", () => {
     ]);
     expect(ignored).toEqual(["docs/readme.md"]);
   });
+
+  it("rejects repositories containing blobs/sha256 paths", async () => {
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [
+            { path: "types/note.md", type: "blob" },
+            { path: "blobs/sha256/aa/aa00", type: "blob" }
+          ]
+        })
+      );
+
+    await expect(loadGitHubSnapshot({ owner: "owner", repo: "repo" })).rejects.toThrow(
+      "Forbidden blob-store path found in repo: blobs/sha256/aa/aa00"
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

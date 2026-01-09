@@ -1,7 +1,7 @@
 import { unzipSync } from "fflate";
 import type { DatasetSnapshot } from "../graphdown";
 
-const ROOT_DIRS = new Set(["types", "records", "blocks"]);
+const ROOT_DIRS = new Set(["types", "records", "blocks", "blobs"]);
 
 function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {
@@ -71,6 +71,9 @@ export async function readZipSnapshot(
     const finalPath = shouldStripRoot ? entry.path.split("/").slice(1).join("/") : entry.path;
     if (!finalPath) {
       continue;
+    }
+    if (finalPath.startsWith("blobs/sha256/")) {
+      throw new Error(`Forbidden blob-store path found in zip: ${finalPath}`);
     }
     if (isDatasetPath(finalPath)) {
       files.set(finalPath, entry.contents);
