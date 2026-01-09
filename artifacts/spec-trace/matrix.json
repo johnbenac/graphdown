@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-09T16:37:01.244Z",
+  "generatedAt": "2026-01-09T18:11:38.502Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -198,7 +198,13 @@
       "title": "Canonical block digest (sha256)",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "BLOCK-001",
+          "testTitle": "BLOCK-001: digest embedded in CID is sha2-256(bytes)",
+          "filePath": "apps/web/src/graphdown/__tests__/cid.test.ts"
+        }
+      ]
     },
     {
       "id": "CID-001",
@@ -643,6 +649,11 @@
           "reqId": "CID-LEGACY-002",
           "testTitle": "CID-LEGACY-002: legacy blob store paths are rejected",
           "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
+        },
+        {
+          "reqId": "CID-LEGACY-002",
+          "testTitle": "CID-LEGACY-002: zip import preserves blobs/sha256 paths so validation can reject them",
+          "filePath": "apps/web/src/import/__tests__/readZipSnapshot.test.ts"
         }
       ]
     },
@@ -1165,10 +1176,5 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": [
-    {
-      "id": "BLOCK-001",
-      "title": "Canonical block digest (sha256)"
-    }
-  ]
+  "missingTestable": []
 }
