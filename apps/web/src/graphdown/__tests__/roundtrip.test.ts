@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { test } from "vitest";
 
 import {
+  blockPathForCid,
   buildRecordLinkGraphFromSnapshot,
   canonicalizeDatasetSnapshot,
+  cidFromRawBytes,
   buildDatasetZipBytes,
   loadDatasetSnapshotFromZipBytes
 } from "..";
@@ -20,10 +21,6 @@ function makeSnapshot(entries: SnapshotEntry[]): DatasetSnapshot {
       entries.map(([p, c]) => [p, typeof c === "string" ? encoder.encode(c) : c])
     )
   };
-}
-
-function hash(content: Uint8Array): string {
-  return createHash("sha256").update(content).digest("hex");
 }
 
 function exportAndLoad(rawSnapshot: DatasetSnapshot) {
@@ -48,45 +45,48 @@ function expectGraphOk(
   }
 }
 
-test('EXP-006: export includes reachable blobs', () => {
+test('EXP-006: export includes reachable blocks', () => {
   const blobBytes = encoder.encode("flower");
-  const digest = hash(blobBytes);
-  const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+  const cid = cidFromRawBytes(blobBytes);
+  const blockPath = blockPathForCid(cid);
 
   const snapshot = makeSnapshot([
     ["types/note.md", ["---", "typeId: note", "fields: {}", "---", ""].join("\n")],
     [
       "records/note-1.md",
-      ["---", "typeId: note", "recordId: one", "fields: {}", "---", `See [[gdblob:sha256-${digest}]].`].join("\n")
+      ["---", "typeId: note", "recordId: one", "fields: {}", "---", `See [[${cid}]].`].join("\n")
     ],
-    [blobPath, blobBytes]
+    [blockPath, blobBytes]
   ]);
 
   const { roundTripped } = exportAndLoad(snapshot);
   const paths = [...roundTripped.files.keys()];
-  assert.ok(paths.includes(blobPath));
+  assert.ok(paths.includes(blockPath));
   assert.ok(paths.includes("types/note.md"));
   assert.ok(paths.includes("records/note.one/one.md"));
 });
 
-test('GC-002: export excludes unreferenced blobs', () => {
+test('GC-002: export excludes unreferenced blocks', () => {
   const blobBytes = encoder.encode("flower");
-  const digest = hash(blobBytes);
-  const blobPath = `blobs/sha256/${digest.slice(0, 2)}/${digest}`;
+  const cid = cidFromRawBytes(blobBytes);
+  const blockPath = blockPathForCid(cid);
+  const garbageBytes = encoder.encode("garbage blob");
+  const garbageCid = cidFromRawBytes(garbageBytes);
+  const garbagePath = blockPathForCid(garbageCid);
 
   const snapshot = makeSnapshot([
     ["types/note.md", ["---", "typeId: note", "fields: {}", "---", ""].join("\n")],
     [
       "records/note-1.md",
-      ["---", "typeId: note", "recordId: one", "fields: {}", "---", `See [[gdblob:sha256-${digest}]].`].join("\n")
+      ["---", "typeId: note", "recordId: one", "fields: {}", "---", `See [[${cid}]].`].join("\n")
     ],
-    [blobPath, blobBytes],
-    ["blobs/sha256/aa/aa" + "0".repeat(62), encoder.encode("garbage blob")]
+    [blockPath, blobBytes],
+    [garbagePath, garbageBytes]
   ]);
 
   const { roundTripped } = exportAndLoad(snapshot);
   const paths = [...roundTripped.files.keys()];
-  assert.ok(!paths.includes("blobs/sha256/aa/aa" + "0".repeat(62)));
+  assert.ok(!paths.includes(garbagePath));
 });
 
 test('EXP-003: canonical dataset export round-trips bytes and graph', () => {

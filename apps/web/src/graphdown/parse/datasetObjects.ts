@@ -1,6 +1,3 @@
-import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@noble/hashes/utils';
-
 import { extractFrontMatter } from './frontMatter';
 import { makeError, type ValidationError } from '../validate/errors';
 import { isObject } from '../model/types';
@@ -99,12 +96,6 @@ function validateIdentifier(value: unknown, key: 'typeId' | 'recordId', file: st
     return {
       ok: false,
       error: makeError('E_INVALID_IDENTIFIER', `${key} must not contain ":"`, file),
-    };
-  }
-  if (key === 'typeId' && trimmed === 'gdblob') {
-    return {
-      ok: false,
-      error: makeError('E_INVALID_IDENTIFIER', 'typeId "gdblob" is reserved', file),
     };
   }
   return { ok: true, value: trimmed };
@@ -276,8 +267,4 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
   }
 
   return { typeObjects, recordObjects, ignored, errors };
-}
-
-export function computeBlobDigest(bytes: Uint8Array): string {
-  return bytesToHex(sha256(bytes));
 }

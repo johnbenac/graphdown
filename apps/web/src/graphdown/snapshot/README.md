@@ -8,7 +8,7 @@
   - Rewrites a snapshot into the **canonical record-only layout**:
     - types in `types/<typeId>.md`
     - records nested under `records/<typeId>.<recordId>/.../<recordId>.md` using `parent:` pointers
-    - reachable blobs only (derived from blob references)
+    - reachable blocks only (derived from block references)
   - Preserves original bytes for the canonical paths (it changes paths, not content).
 
   This canonicalization is a *layout* operation (filesystem tree), not a semantic “graph” operation.

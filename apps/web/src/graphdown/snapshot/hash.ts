@@ -1,13 +1,11 @@
-import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@noble/hashes/utils';
-
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
+import { cidFromRawBytes } from '../cid/daslCid';
 
 export type HashScope = 'schema' | 'snapshot';
 
-type HashResult = { ok: true; digest: string } | { ok: false; errors: ValidationError[] };
+type HashResult = { ok: true; cid: string } | { ok: false; errors: ValidationError[] };
 
 const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
 const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
@@ -92,18 +90,25 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
 
   recordEntries.sort((a, b) => lexCompareBytes(a.idBytes, b.idBytes));
 
-  const hash = sha256.create();
-  hash.update(encoder.encode('graphdown:gdhash:v1\0'));
+  const segments: Uint8Array[] = [];
+  segments.push(encoder.encode('graphdown:gdhash:v1\0'));
 
   for (const entry of recordEntries) {
-    hash.update(entry.idBytes);
-    hash.update(Uint8Array.of(0));
-    hash.update(encoder.encode(String(entry.bytes.length)));
-    hash.update(Uint8Array.of(0));
-    hash.update(entry.bytes);
-    hash.update(Uint8Array.of(0));
+    segments.push(entry.idBytes);
+    segments.push(Uint8Array.of(0));
+    segments.push(encoder.encode(String(entry.bytes.length)));
+    segments.push(Uint8Array.of(0));
+    segments.push(entry.bytes);
+    segments.push(Uint8Array.of(0));
   }
 
-  const digest = bytesToHex(hash.digest());
-  return { ok: true, digest };
+  const totalLength = segments.reduce((sum, segment) => sum + segment.length, 0);
+  const combined = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const segment of segments) {
+    combined.set(segment, offset);
+    offset += segment.length;
+  }
+  const cid = cidFromRawBytes(combined);
+  return { ok: true, cid };
 }

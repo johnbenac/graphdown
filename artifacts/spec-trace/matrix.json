@@ -119,19 +119,6 @@
       ]
     },
     {
-      "id": "ID-002",
-      "title": "Reserved typeId for blob references",
-      "testable": true,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "ID-002",
-          "testTitle": "ID-002: rejects reserved gdblob typeId",
-          "filePath": "apps/web/src/graphdown/__tests__/ids.test.ts"
-        }
-      ]
-    },
-    {
       "id": "HASH-001",
       "title": "Canonical dataset hashing (gdhash-v1)",
       "testable": null,
@@ -195,40 +182,27 @@
     },
     {
       "id": "HASH-005",
-      "title": "Blob content is committed by reference digests",
+      "title": "Block content is committed by reference CIDs",
       "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "HASH-005",
-          "testTitle": "HASH-005: snapshot hash ignores blob store bytes",
+          "testTitle": "HASH-005: snapshot hash ignores block store bytes",
           "filePath": "apps/web/src/graphdown/__tests__/hash.test.ts"
         }
       ]
     },
     {
-      "id": "BLOB-001",
-      "title": "Canonical blob digest (sha256)",
+      "id": "BLOCK-001",
+      "title": "Canonical block CID (DASL CIDv1)",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-001",
-          "testTitle": "BLOB-001: computeBlobDigest hashes raw bytes",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "BLOB-002",
-      "title": "BlobId format is deterministic",
-      "testable": true,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "BLOB-002",
-          "testTitle": "BLOB-002: blob ids must be 64 lowercase hex characters",
-          "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
+          "reqId": "BLOCK-001",
+          "testTitle": "CID-001: empty bytes CID vector",
+          "filePath": "apps/web/src/graphdown/__tests__/cid.test.ts"
         }
       ]
     },
@@ -259,41 +233,41 @@
       ]
     },
     {
-      "id": "BLOB-LAYOUT-001",
-      "title": "Blob store paths are derived from BlobId",
+      "id": "BLOCK-LAYOUT-001",
+      "title": "Block store paths are derived from block CIDs",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-LAYOUT-001",
-          "testTitle": "BLOB-LAYOUT-001: canonical blob path is accepted",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "BLOCK-LAYOUT-001",
+          "testTitle": "BLOCK-LAYOUT-001: canonical block path is accepted",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
     {
-      "id": "BLOB-LAYOUT-002",
-      "title": "Only canonical blob files are allowed in the blob store",
+      "id": "BLOCK-LAYOUT-002",
+      "title": "Only canonical block files are allowed in the block store",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-LAYOUT-002",
-          "testTitle": "BLOB-LAYOUT-002: invalid blob path shape fails validation",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "BLOCK-LAYOUT-002",
+          "testTitle": "BLOCK-LAYOUT-002: invalid block path shape fails validation",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
     {
-      "id": "BLOB-LAYOUT-003",
-      "title": "Non-record, non-blob-store files are non-semantic",
+      "id": "BLOCK-LAYOUT-003",
+      "title": "Non-record, non-block-store files are non-semantic",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-LAYOUT-003",
-          "testTitle": "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "BLOCK-LAYOUT-003",
+          "testTitle": "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
@@ -485,7 +459,7 @@
       "tests": [
         {
           "reqId": "REL-001",
-          "testTitle": "REL-001: blob references are not treated as record relationships",
+          "testTitle": "REL-001: legacy blob references are not treated as record relationships",
           "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
         }
       ]
@@ -565,32 +539,32 @@
       ]
     },
     {
-      "id": "BLOB-REF-001",
-      "title": "Blob references use composite wiki-link tokens",
+      "id": "BLOCK-REF-001",
+      "title": "Block references use composite wiki-link tokens",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-REF-001",
-          "testTitle": "BLOB-REF-001: split strings do not synthesize blob references",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "BLOCK-REF-001",
+          "testTitle": "BLOCK-REF-001: split strings do not synthesize block references",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         },
         {
-          "reqId": "BLOB-REF-001",
-          "testTitle": "BLOB-REF-001: extracts blob references",
+          "reqId": "BLOCK-REF-001",
+          "testTitle": "CID-REF-001: extracts CID references",
           "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
         }
       ]
     },
     {
-      "id": "BLOB-REF-002",
-      "title": "Blob reference normalization is strict",
+      "id": "BLOCK-REF-002",
+      "title": "Block reference normalization is strict",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "BLOB-REF-002",
-          "testTitle": "BLOB-REF-002: ignores malformed blob references",
+          "reqId": "BLOCK-REF-002",
+          "testTitle": "CID-REF-002: ignores non-CID wiki links",
           "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
         }
       ]
@@ -759,67 +733,67 @@
       ]
     },
     {
-      "id": "VAL-BLOB-001",
-      "title": "Blob references must resolve to matching blob bytes",
+      "id": "VAL-BLOCK-001",
+      "title": "Block references must resolve to matching block bytes",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "VAL-BLOB-001",
-          "testTitle": "VAL-BLOB-001: referenced blob must exist",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "VAL-BLOCK-001",
+          "testTitle": "VAL-BLOCK-001: referenced block must exist",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
     {
-      "id": "VAL-BLOB-002",
-      "title": "Blob store files must match their path digest",
+      "id": "VAL-BLOCK-002",
+      "title": "Block store files must match their path digest",
       "testable": true,
       "verify": null,
       "tests": [
         {
-          "reqId": "VAL-BLOB-002",
-          "testTitle": "VAL-BLOB-002: blob bytes must match referenced digest",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "reqId": "VAL-BLOCK-002",
+          "testTitle": "VAL-BLOCK-002: block bytes must match referenced CID",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
     {
       "id": "GC-001",
-      "title": "Reachable blob set is computed from blob references",
+      "title": "Reachable block set is computed from block references",
       "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "GC-001",
-          "testTitle": "GC-001: reachable blob set includes references from fields",
+          "testTitle": "GC-001: reachable block set includes references from fields",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
         }
       ]
     },
     {
       "id": "GC-002",
-      "title": "Unreferenced blobs are garbage and are excluded from record-only export",
+      "title": "Unreferenced blocks are garbage and are excluded from record-only export",
       "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "GC-002",
-          "testTitle": "GC-002: export excludes unreferenced blobs",
+          "testTitle": "GC-002: export excludes unreferenced blocks",
           "filePath": "apps/web/src/graphdown/__tests__/roundtrip.test.ts"
         }
       ]
     },
     {
       "id": "GC-003",
-      "title": "Garbage blobs do not make a dataset invalid",
+      "title": "Garbage blocks do not make a dataset invalid",
       "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "GC-003",
-          "testTitle": "GC-003: unreferenced but valid blobs do not fail validation",
-          "filePath": "apps/web/src/graphdown/__tests__/blobs.test.ts"
+          "testTitle": "GC-003: unreferenced but valid blocks do not fail validation",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
@@ -954,18 +928,18 @@
     },
     {
       "id": "EXP-006",
-      "title": "Record-only export includes reachable blobs",
+      "title": "Record-only export includes reachable blocks",
       "testable": true,
       "verify": null,
       "tests": [
         {
           "reqId": "EXP-006",
-          "testTitle": "EXP-006: includes only referenced blobs alongside canonical records/types",
+          "testTitle": "EXP-006: includes only referenced blocks alongside canonical records/types",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
         },
         {
           "reqId": "EXP-006",
-          "testTitle": "EXP-006: export includes reachable blobs",
+          "testTitle": "EXP-006: export includes reachable blocks",
           "filePath": "apps/web/src/graphdown/__tests__/roundtrip.test.ts"
         }
       ]
@@ -1011,7 +985,7 @@
     },
     {
       "id": "EXP-005",
-      "title": "Content preservation (no “reformat the universe”)",
+      "title": "Content preservation (no \u201creformat the universe\u201d)",
       "testable": null,
       "verify": null,
       "tests": [

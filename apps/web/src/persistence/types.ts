@@ -33,6 +33,6 @@ export type LoadedDataset = {
 export type ImportReport = {
   ignoredFileCount: number;
   ignoredFileSample: string[];
-  droppedBlobCount: number;
-  droppedBlobSample: string[];
+  droppedBlockCount: number;
+  droppedBlockSample: string[];
 };

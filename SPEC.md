@@ -132,7 +132,7 @@ Wiki-links MAY point to non-existent record references `typeId:recordId` (Obsidi
 This non-requirement applies only to wiki-links extracted from record bodies and record `fields` (REL-002).
 It does not apply to record hierarchy parent pointers (HIER-001): parent pointers MUST resolve and are import-failing when missing (VAL-PARENT-002).
 
-Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved blob references are an import-failing error (VAL-BLOB-001).
+Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved block references are an import-failing error (VAL-BLOCK-001).
 
 ---
 
@@ -178,33 +178,27 @@ A string equal to `recordKey`, used inside wiki-links.
 
 Obsidian-style link syntax: `[[...]]` containing a record reference `typeId:recordId`.
 
-### Blob object
+### Block object
 
-A **blob object** is an uninterpreted sequence of bytes stored in the dataset’s blob store (BLOB-LAYOUT-001).
+A **block object** is an uninterpreted sequence of bytes stored in the dataset’s block store (BLOCK-LAYOUT-001).
 
-### Blob digest
+### Block CID
 
-A **blob digest** is the lowercase hex SHA-256 digest of the blob bytes (BLOB-001).
+A **block CID** is a DASL CIDv1 string with:
+- string form starting with `b`
+- base32 RFC4648 lowercase alphabet with no padding
+- decoded bytes equal to 36 bytes: `[0x01, <codec>, 0x12, 0x20, <sha2-256 digest>]`
+  - `<codec>` is `0x55` (raw) or `0x71` (drisl)
 
-### BlobId
+### Block reference
 
-A **BlobId** is a string of the form:
+A **block reference** is a wiki-link token whose inner text is a block CID:
 
-`sha256-<digest>`
+`[[<cid>]]`
 
-where `<digest>` is 64 lowercase hex characters.
+### Block store
 
-### Blob reference
-
-A **blob reference** is a wiki-link token whose inner text is:
-
-`gdblob:<BlobId>`
-
-Example: `[[gdblob:sha256-0123...]]`
-
-### Blob store
-
-The **blob store** is the reserved directory and file layout defined by BLOB-LAYOUT-001.
+The **block store** is the reserved directory and file layout defined by BLOCK-LAYOUT-001.
 
 ---
 
@@ -219,17 +213,6 @@ The **blob store** is the reserved directory and file layout defined by BLOB-LAY
 
 `typeId` and `recordId` MUST NOT contain `:`.
 Colon is reserved as the separator in `typeId:recordId` record references.
-
-<!-- req:id=ID-002 title="Reserved typeId for blob references" testable=true -->
-### ID-002 — Reserved typeId for blob references
-
-The `typeId` value `gdblob` is reserved.
-
-Datasets MUST NOT define:
-* any type object with `typeId: gdblob`, and
-* any record object with `typeId: gdblob`.
-
----
 
 ## 3.1 Dataset identity hashes
 
@@ -306,33 +289,29 @@ Core MUST NOT define or expose any additional standardized fingerprint computati
 If the core hashing API accepts a `scope` selector, it MUST accept only `schema` and `snapshot`.
 Any other value MUST fail with error code `E_USAGE` and MUST NOT return a digest.
 
-<!-- req:id=HASH-005 title="Blob content is committed by reference digests" testable=true -->
-### HASH-005 — Blob content is committed by reference digests
+<!-- req:id=HASH-005 title="Block content is committed by reference CIDs" testable=true -->
+### HASH-005 — Block content is committed by reference CIDs
 
-Because blob references include the blob digest and blob integrity is enforced (VAL-BLOB-001/VAL-BLOB-002),
+Because block references include the block CID and block integrity is enforced (VAL-BLOCK-001/VAL-BLOCK-002),
 dataset fingerprints (HASH-002/HASH-003) are computed over type objects and record objects only.
 
-Changing the bytes of a referenced blob necessarily changes its digest and therefore requires changing the referencing record content; therefore the dataset snapshot fingerprint changes.
+Changing the bytes of a referenced block necessarily changes its CID and therefore requires changing the referencing record content; therefore the dataset snapshot fingerprint changes.
 
-## 3.2 Blob identity
+## 3.2 Block identity
 
-<!-- req:id=BLOB-001 title="Canonical blob digest (sha256)" testable=true -->
-### BLOB-001 — Canonical blob digest (sha256)
+<!-- req:id=BLOCK-001 title="Canonical block CID (DASL CIDv1)" testable=true -->
+### BLOCK-001 — Canonical block CID (DASL CIDv1)
 
-A blob digest MUST be computed as:
+A block CID MUST be computed as:
 
-* `SHA-256` over the blob’s raw bytes (no normalization, no decoding).
+* `SHA-256` over the block’s raw bytes (no normalization, no decoding).
 
-The digest MUST be encoded as 64 lowercase hexadecimal characters.
+The resulting digest MUST be encoded into a DASL CIDv1 string:
 
-<!-- req:id=BLOB-002 title="BlobId format is deterministic" testable=true -->
-### BLOB-002 — BlobId format is deterministic
-
-A BlobId MUST have the exact form:
-
-`sha256-<digest>`
-
-Where `<digest>` matches: `^[0-9a-f]{64}$`.
+* bytes: `[0x01, <codec>, 0x12, 0x20, <digest>]`
+  * `<codec>` is `0x55` (raw) or `0x71` (drisl)
+* base32 RFC4648 lowercase alphabet with no padding
+* string form must start with `b`
 
 ## 4. Repository layout requirements
 
@@ -355,35 +334,35 @@ Each record file MUST contain exactly one YAML front matter block at the start o
 
 Core MUST NOT support multiple record objects in a single file.
 
-<!-- req:id=BLOB-LAYOUT-001 title="Blob store paths are derived from BlobId" testable=true -->
-### BLOB-LAYOUT-001 — Blob store paths are derived from BlobId
+<!-- req:id=BLOCK-LAYOUT-001 title="Block store paths are derived from block CIDs" testable=true -->
+### BLOCK-LAYOUT-001 — Block store paths are derived from block CIDs
 
-Blob objects MUST be stored under the dataset root at:
+Block objects MUST be stored under the dataset root at:
 
-`blobs/sha256/<p>/<digest>`
+`blocks/sha2-256/<p>/<cid>`
 
 Where:
 
-* `<digest>` is the 64 lowercase hex digest from BLOB-001.
-* `<p>` is the first two hex characters of `<digest>`.
+* `<cid>` is the full block CID string from BLOCK-001.
+* `<p>` is the first byte of the CID digest encoded as two lowercase hex characters.
 
 Examples:
-* `blobs/sha256/0a/0a9f...<64 hex total>`
-* `blobs/sha256/ff/ff00...<64 hex total>`
+* `blocks/sha2-256/0a/bafkrei...`
+* `blocks/sha2-256/ff/bafkre...`
 
-Blob files MUST be stored with the filename equal to `<digest>` exactly (no extension).
+Block files MUST be stored with the filename equal to `<cid>` exactly (no extension).
 
-<!-- req:id=BLOB-LAYOUT-002 title="Only canonical blob files are allowed in the blob store" testable=true -->
-### BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store
+<!-- req:id=BLOCK-LAYOUT-002 title="Only canonical block files are allowed in the block store" testable=true -->
+### BLOCK-LAYOUT-002 — Only canonical block files are allowed in the block store
 
-Any file located under `blobs/sha256/` MUST match the canonical blob store path rules in BLOB-LAYOUT-001.
+Any file located under `blocks/sha2-256/` MUST match the canonical block store path rules in BLOCK-LAYOUT-001.
 
-Validation MUST fail if any file exists under `blobs/sha256/` that does not match the required `.../<p>/<digest>` shape.
+Validation MUST fail if any file exists under `blocks/sha2-256/` that does not match the required `.../<p>/<cid>` shape.
 
-<!-- req:id=BLOB-LAYOUT-003 title="Non-record, non-blob-store files are non-semantic" testable=true -->
-### BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic
+<!-- req:id=BLOCK-LAYOUT-003 title="Non-record, non-block-store files are non-semantic" testable=true -->
+### BLOCK-LAYOUT-003 — Non-record, non-block-store files are non-semantic
 
-Files that are not record files (LAYOUT-001) and are not blob store files (BLOB-LAYOUT-001) MUST be ignored by core for identity, linking, and validation semantics.
+Files that are not record files (LAYOUT-001) and are not block store files (BLOCK-LAYOUT-001) MUST be ignored by core for identity, linking, and validation semantics.
 
 ---
 
@@ -567,31 +546,31 @@ Core MUST NOT infer relationships from structured YAML shapes, bare IDs, or any 
 
 Such shapes MAY exist as opaque user data per EXT-002, but they have no relationship semantics in core.
 
-## 8.1 Blob references
+## 8.1 Block references
 
-<!-- req:id=BLOB-REF-001 title="Blob references use composite wiki-link tokens" testable=true -->
-### BLOB-REF-001 — Blob references use composite wiki-link tokens
+<!-- req:id=BLOCK-REF-001 title="Block references use composite wiki-link tokens" testable=true -->
+### BLOCK-REF-001 — Block references use composite wiki-link tokens
 
-A blob reference is expressed only as a wiki-link token:
+A block reference is expressed only as a wiki-link token:
 
-`[[gdblob:sha256-<digest>]]`
+`[[<cid>]]`
 
-Where `<digest>` matches `^[0-9a-f]{64}$`.
+Where `<cid>` is a valid block CID per BLOCK-001.
 
-Blob references MUST be extracted from:
+Block references MUST be extracted from:
 * the record body, and
 * any string value anywhere within the record `fields` map (including nested objects/arrays).
 
-<!-- req:id=BLOB-REF-002 title="Blob reference normalization is strict" testable=true -->
-### BLOB-REF-002 — Blob reference normalization is strict
+<!-- req:id=BLOCK-REF-002 title="Block reference normalization is strict" testable=true -->
+### BLOCK-REF-002 — Block reference normalization is strict
 
-When interpreting a blob reference token, core MUST:
+When interpreting a block reference token, core MUST:
 
 * unwrap `[[...]]`
 * trim surrounding whitespace
-* require the inner text to match `gdblob:sha256-<digest>` exactly (lowercase hex)
+* require the inner text to match a valid block CID (BLOCK-001) exactly
 
-Tokens that do not match this shape MUST be ignored for blob reference extraction.
+Tokens that do not match this shape MUST be ignored for block reference extraction.
 
 ---
 
@@ -628,8 +607,8 @@ Import MUST fail if:
 * identity uniqueness fails (§9.2)
 * a record object’s `typeId` has no matching type object (§9.3)
 * any record hierarchy `parent` pointer is invalid, unresolved, or cyclic (VAL-PARENT-001/VAL-PARENT-002/VAL-PARENT-003)
-* any blob store file fails blob integrity requirements (§VAL-BLOB-002)
-* any blob reference fails resolution (§VAL-BLOB-001)
+* any block store file fails block integrity requirements (§VAL-BLOCK-002)
+* any block reference fails resolution (§VAL-BLOCK-001)
 
 <!-- req:id=VAL-002 title="Identity uniqueness rules" testable=true -->
 ### VAL-002 — Identity uniqueness rules
@@ -712,45 +691,45 @@ Following `parent` pointers from any record MUST terminate at a root record (mis
 
 If any cycle is present (including self-parenting), validation MUST fail.
 
-<!-- req:id=VAL-BLOB-001 title="Blob references must resolve to matching blob bytes" testable=true -->
-### VAL-BLOB-001 — Blob references must resolve to matching blob bytes
+<!-- req:id=VAL-BLOCK-001 title="Block references must resolve to matching block bytes" testable=true -->
+### VAL-BLOCK-001 — Block references must resolve to matching block bytes
 
-For every blob reference extracted per BLOB-REF-001/BLOB-REF-002:
+For every block reference extracted per BLOCK-REF-001/BLOCK-REF-002:
 
-1. A corresponding blob file MUST exist at the canonical blob store path derived from the referenced `<digest>` (BLOB-LAYOUT-001).
-2. The blob file’s computed digest (BLOB-001) MUST equal the referenced `<digest>` exactly.
-
-Validation MUST fail otherwise.
-
-<!-- req:id=VAL-BLOB-002 title="Blob store files must match their path digest" testable=true -->
-### VAL-BLOB-002 — Blob store files must match their path digest
-
-For every file under `blobs/sha256/<p>/<digest>`:
-
-The computed digest of the file bytes (BLOB-001) MUST equal `<digest>`.
+1. A corresponding block file MUST exist at the canonical block store path derived from the referenced `<cid>` (BLOCK-LAYOUT-001).
+2. The block file’s computed digest (BLOCK-001) MUST equal the digest encoded in the `<cid>` exactly.
 
 Validation MUST fail otherwise.
 
-## 9.1 Blob garbage collection
+<!-- req:id=VAL-BLOCK-002 title="Block store files must match their path digest" testable=true -->
+### VAL-BLOCK-002 — Block store files must match their path digest
 
-<!-- req:id=GC-001 title="Reachable blob set is computed from blob references" testable=true -->
-### GC-001 — Reachable blob set is computed from blob references
+For every file under `blocks/sha2-256/<p>/<cid>`:
 
-The reachable blob set is defined as the set of `<digest>` values referenced by blob references extracted from all record objects per BLOB-REF-001/BLOB-REF-002.
+The computed digest of the file bytes (BLOCK-001) MUST equal the digest encoded in `<cid>`.
+
+Validation MUST fail otherwise.
+
+## 9.1 Block garbage collection
+
+<!-- req:id=GC-001 title="Reachable block set is computed from block references" testable=true -->
+### GC-001 — Reachable block set is computed from block references
+
+The reachable block set is defined as the set of `<cid>` values referenced by block references extracted from all record objects per BLOCK-REF-001/BLOCK-REF-002.
 
 Implementations MUST be able to compute this reachable set deterministically.
 
-<!-- req:id=GC-002 title="Unreferenced blobs are garbage and are excluded from record-only export" testable=true -->
-### GC-002 — Unreferenced blobs are garbage and are excluded from record-only export
+<!-- req:id=GC-002 title="Unreferenced blocks are garbage and are excluded from record-only export" testable=true -->
+### GC-002 — Unreferenced blocks are garbage and are excluded from record-only export
 
-A blob store file is garbage if its `<digest>` is not in the reachable blob set (GC-001).
+A block store file is garbage if its `<cid>` is not in the reachable block set (GC-001).
 
-Record-only export (EXP-002) MUST NOT include garbage blob files.
+Record-only export (EXP-002) MUST NOT include garbage block files.
 
-<!-- req:id=GC-003 title="Garbage blobs do not make a dataset invalid" testable=true -->
-### GC-003 — Garbage blobs do not make a dataset invalid
+<!-- req:id=GC-003 title="Garbage blocks do not make a dataset invalid" testable=true -->
+### GC-003 — Garbage blocks do not make a dataset invalid
 
-Validation MUST NOT fail due solely to the presence of unreferenced blob store files.
+Validation MUST NOT fail due solely to the presence of unreferenced block store files.
 
 ---
 
@@ -826,16 +805,16 @@ Export MUST support exporting the Graphdown record subset:
 
 * all type objects (FR-MD-021)
 * all record objects (FR-MD-023)
-* all reachable blob files (GC-001) at their canonical blob store paths (BLOB-LAYOUT-001)
+* all reachable block files (GC-001) at their canonical block store paths (BLOCK-LAYOUT-001)
 
 as a zip archive.
 
 Record-only export MUST use the canonical parent-based layout defined in EXP-HIER-001.
 
-<!-- req:id=EXP-006 title="Record-only export includes reachable blobs" testable=true -->
-### EXP-006 — Record-only export includes reachable blobs
+<!-- req:id=EXP-006 title="Record-only export includes reachable blocks" testable=true -->
+### EXP-006 — Record-only export includes reachable blocks
 
-Record-only export MUST include all blob store files whose digests are in the reachable blob set (GC-001), preserving their canonical blob store paths (BLOB-LAYOUT-001).
+Record-only export MUST include all block store files whose CIDs are in the reachable block set (GC-001), preserving their canonical block store paths (BLOCK-LAYOUT-001).
 
 <!-- req:id=EXP-003 title="Whole-repo export" -->
 ### EXP-003 — Whole-repo export
@@ -868,8 +847,8 @@ Record objects:
   * `<exportDir(P)>/<dirName(K)>/<recordId>.md`
   * where `<exportDir(P)>` is the directory containing the parent’s `<parentRecordId>.md` file.
 
-Reachable blobs:
-* Record-only export MUST include reachable blob files per EXP-006, preserving canonical blob store paths (BLOB-LAYOUT-001).
+Reachable blocks:
+* Record-only export MUST include reachable block files per EXP-006, preserving canonical block store paths (BLOCK-LAYOUT-001).
 
 <!-- req:id=EXP-005 title="Content preservation (no “reformat the universe”)" -->
 ### EXP-005 — Content preservation (no “reformat the universe”)
