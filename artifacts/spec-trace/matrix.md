@@ -1,6 +1,9 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-08T17:01:24.148Z
+Generated: 2026-01-09T16:42:27.069Z
+
+## Testable requirements with no tests
+- BLOCK-001 — Canonical block digest (sha256)
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -48,10 +51,6 @@ Tests (3):
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects recordId with colon"
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
 
-## ID-002 — Reserved typeId for blob references (testable=true)
-Tests (1):
-- apps/web/src/graphdown/__tests__/ids.test.ts — "ID-002: rejects reserved gdblob typeId"
-
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (3):
 - apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-001: duplicate identities fail hashing"
@@ -70,17 +69,20 @@ Tests (1):
 Tests (1):
 - apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-004: invalid hash scope fails with E_USAGE"
 
-## HASH-005 — Blob content is committed by reference digests (testable=true)
+## HASH-005 — Block content is committed by reference CIDs (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-005: snapshot hash ignores blob store bytes"
+- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-005: snapshot hash ignores block store bytes"
 
-## BLOB-001 — Canonical blob digest (sha256) (testable=true)
-Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "BLOB-001: computeBlobDigest hashes raw bytes"
+## BLOCK-001 — Canonical block digest (sha256) (testable=true)
+Tests (0):
+- (none)
 
-## BLOB-002 — BlobId format is deterministic (testable=true)
-Tests (1):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "BLOB-002: blob ids must be 64 lowercase hex characters"
+## BLOCK-002 — Block CID format is deterministic (testable=true)
+Tests (4):
+- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-002: cidFromRawBytes for abc matches golden vector"
+- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-002: cidFromRawBytes for empty bytes matches golden vector"
+- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-002: cidFromRawBytes for hello matches golden vector"
+- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-002: decodeDaslCidString exposes raw codec and sha256 digest"
 
 ## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
 Tests (1):
@@ -90,17 +92,17 @@ Tests (1):
 Tests (1):
 - apps/web/src/graphdown/__tests__/layout.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
-## BLOB-LAYOUT-001 — Blob store paths are derived from BlobId (testable=true)
+## BLOCK-LAYOUT-001 — Block store paths are derived from block CIDs (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "BLOB-LAYOUT-001: canonical blob path is accepted"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
 
-## BLOB-LAYOUT-002 — Only canonical blob files are allowed in the blob store (testable=true)
+## BLOCK-LAYOUT-002 — Only canonical block files are allowed in the block store (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "BLOB-LAYOUT-002: invalid blob path shape fails validation"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: invalid block path shape fails validation"
 
-## BLOB-LAYOUT-003 — Non-record, non-blob-store files are non-semantic (testable=true)
+## BLOCK-LAYOUT-003 — Non-record, non-block-store files are non-semantic (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "BLOB-LAYOUT-003: non-record, non-blob files are ignored by validation"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
@@ -154,7 +156,7 @@ Tests (2):
 
 ## REL-001 — Record relationships use composite wiki-links (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "REL-001: blob references are not treated as record relationships"
+- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "REL-001: legacy blob references are not treated as record relationships"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
 Tests (2):
@@ -179,14 +181,23 @@ Tests (2):
 Tests (1):
 - apps/web/src/utils/__tests__/wikiRefStrings.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
 
-## BLOB-REF-001 — Blob references use composite wiki-link tokens (testable=true)
+## BLOCK-REF-001 — Block references use wiki-link tokens (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "BLOB-REF-001: split strings do not synthesize blob references"
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "BLOB-REF-001: extracts blob references"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-REF-001: split strings do not synthesize block references"
+- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "BLOCK-REF-001: extracts CID references"
 
-## BLOB-REF-002 — Blob reference normalization is strict (testable=true)
+## BLOCK-REF-002 — Block reference normalization is strict (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "BLOB-REF-002: ignores malformed blob references"
+- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "BLOCK-REF-002: ignores non-CID tokens"
+
+## LEGACY-001 — Legacy blob references are invalid (testable=true)
+Tests (2):
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "LEGACY-001: legacy blob references are invalid"
+- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "LEGACY-001: reports legacy blob tokens"
+
+## LEGACY-002 — Legacy blob stores are invalid (testable=true)
+Tests (1):
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "LEGACY-002: legacy blob store paths are invalid"
 
 ## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
 Tests (1):
@@ -236,25 +247,25 @@ Tests (2):
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
-## VAL-BLOB-001 — Blob references must resolve to matching blob bytes (testable=true)
+## VAL-BLOCK-001 — Block references must resolve to matching block bytes (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "VAL-BLOB-001: referenced blob must exist"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-BLOCK-001: referenced block must exist"
 
-## VAL-BLOB-002 — Blob store files must match their path digest (testable=true)
+## VAL-BLOCK-002 — Block store files must match their path digest (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "VAL-BLOB-002: blob bytes must match referenced digest"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
 
-## GC-001 — Reachable blob set is computed from blob references (testable=true)
+## GC-001 — Reachable block set is computed from block references (testable=true)
 Tests (1):
-- apps/web/src/features/export/__tests__/exportZip.test.ts — "GC-001: reachable blob set includes references from fields"
+- apps/web/src/features/export/__tests__/exportZip.test.ts — "GC-001: reachable block set includes references from fields"
 
-## GC-002 — Unreferenced blobs are garbage and are excluded from record-only export (testable=true)
+## GC-002 — Unreferenced blocks are garbage and are excluded from record-only export (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blobs"
+- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blocks"
 
-## GC-003 — Garbage blobs do not make a dataset invalid (testable=true)
+## GC-003 — Garbage blocks do not make a dataset invalid (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blobs.test.ts — "GC-003: unreferenced but valid blobs do not fail validation"
+- apps/web/src/graphdown/__tests__/blocks.test.ts — "GC-003: unreferenced but valid blocks do not fail validation"
 
 ## ERR-001 — File-specific errors when possible
 Tests (1):
@@ -293,10 +304,10 @@ Tests (1):
 Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-002: record-only export excludes non-graph files"
 
-## EXP-006 — Record-only export includes reachable blobs (testable=true)
+## EXP-006 — Record-only export includes reachable blocks (testable=true)
 Tests (2):
-- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-006: includes only referenced blobs alongside canonical records/types"
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blobs"
+- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-006: includes only referenced blocks alongside canonical records/types"
+- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blocks"
 
 ## EXP-003 — Whole-repo export
 Tests (1):

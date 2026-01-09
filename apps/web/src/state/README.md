@@ -27,7 +27,7 @@ components to load, edit, and persist datasets.
 
 - `importReport.ts`
   - Compares raw vs canonical snapshots to report ignored files and dropped
-    unreferenced blobs.
+    unreferenced blocks.
   - Limits report samples to keep UI payloads small.
 
 ## Tests

@@ -15,14 +15,14 @@ This graph is used by the UI for:
   - record body
   - any string anywhere inside record `fields` (nested arrays/objects included)
 
-Blob references (`[[gdblob:sha256-...]]`) are excluded from record relationships.
+Block references (`[[<cid>]]`) are excluded from record relationships.
 
 ## What this graph does NOT represent
 
 This module does **not** encode:
 - the **Record Hierarchy** defined by `parent:` pointers (see validation + canonicalization)
 - **Type Composition Dependencies** (`fields.composition`) or composition satisfaction
-- blob integrity or reachable blob sets
+- block integrity or reachable block sets
 
 Those are handled in `validate/` and `snapshot/`.
 

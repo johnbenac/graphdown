@@ -41,7 +41,7 @@ It checks:
 - identity uniqueness
 - parent pointer integrity
 - composition constraints
-- blob store integrity
+- block store integrity
 - required fields (fieldDefs.required)
 
 ### Canonicalization (`canonicalizeDatasetSnapshot`)
@@ -50,7 +50,7 @@ Canonicalization answers: “If we export record-only, what should the determini
 It rewrites paths into the canonical record-only layout:
 - `types/<typeId>.md`
 - `records/<typeId>.<recordId>/.../<recordId>.md` (nested under parents)
-- includes only reachable blobs
+- includes only reachable blocks
 
 Canonicalization preserves original file bytes. It changes file paths, not file contents.
 
@@ -61,6 +61,6 @@ The Graphdown core can operate on any snapshot and discovers record files by con
 The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), such as:
 - `types/**/*.md`
 - `records/**/*.md`
-- `blobs/sha256/**`
+- `blocks/sha2-256/**`
 
 This is an application decision. It is not a rule of the Graphdown standard.

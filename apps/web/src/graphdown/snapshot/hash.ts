@@ -1,5 +1,4 @@
 import { sha256 } from '@noble/hashes/sha256';
-import { bytesToHex } from '@noble/hashes/utils';
 
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
@@ -7,10 +6,29 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 
 export type HashScope = 'schema' | 'snapshot';
 
-type HashResult = { ok: true; digest: string } | { ok: false; errors: ValidationError[] };
+type HashResult = { ok: true; cid: string } | { ok: false; errors: ValidationError[] };
 
 const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
 const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
+const BASE32_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
+
+function encodeBase32(bytes: Uint8Array): string {
+  let value = 0;
+  let bits = 0;
+  let output = '';
+  for (const byte of bytes) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      output += BASE32_ALPHABET[(value >> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    output += BASE32_ALPHABET[(value << (5 - bits)) & 31];
+  }
+  return output;
+}
 
 function decodeUtf8Fatal(raw: Uint8Array, file: string, errors: ValidationError[]): string | null {
   try {
@@ -104,6 +122,8 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     hash.update(Uint8Array.of(0));
   }
 
-  const digest = bytesToHex(hash.digest());
-  return { ok: true, digest };
+  const digestBytes = hash.digest();
+  const cidBytes = Uint8Array.of(0x01, 0x55, 0x12, 0x20, ...digestBytes);
+  const cid = `b${encodeBase32(cidBytes)}`;
+  return { ok: true, cid };
 }

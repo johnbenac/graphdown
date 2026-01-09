@@ -11,14 +11,14 @@ function snapshot(paths: string[]): DatasetSnapshot {
 }
 
 describe("buildImportReport", () => {
-  it("summarizes ignored files and dropped blobs with samples", () => {
+  it("summarizes ignored files and dropped blocks with samples", () => {
     const rawSnapshot = snapshot([
       "types/note.md",
       "records/note/one.md",
-      "blobs/sha256/aa/aablob",
-      "blobs/sha256/bb/bbblob"
+      "blocks/sha2-256/aa/aablock",
+      "blocks/sha2-256/bb/bbblock"
     ]);
-    const canonicalSnapshot = snapshot(["types/note.md", "records/note/one.md", "blobs/sha256/aa/aablob"]);
+    const canonicalSnapshot = snapshot(["types/note.md", "records/note/one.md", "blocks/sha2-256/aa/aablock"]);
 
     const report = buildImportReport({
       rawSnapshot,
@@ -28,8 +28,8 @@ describe("buildImportReport", () => {
 
     expect(report.ignoredFileCount).toBe(2);
     expect(report.ignoredFileSample).toEqual(["docs/readme.md", "assets/logo.png"]);
-    expect(report.droppedBlobCount).toBe(1);
-    expect(report.droppedBlobSample).toEqual(["blobs/sha256/bb/bbblob"]);
+    expect(report.droppedBlockCount).toBe(1);
+    expect(report.droppedBlockSample).toEqual(["blocks/sha2-256/bb/bbblock"]);
   });
 
   it("handles cases with no warnings", () => {
@@ -44,7 +44,7 @@ describe("buildImportReport", () => {
 
     expect(report.ignoredFileCount).toBe(0);
     expect(report.ignoredFileSample).toEqual([]);
-    expect(report.droppedBlobCount).toBe(0);
-    expect(report.droppedBlobSample).toEqual([]);
+    expect(report.droppedBlockCount).toBe(0);
+    expect(report.droppedBlockSample).toEqual([]);
   });
 });

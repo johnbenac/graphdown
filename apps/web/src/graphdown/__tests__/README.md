@@ -10,9 +10,9 @@ graph building behavior.
   parsing (`frontMatter.test.ts`, `yaml.test.ts`, `markdownRecord.test.ts`,
   `wikiRefs.test.ts`).
 - **Validation**: dataset layout rules, identifier constraints, parent
-  relationships, composition rules, blobs, and error shapes
+  relationships, composition rules, blocks, and error shapes
   (`validateDatasetSnapshot.test.ts`, `composition.test.ts`, `layout.test.ts`,
-  `errors.test.ts`, `blobs.test.ts`).
+  `errors.test.ts`, `blocks.test.ts`).
 - **Graph + hashing**: graph link extraction and deterministic hashing
   (`graph.test.ts`, `hash.test.ts`).
 - **Utilities**: ID normalization and reserved vocabulary checks

@@ -1,11 +1,16 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-08T17:01:24.148Z
+Generated: 2026-01-09T16:42:27.069Z
 Source: artifacts/spec-trace/matrix.json
 
-- Requirements (testable): 68
+- Requirements (testable): 69
 - Covered: 68
-- Missing: 0
-- Coverage: 100.0%
+- Missing: 1
+- Coverage: 98.6%
 
-All requirements have at least one referenced test. 🎉
+The following requirements currently have **no referenced tests**:
+
+## BLOCK (1)
+- BLOCK-001 — Canonical block digest (sha256)
+
+_Tip: add `testable=` / `verify=` metadata in SPEC.md when ready to gate coverage._
