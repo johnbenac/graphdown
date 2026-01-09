@@ -1,7 +1,7 @@
 import { unzipSync } from "fflate";
 import type { DatasetSnapshot } from "../graphdown";
 
-const ROOT_DIRS = new Set(["types", "records", "blocks"]);
+const ROOT_DIRS = new Set(["types", "records", "blocks", "blobs"]);
 
 function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {
@@ -30,6 +30,9 @@ function normalizeZipPath(path: string): string | null {
 
 function isDatasetPath(path: string): boolean {
   const lower = path.toLowerCase();
+  if (path.startsWith("blobs/sha256/")) {
+    return true;
+  }
   if (path.startsWith("types/") && lower.endsWith(".md")) {
     return true;
   }

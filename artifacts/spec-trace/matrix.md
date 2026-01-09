@@ -1,9 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-09T16:37:01.244Z
-
-## Testable requirements with no tests
-- BLOCK-001 — Canonical block digest (sha256)
+Generated: 2026-01-09T18:10:44.294Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -74,8 +71,8 @@ Tests (1):
 - apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-005: snapshot hash ignores block store bytes"
 
 ## BLOCK-001 — Canonical block digest (sha256) (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-001: digest embedded in CID is sha2-256(bytes)"
 
 ## CID-001 — CID test vector for empty bytes (testable=true)
 Tests (1):
@@ -205,8 +202,9 @@ Tests (2):
 - apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "CID-LEGACY-001: reports legacy blob tokens"
 
 ## CID-LEGACY-002 — Legacy blob store paths are invalid (testable=true)
-Tests (1):
+Tests (2):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "CID-LEGACY-002: legacy blob store paths are rejected"
+- apps/web/src/import/__tests__/readZipSnapshot.test.ts — "CID-LEGACY-002: zip import preserves blobs/sha256 paths so validation can reject them"
 
 ## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
 Tests (1):
