@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
 import { readZipSnapshot } from "../readZipSnapshot";
-import { validateDatasetSnapshot } from "../../graphdown";
 
 describe("readZipSnapshot", () => {
   it("strips a single top-level folder in GitHub-style zips", async () => {
@@ -41,7 +40,7 @@ describe("readZipSnapshot", () => {
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });
 
-  it("CID-LEGACY-002: zip import preserves blobs/sha256 paths so validation can reject them", async () => {
+  it("ignores legacy blob paths entirely", async () => {
     const legacyBlobPath = `blobs/sha256/aa/${"a".repeat(64)}`;
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
@@ -58,13 +57,7 @@ describe("readZipSnapshot", () => {
     } as File;
     const { snapshot, ignored } = await readZipSnapshot(file);
 
-    expect(snapshot.files.has(legacyBlobPath)).toBe(true);
-    expect(ignored).toContain("docs/readme.md");
-
-    const validation = validateDatasetSnapshot(snapshot);
-    expect(validation.ok).toBe(false);
-    if (!validation.ok) {
-      expect(validation.errors.some((error) => error.code === "E_LEGACY_BLOB_STORE")).toBe(true);
-    }
+    expect(snapshot.files.has(legacyBlobPath)).toBe(false);
+    expect(ignored.sort()).toEqual([legacyBlobPath, "docs/readme.md"].sort());
   });
 });

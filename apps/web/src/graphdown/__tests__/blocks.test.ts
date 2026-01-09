@@ -160,27 +160,3 @@ test("BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation", 
   );
   expectOk(result);
 });
-
-test("CID-LEGACY-001: legacy blob references are rejected", () => {
-  const digest = "a".repeat(64);
-  const result = validateDatasetSnapshot(
-    snapshot([
-      record("types/photo.md", ["typeId: photo", "fields: {}"]),
-      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[gdblob:sha256-${digest}]]`)
-    ])
-  );
-  const errors = expectErrors(result);
-  assert.ok(errors.some((e) => e.code === "E_LEGACY_BLOB_REF"));
-});
-
-test("CID-LEGACY-002: legacy blob store paths are rejected", () => {
-  const result = validateDatasetSnapshot(
-    snapshot([
-      record("types/photo.md", ["typeId: photo", "fields: {}"]),
-      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"]),
-      ["blobs/sha256/aa/" + "a".repeat(64), encoder.encode("legacy")]
-    ])
-  );
-  const errors = expectErrors(result);
-  assert.ok(errors.some((e) => e.code === "E_LEGACY_BLOB_STORE"));
-});

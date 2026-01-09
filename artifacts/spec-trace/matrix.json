@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-09T21:37:54.122Z",
+  "generatedAt": "2026-01-09T22:18:12.363Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -623,42 +623,6 @@
           "reqId": "CID-REF-002",
           "testTitle": "CID-REF-002: ignores non-CID tokens",
           "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "CID-LEGACY-001",
-      "title": "Legacy gdblob references are invalid",
-      "testable": true,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "CID-LEGACY-001",
-          "testTitle": "CID-LEGACY-001: legacy blob references are rejected",
-          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
-        },
-        {
-          "reqId": "CID-LEGACY-001",
-          "testTitle": "CID-LEGACY-001: reports legacy blob tokens",
-          "filePath": "apps/web/src/graphdown/__tests__/wikiRefs.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "CID-LEGACY-002",
-      "title": "Legacy blob store paths are invalid",
-      "testable": true,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "CID-LEGACY-002",
-          "testTitle": "CID-LEGACY-002: legacy blob store paths are rejected",
-          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
-        },
-        {
-          "reqId": "CID-LEGACY-002",
-          "testTitle": "CID-LEGACY-002: zip import preserves blobs/sha256 paths so validation can reject them",
-          "filePath": "apps/web/src/import/__tests__/readZipSnapshot.test.ts"
         }
       ]
     },

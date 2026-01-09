@@ -32,18 +32,15 @@ export function extractRecordRefs(text: string): string[] {
 export type ExtractCidRefsResult = {
   cids: string[];
   invalidCidTokens: string[];
-  legacyBlobTokens: string[];
 };
 
 export function extractCidRefs(text: string): ExtractCidRefsResult {
   const tokens = extractTokens(text);
   const cids: string[] = [];
   const invalidCidTokens: string[] = [];
-  const legacyBlobTokens: string[] = [];
   for (const token of tokens) {
     const trimmed = token.trim();
     if (LEGACY_BLOB_TOKEN_PATTERN.test(trimmed)) {
-      legacyBlobTokens.push(trimmed);
       continue;
     }
     if (!CID_SHAPE_PATTERN.test(trimmed)) {
@@ -56,5 +53,5 @@ export function extractCidRefs(text: string): ExtractCidRefsResult {
       invalidCidTokens.push(trimmed);
     }
   }
-  return { cids, invalidCidTokens, legacyBlobTokens };
+  return { cids, invalidCidTokens };
 }

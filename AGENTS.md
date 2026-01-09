@@ -11,3 +11,11 @@
 - Use the following repositories as **golden reference datasets** when reasoning about import/validation compatibility (they are out of scope for changes here, but we must remain compatible with their structure and conventions):
   - https://github.com/johnbenac/research-lab-dataset
   - https://github.com/johnbenac/product-tracker-dataset
+
+## big_picture tool
+
+- Located at `/opt/centroid-tools/bin/big_picture`; compiles multiple files into one output file (often placed in `/tmp/`).
+- Two modes: (1) Big Picture Protocol for consultant requests; (2) regular quick compilations for personal use.
+- Big Picture Protocol (strict order): create any optional supporting docs in `/tmp/`, create a required consultant memo in `/tmp/` using the provided template, then run `big_picture -f ... -o /tmp/...` with raw files first, supporting docs next, and the memo last.
+- Default run includes system info; add `--no-system-info` for code-only compilations.
+- Use descriptive, unique output and memo names (avoid generic names like `consultant-memo.md`) to prevent collisions; place temp artifacts in `/tmp/`.

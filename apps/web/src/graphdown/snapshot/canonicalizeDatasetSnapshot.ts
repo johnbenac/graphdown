@@ -29,8 +29,8 @@ function collectReachableBlockPaths(
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
     for (const value of strings) {
-      const { cids: foundCids, invalidCidTokens, legacyBlobTokens } = extractCidRefs(value);
-      if (invalidCidTokens.length > 0 || legacyBlobTokens.length > 0) {
+      const { cids: foundCids, invalidCidTokens } = extractCidRefs(value);
+      if (invalidCidTokens.length > 0) {
         throw new Error('Canonicalization requires validated CID references');
       }
       for (const cid of foundCids) {

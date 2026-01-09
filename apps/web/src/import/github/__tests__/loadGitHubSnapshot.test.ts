@@ -123,19 +123,18 @@ describe("loadGitHubSnapshot", () => {
       )
       // block
       .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
-      // legacy blob
-      .mockResolvedValueOnce(new Response(new Uint8Array([4, 5, 6]), { status: 200 }));
+      // ignored doc (should not be fetched)
+      ;
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
     expect([...snapshot.files.keys()].sort()).toEqual(
       [
-        legacyBlobPath,
         "blocks/sha2-256/aa/aa00",
         "records/note/record-1.md",
         "types/note.md"
       ].sort()
     );
-    expect(ignored).toEqual(["docs/readme.md"]);
+    expect(ignored.sort()).toEqual([legacyBlobPath, "docs/readme.md"].sort());
   });
 });

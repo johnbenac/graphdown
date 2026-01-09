@@ -93,10 +93,6 @@ export async function loadGitHubSnapshot(input: {
       allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
-    if (snapshotPath.startsWith("blobs/sha256/")) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
-      continue;
-    }
     ignored.push(snapshotPath);
   }
   const files = new Map<string, Uint8Array>();

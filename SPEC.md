@@ -608,16 +608,6 @@ Tokens that are not CID-shaped MUST be ignored for block reference extraction.
 
 CID-shaped tokens that fail DASL CIDv1 decoding MUST be treated as invalid and MUST fail validation (VAL-CID-001).
 
-<!-- req:id=CID-LEGACY-001 title="Legacy gdblob references are invalid" testable=true -->
-### CID-LEGACY-001 — Legacy gdblob references are invalid
-
-Tokens matching `[[gdblob:sha256-<digest>]]` MUST be treated as invalid and MUST fail validation.
-
-<!-- req:id=CID-LEGACY-002 title="Legacy blob store paths are invalid" testable=true -->
-### CID-LEGACY-002 — Legacy blob store paths are invalid
-
-Files under `blobs/sha256/` MUST be treated as invalid and MUST fail validation.
-
 ---
 
 ## 8.2 Record hierarchy (parent pointers)

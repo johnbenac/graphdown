@@ -184,11 +184,6 @@ function validateBlockStore(
   records: ParsedRecordObject[],
   errors: ValidationError[]
 ): void {
-  const legacyBlobPaths = [...snapshot.files.keys()].filter((path) => path.startsWith('blobs/sha256/'));
-  for (const path of legacyBlobPaths) {
-    errors.push(makeError('E_LEGACY_BLOB_STORE', `Legacy blob store path ${path} is not supported`, path));
-  }
-
   const blockFiles = [...snapshot.files.keys()].filter((p) => p.startsWith('blocks/'));
   for (const path of blockFiles) {
     if (!path.startsWith('blocks/sha2-256/')) {
@@ -246,12 +241,7 @@ function validateBlockStore(
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
     for (const value of strings) {
-      const { cids, invalidCidTokens, legacyBlobTokens } = extractCidRefs(value);
-      for (const legacy of legacyBlobTokens) {
-        errors.push(
-          makeError('E_LEGACY_BLOB_REF', `Legacy blob reference ${legacy} is not supported`, record.file)
-        );
-      }
+      const { cids, invalidCidTokens } = extractCidRefs(value);
       for (const token of invalidCidTokens) {
         errors.push(makeError('E_CID_INVALID', `Invalid CID reference ${token}`, record.file));
       }

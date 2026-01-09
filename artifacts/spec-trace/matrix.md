@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-09T21:37:54.122Z
+Generated: 2026-01-09T22:18:12.363Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -196,16 +196,6 @@ Tests (2):
 ## CID-REF-002 — CID reference normalization is strict (testable=true)
 Tests (1):
 - apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "CID-REF-002: ignores non-CID tokens"
-
-## CID-LEGACY-001 — Legacy gdblob references are invalid (testable=true)
-Tests (2):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "CID-LEGACY-001: legacy blob references are rejected"
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "CID-LEGACY-001: reports legacy blob tokens"
-
-## CID-LEGACY-002 — Legacy blob store paths are invalid (testable=true)
-Tests (2):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "CID-LEGACY-002: legacy blob store paths are rejected"
-- apps/web/src/import/__tests__/readZipSnapshot.test.ts — "CID-LEGACY-002: zip import preserves blobs/sha256 paths so validation can reject them"
 
 ## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
 Tests (1):

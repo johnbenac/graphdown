@@ -18,22 +18,14 @@ test('CID-REF-001: extracts CID references', () => {
   const cid = 'bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq';
   assert.deepEqual(
     extractCidRefs(`see [[${cid}]]`),
-    { cids: [cid], invalidCidTokens: [], legacyBlobTokens: [] }
+    { cids: [cid], invalidCidTokens: [] }
   );
 });
 
 test('CID-REF-002: ignores non-CID tokens', () => {
   assert.deepEqual(
     extractCidRefs('[[ note:one ]] [[not-a-cid]]'),
-    { cids: [], invalidCidTokens: [], legacyBlobTokens: [] }
-  );
-});
-
-test('CID-LEGACY-001: reports legacy blob tokens', () => {
-  const legacy = 'gdblob:sha256-' + 'a'.repeat(64);
-  assert.deepEqual(
-    extractCidRefs(`see [[${legacy}]]`),
-    { cids: [], invalidCidTokens: [], legacyBlobTokens: [legacy] }
+    { cids: [], invalidCidTokens: [] }
   );
 });
 
