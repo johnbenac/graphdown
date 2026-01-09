@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "..";
+import { encodeBase32 } from "../cid/base32";
 import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
 
 const encoder = new TextEncoder();
@@ -78,6 +79,21 @@ test("BLOCK-LAYOUT-002: invalid block path shape fails validation", () => {
   assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
 });
 
+test("BLOCK-LAYOUT-002: blocks namespace is reserved", () => {
+  const blockBytes = encoder.encode("flower");
+  const cid = cidFromRawBytes(blockBytes);
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[${cid}]]`),
+      ["blocks/readme.md", encoder.encode("nope")],
+      [blockPathForCid(cid), blockBytes]
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
+});
+
 test("BLOCK-LAYOUT-001: canonical block path is accepted", () => {
   const blockBytes = encoder.encode("rose");
   const cid = cidFromRawBytes(blockBytes);
@@ -89,6 +105,23 @@ test("BLOCK-LAYOUT-001: canonical block path is accepted", () => {
     ])
   );
   expectOk(result);
+});
+
+test("VAL-CID-001: CID-shaped but invalid tokens fail validation", () => {
+  const invalidCidBytes = new Uint8Array(36);
+  invalidCidBytes[0] = 0x02;
+  invalidCidBytes[1] = 0x55;
+  invalidCidBytes[2] = 0x12;
+  invalidCidBytes[3] = 0x20;
+  const invalidCid = `b${encodeBase32(invalidCidBytes)}`;
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[${invalidCid}]]`)
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_CID_INVALID"));
 });
 
 test("CID-REF-001: split strings do not synthesize CID references", () => {

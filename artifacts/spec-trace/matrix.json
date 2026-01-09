@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-09T18:11:06.083Z",
+  "generatedAt": "2026-01-09T21:38:19.369Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -303,6 +303,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "BLOCK-LAYOUT-002",
+          "testTitle": "BLOCK-LAYOUT-002: blocks namespace is reserved",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
+        },
         {
           "reqId": "BLOCK-LAYOUT-002",
           "testTitle": "BLOCK-LAYOUT-002: invalid block path shape fails validation",
@@ -817,6 +822,19 @@
           "reqId": "VAL-PARENT-003",
           "testTitle": "VAL-PARENT-003: parent pointer self-cycle fails validation",
           "filePath": "apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts"
+        }
+      ]
+    },
+    {
+      "id": "VAL-CID-001",
+      "title": "Invalid CID-shaped block reference tokens fail validation",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "VAL-CID-001",
+          "testTitle": "VAL-CID-001: CID-shaped but invalid tokens fail validation",
+          "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
     },
