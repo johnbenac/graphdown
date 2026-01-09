@@ -89,7 +89,7 @@ export async function loadGitHubSnapshot(input: {
       allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
-    if (snapshotPath.startsWith("blobs/sha256/")) {
+    if (snapshotPath.startsWith("blocks/")) {
       allFiles.push({ repoPath: entry.path, snapshotPath });
       continue;
     }

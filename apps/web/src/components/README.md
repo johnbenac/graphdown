@@ -42,7 +42,7 @@ components are presentational and consume data passed from `routes/` or the
 ## Import feedback
 
 - `ImportWarningBanner.tsx`
-  - Displays ignored files or dropped blobs after imports.
+  - Displays ignored files or dropped blocks after imports.
   - Uses a summary header with expandable lists for samples.
   - `hasImportWarnings` is exported for route-level visibility checks.
 

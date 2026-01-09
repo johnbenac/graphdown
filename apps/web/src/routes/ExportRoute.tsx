@@ -52,7 +52,7 @@ export default function ExportRoute() {
             <div className="export-options">
               <div className="export-card">
                 <h2>Dataset zip</h2>
-                <p>Exports the dataset (types/records + referenced blobs) in canonical layout.</p>
+                <p>Exports the dataset (types/records + referenced blocks) in canonical layout.</p>
                 <Button
                   type="button"
                   disabled={disabled}

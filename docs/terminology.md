@@ -8,7 +8,7 @@ When writing docs, avoid ambiguous terms (especially “graph”) unless qualifi
 These are the terms used by the Graphdown Standard (see `SPEC.md`, §3).
 
 ### Dataset
-A repository (or repository-like snapshot) of files containing Graphdown record files and optional blob store files.
+A repository (or repository-like snapshot) of files containing Graphdown record files and optional block store files.
 
 ### Record file
 A Markdown file discovered by content per **LAYOUT-001**:
@@ -48,13 +48,13 @@ A string equal to a `recordKey` (`typeId:recordId`), used inside wiki-links.
 ### Wiki-link
 Obsidian-style token `[[...]]`. For record relationships, the inner text is a record reference: `[[typeId:recordId]]` (REL-001).
 
-### Blob store
-Reserved directory layout for raw bytes per **BLOB-LAYOUT-001**:
-`blobs/sha256/<p>/<digest>`
+### Block store
+Reserved directory layout for raw bytes per **BLOCK-LAYOUT-001**:
+`blocks/sha2-256/<p>/<cid>`
 
-### Blob reference
-A wiki-link token that points at blob content (BLOB-REF-001):
-`[[gdblob:sha256-<digest>]]`
+### Block reference
+A wiki-link token that points at block content (CID-REF-001):
+`[[<cid>]]`
 
 ## Implementation terms (this repository)
 
@@ -64,7 +64,7 @@ These terms describe the TypeScript structures and derived views built from a da
 In-memory representation of files:
 `{ files: Map<string, Uint8Array> }`
 
-A snapshot may contain non-record files. Core semantics ignore non-record and non-blob-store files (BLOB-LAYOUT-003), but snapshots can still carry them for whole-snapshot export.
+A snapshot may contain non-record files. Core semantics ignore non-record and non-block-store files (BLOCK-LAYOUT-003), but snapshots can still carry them for whole-snapshot export.
 
 ### ParsedTypeObject / ParsedRecordObject
 Structured objects produced by `discoverGraphdownObjects()` from `parse/datasetObjects.ts`.
@@ -106,13 +106,13 @@ Type-level dependency declarations from `fields.composition` (TYPE-COMP-001):
 Composition constraints are validated using Record Links:
 required components must be satisfied by outgoing record links to existing records of the required type (VAL-COMP-002).
 
-### Blob Dependency Graph
-Record→blob edges implied by blob references extracted from record body/fields.
+### Block Dependency Graph
+Record→block edges implied by block references extracted from record body/fields.
 
-- Nodes: records + blob digests
-- Edges: `recordKey -> digest`
+- Nodes: records + block CIDs
+- Edges: `recordKey -> cid`
 
-Validation requires referenced blobs exist and match digest (VAL-BLOB-001/002).
+Validation requires referenced blocks exist and match digest (VAL-BLOCK-001/002).
 
 ### Canonical Record-Only Layout
 The deterministic directory layout described by **EXP-HIER-001** and produced by `canonicalizeDatasetSnapshot()`:
@@ -133,7 +133,7 @@ It exists for performance so the UI can rehydrate quickly without rebuilding the
   - “Record Link Graph”
   - “Record Hierarchy”
   - “Type Composition Dependencies”
-  - “Blob Dependency Graph”
+  - “Block Dependency Graph”
   - “Canonical Layout (filesystem tree)”
 
 - Use `recordKey` when you mean a global record identity string (`typeId:recordId`).

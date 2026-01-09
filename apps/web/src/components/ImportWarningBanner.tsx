@@ -18,16 +18,16 @@ function WarningList({ title, sample }: { title: string; sample: string[] }) {
 
 export function hasImportWarnings(report?: ImportReport | null): report is ImportReport {
   if (!report) return false;
-  return report.ignoredFileCount > 0 || report.droppedBlobCount > 0;
+  return report.ignoredFileCount > 0 || report.droppedBlockCount > 0;
 }
 
 export default function ImportWarningBanner({ report }: { report?: ImportReport | null }) {
   const ignoredFileCount = report?.ignoredFileCount ?? 0;
   const ignoredFileSample = report?.ignoredFileSample ?? [];
-  const droppedBlobCount = report?.droppedBlobCount ?? 0;
-  const droppedBlobSample = report?.droppedBlobSample ?? [];
+  const droppedBlockCount = report?.droppedBlockCount ?? 0;
+  const droppedBlockSample = report?.droppedBlockSample ?? [];
 
-  if (!report || (!ignoredFileCount && !droppedBlobCount)) {
+  if (!report || (!ignoredFileCount && !droppedBlockCount)) {
     return null;
   }
 
@@ -49,15 +49,15 @@ export default function ImportWarningBanner({ report }: { report?: ImportReport 
             />
           </div>
         ) : null}
-        {droppedBlobCount > 0 ? (
+        {droppedBlockCount > 0 ? (
           <div className="warning-banner__item">
             <p>
-              Dropped {droppedBlobCount} unreferenced blob
-              {droppedBlobCount === 1 ? "" : "s"} during canonicalization.
+              Dropped {droppedBlockCount} unreferenced block
+              {droppedBlockCount === 1 ? "" : "s"} during canonicalization.
             </p>
             <WarningList
-              title={`View sample (${droppedBlobSample.length} shown)`}
-              sample={droppedBlobSample}
+              title={`View sample (${droppedBlockSample.length} shown)`}
+              sample={droppedBlockSample}
             />
           </div>
         ) : null}

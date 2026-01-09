@@ -45,14 +45,6 @@ test('ID-001: rejects recordId with colon', () => {
   assert.equal(result.error.code, "E_INVALID_IDENTIFIER");
 });
 
-test('ID-002: rejects reserved gdblob typeId', () => {
-  const result = parse(
-    ["---", "typeId: gdblob", "fields: {}", "---", "body"].join("\n")
-  );
-  assert.equal(result.kind, "error");
-  assert.equal(result.error.code, "E_INVALID_IDENTIFIER");
-});
-
 test('ID-001: accepts valid identifiers', () => {
   const typeResult = parse(["---", "typeId: note", "fields: {}", "---", "body"].join("\n"));
   assert.equal(typeResult.kind, "type");
