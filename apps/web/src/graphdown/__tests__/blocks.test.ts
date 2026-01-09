@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
+import { encodeBase32 } from "../cid/base32";
 import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "..";
 import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
 
@@ -78,6 +79,18 @@ test("BLOCK-LAYOUT-002: invalid block path shape fails validation", () => {
   assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
 });
 
+test("BLOCK-LAYOUT-002: blocks namespace is fully reserved", () => {
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"]),
+      ["blocks/readme.md", "nope"]
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_BLOCK_PATH_INVALID"));
+});
+
 test("BLOCK-LAYOUT-001: canonical block path is accepted", () => {
   const blockBytes = encoder.encode("rose");
   const cid = cidFromRawBytes(blockBytes);
@@ -109,6 +122,19 @@ test("CID-REF-001: split strings do not synthesize CID references", () => {
     ])
   );
   expectOk(result);
+});
+
+test("VAL-CID-001: invalid CID-shaped tokens fail validation", () => {
+  const invalidCidBytes = Uint8Array.of(0x02, 0x55, 0x12, 0x20, ...new Uint8Array(32));
+  const invalidCid = `b${encodeBase32(invalidCidBytes)}`;
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"]),
+      record("records/photo-1.md", ["typeId: photo", "recordId: one", "fields: {}"], `[[${invalidCid}]]`)
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_CID_INVALID"));
 });
 
 test("GC-003: unreferenced but valid blocks do not fail validation", () => {
