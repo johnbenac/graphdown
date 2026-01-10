@@ -280,12 +280,24 @@ def get_commit_info(commit_sha: str, repo_url: str) -> Dict[str, str]:
     }
 
 
+def get_commit_parents(commit_sha: str) -> List[str]:
+    """Return parent SHAs for the given commit."""
+    output = run_command(
+        f"git rev-list --parents -n 1 {shlex.quote(commit_sha)}"
+    )
+    parts = output.split()
+    return parts[1:] if len(parts) > 1 else []
+
+
 def get_commit_changed_files(commit_sha: str) -> List[str]:
     """Get list of changed files for a specific commit."""
+    parents = get_commit_parents(commit_sha)
+    merge_flag = "-m " if len(parents) > 1 else ""
     output = run_command(
-        f"git diff-tree --no-commit-id --name-only -r --root {shlex.quote(commit_sha)}"
+        f"git diff-tree {merge_flag}--no-commit-id --name-only -r --root {shlex.quote(commit_sha)}"
     )
-    return [line for line in output.splitlines() if line.strip()]
+    files = [line for line in output.splitlines() if line.strip()]
+    return list(dict.fromkeys(files))
 
 
 def normalize_check_entry(check: Dict[str, str], check_type: str) -> Dict[str, str]:
