@@ -95,18 +95,17 @@ test('EXP-003: canonical dataset export round-trips bytes and graph', () => {
     ["records/note.one/one.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body"].join("\n")]
   ]);
 
-  const { roundTripped } = exportAndLoad(snapshot);
+  const { canonical, roundTripped } = exportAndLoad(snapshot);
   const graph = buildRecordLinkGraphFromSnapshot(roundTripped);
   expectGraphOk(graph);
-  assert.deepEqual(
-    [...roundTripped.files.keys()].sort(),
-    [...roundTripped.files.keys()].sort()
-  );
-  for (const key of roundTripped.files.keys()) {
-    const original = roundTripped.files.get(key);
-    const roundTrip = roundTripped.files.get(key);
-    assert.ok(original);
-    assert.ok(roundTrip);
-    assert.equal(Buffer.compare(Buffer.from(original), Buffer.from(roundTrip)), 0);
+  const canonicalPaths = [...canonical.files.keys()].sort();
+  const roundTripPaths = [...roundTripped.files.keys()].sort();
+  assert.deepEqual(roundTripPaths, canonicalPaths);
+  for (const key of canonicalPaths) {
+    const expected = canonical.files.get(key);
+    const actual = roundTripped.files.get(key);
+    assert.ok(expected);
+    assert.ok(actual);
+    assert.equal(Buffer.compare(Buffer.from(expected), Buffer.from(actual)), 0);
   }
 });

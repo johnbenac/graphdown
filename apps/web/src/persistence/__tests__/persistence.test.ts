@@ -81,7 +81,17 @@ describe("persistence service", () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const persistence = createPersistence({ store });
 
+    await store.set(KEY.activeRecordLinkGraphCache, samplePersistedGraph);
+    await store.set(KEY.activeMeta, {
+      id: "dataset-3",
+      createdAt: 1,
+      updatedAt: 1
+    });
+
     const loaded = await persistence.loadActiveDataset();
     expect(loaded).toBeUndefined();
+    await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
+    await expect(store.get(KEY.activeRecordLinkGraphCache)).resolves.toBeUndefined();
+    await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
   });
 });
