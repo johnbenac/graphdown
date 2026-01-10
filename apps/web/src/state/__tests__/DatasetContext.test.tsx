@@ -71,38 +71,19 @@ describe("DatasetContext GitHub import", () => {
   });
 
   it("GH-003: imports a dataset snapshot via tree listing + raw fetch", async () => {
-    const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
 
-    const typeContent = [
-      "---",
-      "typeId: note",
-      "fields:",
-      "  fieldDefs:",
-      "    title:",
-      "      required: false",
-      "---"
-    ].join("\n");
-
-    const recordContent = [
-      "---",
-      "typeId: note",
-      "recordId: record-1",
-      "fields:",
-      "  title: Hello",
-      "---",
-      "Body"
-    ].join("\n");
-
-    fetchMock
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ default_branch: "main" }), {
+      if (url.origin === "https://api.github.com" && url.pathname === "/repos/owner/repo") {
+        return new Response(JSON.stringify({ default_branch: "main" }), {
           status: 200,
           headers: { "Content-Type": "application/json" }
-        })
-      )
-      .mockResolvedValueOnce(
-        new Response(
+        });
+      }
+
+      if (url.origin === "https://api.github.com" && url.pathname === "/repos/owner/repo/git/trees/main") {
+        expect(url.searchParams.get("recursive")).toBe("1");
+        return new Response(
           JSON.stringify({
             tree: [
               { path: "types/note.md", type: "blob" },
@@ -110,10 +91,43 @@ describe("DatasetContext GitHub import", () => {
             ]
           }),
           { status: 200, headers: { "Content-Type": "application/json" } }
-        )
-      )
-      .mockResolvedValueOnce(new Response(typeContent, { status: 200 }))
-      .mockResolvedValueOnce(new Response(recordContent, { status: 200 }));
+        );
+      }
+
+      if (url.origin === "https://raw.githubusercontent.com") {
+        if (url.pathname.endsWith("/types/note.md")) {
+          return new Response(
+            [
+              "---",
+              "typeId: note",
+              "fields:",
+              "  fieldDefs:",
+              "    title:",
+              "      required: false",
+              "---"
+            ].join("\n"),
+            { status: 200 }
+          );
+        }
+        if (url.pathname.endsWith("/records/note/record-1.md")) {
+          return new Response(
+            [
+              "---",
+              "typeId: note",
+              "recordId: record-1",
+              "fields:",
+              "  title: Hello",
+              "---",
+              "Body"
+            ].join("\n"),
+            { status: 200 }
+          );
+        }
+      }
+
+      throw new Error(`Unexpected fetch: ${url.toString()}`);
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     let ctx: ReturnType<typeof useDataset> | null = null;
     render(
@@ -131,6 +145,10 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).startsWith("https://raw.githubusercontent.com/"))).toBe(
+      true
+    );
   });
 });
 

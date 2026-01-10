@@ -41,6 +41,7 @@ test("GH-003: imports GitHub repos via tree API + raw fetch (e2e)", async ({ pag
     }
 
     if (url.pathname === "/repos/owner/repo/git/trees/main") {
+      expect(url.searchParams.get("recursive")).toBe("1");
       await route.fulfill({
         status: 200,
         contentType: "application/json",
