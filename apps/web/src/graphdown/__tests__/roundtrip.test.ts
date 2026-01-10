@@ -64,6 +64,9 @@ test('EXP-006: export includes reachable blocks', () => {
   assert.ok(paths.includes(blockPath));
   assert.ok(paths.includes("types/note.md"));
   assert.ok(paths.includes("records/note.one/one.md"));
+  const roundTrippedBlock = roundTripped.files.get(blockPath);
+  assert.ok(roundTrippedBlock);
+  assert.equal(Buffer.compare(Buffer.from(roundTrippedBlock!), Buffer.from(blobBytes)), 0);
 });
 
 test('GC-002: export excludes unreferenced blocks', () => {
@@ -98,10 +101,12 @@ test('EXP-003: canonical dataset export round-trips bytes and graph', () => {
   const { canonical, roundTripped } = exportAndLoad(snapshot);
   const graph = buildRecordLinkGraphFromSnapshot(roundTripped);
   expectGraphOk(graph);
+  const expectedPaths = ["records/note.one/one.md", "types/note.md"].sort();
   const canonicalPaths = [...canonical.files.keys()].sort();
   const roundTripPaths = [...roundTripped.files.keys()].sort();
-  assert.deepEqual(roundTripPaths, canonicalPaths);
-  for (const key of canonicalPaths) {
+  assert.deepEqual(roundTripPaths, expectedPaths);
+  assert.deepEqual(canonicalPaths, expectedPaths);
+  for (const key of expectedPaths) {
     const expected = canonical.files.get(key);
     const actual = roundTripped.files.get(key);
     assert.ok(expected);

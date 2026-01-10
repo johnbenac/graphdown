@@ -81,10 +81,12 @@ test('HASH-004: invalid hash scope fails with E_USAGE', () => {
 
 test('HASH-005: snapshot hash ignores block store bytes', () => {
   const type = typeFile("type.md", "note");
-  const record = recordFile("r.md", "note", "one", "Body");
-  const blockCid = cidFromRawBytes(encoder.encode("block"));
+  const blobBytes = encoder.encode("block");
+  const blockCid = cidFromRawBytes(blobBytes);
   const blockPath = blockPathForCid(blockCid);
-  const base = snapshot([type, record, [blockPath, encoder.encode("one")]]);
+  const record = recordFile("r.md", "note", "one", `Body with [[${blockCid}]]`);
+  // Referenced block bytes differ, but hashes should ignore block store contents
+  const base = snapshot([type, record, [blockPath, blobBytes]]);
   const changedBlob = snapshot([type, record, [blockPath, encoder.encode("two")]]);
 
   const baseDigest = digest(computeGdHashV1(base, "snapshot"));
