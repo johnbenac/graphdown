@@ -40,6 +40,29 @@ describe("readZipSnapshot", () => {
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });
 
+  it("imports Graphdown markdown files regardless of folder layout", async () => {
+    const zipBytes = zipSync({
+      "random/type-location.md": new Uint8Array(
+        strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
+      ),
+      "deep/nested/record-location.md": new Uint8Array(
+        strToU8(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"))
+      ),
+      "docs/readme.md": new Uint8Array(strToU8("# not a graphdown record"))
+    });
+
+    const buffer = Uint8Array.from(zipBytes).buffer;
+    const file = {
+      arrayBuffer: async () => buffer
+    } as File;
+    const { snapshot, ignored } = await readZipSnapshot(file);
+
+    expect(snapshot.files.has("random/type-location.md")).toBe(true);
+    expect(snapshot.files.has("deep/nested/record-location.md")).toBe(true);
+    expect(snapshot.files.has("docs/readme.md")).toBe(false);
+    expect(ignored).toContain("docs/readme.md");
+  });
+
   it("ignores legacy blob paths entirely", async () => {
     const legacyBlobPath = `blobs/sha256/aa/${"a".repeat(64)}`;
     const zipBytes = zipSync({
