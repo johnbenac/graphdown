@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import { openRuntimeApiV1, RUNTIME_API_VERSION_V1, validateDatasetSnapshot } from '../../index';
+import {
+  blockPathForCid,
+  cidFromRawBytes,
+  openRuntimeApiV1,
+  RUNTIME_API_VERSION_V1,
+  validateDatasetSnapshot
+} from '../../index';
 import {
   invalidDataset_badBlockPathUnderBlocks,
   invalidDataset_missingFrontMatter,
@@ -254,4 +260,104 @@ test('runtime api v1 open is async', async () => {
   const promise = openRuntimeApiV1({ snapshot: validDatasetMinimal() });
   assert.equal(typeof (promise as Promise<unknown>).then, 'function');
   await promise;
+});
+
+test('runtime api v1 exposes block read methods', async () => {
+  const blockBytes = new TextEncoder().encode('block-a');
+  const referencedCid = cidFromRawBytes(blockBytes);
+  const garbageBytes = new TextEncoder().encode('block-b');
+  const garbageCid = cidFromRawBytes(garbageBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': recordFile('note', 'one', `See [[${referencedCid}]].`),
+    [blockPathForCid(referencedCid)]: blockBytes,
+    [blockPathForCid(garbageCid)]: garbageBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+
+  assert.deepEqual(opened.value.listBlockCidsPresent(), [garbageCid, referencedCid].sort());
+  assert.deepEqual(opened.value.listReachableBlockCids(), [referencedCid]);
+  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:one'), [referencedCid]);
+  assert.equal(opened.value.hasBlock(referencedCid), true);
+  assert.equal(opened.value.hasBlock(garbageCid), true);
+  assert.equal(opened.value.hasBlock('bafkqaaa'), false);
+  const bytes = opened.value.getBlockBytes(referencedCid);
+  assert.ok(bytes);
+  assert.deepEqual(bytes, blockBytes);
+});
+
+test('runtime api v1 extracts block refs from nested field strings', async () => {
+  const firstBytes = new TextEncoder().encode('nested-a');
+  const firstCid = cidFromRawBytes(firstBytes);
+  const secondBytes = new TextEncoder().encode('nested-b');
+  const secondCid = cidFromRawBytes(secondBytes);
+  const record = [
+    '---',
+    'typeId: note',
+    'recordId: nested',
+    'fields:',
+    '  title: hello',
+    '  meta:',
+    '    list:',
+    `      - "see [[${firstCid}]]"`,
+    '      -',
+    `        deep: "also [[${secondCid}]]"`,
+    '---',
+    'Body'
+  ].join('\n');
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/nested.md': record,
+    [blockPathForCid(firstCid)]: firstBytes,
+    [blockPathForCid(secondCid)]: secondBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:nested'), [
+    firstCid,
+    secondCid
+  ].sort());
+});
+
+test('runtime api v1 block bytes are returned as copies', async () => {
+  const blockBytes = new TextEncoder().encode('block-copy');
+  const cid = cidFromRawBytes(blockBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': recordFile('note', 'one', `See [[${cid}]].`),
+    [blockPathForCid(cid)]: blockBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const first = opened.value.getBlockBytes(cid);
+  assert.ok(first);
+  first[0] = 0;
+  const second = opened.value.getBlockBytes(cid);
+  assert.ok(second);
+  assert.notEqual(second[0], 0);
+});
+
+test('runtime api v1 block methods handle invalid cid inputs', async () => {
+  const snapshot = validDatasetMinimal();
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.doesNotThrow(() => {
+    assert.equal(opened.value.hasBlock('not-a-cid'), false);
+  });
+  assert.doesNotThrow(() => {
+    assert.equal(opened.value.getBlockBytes('not-a-cid'), null);
+  });
 });

@@ -1,5 +1,10 @@
+import { sha256 } from '@noble/hashes/sha256';
+
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import type { ValidationError } from '../validate/errors';
+import { isObject } from '../model/types';
+import { decodeDaslCidString, blockPathForCid } from '../cid/daslCid';
+import { extractCidRefs } from '../parse/wikiRefs';
 import { validateDatasetSnapshot } from '../validate/validateDatasetSnapshot';
 import { discoverGraphdownObjects } from '../parse/datasetObjects';
 import { buildRecordLinkGraphFromSnapshot } from '../graph/graph';
@@ -61,6 +66,13 @@ export interface RuntimeApiV1 {
 
   getTypeMarkdownBytes(typeId: string): Uint8Array | null;
   getRecordMarkdownBytes(recordKey: string): Uint8Array | null;
+
+  getBlockBytes(cid: string): Uint8Array | null;
+  hasBlock(cid: string): boolean;
+
+  listBlockCidsPresent(): string[];
+  listBlockCidsReferencedByRecord(recordKey: string): string[];
+  listReachableBlockCids(): string[];
 }
 
 export type RuntimeApiResult<T> =
@@ -103,6 +115,56 @@ function cloneForPlugin<T>(value: T): T {
   return sc(value) as T;
 }
 
+function collectStringValues(value: unknown, into: Set<string>): void {
+  if (typeof value === 'string') {
+    into.add(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectStringValues(item, into);
+    }
+    return;
+  }
+  if (isObject(value)) {
+    for (const child of Object.values(value)) {
+      collectStringValues(child, into);
+    }
+  }
+}
+
+function extractBlockCidsFromRecord(fields: unknown, body: string): { cids: string[] } {
+  const strings = new Set<string>();
+  collectStringValues(fields, strings);
+  collectStringValues(body, strings);
+
+  const cids = new Set<string>();
+  for (const text of strings) {
+    const { cids: found } = extractCidRefs(text);
+    for (const cid of found) {
+      cids.add(cid);
+    }
+  }
+
+  return { cids: [...cids].sort((a, b) => a.localeCompare(b)) };
+}
+
+function blockPathForCidOrNull(cid: string): string | null {
+  try {
+    return blockPathForCid(cid);
+  } catch {
+    return null;
+  }
+}
+
+function decodeCidOrNull(cid: string): ReturnType<typeof decodeDaslCidString> | null {
+  try {
+    return decodeDaslCidString(cid);
+  } catch {
+    return null;
+  }
+}
+
 export async function openRuntimeApiV1(input: {
   snapshot: DatasetSnapshot;
 }): Promise<RuntimeApiResult<RuntimeApiV1>> {
@@ -131,6 +193,7 @@ export async function openRuntimeApiV1(input: {
   const recordFileByKey = new Map<string, string>();
   const typeCompositionByTypeId = new Map<string, RuntimeTypeCompositionComponentV1[]>();
   const typeCompositionEdges: RuntimeTypeCompositionEdgeV1[] = [];
+  const blockRefsByRecordKey = new Map<string, string[]>();
 
   for (const typeObj of parsed.typeObjects) {
     const view: RuntimeTypeViewV1 = {
@@ -197,6 +260,10 @@ export async function openRuntimeApiV1(input: {
       }
       rootRecordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
     }
+
+    const { cids } = extractBlockCidsFromRecord(recordObj.fields, recordObj.body);
+    deepFreeze(cids);
+    blockRefsByRecordKey.set(recordKey, cids);
   }
 
   const typeIdsSorted = [...typesById.keys()].sort((a, b) => a.localeCompare(b));
@@ -228,6 +295,32 @@ export async function openRuntimeApiV1(input: {
     return a.componentName.localeCompare(b.componentName);
   });
   deepFreeze(typeCompositionEdges);
+
+  const reachableBlockCids = new Set<string>();
+  for (const cids of blockRefsByRecordKey.values()) {
+    for (const cid of cids) {
+      reachableBlockCids.add(cid);
+    }
+  }
+  const reachableBlockCidsSorted = [...reachableBlockCids].sort((a, b) => a.localeCompare(b));
+  deepFreeze(reachableBlockCidsSorted);
+
+  const blockCidsPresent = new Set<string>();
+  for (const path of snapshotFiles.keys()) {
+    if (!path.startsWith('blocks/sha2-256/')) {
+      continue;
+    }
+    const parts = path.split('/');
+    if (parts.length !== 4) {
+      continue;
+    }
+    const cid = parts[3];
+    if (cid) {
+      blockCidsPresent.add(cid);
+    }
+  }
+  const blockCidsPresentSorted = [...blockCidsPresent].sort((a, b) => a.localeCompare(b));
+  deepFreeze(blockCidsPresentSorted);
 
   const capabilities = deepFreeze(['gd.api.read'] as const);
   const graph = graphResult.graph;
@@ -303,7 +396,44 @@ export async function openRuntimeApiV1(input: {
       getOutgoingRecordLinks: (recordKey: string) =>
         [...graph.getOutgoingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
       getIncomingRecordLinks: (recordKey: string) =>
-        [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b))
+        [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
+      listBlockCidsPresent: () => [...blockCidsPresentSorted],
+      listBlockCidsReferencedByRecord: (recordKey: string) => {
+        const refs = blockRefsByRecordKey.get(recordKey);
+        return refs ? [...refs] : [];
+      },
+      listReachableBlockCids: () => [...reachableBlockCidsSorted],
+      hasBlock: (cid: string) => {
+        const path = blockPathForCidOrNull(cid);
+        if (!path) {
+          return false;
+        }
+        return snapshotFiles.has(path);
+      },
+      getBlockBytes: (cid: string) => {
+        const path = blockPathForCidOrNull(cid);
+        if (!path) {
+          return null;
+        }
+        const bytes = snapshotFiles.get(path);
+        if (!bytes) {
+          return null;
+        }
+        const decoded = decodeCidOrNull(cid);
+        if (!decoded) {
+          return null;
+        }
+        const digest = sha256(bytes);
+        if (digest.length !== decoded.digest.length) {
+          return null;
+        }
+        for (let i = 0; i < digest.length; i += 1) {
+          if (digest[i] !== decoded.digest[i]) {
+            return null;
+          }
+        }
+        return bytes.slice();
+      }
     }
   };
 }
