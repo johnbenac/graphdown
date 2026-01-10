@@ -35,6 +35,12 @@ export interface RuntimeApiV1 {
 
   getOutgoingRecordLinks(recordKey: string): string[];
   getIncomingRecordLinks(recordKey: string): string[];
+
+  listTypes(): RuntimeTypeViewV1[];
+  listRecordsByType(typeId: string): RuntimeRecordViewV1[];
+
+  getTypeMarkdownBytes(typeId: string): Uint8Array | null;
+  getRecordMarkdownBytes(recordKey: string): Uint8Array | null;
 }
 
 export type RuntimeApiResult<T> =
@@ -69,6 +75,14 @@ function deepFreeze<T>(value: T, seen = new WeakSet<object>()): T {
   return value;
 }
 
+function cloneForPlugin<T>(value: T): T {
+  const sc = (globalThis as { structuredClone?: (input: T) => T }).structuredClone;
+  if (typeof sc !== 'function') {
+    throw new Error('structuredClone is required for Runtime API v1');
+  }
+  return sc(value);
+}
+
 export async function openRuntimeApiV1(input: {
   snapshot: DatasetSnapshot;
 }): Promise<RuntimeApiResult<RuntimeApiV1>> {
@@ -90,6 +104,9 @@ export async function openRuntimeApiV1(input: {
   const typesById = new Map<string, RuntimeTypeViewV1>();
   const recordsByKey = new Map<string, RuntimeRecordViewV1>();
   const recordKeysByTypeId = new Map<string, string[]>();
+  const snapshotFiles = input.snapshot.files;
+  const typeFileById = new Map<string, string>();
+  const recordFileByKey = new Map<string, string>();
 
   for (const typeObj of parsed.typeObjects) {
     const view: RuntimeTypeViewV1 = {
@@ -99,6 +116,7 @@ export async function openRuntimeApiV1(input: {
     };
     deepFreeze(view);
     typesById.set(typeObj.typeId, view);
+    typeFileById.set(typeObj.typeId, typeObj.file);
   }
 
   for (const recordObj of parsed.recordObjects) {
@@ -113,6 +131,7 @@ export async function openRuntimeApiV1(input: {
     };
     deepFreeze(view);
     recordsByKey.set(recordKey, view);
+    recordFileByKey.set(recordKey, recordObj.file);
     if (!recordKeysByTypeId.has(recordObj.typeId)) {
       recordKeysByTypeId.set(recordObj.typeId, []);
     }
@@ -141,12 +160,46 @@ export async function openRuntimeApiV1(input: {
         const keys = recordKeysByTypeId.get(typeId);
         return keys ? [...keys] : [];
       },
-      getType: (typeId: string) => typesById.get(typeId) ?? null,
-      getRecord: (recordKey: string) => recordsByKey.get(recordKey) ?? null,
+      getType: (typeId: string) => {
+        const view = typesById.get(typeId);
+        return view ? cloneForPlugin(view) : null;
+      },
+      getRecord: (recordKey: string) => {
+        const view = recordsByKey.get(recordKey);
+        return view ? cloneForPlugin(view) : null;
+      },
       getOutgoingRecordLinks: (recordKey: string) =>
         [...graph.getOutgoingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
       getIncomingRecordLinks: (recordKey: string) =>
-        [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b))
+        [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
+      listTypes: () =>
+        typeIdsSorted
+          .map((typeId) => typesById.get(typeId))
+          .filter((type): type is RuntimeTypeViewV1 => Boolean(type))
+          .map((type) => cloneForPlugin(type)),
+      listRecordsByType: (typeId: string) => {
+        const keys = recordKeysByTypeId.get(typeId) ?? [];
+        return keys
+          .map((recordKey) => recordsByKey.get(recordKey))
+          .filter((record): record is RuntimeRecordViewV1 => Boolean(record))
+          .map((record) => cloneForPlugin(record));
+      },
+      getTypeMarkdownBytes: (typeId: string) => {
+        const file = typeFileById.get(typeId);
+        if (!file) {
+          return null;
+        }
+        const bytes = snapshotFiles.get(file);
+        return bytes ? bytes.slice() : null;
+      },
+      getRecordMarkdownBytes: (recordKey: string) => {
+        const file = recordFileByKey.get(recordKey);
+        if (!file) {
+          return null;
+        }
+        const bytes = snapshotFiles.get(file);
+        return bytes ? bytes.slice() : null;
+      }
     }
   };
 }
