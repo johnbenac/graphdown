@@ -87,6 +87,96 @@ test('runtime api v1 exposes Record Link Graph adjacency', async () => {
   assert.deepEqual(opened.value.getIncomingRecordLinks('note:two'), ['note:one']);
 });
 
+test('runtime api v1 exposes record hierarchy based on parent pointers', async () => {
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/root.md': recordFile('note', 'root'),
+    'records/child.md': recordFile('note', 'child', '', ['parent: note:root']),
+    'records/linked.md': recordFile('note', 'linked', 'See [[note:root]].')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.equal(opened.value.getParentRecordKey('note:root'), null);
+  assert.equal(opened.value.getParentRecordKey('note:child'), 'note:root');
+  assert.deepEqual(opened.value.listChildRecordKeys('note:root'), ['note:child']);
+  assert.deepEqual(opened.value.listRootRecordKeysByType('note'), ['note:linked', 'note:root']);
+});
+
+test('runtime api v1 exposes type composition dependencies', async () => {
+  const snapshot = makeSnapshot({
+    'types/car.md': [
+      '---',
+      'typeId: car',
+      'fields:',
+      '  composition:',
+      '    wheel:',
+      '      typeId: wheel',
+      '      required: false',
+      '    engine:',
+      '      typeId: engine',
+      '      required: true',
+      '---',
+      ''
+    ].join('\n'),
+    'types/engine.md': typeFile('engine'),
+    'types/wheel.md': typeFile('wheel'),
+    'records/engine.md': recordFile('engine', 'e1'),
+    'records/car.md': recordFile('car', 'c1', 'See [[engine:e1]].')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.deepEqual(opened.value.getTypeCompositionComponents('car'), [
+    { name: 'engine', componentTypeId: 'engine', required: true },
+    { name: 'wheel', componentTypeId: 'wheel', required: false }
+  ]);
+  assert.deepEqual(opened.value.listTypeCompositionEdges(), [
+    { fromTypeId: 'car', componentName: 'engine', toTypeId: 'engine', required: true },
+    { fromTypeId: 'car', componentName: 'wheel', toTypeId: 'wheel', required: false }
+  ]);
+  assert.deepEqual(opened.value.getTypeCompositionComponents('engine'), []);
+  assert.equal(opened.value.getTypeCompositionComponents('missing'), null);
+});
+
+test('runtime api v1 type composition getters return isolated copies', async () => {
+  const snapshot = makeSnapshot({
+    'types/car.md': [
+      '---',
+      'typeId: car',
+      'fields:',
+      '  composition:',
+      '    wheel:',
+      '      typeId: wheel',
+      '      required: false',
+      '    engine:',
+      '      typeId: engine',
+      '      required: true',
+      '---',
+      ''
+    ].join('\n'),
+    'types/engine.md': typeFile('engine'),
+    'types/wheel.md': typeFile('wheel'),
+    'records/engine.md': recordFile('engine', 'e1'),
+    'records/car.md': recordFile('car', 'c1', 'See [[engine:e1]].')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const first = opened.value.getTypeCompositionComponents('car');
+  assert.ok(first);
+  first[0].name = 'MUTATED';
+  const second = opened.value.getTypeCompositionComponents('car');
+  assert.ok(second);
+  assert.equal(second[0].name, 'engine');
+});
+
 test('runtime api v1 listTypes + listRecordsByType return deterministic sorted views', async () => {
   const snapshot = makeSnapshot({
     'z/records.md': recordFile('note', 'b'),
