@@ -123,8 +123,8 @@ describe("loadGitHubSnapshot", () => {
       )
       // block
       .mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3]), { status: 200 }))
-      // ignored doc (should not be fetched)
-      ;
+      // docs/readme.md (downloaded, then ignored)
+      .mockResolvedValueOnce(new Response("# readme", { status: 200 }));
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
@@ -136,5 +136,40 @@ describe("loadGitHubSnapshot", () => {
       ].sort()
     );
     expect(ignored.sort()).toEqual([legacyBlobPath, "docs/readme.md"].sort());
+  });
+
+  it("imports markdown records regardless of folder layout", async () => {
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [
+            { path: "weird/type.md", type: "blob" },
+            { path: "somewhere/record.md", type: "blob" },
+            { path: "docs/readme.md", type: "blob" },
+            { path: "assets/logo.png", type: "blob" }
+          ]
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(["---", "typeId: note", "fields: {}", "---"].join("\n"), { status: 200 })
+      )
+      .mockResolvedValueOnce(
+        new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), {
+          status: 200
+        })
+      )
+      .mockResolvedValueOnce(new Response("# readme", { status: 200 }));
+
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+
+    expect([...snapshot.files.keys()].sort()).toEqual(
+      ["somewhere/record.md", "weird/type.md"].sort()
+    );
+    expect(snapshot.files.has("docs/readme.md")).toBe(false);
+    expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });
 });
