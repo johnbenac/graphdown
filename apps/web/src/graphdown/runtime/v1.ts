@@ -14,6 +14,19 @@ export interface RuntimeTypeViewV1 {
   body: string;
 }
 
+export type RuntimeTypeCompositionComponentV1 = {
+  name: string;
+  componentTypeId: string;
+  required: boolean;
+};
+
+export type RuntimeTypeCompositionEdgeV1 = {
+  fromTypeId: string;
+  componentName: string;
+  toTypeId: string;
+  required: boolean;
+};
+
 export interface RuntimeRecordViewV1 {
   typeId: string;
   recordId: string;
@@ -38,6 +51,13 @@ export interface RuntimeApiV1 {
 
   listTypes(): RuntimeTypeViewV1[];
   listRecordsByType(typeId: string): RuntimeRecordViewV1[];
+
+  getParentRecordKey(recordKey: string): string | null;
+  listChildRecordKeys(recordKey: string): string[];
+  listRootRecordKeysByType(typeId: string): string[];
+
+  getTypeCompositionComponents(typeId: string): RuntimeTypeCompositionComponentV1[] | null;
+  listTypeCompositionEdges(): RuntimeTypeCompositionEdgeV1[];
 
   getTypeMarkdownBytes(typeId: string): Uint8Array | null;
   getRecordMarkdownBytes(recordKey: string): Uint8Array | null;
@@ -107,6 +127,10 @@ export async function openRuntimeApiV1(input: {
   const recordKeysByTypeId = new Map<string, string[]>();
   const typeFileById = new Map<string, string>();
   const recordFileByKey = new Map<string, string>();
+  const childrenByParentKey = new Map<string, string[]>();
+  const rootRecordKeysByTypeId = new Map<string, string[]>();
+  const typeCompositionByTypeId = new Map<string, RuntimeTypeCompositionComponentV1[]>();
+  const typeCompositionEdges: RuntimeTypeCompositionEdgeV1[] = [];
 
   for (const typeObj of parsed.typeObjects) {
     const view: RuntimeTypeViewV1 = {
@@ -117,6 +141,30 @@ export async function openRuntimeApiV1(input: {
     deepFreeze(view);
     typesById.set(typeObj.typeId, view);
     typeFileById.set(typeObj.typeId, typeObj.file);
+    const compositionRaw = (typeObj.fields as Record<string, unknown>).composition;
+    if (compositionRaw === undefined) {
+      const components: RuntimeTypeCompositionComponentV1[] = [];
+      deepFreeze(components);
+      typeCompositionByTypeId.set(typeObj.typeId, components);
+      continue;
+    }
+    const compositionEntries = compositionRaw as Record<string, { typeId: string; required: boolean }>;
+    const components = Object.entries(compositionEntries).map(([name, entry]) => ({
+      name,
+      componentTypeId: entry.typeId,
+      required: entry.required
+    }));
+    components.sort((a, b) => a.name.localeCompare(b.name));
+    deepFreeze(components);
+    typeCompositionByTypeId.set(typeObj.typeId, components);
+    for (const component of components) {
+      typeCompositionEdges.push({
+        fromTypeId: typeObj.typeId,
+        componentName: component.name,
+        toTypeId: component.componentTypeId,
+        required: component.required
+      });
+    }
   }
 
   for (const recordObj of parsed.recordObjects) {
@@ -136,6 +184,17 @@ export async function openRuntimeApiV1(input: {
       recordKeysByTypeId.set(recordObj.typeId, []);
     }
     recordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
+    if (typeof recordObj.parent === 'string') {
+      if (!childrenByParentKey.has(recordObj.parent)) {
+        childrenByParentKey.set(recordObj.parent, []);
+      }
+      childrenByParentKey.get(recordObj.parent)?.push(recordKey);
+    } else {
+      if (!rootRecordKeysByTypeId.has(recordObj.typeId)) {
+        rootRecordKeysByTypeId.set(recordObj.typeId, []);
+      }
+      rootRecordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
+    }
   }
 
   const typeIdsSorted = [...typesById.keys()].sort((a, b) => a.localeCompare(b));
@@ -146,6 +205,27 @@ export async function openRuntimeApiV1(input: {
     deepFreeze(recordKeys);
     recordKeysByTypeId.set(typeId, recordKeys);
   }
+
+  for (const [parentKey, recordKeys] of childrenByParentKey) {
+    recordKeys.sort((a, b) => a.localeCompare(b));
+    deepFreeze(recordKeys);
+    childrenByParentKey.set(parentKey, recordKeys);
+  }
+
+  for (const [typeId, recordKeys] of rootRecordKeysByTypeId) {
+    recordKeys.sort((a, b) => a.localeCompare(b));
+    deepFreeze(recordKeys);
+    rootRecordKeysByTypeId.set(typeId, recordKeys);
+  }
+
+  typeCompositionEdges.sort((a, b) => {
+    const typeCompare = a.fromTypeId.localeCompare(b.fromTypeId);
+    if (typeCompare !== 0) {
+      return typeCompare;
+    }
+    return a.componentName.localeCompare(b.componentName);
+  });
+  deepFreeze(typeCompositionEdges);
 
   const capabilities = deepFreeze(['gd.api.read'] as const);
   const graph = graphResult.graph;
@@ -180,6 +260,28 @@ export async function openRuntimeApiV1(input: {
           .filter((value): value is RuntimeRecordViewV1 => Boolean(value))
           .map((value) => cloneForPlugin(value));
       },
+      getParentRecordKey: (recordKey: string) => {
+        const view = recordsByKey.get(recordKey);
+        if (!view) {
+          return null;
+        }
+        return typeof view.parent === 'string' ? view.parent : null;
+      },
+      listChildRecordKeys: (recordKey: string) => {
+        const kids = childrenByParentKey.get(recordKey);
+        return kids ? [...kids] : [];
+      },
+      listRootRecordKeysByType: (typeId: string) => {
+        const roots = rootRecordKeysByTypeId.get(typeId);
+        return roots ? [...roots] : [];
+      },
+      getTypeCompositionComponents: (typeId: string) => {
+        if (!typesById.has(typeId)) {
+          return null;
+        }
+        return cloneForPlugin(typeCompositionByTypeId.get(typeId) ?? []);
+      },
+      listTypeCompositionEdges: () => cloneForPlugin(typeCompositionEdges),
       getTypeMarkdownBytes: (typeId: string) => {
         const file = typeFileById.get(typeId);
         if (!file) {
