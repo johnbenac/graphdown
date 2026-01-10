@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-10T22:48:47.526Z",
+  "generatedAt": "2026-01-10T23:44:50.841Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1178,7 +1178,13 @@
       "title": "All Runtime API operations are asynchronous",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-003",
+          "testTitle": "API-003: all Runtime API operations are asynchronous (thenable)",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-004",
@@ -1198,7 +1204,13 @@
       "title": "Runtime API payloads are structured-clone compatible",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-005",
+          "testTitle": "API-005: Runtime API payloads are structured-clone compatible",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-ERR-001",
@@ -1219,7 +1231,33 @@
       "title": "Read operations are side-effect free",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-SESSION-002",
+          "testTitle": "API-SESSION-002: block bytes are returned as copies",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        },
+        {
+          "reqId": "API-SESSION-002",
+          "testTitle": "API-SESSION-002: getType returns isolated copies",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        },
+        {
+          "reqId": "API-SESSION-002",
+          "testTitle": "API-SESSION-002: listRecordsByType returns isolated copies",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        },
+        {
+          "reqId": "API-SESSION-002",
+          "testTitle": "API-SESSION-002: raw bytes are returned as copies",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        },
+        {
+          "reqId": "API-SESSION-002",
+          "testTitle": "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-SHAPE-001",
@@ -1324,14 +1362,26 @@
       "title": "Read results are deterministic for a fixed snapshot",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-DET-001",
+          "testTitle": "API-DET-001: read results are deterministic for a fixed snapshot",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-DET-002",
       "title": "List order is stable and documented",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-DET-002",
+          "testTitle": "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-PARK-000",
