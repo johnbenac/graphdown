@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-10T04:19:29.226Z",
+  "generatedAt": "2026-01-10T22:23:48.192Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1139,8 +1139,315 @@
       "testable": false,
       "verify": null,
       "tests": []
+    },
+    {
+      "id": "API-V1-000",
+      "title": "Runtime API v1 conformance scope",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-001",
+      "title": "Runtime API is explicitly versioned",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-002",
+      "title": "Capabilities are discoverable",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-003",
+      "title": "All Runtime API operations are asynchronous",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-004",
+      "title": "Runtime API addresses objects by Graphdown identities",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-005",
+      "title": "Runtime API payloads are structured-clone compatible",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-ERR-001",
+      "title": "Errors are structured and include stable codes",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-SESSION-001",
+      "title": "Runtime API can open a session from a snapshot",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-SESSION-002",
+      "title": "Read operations are side-effect free",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-SHAPE-001",
+      "title": "Type object view shape",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-SHAPE-002",
+      "title": "Record object view shape",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-READ-001",
+      "title": "List and get type objects",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-READ-002",
+      "title": "List and get record objects",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-READ-003",
+      "title": "Raw Markdown access for type/record files is available",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-RLG-001",
+      "title": "Record Link Graph adjacency is readable",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-HIER-001",
+      "title": "Record Hierarchy (parent pointers) is readable",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-COMP-001",
+      "title": "Type Composition Dependencies are readable",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-001",
+      "title": "Block identity is CID and blocks are immutable",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-READ-001",
+      "title": "Resolve block bytes by CID",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-READ-002",
+      "title": "Block existence check by CID",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-READ-003",
+      "title": "List blocks present in the snapshot",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-REF-001",
+      "title": "List block references extracted from a record",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-GC-001",
+      "title": "Reachable block set computation is exposed",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-DET-001",
+      "title": "Read results are deterministic for a fixed snapshot",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-DET-002",
+      "title": "List order is stable and documented",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-PARK-000",
+      "title": "Parked requirements are capability-conditional",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-001",
+      "title": "Record mutations are capability-gated",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-002",
+      "title": "Type mutations are capability-gated",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-003",
+      "title": "All mutations validate the resulting dataset",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-004",
+      "title": "Mutations are atomic at the dataset level",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-005",
+      "title": "Mutations must not rewrite unrelated files",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-006",
+      "title": "API-created objects must serialize as valid record files",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-WRITE-007",
+      "title": "Structured relationship editing serializes as wiki-links",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-WRITE-001",
+      "title": "Block insertion by bytes returns CID",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-WRITE-002",
+      "title": "Block insertion is idempotent",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-WRITE-003",
+      "title": "Block deletion is constrained by validity",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-BLOCK-WRITE-004",
+      "title": "Garbage collection mutation removes only garbage blocks",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-HASH-001",
+      "title": "API exposes schema and snapshot fingerprints only",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-EXP-001",
+      "title": "API can produce canonical dataset export bytes",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-EVENT-001",
+      "title": "API provides change notifications",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-TXN-001",
+      "title": "API supports explicit transactions",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "API-QUERY-001",
+      "title": "No required text query language",
+      "testable": false,
+      "verify": null,
+      "tests": []
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [
+    {
+      "id": "API-001",
+      "title": "Runtime API is explicitly versioned"
+    },
+    {
+      "id": "API-002",
+      "title": "Capabilities are discoverable"
+    },
+    {
+      "id": "API-004",
+      "title": "Runtime API addresses objects by Graphdown identities"
+    }
+  ]
 }

@@ -1,6 +1,11 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-10T04:19:29.226Z
+Generated: 2026-01-10T22:23:48.192Z
+
+## Testable requirements with no tests
+- API-001 — Runtime API is explicitly versioned
+- API-002 — Capabilities are discoverable
+- API-004 — Runtime API addresses objects by Graphdown identities
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -352,5 +357,173 @@ Tests (0):
 - (none)
 
 ## NFR-031 — New field kinds without rewriting CRUD (testable=false)
+Tests (0):
+- (none)
+
+## API-V1-000 — Runtime API v1 conformance scope (testable=false)
+Tests (0):
+- (none)
+
+## API-001 — Runtime API is explicitly versioned (testable=true)
+Tests (0):
+- (none)
+
+## API-002 — Capabilities are discoverable (testable=true)
+Tests (0):
+- (none)
+
+## API-003 — All Runtime API operations are asynchronous (testable=false)
+Tests (0):
+- (none)
+
+## API-004 — Runtime API addresses objects by Graphdown identities (testable=true)
+Tests (0):
+- (none)
+
+## API-005 — Runtime API payloads are structured-clone compatible (testable=false)
+Tests (0):
+- (none)
+
+## API-ERR-001 — Errors are structured and include stable codes (testable=false)
+Tests (0):
+- (none)
+
+## API-SESSION-001 — Runtime API can open a session from a snapshot (testable=false)
+Tests (0):
+- (none)
+
+## API-SESSION-002 — Read operations are side-effect free (testable=false)
+Tests (0):
+- (none)
+
+## API-SHAPE-001 — Type object view shape (testable=false)
+Tests (0):
+- (none)
+
+## API-SHAPE-002 — Record object view shape (testable=false)
+Tests (0):
+- (none)
+
+## API-READ-001 — List and get type objects (testable=false)
+Tests (0):
+- (none)
+
+## API-READ-002 — List and get record objects (testable=false)
+Tests (0):
+- (none)
+
+## API-READ-003 — Raw Markdown access for type/record files is available (testable=false)
+Tests (0):
+- (none)
+
+## API-RLG-001 — Record Link Graph adjacency is readable (testable=false)
+Tests (0):
+- (none)
+
+## API-HIER-001 — Record Hierarchy (parent pointers) is readable (testable=false)
+Tests (0):
+- (none)
+
+## API-COMP-001 — Type Composition Dependencies are readable (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-001 — Block identity is CID and blocks are immutable (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-READ-001 — Resolve block bytes by CID (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-READ-002 — Block existence check by CID (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-READ-003 — List blocks present in the snapshot (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-REF-001 — List block references extracted from a record (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-GC-001 — Reachable block set computation is exposed (testable=false)
+Tests (0):
+- (none)
+
+## API-DET-001 — Read results are deterministic for a fixed snapshot (testable=false)
+Tests (0):
+- (none)
+
+## API-DET-002 — List order is stable and documented (testable=false)
+Tests (0):
+- (none)
+
+## API-PARK-000 — Parked requirements are capability-conditional (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-001 — Record mutations are capability-gated (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-002 — Type mutations are capability-gated (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-003 — All mutations validate the resulting dataset (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-004 — Mutations are atomic at the dataset level (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-005 — Mutations must not rewrite unrelated files (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-006 — API-created objects must serialize as valid record files (testable=false)
+Tests (0):
+- (none)
+
+## API-WRITE-007 — Structured relationship editing serializes as wiki-links (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-WRITE-001 — Block insertion by bytes returns CID (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-WRITE-002 — Block insertion is idempotent (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-WRITE-003 — Block deletion is constrained by validity (testable=false)
+Tests (0):
+- (none)
+
+## API-BLOCK-WRITE-004 — Garbage collection mutation removes only garbage blocks (testable=false)
+Tests (0):
+- (none)
+
+## API-HASH-001 — API exposes schema and snapshot fingerprints only (testable=false)
+Tests (0):
+- (none)
+
+## API-EXP-001 — API can produce canonical dataset export bytes (testable=false)
+Tests (0):
+- (none)
+
+## API-EVENT-001 — API provides change notifications (testable=false)
+Tests (0):
+- (none)
+
+## API-TXN-001 — API supports explicit transactions (testable=false)
+Tests (0):
+- (none)
+
+## API-QUERY-001 — No required text query language (testable=false)
 Tests (0):
 - (none)
