@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-10T22:23:48.192Z",
+  "generatedAt": "2026-01-10T22:48:47.526Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1152,14 +1152,26 @@
       "title": "Runtime API is explicitly versioned",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-001",
+          "testTitle": "API-001: runtime api v1 is explicitly versioned",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-002",
       "title": "Capabilities are discoverable",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-002",
+          "testTitle": "API-002: capabilities are discoverable and include gd.api.read",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-003",
@@ -1173,7 +1185,13 @@
       "title": "Runtime API addresses objects by Graphdown identities",
       "testable": true,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-004",
+          "testTitle": "API-004: runtime api methods are identity-addressed and path-independent",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts"
+        }
+      ]
     },
     {
       "id": "API-005",
@@ -1436,18 +1454,5 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": [
-    {
-      "id": "API-001",
-      "title": "Runtime API is explicitly versioned"
-    },
-    {
-      "id": "API-002",
-      "title": "Capabilities are discoverable"
-    },
-    {
-      "id": "API-004",
-      "title": "Runtime API addresses objects by Graphdown identities"
-    }
-  ]
+  "missingTestable": []
 }

@@ -14,9 +14,26 @@ import {
   makeSnapshot
 } from './fixtures';
 
-test('runtime api v1 exports from graphdown index', () => {
+test('API-001: runtime api v1 is explicitly versioned', async () => {
   assert.equal(RUNTIME_API_VERSION_V1, 1);
-  assert.equal(typeof openRuntimeApiV1, 'function');
+  const snapshot = validDatasetMinimal();
+  const result = await openRuntimeApiV1({ snapshot });
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.equal(result.value.apiVersion, 1);
+});
+
+test('API-002: capabilities are discoverable and include gd.api.read', async () => {
+  const snapshot = validDatasetMinimal();
+  const result = await openRuntimeApiV1({ snapshot });
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.ok(result.value.capabilities.includes('gd.api.read'));
+  assert.deepEqual(result.value.capabilities, ['gd.api.read']);
 });
 
 test('runtime api v1 open returns session for valid dataset', async () => {
@@ -26,8 +43,6 @@ test('runtime api v1 open returns session for valid dataset', async () => {
   if (!result.ok) {
     assert.fail('Expected ok result');
   }
-  assert.equal(result.value.apiVersion, 1);
-  assert.ok(result.value.capabilities.includes('gd.api.read'));
   assert.deepEqual(result.value.listTypeIds(), ['note']);
   const type = result.value.getType('note');
   assert.ok(type);
@@ -60,7 +75,7 @@ test('runtime api v1 open fails for invalid snapshot and preserves validation er
   }
 });
 
-test('runtime api v1 methods are identity-addressed and path-independent', async () => {
+test('API-004: runtime api methods are identity-addressed and path-independent', async () => {
   const snapshot = validDatasetWeirdPaths();
   const opened = await openRuntimeApiV1({ snapshot });
   assert.equal(opened.ok, true);

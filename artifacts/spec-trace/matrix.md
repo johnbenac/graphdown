@@ -1,11 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-10T22:23:48.192Z
-
-## Testable requirements with no tests
-- API-001 — Runtime API is explicitly versioned
-- API-002 — Capabilities are discoverable
-- API-004 — Runtime API addresses objects by Graphdown identities
+Generated: 2026-01-10T22:48:47.526Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -365,20 +360,20 @@ Tests (0):
 - (none)
 
 ## API-001 — Runtime API is explicitly versioned (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-001: runtime api v1 is explicitly versioned"
 
 ## API-002 — Capabilities are discoverable (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-002: capabilities are discoverable and include gd.api.read"
 
 ## API-003 — All Runtime API operations are asynchronous (testable=false)
 Tests (0):
 - (none)
 
 ## API-004 — Runtime API addresses objects by Graphdown identities (testable=true)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
 
 ## API-005 — Runtime API payloads are structured-clone compatible (testable=false)
 Tests (0):
