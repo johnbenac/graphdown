@@ -21,6 +21,11 @@ import {
   makeSnapshot
 } from './fixtures';
 
+function expectThenable(value: unknown): void {
+  const v = value as { then?: unknown };
+  assert.equal(typeof v?.then, 'function');
+}
+
 test('API-001: runtime api v1 is explicitly versioned', async () => {
   assert.equal(RUNTIME_API_VERSION_V1, 1);
   const snapshot = validDatasetMinimal();
@@ -50,11 +55,11 @@ test('runtime api v1 open returns session for valid dataset', async () => {
   if (!result.ok) {
     assert.fail('Expected ok result');
   }
-  assert.deepEqual(result.value.listTypeIds(), ['note']);
-  const type = result.value.getType('note');
+  assert.deepEqual(await result.value.listTypeIds(), ['note']);
+  const type = await result.value.getType('note');
   assert.ok(type);
   assert.equal(type.typeId, 'note');
-  const record = result.value.getRecord('note:one');
+  const record = await result.value.getRecord('note:one');
   assert.ok(record);
   assert.equal(record.recordKey, 'note:one');
 });
@@ -89,9 +94,9 @@ test('API-004: runtime api methods are identity-addressed and path-independent',
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  assert.ok(opened.value.getType('note'));
-  assert.ok(opened.value.getRecord('note:one'));
-  assert.deepEqual(opened.value.listRecordKeysByType('note'), ['note:one']);
+  assert.ok(await opened.value.getType('note'));
+  assert.ok(await opened.value.getRecord('note:one'));
+  assert.deepEqual(await opened.value.listRecordKeysByType('note'), ['note:one']);
 });
 
 test('runtime api v1 exposes Record Link Graph adjacency', async () => {
@@ -105,8 +110,8 @@ test('runtime api v1 exposes Record Link Graph adjacency', async () => {
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  assert.deepEqual(opened.value.getOutgoingRecordLinks('note:one'), ['note:two']);
-  assert.deepEqual(opened.value.getIncomingRecordLinks('note:two'), ['note:one']);
+  assert.deepEqual(await opened.value.getOutgoingRecordLinks('note:one'), ['note:two']);
+  assert.deepEqual(await opened.value.getIncomingRecordLinks('note:two'), ['note:one']);
 });
 
 test('runtime api v1 exposes record hierarchy based on parent pointers', async () => {
@@ -121,11 +126,11 @@ test('runtime api v1 exposes record hierarchy based on parent pointers', async (
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  assert.equal(opened.value.getParentRecordKey('note:root'), null);
-  assert.equal(opened.value.getParentRecordKey('note:child'), 'note:root');
-  assert.deepEqual(opened.value.listChildRecordKeys('note:root'), ['note:child']);
-  assert.deepEqual(opened.value.listChildRecordKeys('missing:record'), []);
-  assert.deepEqual(opened.value.listRootRecordKeysByType('note'), ['note:linked', 'note:root']);
+  assert.equal(await opened.value.getParentRecordKey('note:root'), null);
+  assert.equal(await opened.value.getParentRecordKey('note:child'), 'note:root');
+  assert.deepEqual(await opened.value.listChildRecordKeys('note:root'), ['note:child']);
+  assert.deepEqual(await opened.value.listChildRecordKeys('missing:record'), []);
+  assert.deepEqual(await opened.value.listRootRecordKeysByType('note'), ['note:linked', 'note:root']);
 });
 
 test('runtime api v1 exposes type composition dependencies', async () => {
@@ -154,25 +159,25 @@ test('runtime api v1 exposes type composition dependencies', async () => {
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  assert.deepEqual(opened.value.getTypeCompositionComponents('car'), [
+  assert.deepEqual(await opened.value.getTypeCompositionComponents('car'), [
     { name: 'engine', componentTypeId: 'engine', required: true },
     { name: 'wheel', componentTypeId: 'wheel', required: false }
   ]);
-  assert.deepEqual(opened.value.listTypeCompositionEdges(), [
+  assert.deepEqual(await opened.value.listTypeCompositionEdges(), [
     { fromTypeId: 'car', componentName: 'engine', toTypeId: 'engine', required: true },
     { fromTypeId: 'car', componentName: 'wheel', toTypeId: 'wheel', required: false }
   ]);
-  assert.deepEqual(opened.value.getTypeCompositionComponents('engine'), []);
-  assert.equal(opened.value.getTypeCompositionComponents('missing'), null);
-  const first = opened.value.getTypeCompositionComponents('car');
+  assert.deepEqual(await opened.value.getTypeCompositionComponents('engine'), []);
+  assert.equal(await opened.value.getTypeCompositionComponents('missing'), null);
+  const first = await opened.value.getTypeCompositionComponents('car');
   assert.ok(first);
   first[0].name = 'MUTATED';
-  const second = opened.value.getTypeCompositionComponents('car');
+  const second = await opened.value.getTypeCompositionComponents('car');
   assert.ok(second);
   assert.equal(second[0].name, 'engine');
 });
 
-test('runtime api v1 listTypes + listRecordsByType return deterministic sorted views', async () => {
+test('API-DET-002: listTypes + listRecordsByType return deterministic sorted views', async () => {
   const snapshot = makeSnapshot({
     'z/records.md': recordFile('note', 'b'),
     'a/types.md': typeFile('note'),
@@ -184,14 +189,14 @@ test('runtime api v1 listTypes + listRecordsByType return deterministic sorted v
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  assert.deepEqual(opened.value.listTypeIds(), ['note', 'task']);
+  assert.deepEqual(await opened.value.listTypeIds(), ['note', 'task']);
   assert.deepEqual(
-    opened.value.listTypes().map((type) => type.typeId),
+    (await opened.value.listTypes()).map((type) => type.typeId),
     ['note', 'task']
   );
-  assert.deepEqual(opened.value.listRecordKeysByType('note'), ['note:a', 'note:b']);
+  assert.deepEqual(await opened.value.listRecordKeysByType('note'), ['note:a', 'note:b']);
   assert.deepEqual(
-    opened.value.listRecordsByType('note').map((record) => record.recordKey),
+    (await opened.value.listRecordsByType('note')).map((record) => record.recordKey),
     ['note:a', 'note:b']
   );
 });
@@ -208,10 +213,10 @@ test('runtime api v1 raw markdown bytes preserve original bytes (no newline norm
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  const typeBytes = opened.value.getTypeMarkdownBytes('note');
+  const typeBytes = await opened.value.getTypeMarkdownBytes('note');
   assert.ok(typeBytes);
   assert.equal(new TextDecoder().decode(typeBytes), typeText);
-  const recordBytes = opened.value.getRecordMarkdownBytes('note:one');
+  const recordBytes = await opened.value.getRecordMarkdownBytes('note:one');
   assert.ok(recordBytes);
   assert.equal(new TextDecoder().decode(recordBytes), recordText);
 });
@@ -223,10 +228,10 @@ test('runtime api v1 raw bytes are returned as copies', async () => {
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  const first = opened.value.getRecordMarkdownBytes('note:one');
+  const first = await opened.value.getRecordMarkdownBytes('note:one');
   assert.ok(first);
   first[0] = 0;
-  const second = opened.value.getRecordMarkdownBytes('note:one');
+  const second = await opened.value.getRecordMarkdownBytes('note:one');
   assert.ok(second);
   assert.notEqual(second[0], 0);
 });
@@ -248,13 +253,13 @@ test('runtime api v1 exposes block read methods', async () => {
     assert.fail('Expected ok result');
   }
   const expectedPresent = [garbageCid, referencedCid].sort((a, b) => a.localeCompare(b));
-  assert.deepEqual(opened.value.listBlockCidsPresent(), expectedPresent);
-  assert.deepEqual(opened.value.listReachableBlockCids(), [referencedCid]);
-  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:one'), [referencedCid]);
-  assert.equal(opened.value.hasBlock(referencedCid), true);
-  assert.equal(opened.value.hasBlock(garbageCid), true);
-  assert.equal(opened.value.hasBlock('gdblob:sha256-' + '0'.repeat(64)), false);
-  const bytes = opened.value.getBlockBytes(referencedCid);
+  assert.deepEqual(await opened.value.listBlockCidsPresent(), expectedPresent);
+  assert.deepEqual(await opened.value.listReachableBlockCids(), [referencedCid]);
+  assert.deepEqual(await opened.value.listBlockCidsReferencedByRecord('note:one'), [referencedCid]);
+  assert.equal(await opened.value.hasBlock(referencedCid), true);
+  assert.equal(await opened.value.hasBlock(garbageCid), true);
+  assert.equal(await opened.value.hasBlock('gdblob:sha256-' + '0'.repeat(64)), false);
+  const bytes = await opened.value.getBlockBytes(referencedCid);
   assert.ok(bytes);
   assert.deepEqual(bytes, referencedBytes);
 });
@@ -287,7 +292,7 @@ test('runtime api v1 extracts block refs from nested field strings', async () =>
     assert.fail('Expected ok result');
   }
   const expected = [cidOne, cidTwo].sort((a, b) => a.localeCompare(b));
-  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:one'), expected);
+  assert.deepEqual(await opened.value.listBlockCidsReferencedByRecord('note:one'), expected);
 });
 
 test('runtime api v1 block bytes are returned as copies', async () => {
@@ -303,10 +308,10 @@ test('runtime api v1 block bytes are returned as copies', async () => {
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  const first = opened.value.getBlockBytes(cid);
+  const first = await opened.value.getBlockBytes(cid);
   assert.ok(first);
   first[0] = 0;
-  const second = opened.value.getBlockBytes(cid);
+  const second = await opened.value.getBlockBytes(cid);
   assert.ok(second);
   assert.notEqual(second[0], 0);
 });
@@ -320,8 +325,8 @@ test('runtime api v1 block methods ignore invalid cid inputs', async () => {
   }
   assert.doesNotThrow(() => opened.value.hasBlock('not-a-cid'));
   assert.doesNotThrow(() => opened.value.getBlockBytes('not-a-cid'));
-  assert.equal(opened.value.hasBlock('not-a-cid'), false);
-  assert.equal(opened.value.getBlockBytes('not-a-cid'), null);
+  assert.equal(await opened.value.hasBlock('not-a-cid'), false);
+  assert.equal(await opened.value.getBlockBytes('not-a-cid'), null);
 });
 
 test('runtime api v1 view getters return isolated copies (mutations do not affect subsequent reads)', async () => {
@@ -342,16 +347,155 @@ test('runtime api v1 view getters return isolated copies (mutations do not affec
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  const first = opened.value.getRecord('note:one');
+  const first = await opened.value.getRecord('note:one');
   assert.ok(first);
   (first.fields as Record<string, unknown>).title = 'MUTATED';
-  const second = opened.value.getRecord('note:one');
+  const second = await opened.value.getRecord('note:one');
   assert.ok(second);
   assert.equal((second.fields as Record<string, unknown>).title, 'hello');
 });
 
-test('runtime api v1 open is async', async () => {
-  const promise = openRuntimeApiV1({ snapshot: validDatasetMinimal() });
-  assert.equal(typeof (promise as Promise<unknown>).then, 'function');
-  await promise;
+test('API-003: all Runtime API operations are asynchronous (thenable)', async () => {
+  const snapshot = validDatasetMinimal();
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+
+  const api = opened.value;
+  const calls = [
+    api.listTypeIds(),
+    api.listRecordKeysByType('note'),
+    api.getType('note'),
+    api.getRecord('note:one'),
+    api.getParentRecordKey('note:one'),
+    api.listChildRecordKeys('note:one'),
+    api.listRootRecordKeysByType('note'),
+    api.getTypeCompositionComponents('note'),
+    api.listTypeCompositionEdges(),
+    api.getOutgoingRecordLinks('note:one'),
+    api.getIncomingRecordLinks('note:one'),
+    api.listTypes(),
+    api.listRecordsByType('note'),
+    api.getTypeMarkdownBytes('note'),
+    api.getRecordMarkdownBytes('note:one'),
+    api.getBlockBytes('not-a-cid'),
+    api.hasBlock('not-a-cid'),
+    api.listBlockCidsPresent(),
+    api.listBlockCidsReferencedByRecord('note:one'),
+    api.listReachableBlockCids()
+  ];
+
+  for (const call of calls) {
+    expectThenable(call);
+  }
+
+  await Promise.all(calls);
+});
+
+test('API-005: Runtime API payloads are structured-clone compatible', async () => {
+  const snapshot = validDatasetMinimal();
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+
+  const api = opened.value;
+  const typeIds = await api.listTypeIds();
+  const type = await api.getType('note');
+  const record = await api.getRecord('note:one');
+
+  assert.doesNotThrow(() => structuredClone(typeIds));
+  assert.doesNotThrow(() => structuredClone(type));
+  assert.doesNotThrow(() => structuredClone(record));
+
+  const types = await api.listTypes();
+  const records = await api.listRecordsByType('note');
+  const edges = await api.listTypeCompositionEdges();
+  assert.doesNotThrow(() => structuredClone(types));
+  assert.doesNotThrow(() => structuredClone(records));
+  assert.doesNotThrow(() => structuredClone(edges));
+
+  const typeBytes = await api.getTypeMarkdownBytes('note');
+  const recordBytes = await api.getRecordMarkdownBytes('note:one');
+  assert.doesNotThrow(() => structuredClone(typeBytes));
+  assert.doesNotThrow(() => structuredClone(recordBytes));
+});
+
+test('API-SESSION-002: listRecordsByType returns isolated copies', async () => {
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': [
+      '---',
+      'typeId: note',
+      'recordId: one',
+      'fields:',
+      '  title: hello',
+      '---',
+      'Body'
+    ].join('\n')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+
+  const api = opened.value;
+  const firstList = await api.listRecordsByType('note');
+  assert.equal(firstList.length, 1);
+  (firstList[0].fields as Record<string, unknown>).title = 'MUTATED';
+
+  const secondList = await api.listRecordsByType('note');
+  assert.equal((secondList[0].fields as Record<string, unknown>).title, 'hello');
+});
+
+test('API-SESSION-002: getType returns isolated copies', async () => {
+  const snapshot = makeSnapshot({
+    'types/note.md': ['---', 'typeId: note', 'fields:', '  any: value', '---', 'body'].join('\n'),
+    'records/one.md': recordFile('note', 'one')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+
+  const api = opened.value;
+  const first = await api.getType('note');
+  assert.ok(first);
+  (first.fields as Record<string, unknown>).any = 'MUTATED';
+
+  const second = await api.getType('note');
+  assert.ok(second);
+  assert.equal((second.fields as Record<string, unknown>).any, 'value');
+});
+
+test('API-DET-001: read results are deterministic for a fixed snapshot', async () => {
+  const snapshot = makeSnapshot({
+    'z/records.md': recordFile('note', 'b'),
+    'a/types.md': typeFile('note'),
+    'x/records.md': recordFile('note', 'a'),
+    'types/task.md': typeFile('task')
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const api = opened.value;
+
+  const typeIdsFirst = await api.listTypeIds();
+  const typeIdsSecond = await api.listTypeIds();
+  assert.deepEqual(typeIdsFirst, typeIdsSecond);
+
+  const recordKeysFirst = await api.listRecordKeysByType('note');
+  const recordKeysSecond = await api.listRecordKeysByType('note');
+  assert.deepEqual(recordKeysFirst, recordKeysSecond);
+
+  const blocksFirst = await api.listBlockCidsPresent();
+  const blocksSecond = await api.listBlockCidsPresent();
+  assert.deepEqual(blocksFirst, blocksSecond);
 });

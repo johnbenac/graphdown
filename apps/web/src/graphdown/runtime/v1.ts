@@ -45,34 +45,36 @@ export interface RuntimeApiV1 {
   apiVersion: 1;
   capabilities: readonly RuntimeCapabilityV1[];
 
-  listTypeIds(): string[];
-  listRecordKeysByType(typeId: string): string[];
+  listTypeIds(): Promise<string[]>;
+  listRecordKeysByType(typeId: string): Promise<string[]>;
 
-  getType(typeId: string): RuntimeTypeViewV1 | null;
-  getRecord(recordKey: string): RuntimeRecordViewV1 | null;
+  getType(typeId: string): Promise<RuntimeTypeViewV1 | null>;
+  getRecord(recordKey: string): Promise<RuntimeRecordViewV1 | null>;
 
-  getParentRecordKey(recordKey: string): string | null;
-  listChildRecordKeys(recordKey: string): string[];
-  listRootRecordKeysByType(typeId: string): string[];
+  getParentRecordKey(recordKey: string): Promise<string | null>;
+  listChildRecordKeys(recordKey: string): Promise<string[]>;
+  listRootRecordKeysByType(typeId: string): Promise<string[]>;
 
-  getTypeCompositionComponents(typeId: string): RuntimeTypeCompositionComponentV1[] | null;
-  listTypeCompositionEdges(): RuntimeTypeCompositionEdgeV1[];
+  getTypeCompositionComponents(
+    typeId: string
+  ): Promise<RuntimeTypeCompositionComponentV1[] | null>;
+  listTypeCompositionEdges(): Promise<RuntimeTypeCompositionEdgeV1[]>;
 
-  getOutgoingRecordLinks(recordKey: string): string[];
-  getIncomingRecordLinks(recordKey: string): string[];
+  getOutgoingRecordLinks(recordKey: string): Promise<string[]>;
+  getIncomingRecordLinks(recordKey: string): Promise<string[]>;
 
-  listTypes(): RuntimeTypeViewV1[];
-  listRecordsByType(typeId: string): RuntimeRecordViewV1[];
+  listTypes(): Promise<RuntimeTypeViewV1[]>;
+  listRecordsByType(typeId: string): Promise<RuntimeRecordViewV1[]>;
 
-  getTypeMarkdownBytes(typeId: string): Uint8Array | null;
-  getRecordMarkdownBytes(recordKey: string): Uint8Array | null;
+  getTypeMarkdownBytes(typeId: string): Promise<Uint8Array | null>;
+  getRecordMarkdownBytes(recordKey: string): Promise<Uint8Array | null>;
 
-  getBlockBytes(cid: string): Uint8Array | null;
-  hasBlock(cid: string): boolean;
+  getBlockBytes(cid: string): Promise<Uint8Array | null>;
+  hasBlock(cid: string): Promise<boolean>;
 
-  listBlockCidsPresent(): string[];
-  listBlockCidsReferencedByRecord(recordKey: string): string[];
-  listReachableBlockCids(): string[];
+  listBlockCidsPresent(): Promise<string[]>;
+  listBlockCidsReferencedByRecord(recordKey: string): Promise<string[]>;
+  listReachableBlockCids(): Promise<string[]>;
 }
 
 export type RuntimeApiResult<T> =
@@ -311,54 +313,54 @@ export async function openRuntimeApiV1(input: {
     value: {
       apiVersion: RUNTIME_API_VERSION_V1,
       capabilities,
-      listTypeIds: () => [...typeIdsSorted],
-      listRecordKeysByType: (typeId: string) => {
+      listTypeIds: async () => [...typeIdsSorted],
+      listRecordKeysByType: async (typeId: string) => {
         const keys = recordKeysByTypeId.get(typeId);
         return keys ? [...keys] : [];
       },
-      getType: (typeId: string) => {
+      getType: async (typeId: string) => {
         const view = typesById.get(typeId);
         return view ? cloneForPlugin(view) : null;
       },
-      getRecord: (recordKey: string) => {
+      getRecord: async (recordKey: string) => {
         const view = recordsByKey.get(recordKey);
         return view ? cloneForPlugin(view) : null;
       },
-      getParentRecordKey: (recordKey: string) => {
+      getParentRecordKey: async (recordKey: string) => {
         const record = recordsByKey.get(recordKey);
         if (!record) {
           return null;
         }
         return typeof record.parent === 'string' ? record.parent : null;
       },
-      listChildRecordKeys: (recordKey: string) => {
+      listChildRecordKeys: async (recordKey: string) => {
         const kids = childrenByParentKey.get(recordKey);
         return kids ? [...kids] : [];
       },
-      listRootRecordKeysByType: (typeId: string) => {
+      listRootRecordKeysByType: async (typeId: string) => {
         const roots = rootRecordKeysByTypeId.get(typeId);
         return roots ? [...roots] : [];
       },
-      getTypeCompositionComponents: (typeId: string) => {
+      getTypeCompositionComponents: async (typeId: string) => {
         if (!typesById.has(typeId)) {
           return null;
         }
         return cloneForPlugin(typeCompositionByTypeId.get(typeId) ?? []);
       },
-      listTypeCompositionEdges: () => cloneForPlugin(typeCompositionEdges),
-      listTypes: () =>
+      listTypeCompositionEdges: async () => cloneForPlugin(typeCompositionEdges),
+      listTypes: async () =>
         typeIdsSorted
           .map((id) => typesById.get(id))
           .filter((value): value is RuntimeTypeViewV1 => Boolean(value))
           .map((value) => cloneForPlugin(value)),
-      listRecordsByType: (typeId: string) => {
+      listRecordsByType: async (typeId: string) => {
         const keys = recordKeysByTypeId.get(typeId) ?? [];
         return keys
           .map((key) => recordsByKey.get(key))
           .filter((value): value is RuntimeRecordViewV1 => Boolean(value))
           .map((value) => cloneForPlugin(value));
       },
-      getTypeMarkdownBytes: (typeId: string) => {
+      getTypeMarkdownBytes: async (typeId: string) => {
         const file = typeFileById.get(typeId);
         if (!file) {
           return null;
@@ -366,7 +368,7 @@ export async function openRuntimeApiV1(input: {
         const bytes = snapshotFiles.get(file);
         return bytes ? bytes.slice() : null;
       },
-      getRecordMarkdownBytes: (recordKey: string) => {
+      getRecordMarkdownBytes: async (recordKey: string) => {
         const file = recordFileByKey.get(recordKey);
         if (!file) {
           return null;
@@ -374,7 +376,7 @@ export async function openRuntimeApiV1(input: {
         const bytes = snapshotFiles.get(file);
         return bytes ? bytes.slice() : null;
       },
-      getBlockBytes: (cid: string) => {
+      getBlockBytes: async (cid: string) => {
         let decoded: ReturnType<typeof decodeDaslCidString>;
         let path: string;
         try {
@@ -398,7 +400,7 @@ export async function openRuntimeApiV1(input: {
         }
         return bytes.slice();
       },
-      hasBlock: (cid: string) => {
+      hasBlock: async (cid: string) => {
         let path: string;
         try {
           path = blockPathForCid(cid);
@@ -407,15 +409,15 @@ export async function openRuntimeApiV1(input: {
         }
         return snapshotFiles.has(path);
       },
-      listBlockCidsPresent: () => [...blockCidsPresentSorted],
-      listBlockCidsReferencedByRecord: (recordKey: string) => {
+      listBlockCidsPresent: async () => [...blockCidsPresentSorted],
+      listBlockCidsReferencedByRecord: async (recordKey: string) => {
         const cids = blockRefsByRecordKey.get(recordKey);
         return cids ? [...cids] : [];
       },
-      listReachableBlockCids: () => [...reachableBlockCidsSorted],
-      getOutgoingRecordLinks: (recordKey: string) =>
+      listReachableBlockCids: async () => [...reachableBlockCidsSorted],
+      getOutgoingRecordLinks: async (recordKey: string) =>
         [...graph.getOutgoingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
-      getIncomingRecordLinks: (recordKey: string) =>
+      getIncomingRecordLinks: async (recordKey: string) =>
         [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b))
     }
   };
