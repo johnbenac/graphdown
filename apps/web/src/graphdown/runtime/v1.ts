@@ -23,6 +23,19 @@ export interface RuntimeRecordViewV1 {
   body: string;
 }
 
+export type RuntimeTypeCompositionComponentV1 = {
+  name: string;
+  componentTypeId: string;
+  required: boolean;
+};
+
+export type RuntimeTypeCompositionEdgeV1 = {
+  fromTypeId: string;
+  componentName: string;
+  toTypeId: string;
+  required: boolean;
+};
+
 export interface RuntimeApiV1 {
   apiVersion: 1;
   capabilities: readonly RuntimeCapabilityV1[];
@@ -32,6 +45,13 @@ export interface RuntimeApiV1 {
 
   getType(typeId: string): RuntimeTypeViewV1 | null;
   getRecord(recordKey: string): RuntimeRecordViewV1 | null;
+
+  getParentRecordKey(recordKey: string): string | null;
+  listChildRecordKeys(recordKey: string): string[];
+  listRootRecordKeysByType(typeId: string): string[];
+
+  getTypeCompositionComponents(typeId: string): RuntimeTypeCompositionComponentV1[] | null;
+  listTypeCompositionEdges(): RuntimeTypeCompositionEdgeV1[];
 
   getOutgoingRecordLinks(recordKey: string): string[];
   getIncomingRecordLinks(recordKey: string): string[];
@@ -105,8 +125,12 @@ export async function openRuntimeApiV1(input: {
   const typesById = new Map<string, RuntimeTypeViewV1>();
   const recordsByKey = new Map<string, RuntimeRecordViewV1>();
   const recordKeysByTypeId = new Map<string, string[]>();
+  const childrenByParentKey = new Map<string, string[]>();
+  const rootRecordKeysByTypeId = new Map<string, string[]>();
   const typeFileById = new Map<string, string>();
   const recordFileByKey = new Map<string, string>();
+  const typeCompositionByTypeId = new Map<string, RuntimeTypeCompositionComponentV1[]>();
+  const typeCompositionEdges: RuntimeTypeCompositionEdgeV1[] = [];
 
   for (const typeObj of parsed.typeObjects) {
     const view: RuntimeTypeViewV1 = {
@@ -117,6 +141,31 @@ export async function openRuntimeApiV1(input: {
     deepFreeze(view);
     typesById.set(typeObj.typeId, view);
     typeFileById.set(typeObj.typeId, typeObj.file);
+
+    const compositionRaw = (typeObj.fields as Record<string, unknown>).composition;
+    if (compositionRaw === undefined) {
+      const components: RuntimeTypeCompositionComponentV1[] = [];
+      deepFreeze(components);
+      typeCompositionByTypeId.set(typeObj.typeId, components);
+      continue;
+    }
+    const components: RuntimeTypeCompositionComponentV1[] = [];
+    for (const [name, component] of Object.entries(
+      compositionRaw as Record<string, { typeId: string; required: boolean }>
+    )) {
+      const componentTypeId = component.typeId;
+      const required = component.required;
+      components.push({ name, componentTypeId, required });
+      typeCompositionEdges.push({
+        fromTypeId: typeObj.typeId,
+        componentName: name,
+        toTypeId: componentTypeId,
+        required
+      });
+    }
+    components.sort((a, b) => a.name.localeCompare(b.name));
+    deepFreeze(components);
+    typeCompositionByTypeId.set(typeObj.typeId, components);
   }
 
   for (const recordObj of parsed.recordObjects) {
@@ -136,6 +185,18 @@ export async function openRuntimeApiV1(input: {
       recordKeysByTypeId.set(recordObj.typeId, []);
     }
     recordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
+
+    if (typeof recordObj.parent === 'string') {
+      if (!childrenByParentKey.has(recordObj.parent)) {
+        childrenByParentKey.set(recordObj.parent, []);
+      }
+      childrenByParentKey.get(recordObj.parent)?.push(recordKey);
+    } else {
+      if (!rootRecordKeysByTypeId.has(recordObj.typeId)) {
+        rootRecordKeysByTypeId.set(recordObj.typeId, []);
+      }
+      rootRecordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
+    }
   }
 
   const typeIdsSorted = [...typesById.keys()].sort((a, b) => a.localeCompare(b));
@@ -146,6 +207,27 @@ export async function openRuntimeApiV1(input: {
     deepFreeze(recordKeys);
     recordKeysByTypeId.set(typeId, recordKeys);
   }
+
+  for (const [parentKey, children] of childrenByParentKey) {
+    children.sort((a, b) => a.localeCompare(b));
+    deepFreeze(children);
+    childrenByParentKey.set(parentKey, children);
+  }
+
+  for (const [typeId, roots] of rootRecordKeysByTypeId) {
+    roots.sort((a, b) => a.localeCompare(b));
+    deepFreeze(roots);
+    rootRecordKeysByTypeId.set(typeId, roots);
+  }
+
+  typeCompositionEdges.sort((a, b) => {
+    const byType = a.fromTypeId.localeCompare(b.fromTypeId);
+    if (byType !== 0) {
+      return byType;
+    }
+    return a.componentName.localeCompare(b.componentName);
+  });
+  deepFreeze(typeCompositionEdges);
 
   const capabilities = deepFreeze(['gd.api.read'] as const);
   const graph = graphResult.graph;
@@ -168,6 +250,28 @@ export async function openRuntimeApiV1(input: {
         const view = recordsByKey.get(recordKey);
         return view ? cloneForPlugin(view) : null;
       },
+      getParentRecordKey: (recordKey: string) => {
+        const record = recordsByKey.get(recordKey);
+        if (!record) {
+          return null;
+        }
+        return typeof record.parent === 'string' ? record.parent : null;
+      },
+      listChildRecordKeys: (recordKey: string) => {
+        const kids = childrenByParentKey.get(recordKey);
+        return kids ? [...kids] : [];
+      },
+      listRootRecordKeysByType: (typeId: string) => {
+        const roots = rootRecordKeysByTypeId.get(typeId);
+        return roots ? [...roots] : [];
+      },
+      getTypeCompositionComponents: (typeId: string) => {
+        if (!typesById.has(typeId)) {
+          return null;
+        }
+        return cloneForPlugin(typeCompositionByTypeId.get(typeId) ?? []);
+      },
+      listTypeCompositionEdges: () => cloneForPlugin(typeCompositionEdges),
       listTypes: () =>
         typeIdsSorted
           .map((id) => typesById.get(id))
