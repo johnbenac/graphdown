@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "../../graphdown";
+import { isRecordFileBytes, type DatasetSnapshot } from "../../graphdown";
 import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -45,14 +45,6 @@ function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
 }
 
-function isTypeFile(path: string): boolean {
-  return path.startsWith("types/");
-}
-
-function isRecordFile(path: string): boolean {
-  return path.startsWith("records/");
-}
-
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
@@ -70,7 +62,11 @@ export async function loadGitHubSnapshot(input: {
     `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
   );
 
-  const allFiles: Array<{ repoPath: string; snapshotPath: string }> = [];
+  const allFiles: Array<{
+    repoPath: string;
+    snapshotPath: string;
+    kind: "block" | "markdown";
+  }> = [];
   const ignored: string[] = [];
 
   for (const entry of treeResponse.tree) {
@@ -81,16 +77,13 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) {
       continue;
     }
-    if (isTypeFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
-      continue;
-    }
-    if (isRecordFile(snapshotPath) && isMarkdownFile(snapshotPath)) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
-      continue;
-    }
     if (snapshotPath.startsWith("blocks/")) {
-      allFiles.push({ repoPath: entry.path, snapshotPath });
+      allFiles.push({ repoPath: entry.path, snapshotPath, kind: "block" });
+      continue;
+    }
+    if (isMarkdownFile(snapshotPath)) {
+      // Might be Graphdown markdown; decide after download via isRecordFileBytes.
+      allFiles.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
       continue;
     }
     ignored.push(snapshotPath);
@@ -107,7 +100,14 @@ export async function loadGitHubSnapshot(input: {
       throw new GitHubImportError(mapGitHubError(response, message));
     }
     const buffer = await response.arrayBuffer();
-    files.set(file.snapshotPath, new Uint8Array(buffer));
+    const bytes = new Uint8Array(buffer);
+    if (file.kind === "block") {
+      files.set(file.snapshotPath, bytes);
+    } else if (isRecordFileBytes(file.snapshotPath, bytes)) {
+      files.set(file.snapshotPath, bytes);
+    } else {
+      ignored.push(file.snapshotPath);
+    }
     completed += 1;
     onProgress?.({
       phase: "downloading_files",

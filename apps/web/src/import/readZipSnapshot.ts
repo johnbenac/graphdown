@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { DatasetSnapshot } from "../graphdown";
+import { isRecordFileBytes, type DatasetSnapshot } from "../graphdown";
 
 const ROOT_DIRS = new Set(["types", "records", "blocks"]);
 
@@ -28,18 +28,12 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-function isDatasetPath(path: string): boolean {
-  const lower = path.toLowerCase();
-  if (path.startsWith("types/") && lower.endsWith(".md")) {
-    return true;
-  }
-  if (path.startsWith("records/") && lower.endsWith(".md")) {
-    return true;
-  }
+function shouldIncludeInSnapshot(path: string, contents: Uint8Array): boolean {
   if (path.startsWith("blocks/")) {
     return true;
   }
-  return false;
+  // LAYOUT-001: record/type markdown is discovered by content, not directory.
+  return isRecordFileBytes(path, contents);
 }
 
 export async function readZipSnapshot(
@@ -72,7 +66,7 @@ export async function readZipSnapshot(
     if (!finalPath) {
       continue;
     }
-    if (isDatasetPath(finalPath)) {
+    if (shouldIncludeInSnapshot(finalPath, entry.contents)) {
       files.set(finalPath, entry.contents);
     } else {
       ignored.push(finalPath);
