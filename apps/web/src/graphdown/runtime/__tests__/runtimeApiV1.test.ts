@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import { openRuntimeApiV1, RUNTIME_API_VERSION_V1, validateDatasetSnapshot } from '../../index';
+import {
+  blockPathForCid,
+  cidFromRawBytes,
+  openRuntimeApiV1,
+  RUNTIME_API_VERSION_V1,
+  validateDatasetSnapshot
+} from '../../index';
 import {
   invalidDataset_badBlockPathUnderBlocks,
   invalidDataset_missingFrontMatter,
   invalidDataset_missingTypeForRecord,
   invalidDataset_unknownTopLevelKey,
+  utf8,
   recordFile,
   typeFile,
   validDatasetMinimal,
@@ -222,6 +229,96 @@ test('runtime api v1 raw bytes are returned as copies', async () => {
   const second = opened.value.getRecordMarkdownBytes('note:one');
   assert.ok(second);
   assert.notEqual(second[0], 0);
+});
+
+test('runtime api v1 exposes block read methods', async () => {
+  const blockBytes = utf8('block-one');
+  const blockCid = cidFromRawBytes(blockBytes);
+  const garbageBytes = utf8('block-two');
+  const garbageCid = cidFromRawBytes(garbageBytes);
+  const missingCid = cidFromRawBytes(utf8('missing-block'));
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': recordFile('note', 'one', `See [[${blockCid}]].`),
+    [blockPathForCid(blockCid)]: blockBytes,
+    [blockPathForCid(garbageCid)]: garbageBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const expectedPresent = [blockCid, garbageCid].sort((a, b) => a.localeCompare(b));
+  assert.deepEqual(opened.value.listBlockCidsPresent(), expectedPresent);
+  assert.deepEqual(opened.value.listReachableBlockCids(), [blockCid]);
+  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:one'), [blockCid]);
+  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('missing:record'), []);
+  assert.equal(opened.value.hasBlock(blockCid), true);
+  assert.equal(opened.value.hasBlock(garbageCid), true);
+  assert.equal(opened.value.hasBlock(missingCid), false);
+  assert.deepEqual(opened.value.getBlockBytes(blockCid), blockBytes);
+});
+
+test('runtime api v1 extracts block refs from nested field strings', async () => {
+  const nestedBytes = utf8('nested');
+  const nestedCid = cidFromRawBytes(nestedBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': [
+      '---',
+      'typeId: note',
+      'recordId: one',
+      'fields:',
+      '  meta:',
+      `    note: "See [[${nestedCid}]]"`,
+      '  list:',
+      `    - "Also [[${nestedCid}]]"`,
+      '---',
+      'Body'
+    ].join('\n'),
+    [blockPathForCid(nestedCid)]: nestedBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.deepEqual(opened.value.listBlockCidsReferencedByRecord('note:one'), [nestedCid]);
+  assert.deepEqual(opened.value.listReachableBlockCids(), [nestedCid]);
+});
+
+test('runtime api v1 block bytes are returned as copies', async () => {
+  const blockBytes = utf8('copy-check');
+  const blockCid = cidFromRawBytes(blockBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': recordFile('note', 'one', `See [[${blockCid}]].`),
+    [blockPathForCid(blockCid)]: blockBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const first = opened.value.getBlockBytes(blockCid);
+  assert.ok(first);
+  first[0] = 0;
+  const second = opened.value.getBlockBytes(blockCid);
+  assert.ok(second);
+  assert.notEqual(second[0], 0);
+});
+
+test('runtime api v1 ignores invalid block cids', async () => {
+  const snapshot = validDatasetMinimal();
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.doesNotThrow(() => opened.value.hasBlock('not-a-cid'));
+  assert.equal(opened.value.hasBlock('not-a-cid'), false);
+  assert.doesNotThrow(() => opened.value.getBlockBytes('not-a-cid'));
+  assert.equal(opened.value.getBlockBytes('not-a-cid'), null);
 });
 
 test('runtime api v1 view getters return isolated copies (mutations do not affect subsequent reads)', async () => {
