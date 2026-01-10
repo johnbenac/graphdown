@@ -766,12 +766,12 @@ The reachable block set is defined as the set of `<cid>` values referenced by bl
 
 Implementations MUST be able to compute this reachable set deterministically.
 
-<!-- req:id=GC-002 title="Unreferenced blocks are garbage and are excluded from record-only export" testable=true -->
-### GC-002 — Unreferenced blocks are garbage and are excluded from record-only export
+<!-- req:id=GC-002 title="Unreferenced blocks are garbage and are excluded from canonical dataset export" testable=true -->
+### GC-002 — Unreferenced blocks are garbage and are excluded from canonical dataset export
 
 A block store file is garbage if its `<cid>` is not in the reachable block set (GC-001).
 
-Record-only export (EXP-002) MUST NOT include garbage block files.
+The canonical dataset export (EXP-003) MUST NOT include garbage block files.
 
 <!-- req:id=GC-003 title="Garbage blocks do not make a dataset invalid" testable=true -->
 ### GC-003 — Garbage blocks do not make a dataset invalid
@@ -842,43 +842,32 @@ Unauthenticated import from public repositories MUST work for MVP.
 
 ## 12. Export requirements
 
-Export produces repository snapshots as files (not a JSON/database dump). Graphdown record files remain
+Export produces dataset snapshots as files (not a JSON/database dump). Graphdown record files remain
 Markdown with YAML front matter per §5 and are intended to be tracked in version control.
 
-<!-- req:id=EXP-002 title="Record-only export" -->
-### EXP-002 — Record-only export 
+Graphdown defines a single standardized export: the **canonical dataset zip**.
+Exporting arbitrary non-record files from an imported repository snapshot (for example `docs/`, `assets/`, `.git/`) is not required by this standard.
 
-Export MUST support exporting the Graphdown record subset:
+<!-- req:id=EXP-003 title="Canonical dataset export" -->
+### EXP-003 — Canonical dataset export
+
+Export MUST support producing a zip archive that contains exactly:
 
 * all type objects (FR-MD-021)
 * all record objects (FR-MD-023)
 * all reachable block files (GC-001) at their canonical block store paths (BLOCK-LAYOUT-001)
 
-as a zip archive.
+The canonical dataset export MUST use the canonical parent-based layout defined in EXP-HIER-001 and MUST NOT include non-record, non-block-store files.
 
-Record-only export MUST use the canonical parent-based layout defined in EXP-HIER-001.
+<!-- req:id=EXP-006 title="Canonical dataset export includes reachable blocks" testable=true -->
+### EXP-006 — Canonical dataset export includes reachable blocks
 
-<!-- req:id=EXP-006 title="Record-only export includes reachable blocks" testable=true -->
-### EXP-006 — Record-only export includes reachable blocks
-
-Record-only export MUST include all block store files whose CIDs are in the reachable block set (GC-001), preserving their canonical block store paths (BLOCK-LAYOUT-001).
-
-<!-- req:id=EXP-003 title="Whole-repo export" -->
-### EXP-003 — Whole-repo export
-
-Export MUST support exporting the entire repository snapshot (including non-record files) as a zip archive.
-
-<!-- req:id=EXP-004 title="Path stability" -->
-### EXP-004 — Path stability
-
-Whole-repo export (EXP-003) SHOULD preserve the imported snapshot paths (unless the user explicitly relocates files). Paths carry no semantic meaning but may be preserved for user convenience.
-
-Record-only export (EXP-002) MUST ignore imported record/type file paths and MUST use the canonical layout in EXP-HIER-001.
+The canonical dataset export (EXP-003) MUST include all block store files whose CIDs are in the reachable block set (GC-001), preserving their canonical block store paths (BLOCK-LAYOUT-001).
 
 <!-- req:id=EXP-HIER-001 title="Canonical parent-based export layout" testable=true -->
 ### EXP-HIER-001 — Canonical parent-based export layout
 
-Record-only export MUST produce a deterministic directory tree rooted at `types/` and `records/` derived solely from object identities and record `parent` pointers (HIER-001).
+The canonical dataset export (EXP-003) MUST produce a deterministic directory tree rooted at `types/` and `records/` derived solely from object identities and record `parent` pointers (HIER-001).
 
 Type objects:
 * A type object with `typeId = T` MUST be exported at: `types/T.md`
@@ -895,7 +884,7 @@ Record objects:
   * where `<exportDir(P)>` is the directory containing the parent’s `<parentRecordId>.md` file.
 
 Reachable blocks:
-* Record-only export MUST include reachable block files per EXP-006, preserving canonical block store paths (BLOCK-LAYOUT-001).
+* The canonical dataset export MUST include reachable block files per EXP-006, preserving canonical block store paths (BLOCK-LAYOUT-001).
 
 <!-- req:id=EXP-005 title="Content preservation (no “reformat the universe”)" -->
 ### EXP-005 — Content preservation (no “reformat the universe”)

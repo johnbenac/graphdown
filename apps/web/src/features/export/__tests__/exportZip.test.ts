@@ -54,7 +54,7 @@ describe("buildDatasetZipBytes", () => {
     expect(imported.files.has(blockPath)).toBe(true);
   });
 
-  it("EXP-002: record-only export excludes non-graph files", () => {
+  it("EXP-003: canonical dataset export excludes non-graph files", () => {
     const snapshot = snapshotFromEntries([
       ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
       ["records/note/custom.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")],
@@ -66,7 +66,7 @@ describe("buildDatasetZipBytes", () => {
     expect([...imported.files.keys()].sort()).toEqual(["records/note.one/one.md", "types/note.md"]);
   });
 
-  it("EXP-004: export canonicalizes record/type file paths", () => {
+  it("EXP-003: canonical dataset export ignores imported record/type file paths", () => {
     const snapshot = snapshotFromEntries([
       ["custom/path/type.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
       ["another/deep/record.md", ["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n")]

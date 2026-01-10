@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-09T22:18:12.363Z",
+  "generatedAt": "2026-01-10T04:19:29.226Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -843,7 +843,7 @@
     },
     {
       "id": "GC-002",
-      "title": "Unreferenced blocks are garbage and are excluded from record-only export",
+      "title": "Unreferenced blocks are garbage and are excluded from canonical dataset export",
       "testable": true,
       "verify": null,
       "tests": [
@@ -984,21 +984,31 @@
       ]
     },
     {
-      "id": "EXP-002",
-      "title": "Record-only export",
+      "id": "EXP-003",
+      "title": "Canonical dataset export",
       "testable": null,
       "verify": null,
       "tests": [
         {
-          "reqId": "EXP-002",
-          "testTitle": "EXP-002: record-only export excludes non-graph files",
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: canonical dataset export excludes non-graph files",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
+        },
+        {
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: canonical dataset export ignores imported record/type file paths",
+          "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
+        },
+        {
+          "reqId": "EXP-003",
+          "testTitle": "EXP-003: canonical dataset export round-trips bytes and graph",
+          "filePath": "apps/web/src/graphdown/__tests__/roundtrip.test.ts"
         }
       ]
     },
     {
       "id": "EXP-006",
-      "title": "Record-only export includes reachable blocks",
+      "title": "Canonical dataset export includes reachable blocks",
       "testable": true,
       "verify": null,
       "tests": [
@@ -1011,32 +1021,6 @@
           "reqId": "EXP-006",
           "testTitle": "EXP-006: export includes reachable blocks",
           "filePath": "apps/web/src/graphdown/__tests__/roundtrip.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "EXP-003",
-      "title": "Whole-repo export",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-003",
-          "testTitle": "EXP-003: canonical dataset export round-trips bytes and graph",
-          "filePath": "apps/web/src/graphdown/__tests__/roundtrip.test.ts"
-        }
-      ]
-    },
-    {
-      "id": "EXP-004",
-      "title": "Path stability",
-      "testable": null,
-      "verify": null,
-      "tests": [
-        {
-          "reqId": "EXP-004",
-          "testTitle": "EXP-004: export canonicalizes record/type file paths",
-          "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
         }
       ]
     },

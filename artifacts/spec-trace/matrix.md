@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-09T22:18:12.363Z
+Generated: 2026-01-10T04:19:29.226Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -261,7 +261,7 @@ Tests (1):
 Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "GC-001: reachable block set includes references from fields"
 
-## GC-002 — Unreferenced blocks are garbage and are excluded from record-only export (testable=true)
+## GC-002 — Unreferenced blocks are garbage and are excluded from canonical dataset export (testable=true)
 Tests (1):
 - apps/web/src/graphdown/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blocks"
 
@@ -302,22 +302,16 @@ Tests (1):
 Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
-## EXP-002 — Record-only export
-Tests (1):
-- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-002: record-only export excludes non-graph files"
+## EXP-003 — Canonical dataset export
+Tests (3):
+- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-003: canonical dataset export excludes non-graph files"
+- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-003: canonical dataset export ignores imported record/type file paths"
+- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
 
-## EXP-006 — Record-only export includes reachable blocks (testable=true)
+## EXP-006 — Canonical dataset export includes reachable blocks (testable=true)
 Tests (2):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-006: includes only referenced blocks alongside canonical records/types"
 - apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blocks"
-
-## EXP-003 — Whole-repo export
-Tests (1):
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
-
-## EXP-004 — Path stability
-Tests (1):
-- apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-004: export canonicalizes record/type file paths"
 
 ## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
 Tests (1):
