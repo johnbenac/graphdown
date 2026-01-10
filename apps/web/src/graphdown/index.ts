@@ -13,6 +13,7 @@ export * from './validate/validateDatasetSnapshot';
 export * from './graph/graph';
 export * from './snapshot/hash';
 export * from './snapshot/canonicalizeDatasetSnapshot';
+export * from './runtime/v1';
 export { buildDatasetZipBytes } from './zip/buildZip';
 export { loadDatasetSnapshotFromZipBytes } from './zip/zipSnapshot';
 export type { ZipBuildOptions } from './zip/zipSnapshot';
