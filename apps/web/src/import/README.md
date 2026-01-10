@@ -19,9 +19,9 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Supports stripping a single root directory when the zip is packaged with a
     top-level folder.
   - Filters entries to files relevant to the web app import flow:
-    - `types/**/*.md`
-    - `records/**/*.md`
-    - `blocks/sha2-256/**`
+    - `blocks/**`
+    - Markdown files anywhere that start with the YAML front matter delimiter
+      at byte 0 (same rule as `isRecordFileBytes`).
   - Returns both the filtered snapshot and a list of ignored files.
 
 ## GitHub imports (`import/github`)
@@ -34,6 +34,9 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Uses the GitHub REST API to resolve the default branch, list repository
     files, and download selected files from the raw content endpoint.
   - Streams progress updates through `ImportProgress` phases.
+  - Only keeps markdown files that start with the YAML front matter delimiter
+    at byte 0 (same rule as `isRecordFileBytes`), while always keeping
+    `blocks/**`.
 
 - `mapGitHubError.ts`
   - Normalizes GitHub API errors into displayable categories (not found,
