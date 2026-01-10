@@ -11,3 +11,56 @@ export function makeSnapshot(files: Record<string, string | Uint8Array> = {}): D
     )
   };
 }
+
+export function typeFile(typeId: string, body = ''): string {
+  return ['---', `typeId: ${typeId}`, 'fields: {}', '---', body].join('\n');
+}
+
+export function recordFile(
+  typeId: string,
+  recordId: string,
+  body = '',
+  extraYamlLines: string[] = []
+): string {
+  return ['---', `typeId: ${typeId}`, `recordId: ${recordId}`, 'fields: {}', ...extraYamlLines, '---', body].join('\n');
+}
+
+export function validDatasetMinimal(): DatasetSnapshot {
+  return makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/note-one.md': recordFile('note', 'one')
+  });
+}
+
+export function validDatasetWeirdPaths(): DatasetSnapshot {
+  return makeSnapshot({
+    'jan/anything/types/note.md': typeFile('note'),
+    'feb/something/records/r1.md': recordFile('note', 'one')
+  });
+}
+
+export function invalidDataset_missingFrontMatter(): DatasetSnapshot {
+  return makeSnapshot({
+    'broken.md': '---\nfoo: bar\nbody'
+  });
+}
+
+export function invalidDataset_unknownTopLevelKey(): DatasetSnapshot {
+  return makeSnapshot({
+    'types/note.md': ['---', 'typeId: note', 'fields: {}', 'extra: nope', '---', ''].join('\n')
+  });
+}
+
+export function invalidDataset_missingTypeForRecord(): DatasetSnapshot {
+  return makeSnapshot({
+    'records/missing.md': recordFile('missing', 'one')
+  });
+}
+
+export function invalidDataset_badBlockPathUnderBlocks(): DatasetSnapshot {
+  return makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/note-one.md': recordFile('note', 'one'),
+    'blocks/readme.md': 'not a block'
+  });
+}
