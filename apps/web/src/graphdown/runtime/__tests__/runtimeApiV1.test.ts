@@ -260,7 +260,8 @@ test('runtime api v1 exposes block read methods', async () => {
   ]);
   assert.equal(await opened.value.hasBlock(referencedCid), true);
   assert.equal(await opened.value.hasBlock(garbageCid), true);
-  assert.equal(await opened.value.hasBlock('gdblob:sha256-' + '0'.repeat(64)), false);
+  const missingCid = cidFromRawBytes(utf8('missing-block'));
+  assert.equal(await opened.value.hasBlock(missingCid), false);
   const bytes = await opened.value.getBlockBytes(referencedCid);
   assert.ok(bytes);
   assert.deepEqual(bytes, referencedBytes);
@@ -318,19 +319,6 @@ test('API-SESSION-002: block bytes are returned as copies', async () => {
   assert.notEqual(second[0], 0);
 });
 
-test('runtime api v1 block methods ignore invalid cid inputs', async () => {
-  const snapshot = validDatasetMinimal();
-  const opened = await openRuntimeApiV1({ snapshot });
-  assert.equal(opened.ok, true);
-  if (!opened.ok) {
-    assert.fail('Expected ok result');
-  }
-  await assert.doesNotReject(() => opened.value.hasBlock('not-a-cid'));
-  await assert.doesNotReject(() => opened.value.getBlockBytes('not-a-cid'));
-  assert.equal(await opened.value.hasBlock('not-a-cid'), false);
-  assert.equal(await opened.value.getBlockBytes('not-a-cid'), null);
-});
-
 test('API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)', async () => {
   const snapshot = makeSnapshot({
     'types/note.md': typeFile('note'),
@@ -358,7 +346,13 @@ test('API-SESSION-002: view getters return isolated copies (mutations do not aff
 });
 
 test('API-003: all Runtime API operations are asynchronous (thenable)', async () => {
-  const snapshot = validDatasetMinimal();
+  const bytes = utf8('block');
+  const cid = cidFromRawBytes(bytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note'),
+    'records/one.md': recordFile('note', 'one', `See [[${cid}]].`),
+    [blockPathForCid(cid)]: bytes
+  });
   const opened = await openRuntimeApiV1({ snapshot });
   assert.equal(opened.ok, true);
   if (!opened.ok) {
@@ -381,8 +375,8 @@ test('API-003: all Runtime API operations are asynchronous (thenable)', async ()
     api.listRecordsByType('note'),
     api.getTypeMarkdownBytes('note'),
     api.getRecordMarkdownBytes('note:one'),
-    api.getBlockBytes('not-a-cid'),
-    api.hasBlock('not-a-cid'),
+    api.getBlockBytes(cid),
+    api.hasBlock(cid),
     api.listBlockCidsPresent(),
     api.listBlockCidsReferencedByRecord('note:one'),
     api.listReachableBlockCids()
