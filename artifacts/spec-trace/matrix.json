@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-11T01:18:46.558Z",
+  "generatedAt": "2026-01-11T23:36:24.274Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -23,7 +23,7 @@
     },
     {
       "id": "P-001",
-      "title": "Repository-first, Markdown-canonical",
+      "title": "Repository-first, record-canonical",
       "testable": false,
       "verify": null,
       "tests": []
@@ -96,6 +96,34 @@
       ]
     },
     {
+      "id": "NR-PLUG-LINK-001",
+      "title": "No relationship or CID extraction from plugin files",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-PLUG-VAL-001",
+      "title": "No plugin-defined dataset validity rules",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-PLUG-EXP-001",
+      "title": "Plugins do not define canonical export",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "NR-PLUG-HASH-001",
+      "title": "Plugins do not define hashing semantics",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
       "id": "ID-001",
       "title": "Identifier syntax is separator-safe",
       "testable": true,
@@ -117,6 +145,20 @@
           "filePath": "apps/web/src/graphdown/__tests__/ids.test.ts"
         }
       ]
+    },
+    {
+      "id": "PLUG-ID-001",
+      "title": "pluginId syntax is separator-safe",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-ID-002",
+      "title": "pluginId uniqueness",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "HASH-001",
@@ -156,7 +198,7 @@
     },
     {
       "id": "HASH-003",
-      "title": "Snapshot fingerprint (types + record objects)",
+      "title": "Snapshot fingerprint (types + record objects + plugin objects)",
       "testable": null,
       "verify": null,
       "tests": [
@@ -317,7 +359,7 @@
     },
     {
       "id": "BLOCK-LAYOUT-003",
-      "title": "Non-record, non-block-store files are non-semantic",
+      "title": "Non-record, non-block-store, non-plugin files are non-semantic",
       "testable": true,
       "verify": null,
       "tests": [
@@ -327,6 +369,41 @@
           "filePath": "apps/web/src/graphdown/__tests__/blocks.test.ts"
         }
       ]
+    },
+    {
+      "id": "PLUG-000",
+      "title": "Plugins are a first-class dataset object class",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-LAYOUT-001",
+      "title": "Plugin manifests are discovered by content (not path)",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-RES-001",
+      "title": "pluginId and gdApiVersion are reserved top-level keys",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-LAYOUT-002",
+      "title": "Plugin bundle files are resolved from the manifest",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-LAYOUT-003",
+      "title": "Plugin bundle file paths are safe and self-contained",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "FR-MD-020",
@@ -421,8 +498,29 @@
       ]
     },
     {
+      "id": "PLUG-FR-001",
+      "title": "Plugin manifest YAML front matter is required",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-FR-002",
+      "title": "Required top-level keys for plugin manifests",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "PLUG-FR-003",
+      "title": "Plugin manifest body is raw Markdown",
+      "testable": false,
+      "verify": null,
+      "tests": []
+    },
+    {
       "id": "EXT-001",
-      "title": "Top-level vocabulary is fixed",
+      "title": "Type/record top-level vocabulary is fixed",
       "testable": true,
       "verify": null,
       "tests": [
@@ -641,7 +739,7 @@
     },
     {
       "id": "VAL-001",
-      "title": "Type/records must be internally consistent",
+      "title": "Type/records/plugins/blocks must be internally consistent",
       "testable": null,
       "verify": null,
       "tests": [
@@ -790,6 +888,62 @@
       ]
     },
     {
+      "id": "VAL-PLUG-001",
+      "title": "Plugin manifests must parse and satisfy PLUG-FR-002",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-002",
+      "title": "pluginId must be unique",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-003",
+      "title": "Plugin entry must exist and be included",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-004",
+      "title": "Plugin bundle file paths must resolve safely and exist",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-005",
+      "title": "Plugin bundle files must be UTF-8 decodable",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-006",
+      "title": "Plugin bundle must not contain reserved export paths",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-007",
+      "title": "Plugin-declared block dependencies must be valid CIDs",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
+      "id": "VAL-PLUG-008",
+      "title": "Plugin-declared block dependencies must resolve to matching block bytes",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
       "id": "VAL-CID-001",
       "title": "Invalid CID-shaped block reference tokens fail validation",
       "testable": true,
@@ -830,7 +984,7 @@
     },
     {
       "id": "GC-001",
-      "title": "Reachable block set is computed from block references",
+      "title": "Reachable block set is computed from declared block dependencies",
       "testable": true,
       "verify": null,
       "tests": [
@@ -984,6 +1138,13 @@
       ]
     },
     {
+      "id": "IMP-PLUG-001",
+      "title": "Importers must include plugin manifests and bundles",
+      "testable": true,
+      "verify": null,
+      "tests": []
+    },
+    {
       "id": "EXP-003",
       "title": "Canonical dataset export",
       "testable": null,
@@ -1036,6 +1197,13 @@
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
         }
       ]
+    },
+    {
+      "id": "EXP-PLUG-001",
+      "title": "Canonical plugin export layout",
+      "testable": true,
+      "verify": null,
+      "tests": []
     },
     {
       "id": "EXP-005",
@@ -1520,5 +1688,94 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [
+    {
+      "id": "EXP-PLUG-001",
+      "title": "Canonical plugin export layout"
+    },
+    {
+      "id": "IMP-PLUG-001",
+      "title": "Importers must include plugin manifests and bundles"
+    },
+    {
+      "id": "NR-PLUG-EXP-001",
+      "title": "Plugins do not define canonical export"
+    },
+    {
+      "id": "NR-PLUG-HASH-001",
+      "title": "Plugins do not define hashing semantics"
+    },
+    {
+      "id": "NR-PLUG-LINK-001",
+      "title": "No relationship or CID extraction from plugin files"
+    },
+    {
+      "id": "NR-PLUG-VAL-001",
+      "title": "No plugin-defined dataset validity rules"
+    },
+    {
+      "id": "PLUG-000",
+      "title": "Plugins are a first-class dataset object class"
+    },
+    {
+      "id": "PLUG-FR-001",
+      "title": "Plugin manifest YAML front matter is required"
+    },
+    {
+      "id": "PLUG-FR-002",
+      "title": "Required top-level keys for plugin manifests"
+    },
+    {
+      "id": "PLUG-ID-001",
+      "title": "pluginId syntax is separator-safe"
+    },
+    {
+      "id": "PLUG-ID-002",
+      "title": "pluginId uniqueness"
+    },
+    {
+      "id": "PLUG-LAYOUT-001",
+      "title": "Plugin manifests are discovered by content (not path)"
+    },
+    {
+      "id": "PLUG-LAYOUT-002",
+      "title": "Plugin bundle files are resolved from the manifest"
+    },
+    {
+      "id": "PLUG-LAYOUT-003",
+      "title": "Plugin bundle file paths are safe and self-contained"
+    },
+    {
+      "id": "VAL-PLUG-001",
+      "title": "Plugin manifests must parse and satisfy PLUG-FR-002"
+    },
+    {
+      "id": "VAL-PLUG-002",
+      "title": "pluginId must be unique"
+    },
+    {
+      "id": "VAL-PLUG-003",
+      "title": "Plugin entry must exist and be included"
+    },
+    {
+      "id": "VAL-PLUG-004",
+      "title": "Plugin bundle file paths must resolve safely and exist"
+    },
+    {
+      "id": "VAL-PLUG-005",
+      "title": "Plugin bundle files must be UTF-8 decodable"
+    },
+    {
+      "id": "VAL-PLUG-006",
+      "title": "Plugin bundle must not contain reserved export paths"
+    },
+    {
+      "id": "VAL-PLUG-007",
+      "title": "Plugin-declared block dependencies must be valid CIDs"
+    },
+    {
+      "id": "VAL-PLUG-008",
+      "title": "Plugin-declared block dependencies must resolve to matching block bytes"
+    }
+  ]
 }

@@ -1,6 +1,30 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-11T01:18:46.558Z
+Generated: 2026-01-11T23:36:24.274Z
+
+## Testable requirements with no tests
+- EXP-PLUG-001 — Canonical plugin export layout
+- IMP-PLUG-001 — Importers must include plugin manifests and bundles
+- NR-PLUG-EXP-001 — Plugins do not define canonical export
+- NR-PLUG-HASH-001 — Plugins do not define hashing semantics
+- NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
+- NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
+- PLUG-000 — Plugins are a first-class dataset object class
+- PLUG-FR-001 — Plugin manifest YAML front matter is required
+- PLUG-FR-002 — Required top-level keys for plugin manifests
+- PLUG-ID-001 — pluginId syntax is separator-safe
+- PLUG-ID-002 — pluginId uniqueness
+- PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path)
+- PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest
+- PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained
+- VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
+- VAL-PLUG-002 — pluginId must be unique
+- VAL-PLUG-003 — Plugin entry must exist and be included
+- VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist
+- VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable
+- VAL-PLUG-006 — Plugin bundle must not contain reserved export paths
+- VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs
+- VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -10,7 +34,7 @@ Tests (0):
 Tests (1):
 - apps/web/src/__tests__/governance/spec-trace-matrix.test.ts — "GOV-002: spec-trace output matches committed matrix"
 
-## P-001 — Repository-first, Markdown-canonical (testable=false)
+## P-001 — Repository-first, record-canonical (testable=false)
 Tests (0):
 - (none)
 
@@ -42,11 +66,35 @@ Tests (0):
 Tests (1):
 - apps/web/src/graphdown/__tests__/gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
+## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true)
+Tests (0):
+- (none)
+
+## NR-PLUG-VAL-001 — No plugin-defined dataset validity rules (testable=true)
+Tests (0):
+- (none)
+
+## NR-PLUG-EXP-001 — Plugins do not define canonical export (testable=true)
+Tests (0):
+- (none)
+
+## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true)
+Tests (0):
+- (none)
+
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: accepts valid identifiers"
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects recordId with colon"
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
+
+## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-ID-002 — pluginId uniqueness (testable=true)
+Tests (0):
+- (none)
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (3):
@@ -58,7 +106,7 @@ Tests (3):
 Tests (1):
 - apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-002: schema fingerprint ignores record object changes"
 
-## HASH-003 — Snapshot fingerprint (types + record objects)
+## HASH-003 — Snapshot fingerprint (types + record objects + plugin objects)
 Tests (1):
 - apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-003: snapshot hash is path-independent for record files"
 
@@ -107,9 +155,29 @@ Tests (2):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: blocks namespace is fully reserved"
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: invalid block path shape fails validation"
 
-## BLOCK-LAYOUT-003 — Non-record, non-block-store files are non-semantic (testable=true)
+## BLOCK-LAYOUT-003 — Non-record, non-block-store, non-plugin files are non-semantic (testable=true)
 Tests (1):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
+
+## PLUG-000 — Plugins are a first-class dataset object class (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-RES-001 — pluginId and gdApiVersion are reserved top-level keys (testable=false)
+Tests (0):
+- (none)
+
+## PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained (testable=true)
+Tests (0):
+- (none)
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
@@ -135,7 +203,19 @@ Tests (2):
 Tests (1):
 - apps/web/src/graphdown/__tests__/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
 
-## EXT-001 — Top-level vocabulary is fixed (testable=true)
+## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-FR-002 — Required top-level keys for plugin manifests (testable=true)
+Tests (0):
+- (none)
+
+## PLUG-FR-003 — Plugin manifest body is raw Markdown (testable=false)
+Tests (0):
+- (none)
+
+## EXT-001 — Type/record top-level vocabulary is fixed (testable=true)
 Tests (2):
 - apps/web/src/graphdown/__tests__/reserved-vocabulary.test.ts — "EXT-001: extra top-level keys are forbidden"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "EXT-001: extra top-level keys are rejected"
@@ -201,7 +281,7 @@ Tests (1):
 Tests (1):
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "HIER-001: parent missing and parent null both define hierarchy roots"
 
-## VAL-001 — Type/records must be internally consistent
+## VAL-001 — Type/records/plugins/blocks must be internally consistent
 Tests (1):
 - apps/web/src/state/__tests__/DatasetContext.test.tsx — "VAL-001: invalid datasets are reported as dataset_invalid"
 
@@ -245,6 +325,38 @@ Tests (2):
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
+## VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002 (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-002 — pluginId must be unique (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-003 — Plugin entry must exist and be included (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs (testable=true)
+Tests (0):
+- (none)
+
+## VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes (testable=true)
+Tests (0):
+- (none)
+
 ## VAL-CID-001 — Invalid CID-shaped block reference tokens fail validation (testable=true)
 Tests (1):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-CID-001: invalid CID-shaped tokens fail validation"
@@ -257,7 +369,7 @@ Tests (1):
 Tests (1):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
 
-## GC-001 — Reachable block set is computed from block references (testable=true)
+## GC-001 — Reachable block set is computed from declared block dependencies (testable=true)
 Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "GC-001: reachable block set includes references from fields"
 
@@ -302,6 +414,10 @@ Tests (1):
 Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
+## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true)
+Tests (0):
+- (none)
+
 ## EXP-003 — Canonical dataset export
 Tests (3):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-003: canonical dataset export excludes non-graph files"
@@ -316,6 +432,10 @@ Tests (2):
 ## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
 Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-HIER-001: export uses canonical layout paths"
+
+## EXP-PLUG-001 — Canonical plugin export layout (testable=true)
+Tests (0):
+- (none)
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
 Tests (1):
