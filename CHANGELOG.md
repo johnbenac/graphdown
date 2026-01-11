@@ -1,3 +1,10 @@
+# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.13.0) (2026-01-11)
+
+
+### Features
+
+* add dataset plugin runner ([01b6479](https://github.com/johnbenac/graphdown/commit/01b647919fcb931f4868c69bc63c1a969bf02642))
+
 # [0.12.0](https://github.com/johnbenac/graphdown/compare/v0.11.0...v0.12.0) (2026-01-05)
 
 
