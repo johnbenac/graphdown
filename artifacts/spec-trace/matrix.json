@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-10T23:44:50.841Z",
+  "generatedAt": "2026-01-11T01:18:34.484Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1217,7 +1217,23 @@
       "title": "Errors are structured and include stable codes",
       "testable": false,
       "verify": null,
-      "tests": []
+      "tests": [
+        {
+          "reqId": "API-ERR-001",
+          "testTitle": "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts"
+        },
+        {
+          "reqId": "API-ERR-001",
+          "testTitle": "API-ERR-001: invalid CID argument rejects with structured error",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts"
+        },
+        {
+          "reqId": "API-ERR-001",
+          "testTitle": "API-ERR-001: open fails with structured error when structuredClone is unavailable",
+          "filePath": "apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts"
+        }
+      ]
     },
     {
       "id": "API-SESSION-001",

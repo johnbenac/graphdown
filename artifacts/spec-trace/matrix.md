@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-10T23:44:50.841Z
+Generated: 2026-01-11T01:18:34.484Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -380,8 +380,10 @@ Tests (1):
 - apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-005: Runtime API payloads are structured-clone compatible"
 
 ## API-ERR-001 — Errors are structured and include stable codes (testable=false)
-Tests (0):
-- (none)
+Tests (3):
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint"
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: invalid CID argument rejects with structured error"
+- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: open fails with structured error when structuredClone is unavailable"
 
 ## API-SESSION-001 — Runtime API can open a session from a snapshot (testable=false)
 Tests (0):
