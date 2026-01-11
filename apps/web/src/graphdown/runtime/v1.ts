@@ -2,12 +2,14 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import type { ValidationError } from '../validate/errors';
+import { makeError } from '../validate/errors';
 import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
 import { buildRecordLinkGraphFromSnapshot } from '../graph/graph';
 import { isObject } from '../model/types';
-import { discoverGraphdownObjects } from '../parse/datasetObjects';
+import { discoverGraphdownObjects, IDENTIFIER_PATTERN, RECORD_KEY_PATTERN } from '../parse/datasetObjects';
 import { extractCidRefs } from '../parse/wikiRefs';
 import { validateDatasetSnapshot } from '../validate/validateDatasetSnapshot';
+import { fail } from './errors';
 
 export const RUNTIME_API_VERSION_V1 = 1 as const;
 
@@ -109,12 +111,53 @@ function deepFreeze<T>(value: T, seen = new WeakSet<object>()): T {
   return value;
 }
 
-function cloneForPlugin<T>(value: T): T {
-  const sc = (globalThis as { structuredClone?: (value: unknown) => unknown }).structuredClone;
-  if (typeof sc !== 'function') {
-    throw new Error('structuredClone is required for Runtime API v1');
+function requireTypeId(op: string, typeId: unknown): string {
+  if (typeof typeId !== 'string') {
+    fail(op, 'E_USAGE', 'typeId must be a string', { details: { typeId } });
   }
-  return sc(value) as T;
+  const trimmed = typeId.trim();
+  if (!IDENTIFIER_PATTERN.test(trimmed)) {
+    fail(op, 'E_INVALID_IDENTIFIER', 'typeId must satisfy ID-001', {
+      hint: 'Expected /^[A-Za-z0-9][A-Za-z0-9_-]*$/',
+      details: { typeId, trimmed }
+    });
+  }
+  return trimmed;
+}
+
+function requireRecordKey(op: string, recordKey: unknown): string {
+  if (typeof recordKey !== 'string') {
+    fail(op, 'E_USAGE', 'recordKey must be a string', { details: { recordKey } });
+  }
+  const trimmed = recordKey.trim();
+  if (!RECORD_KEY_PATTERN.test(trimmed)) {
+    fail(op, 'E_USAGE', 'recordKey must be \"typeId:recordId\" (both ID-001)', {
+      hint: 'Use listRecordKeysByType(typeId) to discover valid recordKeys.',
+      details: { recordKey, trimmed }
+    });
+  }
+  return trimmed;
+}
+
+function requireCid(
+  op: string,
+  cid: unknown
+): { cid: string; path: string; decoded: ReturnType<typeof decodeDaslCidString> } {
+  if (typeof cid !== 'string') {
+    fail(op, 'E_USAGE', 'cid must be a string', { details: { cid } });
+  }
+  const trimmed = cid.trim();
+  try {
+    const decoded = decodeDaslCidString(trimmed);
+    const path = blockPathForCid(trimmed);
+    return { cid: trimmed, path, decoded };
+  } catch (e) {
+    const hint = e instanceof Error ? e.message : String(e);
+    fail(op, 'E_CID_INVALID', 'Invalid DASL CIDv1 string', {
+      hint,
+      details: { cid: trimmed }
+    });
+  }
 }
 
 function collectStringValues(value: unknown, into: Set<string>): void {
@@ -168,6 +211,22 @@ export async function openRuntimeApiV1(input: {
   if (!graphResult.ok) {
     return { ok: false, errors: graphResult.errors };
   }
+
+  const sc = (globalThis as { structuredClone?: (value: unknown) => unknown }).structuredClone;
+  if (typeof sc !== 'function') {
+    return {
+      ok: false,
+      errors: [
+        makeError(
+          'E_INTERNAL',
+          'structuredClone is required for Runtime API v1',
+          undefined,
+          'Upgrade the runtime or provide a structuredClone polyfill.'
+        )
+      ]
+    };
+  }
+  const clone = <T>(value: T): T => sc(value) as T;
 
   const snapshotFiles = input.snapshot.files;
   const typesById = new Map<string, RuntimeTypeViewV1>();
@@ -315,53 +374,62 @@ export async function openRuntimeApiV1(input: {
       capabilities,
       listTypeIds: async () => [...typeIdsSorted],
       listRecordKeysByType: async (typeId: string) => {
-        const keys = recordKeysByTypeId.get(typeId);
+        const id = requireTypeId('listRecordKeysByType', typeId);
+        const keys = recordKeysByTypeId.get(id);
         return keys ? [...keys] : [];
       },
       getType: async (typeId: string) => {
-        const view = typesById.get(typeId);
-        return view ? cloneForPlugin(view) : null;
+        const id = requireTypeId('getType', typeId);
+        const view = typesById.get(id);
+        return view ? clone(view) : null;
       },
       getRecord: async (recordKey: string) => {
-        const view = recordsByKey.get(recordKey);
-        return view ? cloneForPlugin(view) : null;
+        const key = requireRecordKey('getRecord', recordKey);
+        const view = recordsByKey.get(key);
+        return view ? clone(view) : null;
       },
       getParentRecordKey: async (recordKey: string) => {
-        const record = recordsByKey.get(recordKey);
+        const key = requireRecordKey('getParentRecordKey', recordKey);
+        const record = recordsByKey.get(key);
         if (!record) {
           return null;
         }
         return typeof record.parent === 'string' ? record.parent : null;
       },
       listChildRecordKeys: async (recordKey: string) => {
-        const kids = childrenByParentKey.get(recordKey);
+        const key = requireRecordKey('listChildRecordKeys', recordKey);
+        const kids = childrenByParentKey.get(key);
         return kids ? [...kids] : [];
       },
       listRootRecordKeysByType: async (typeId: string) => {
-        const roots = rootRecordKeysByTypeId.get(typeId);
+        const id = requireTypeId('listRootRecordKeysByType', typeId);
+        const roots = rootRecordKeysByTypeId.get(id);
         return roots ? [...roots] : [];
       },
       getTypeCompositionComponents: async (typeId: string) => {
-        if (!typesById.has(typeId)) {
+        const id = requireTypeId('getTypeCompositionComponents', typeId);
+        if (!typesById.has(id)) {
           return null;
         }
-        return cloneForPlugin(typeCompositionByTypeId.get(typeId) ?? []);
+        return clone(typeCompositionByTypeId.get(id) ?? []);
       },
-      listTypeCompositionEdges: async () => cloneForPlugin(typeCompositionEdges),
+      listTypeCompositionEdges: async () => clone(typeCompositionEdges),
       listTypes: async () =>
         typeIdsSorted
           .map((id) => typesById.get(id))
           .filter((value): value is RuntimeTypeViewV1 => Boolean(value))
-          .map((value) => cloneForPlugin(value)),
+          .map((value) => clone(value)),
       listRecordsByType: async (typeId: string) => {
-        const keys = recordKeysByTypeId.get(typeId) ?? [];
+        const id = requireTypeId('listRecordsByType', typeId);
+        const keys = recordKeysByTypeId.get(id) ?? [];
         return keys
           .map((key) => recordsByKey.get(key))
           .filter((value): value is RuntimeRecordViewV1 => Boolean(value))
-          .map((value) => cloneForPlugin(value));
+          .map((value) => clone(value));
       },
       getTypeMarkdownBytes: async (typeId: string) => {
-        const file = typeFileById.get(typeId);
+        const id = requireTypeId('getTypeMarkdownBytes', typeId);
+        const file = typeFileById.get(id);
         if (!file) {
           return null;
         }
@@ -369,56 +437,56 @@ export async function openRuntimeApiV1(input: {
         return bytes ? bytes.slice() : null;
       },
       getRecordMarkdownBytes: async (recordKey: string) => {
-        const file = recordFileByKey.get(recordKey);
+        const key = requireRecordKey('getRecordMarkdownBytes', recordKey);
+        const file = recordFileByKey.get(key);
         if (!file) {
           return null;
         }
         const bytes = snapshotFiles.get(file);
         return bytes ? bytes.slice() : null;
       },
-      getBlockBytes: async (cid: string) => {
-        let decoded: ReturnType<typeof decodeDaslCidString>;
-        let path: string;
-        try {
-          decoded = decodeDaslCidString(cid);
-          path = blockPathForCid(cid);
-        } catch {
-          return null;
-        }
+      getBlockBytes: async (cidInput: string) => {
+        const op = 'getBlockBytes';
+        const { cid, path, decoded } = requireCid(op, cidInput);
         const bytes = snapshotFiles.get(path);
         if (!bytes) {
-          return null;
+          fail(op, 'E_BLOCK_REFERENCE_MISSING', `Block is missing for CID ${cid}`, {
+            file: path,
+            hint: 'Ensure the dataset contains the block file at the canonical path, or call hasBlock(cid) first.',
+            details: { cid, path }
+          });
         }
         const digest = sha256(bytes);
-        if (digest.length !== decoded.digest.length) {
-          return null;
-        }
         for (let i = 0; i < digest.length; i += 1) {
           if (digest[i] !== decoded.digest[i]) {
-            return null;
+            fail(op, 'E_BLOCK_DIGEST_MISMATCH', `Block bytes do not match CID digest for ${cid}`, {
+              file: path,
+              hint: 'The block file content is corrupted or the CID/path is wrong. Recompute CID from bytes or fix the file.',
+              details: { cid, path }
+            });
           }
         }
         return bytes.slice();
       },
-      hasBlock: async (cid: string) => {
-        let path: string;
-        try {
-          path = blockPathForCid(cid);
-        } catch {
-          return false;
-        }
+      hasBlock: async (cidInput: string) => {
+        const { path } = requireCid('hasBlock', cidInput);
         return snapshotFiles.has(path);
       },
       listBlockCidsPresent: async () => [...blockCidsPresentSorted],
       listBlockCidsReferencedByRecord: async (recordKey: string) => {
-        const cids = blockRefsByRecordKey.get(recordKey);
+        const key = requireRecordKey('listBlockCidsReferencedByRecord', recordKey);
+        const cids = blockRefsByRecordKey.get(key);
         return cids ? [...cids] : [];
       },
       listReachableBlockCids: async () => [...reachableBlockCidsSorted],
-      getOutgoingRecordLinks: async (recordKey: string) =>
-        [...graph.getOutgoingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b)),
-      getIncomingRecordLinks: async (recordKey: string) =>
-        [...graph.getIncomingRecordLinks(recordKey)].sort((a, b) => a.localeCompare(b))
+      getOutgoingRecordLinks: async (recordKey: string) => {
+        const key = requireRecordKey('getOutgoingRecordLinks', recordKey);
+        return [...graph.getOutgoingRecordLinks(key)].sort((a, b) => a.localeCompare(b));
+      },
+      getIncomingRecordLinks: async (recordKey: string) => {
+        const key = requireRecordKey('getIncomingRecordLinks', recordKey);
+        return [...graph.getIncomingRecordLinks(key)].sort((a, b) => a.localeCompare(b));
+      }
     }
   };
 }
