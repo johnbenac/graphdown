@@ -1,11 +1,8 @@
-import type { DatasetSnapshot, ValidationError } from "../graphdown";
+import type { DatasetSnapshot, ValidationError, RuntimeApiV1 } from "../graphdown";
 import { openRuntimeApiV1 } from "../graphdown";
 
 type Logger = Pick<Console, "log" | "info" | "warn" | "error"> &
   Partial<Pick<Console, "groupCollapsed" | "groupEnd">>;
-
-type OpenedRuntimeApi = Awaited<ReturnType<typeof openRuntimeApiV1>>;
-type RuntimeApiV1 = OpenedRuntimeApi extends { ok: true; value: infer Api } ? Api : never;
 
 export type PluginActivationContextV1 = {
   api: RuntimeApiV1;
