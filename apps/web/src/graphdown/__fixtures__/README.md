@@ -2,7 +2,8 @@
 
 These fixture datasets are used by unit tests and manual validation of the
 Graphdown parsing and validation logic. Each fixture mirrors a small dataset
-layout on disk so tests can load them as `DatasetSnapshot` inputs.
+layout on disk so tests can load them as `DatasetSnapshot` inputs. Fixtures must
+conform to SPEC.md v0.5 (especially strict top-level keys for types and records).
 
 ## Fixture sets
 
@@ -19,8 +20,29 @@ layout on disk so tests can load them as `DatasetSnapshot` inputs.
   - Used to exercise graph-link extraction behavior and link directionality.
 - `roundtrip-repo/`
   - Dataset with nested `types/` and `records/` paths plus an extra file under
-    `assets/` to ensure round-trip export preserves unrelated files.
+    `assets/` to ensure ignored files are skipped during validation/export.
   - Records include link references in both YAML fields and markdown body text.
+
+## Plugin fixtures (SPEC v0.5)
+
+- `plugin-valid-dataset/`
+  - Valid plugin manifest + UTF-8 bundle files.
+  - Includes an empty-bytes block file using CID-001 for later plugin block
+    reachability/export tests.
+
+- `plugin-invalid-duplicate-pluginId/`
+  - Two manifests share the same `pluginId` (to exercise PLUG-ID-002 /
+    VAL-PLUG-002 later).
+
+- `plugin-invalid-entry-not-in-files/`
+  - `entry` exists but is not listed in `files[]` (VAL-PLUG-003 later).
+
+- `plugin-invalid-reserved-manifest-path/`
+  - `files[]` contains `manifest.md` (VAL-PLUG-006 later).
+
+- `plugin-invalid-unsafe-relative-path/`
+  - `entry` and `files[]` contain `..` segments (PLUG-LAYOUT-003 /
+    VAL-PLUG-004 later).
 
 ## Notes
 
