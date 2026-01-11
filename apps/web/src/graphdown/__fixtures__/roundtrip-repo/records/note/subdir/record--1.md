@@ -1,8 +1,6 @@
 ---
-id: "note:1"
-typeId: "note"
-createdAt: "2024-01-01T00:00:00Z"
-updatedAt: "2024-01-01T00:00:00Z"
+typeId: note
+recordId: "1"
 fields:
   title: "Note 1"
   ref: "[[note:2]]"
