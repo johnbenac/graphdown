@@ -16,6 +16,7 @@ import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
 import { createPersistStore } from "../storage/createPersistStore";
 import { buildImportReport } from "./importReport";
+import { runPluginsV1 } from "../plugins/runPluginsV1";
 
 export type ImportErrorCategory =
   | "invalid_url"
@@ -177,6 +178,29 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, [persistence]);
+
+  // Run dataset-scoped plugins (Runtime API v1) when a dataset becomes active.
+  // This is intentionally fire-and-forget: plugin failures must never block dataset load.
+  const activeCreatedAt = activeDataset?.meta.createdAt;
+  useEffect(() => {
+    if (!activeDataset) {
+      return;
+    }
+    void runPluginsV1({
+      datasetSnapshot: activeDataset.datasetSnapshot,
+      datasetKey: `${activeDataset.meta.id}:${activeDataset.meta.createdAt}`,
+      datasetLabel: activeDataset.meta.label ?? activeDataset.meta.id,
+      logger: console
+    })
+      .then((result) => {
+        if (!result.ok) {
+          console.warn("[plugins] Runtime API v1 failed to open; plugins not executed.", result.errors);
+        }
+      })
+      .catch((err) => {
+        console.error("[plugins] runPluginsV1 crashed.", err);
+      });
+  }, [activeCreatedAt]);
 
   const saveActiveDataset = useCallback(
     async (
