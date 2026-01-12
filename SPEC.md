@@ -146,7 +146,7 @@ It does not apply to record hierarchy parent pointers (HIER-001): parent pointer
 
 Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved block references are an import-failing error (VAL-BLOCK-001).
 
-<!-- req:id=NR-PLUG-LINK-001 title="No relationship or CID extraction from plugin files" testable=true -->
+<!-- req:id=NR-PLUG-LINK-001 title="No relationship or CID extraction from plugin files" testable=true verify=todo -->
 ### NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
 
 Core MUST NOT extract record relationships (REL-001/REL-002) or block references (CID-REF-001/002) from:
@@ -156,19 +156,19 @@ Core MUST NOT extract record relationships (REL-001/REL-002) or block references
 
 Only record objects participate in relationship and CID reference extraction, and plugins declare block dependencies only via plugin manifest `blocks[]` (PLUG-FR-002).
 
-<!-- req:id=NR-PLUG-VAL-001 title="No plugin-defined dataset validity rules" testable=true -->
+<!-- req:id=NR-PLUG-VAL-001 title="No plugin-defined dataset validity rules" testable=true verify=todo -->
 ### NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
 
 Core validation (VAL-001 and related requirements) MUST NOT depend on executing plugins or interpreting plugin bundle content.
 Plugins MUST NOT be able to make an otherwise-valid dataset invalid for import/export conformance.
 
-<!-- req:id=NR-PLUG-EXP-001 title="Plugins do not define canonical export" testable=true -->
+<!-- req:id=NR-PLUG-EXP-001 title="Plugins do not define canonical export" testable=true verify=todo -->
 ### NR-PLUG-EXP-001 — Plugins do not define canonical export
 
 Canonical export (EXP-003 and related requirements) is defined by core.
 Plugins MUST NOT modify which files are included, how they are laid out, or how bytes are rewritten for canonical export.
 
-<!-- req:id=NR-PLUG-HASH-001 title="Plugins do not define hashing semantics" testable=true -->
+<!-- req:id=NR-PLUG-HASH-001 title="Plugins do not define hashing semantics" testable=true verify=todo -->
 ### NR-PLUG-HASH-001 — Plugins do not define hashing semantics
 
 Dataset hashing (gdhash-v1) is defined by core (HASH-001/002/003).
@@ -288,7 +288,7 @@ Plugin bundle files are semantic for hashing and export.
 `typeId` and `recordId` MUST NOT contain `:`.
 Colon is reserved as the separator in `typeId:recordId` record references.
 
-<!-- req:id=PLUG-ID-001 title="pluginId syntax is separator-safe" testable=true -->
+<!-- req:id=PLUG-ID-001 title="pluginId syntax is separator-safe" testable=true verify=todo -->
 ### PLUG-ID-001 — pluginId syntax is separator-safe
 
 `pluginId` MUST be a string and MUST be non-empty after trimming.
@@ -299,7 +299,7 @@ Colon is reserved as the separator in `typeId:recordId` record references.
 
 Colon is reserved elsewhere (e.g. record references) and MUST NOT appear in plugin identifiers.
 
-<!-- req:id=PLUG-ID-002 title="pluginId uniqueness" testable=true -->
+<!-- req:id=PLUG-ID-002 title="pluginId uniqueness" testable=true verify=todo -->
 ### PLUG-ID-002 — pluginId uniqueness
 
 `pluginId` values across all plugin objects in a dataset MUST be globally unique.
@@ -523,7 +523,7 @@ MUST be ignored by core for identity, linking, validation semantics, and export 
 
 Path names and directory names carry no semantic meaning for these ignored files.
 
-<!-- req:id=PLUG-000 title="Plugins are a first-class dataset object class" testable=true -->
+<!-- req:id=PLUG-000 title="Plugins are a first-class dataset object class" testable=true verify=todo -->
 ### PLUG-000 — Plugins are a first-class dataset object class
 
 Graphdown defines **plugin objects** as a first-class semantic object class in the dataset repository.
@@ -537,7 +537,7 @@ When plugin objects are present, they:
 * MUST participate in dataset hashing (HASH-003),
 * MUST be included in canonical dataset export (EXP-003 / EXP-PLUG-001).
 
-<!-- req:id=PLUG-LAYOUT-001 title="Plugin manifests are discovered by content (not path)" testable=true -->
+<!-- req:id=PLUG-LAYOUT-001 title="Plugin manifests are discovered by content (not path)" testable=true verify=todo -->
 ### PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path)
 
 A **plugin manifest file** is any file that:
@@ -564,7 +564,7 @@ Notes:
 The top-level YAML keys `pluginId` and `gdApiVersion` are reserved for plugin manifests.
 Non-record Markdown files that use both keys will be treated as plugin manifest candidates and validated as such.
 
-<!-- req:id=PLUG-LAYOUT-002 title="Plugin bundle files are resolved from the manifest" testable=true -->
+<!-- req:id=PLUG-LAYOUT-002 title="Plugin bundle files are resolved from the manifest" testable=true verify=todo -->
 ### PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest
 
 For each discovered plugin manifest file at dataset path `M`:
@@ -586,7 +586,7 @@ The resolved set of files is the plugin object’s **bundle file set**.
 
 Bundle file resolution MUST be deterministic and MUST NOT depend on repo layout beyond the manifest’s own location and its declared relative paths.
 
-<!-- req:id=PLUG-LAYOUT-003 title="Plugin bundle file paths are safe and self-contained" testable=true -->
+<!-- req:id=PLUG-LAYOUT-003 title="Plugin bundle file paths are safe and self-contained" testable=true verify=todo -->
 ### PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained
 
 Each plugin manifest `files[]` entry and the manifest `entry` value MUST be a canonical safe relative path.
@@ -669,7 +669,7 @@ Core MUST treat the body as an uninterpreted string (except for link extraction;
 
 ## 5.1 Plugin manifest file format
 
-<!-- req:id=PLUG-FR-001 title="Plugin manifest YAML front matter is required" testable=true -->
+<!-- req:id=PLUG-FR-001 title="Plugin manifest YAML front matter is required" testable=true verify=todo -->
 ### PLUG-FR-001 — Plugin manifest YAML front matter is required
 
 Every plugin manifest file MUST start with YAML front matter delimited by:
@@ -689,7 +689,7 @@ Validation MUST fail if:
 
 The plugin manifest body is optional and treated as uninterpreted Markdown text (PLUG-FR-003).
 
-<!-- req:id=PLUG-FR-002 title="Required top-level keys for plugin manifests" testable=true -->
+<!-- req:id=PLUG-FR-002 title="Required top-level keys for plugin manifests" testable=true verify=todo -->
 
 ### PLUG-FR-002 — Required top-level keys for plugin manifests
 
@@ -1009,7 +1009,7 @@ If any cycle is present (including self-parenting), validation MUST fail.
 
 ## 9.4 Plugin validity and integrity rules
 
-<!-- req:id=VAL-PLUG-001 title="Plugin manifests must parse and satisfy PLUG-FR-002" testable=true -->
+<!-- req:id=VAL-PLUG-001 title="Plugin manifests must parse and satisfy PLUG-FR-002" testable=true verify=todo -->
 ### VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
 
 Validation MUST fail if any discovered plugin manifest file:
@@ -1023,14 +1023,14 @@ Recommended error codes:
 * `E_PLUGIN_MANIFEST_INVALID`
 * `E_PLUGIN_KEYS_INVALID`
 
-<!-- req:id=VAL-PLUG-002 title="pluginId must be unique" testable=true -->
+<!-- req:id=VAL-PLUG-002 title="pluginId must be unique" testable=true verify=todo -->
 ### VAL-PLUG-002 — pluginId must be unique
 
 If two plugin manifests declare the same `pluginId`, validation MUST fail.
 
 Validation failure MUST include stable error code `E_PLUGIN_DUPLICATE_ID` and should attribute both manifest file paths when possible.
 
-<!-- req:id=VAL-PLUG-003 title="Plugin entry must exist and be included" testable=true -->
+<!-- req:id=VAL-PLUG-003 title="Plugin entry must exist and be included" testable=true verify=todo -->
 ### VAL-PLUG-003 — Plugin entry must exist and be included
 
 For each plugin manifest:
@@ -1041,7 +1041,7 @@ For each plugin manifest:
 
 Validation MUST fail otherwise with error code `E_PLUGIN_ENTRY_INVALID`.
 
-<!-- req:id=VAL-PLUG-004 title="Plugin bundle file paths must resolve safely and exist" testable=true -->
+<!-- req:id=VAL-PLUG-004 title="Plugin bundle file paths must resolve safely and exist" testable=true verify=todo -->
 ### VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist
 
 For each plugin manifest at path `M` and each declared file `p` in `files[]`:
@@ -1066,7 +1066,7 @@ Recommended error codes:
 * `E_PLUGIN_FILE_KIND_FORBIDDEN`
 * `E_PLUGIN_FILES_DUPLICATE`
 
-<!-- req:id=VAL-PLUG-005 title="Plugin bundle files must be UTF-8 decodable" testable=true -->
+<!-- req:id=VAL-PLUG-005 title="Plugin bundle files must be UTF-8 decodable" testable=true verify=todo -->
 ### VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable
 
 For determinism and hashing portability, every plugin bundle file MUST be decodable as UTF-8 text.
@@ -1076,7 +1076,7 @@ Validation MUST fail if UTF-8 decoding fails for any plugin bundle file.
 Note:
 Binary assets SHOULD be stored as blocks and referenced by CID via plugin runtime mechanisms (plugin-defined), not as raw plugin bundle files.
 
-<!-- req:id=VAL-PLUG-006 title="Plugin bundle must not contain reserved export paths" testable=true -->
+<!-- req:id=VAL-PLUG-006 title="Plugin bundle must not contain reserved export paths" testable=true verify=todo -->
 ### VAL-PLUG-006 — Plugin bundle must not contain reserved export paths
 
 For each plugin manifest:
@@ -1088,7 +1088,7 @@ The canonical export path for the plugin manifest is `plugins/<pluginId>/manifes
 
 Validation MUST fail with error code `E_PLUGIN_PATH_RESERVED`.
 
-<!-- req:id=VAL-PLUG-007 title="Plugin-declared block dependencies must be valid CIDs" testable=true -->
+<!-- req:id=VAL-PLUG-007 title="Plugin-declared block dependencies must be valid CIDs" testable=true verify=todo -->
 ### VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs
 
 If a plugin manifest defines `blocks`, then:
@@ -1099,7 +1099,7 @@ If a plugin manifest defines `blocks`, then:
 
 Validation MUST fail otherwise with error code `E_PLUGIN_BLOCK_CID_INVALID`.
 
-<!-- req:id=VAL-PLUG-008 title="Plugin-declared block dependencies must resolve to matching block bytes" testable=true -->
+<!-- req:id=VAL-PLUG-008 title="Plugin-declared block dependencies must resolve to matching block bytes" testable=true verify=todo -->
 ### VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes
 
 For every CID listed in any plugin manifest `blocks[]`:
@@ -1223,7 +1223,7 @@ Importer **MUST** reject URLs that specify a subdirectory after `/tree/<ref>/` a
 
 Unauthenticated import from public repositories MUST work for MVP.
 
-<!-- req:id=IMP-PLUG-001 title="Importers must include plugin manifests and bundles" testable=true -->
+<!-- req:id=IMP-PLUG-001 title="Importers must include plugin manifests and bundles" testable=true verify=todo -->
 ### IMP-PLUG-001 — Importers must include plugin manifests and bundles
 
 When importing a dataset snapshot, implementations MUST include:
@@ -1290,7 +1290,7 @@ Record objects:
 Reachable blocks:
 * The canonical dataset export MUST include reachable block files per EXP-006, preserving canonical block store paths (BLOCK-LAYOUT-001).
 
-<!-- req:id=EXP-PLUG-001 title="Canonical plugin export layout" testable=true -->
+<!-- req:id=EXP-PLUG-001 title="Canonical plugin export layout" testable=true verify=todo -->
 ### EXP-PLUG-001 — Canonical plugin export layout
 
 For each plugin object with `pluginId = P`, canonical export MUST include:
