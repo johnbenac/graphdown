@@ -18,7 +18,9 @@
   ],
   "scripts": {
     "postinstall": "npm --workspace apps/web run playwright:install",
-    "lint": "eslint \"packages/core/src/**/*.ts\"",
+    "lint:core": "eslint \"packages/core/src/**/*.{ts,tsx}\"",
+    "lint:web": "eslint \"apps/web/src/**/*.{ts,tsx}\"",
+    "lint": "npm run lint:core && npm run lint:web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:core-scope": "node tools/check-tsc-build-scope.cjs",

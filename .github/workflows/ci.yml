@@ -68,8 +68,15 @@ jobs:
           cache: 'npm'
       - name: Install
         run: npm ci
-      - name: Build
-        run: npx tsc -p packages/core/tsconfig.json --outDir dist/core --rootDir packages/core/src --module commonjs --moduleResolution node --target ES2022 --esModuleInterop
+      - name: Build core for dataset validation (CommonJS)
+        run: |
+          CORE_DIST="${{ runner.temp }}/core-dist"
+          NODE_PATH="${{ github.workspace }}/node_modules"
+          echo "CORE_DIST=$CORE_DIST" >> "$GITHUB_ENV"
+          echo "NODE_PATH=$NODE_PATH" >> "$GITHUB_ENV"
+          rm -rf "$CORE_DIST"
+          npx tsc -p packages/core/tsconfig.build.cjs.json --outDir "$CORE_DIST"
+          NODE_PATH="$NODE_PATH" node -e "require('fs').accessSync(process.env.CORE_DIST + '/index.js'); console.log('core build ok')"
       - name: Validate research-lab-dataset (JSON)
         run: |
           set -euo pipefail
@@ -78,7 +85,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/core/index.js');
+          const { validateDatasetSnapshot } = require(process.env.CORE_DIST + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -114,7 +121,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/core/index.js');
+          const { validateDatasetSnapshot } = require(process.env.CORE_DIST + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();

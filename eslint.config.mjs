@@ -44,17 +44,34 @@ export default [
     }
   },
   {
+    files: [
+      'packages/core/src/**/__tests__/**/*.{ts,tsx}',
+      'apps/web/src/**/__tests__/**/*.{ts,tsx}',
+      'packages/core/src/**/*.test.{ts,tsx}',
+      'packages/core/src/**/*.spec.{ts,tsx}',
+      'apps/web/src/**/*.test.{ts,tsx}',
+      'apps/web/src/**/*.spec.{ts,tsx}'
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
+  },
+  {
     files: ['apps/web/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
-            '@graphdown/core/*',
-            '@graphdown/core/src/*',
-            '@graphdown/core/src/**'
-          ],
-          message: 'Import from @graphdown/core (package barrel) only.'
+            {
+              group: [
+                '@graphdown/core/*',
+                '@graphdown/core/src/*',
+                '@graphdown/core/src/**'
+              ],
+              message: 'Import from @graphdown/core (package barrel) only.'
+            }
+          ]
         }
       ]
     }
