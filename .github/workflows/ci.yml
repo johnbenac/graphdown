@@ -58,6 +58,8 @@ jobs:
 
   validate-example-datasets:
     runs-on: ubuntu-latest
+    env:
+      CORE_DIST: ${{ github.workspace }}/.ci/core-dist-cjs
     steps:
       - name: Checkout graphdown
         uses: actions/checkout@v4
@@ -70,22 +72,34 @@ jobs:
         run: npm ci
       - name: Build core for dataset validation (CommonJS)
         run: |
-          CORE_DIST="${{ runner.temp }}/core-dist"
-          NODE_PATH="${{ github.workspace }}/node_modules"
-          echo "CORE_DIST=$CORE_DIST" >> "$GITHUB_ENV"
-          echo "NODE_PATH=$NODE_PATH" >> "$GITHUB_ENV"
+          set -euo pipefail
           rm -rf "$CORE_DIST"
+          mkdir -p "$CORE_DIST"
           npx tsc -p packages/core/tsconfig.build.cjs.json --outDir "$CORE_DIST"
-          NODE_PATH="$NODE_PATH" node -e "require('fs').accessSync(process.env.CORE_DIST + '/index.js'); console.log('core build ok')"
+
+          node -e "
+            const coreDist = process.env.CORE_DIST;
+            if (!coreDist) throw new Error('CORE_DIST not set');
+            require('fs').accessSync(coreDist + '/index.js');
+            console.log('core build ok');
+          "
       - name: Validate research-lab-dataset (JSON)
         run: |
           set -euo pipefail
           rm -rf /tmp/research-lab-dataset
           git clone --depth 1 https://github.com/johnbenac/research-lab-dataset.git /tmp/research-lab-dataset
+
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require(process.env.CORE_DIST + '/index.js');
+
+          const coreDist = process.env.CORE_DIST;
+          if (!coreDist) {
+            console.error('CORE_DIST env var not set');
+            process.exit(1);
+          }
+
+          const { validateDatasetSnapshot } = require(coreDist + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -93,9 +107,8 @@ jobs:
               for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
                 if (entry.name === '.git') continue;
                 const full = path.join(dir, entry.name);
-                if (entry.isDirectory()) {
-                  walk(full);
-                } else if (entry.isFile()) {
+                if (entry.isDirectory()) walk(full);
+                else if (entry.isFile()) {
                   const rel = path.relative(root, full).split(path.sep).join('/');
                   files.set(rel, fs.readFileSync(full));
                 }
@@ -118,10 +131,18 @@ jobs:
           set -euo pipefail
           rm -rf /tmp/product-tracker-dataset
           git clone --depth 1 https://github.com/johnbenac/product-tracker-dataset.git /tmp/product-tracker-dataset
+
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require(process.env.CORE_DIST + '/index.js');
+
+          const coreDist = process.env.CORE_DIST;
+          if (!coreDist) {
+            console.error('CORE_DIST env var not set');
+            process.exit(1);
+          }
+
+          const { validateDatasetSnapshot } = require(coreDist + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -129,9 +150,8 @@ jobs:
               for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
                 if (entry.name === '.git') continue;
                 const full = path.join(dir, entry.name);
-                if (entry.isDirectory()) {
-                  walk(full);
-                } else if (entry.isFile()) {
+                if (entry.isDirectory()) walk(full);
+                else if (entry.isFile()) {
                   const rel = path.relative(root, full).split(path.sep).join('/');
                   files.set(rel, fs.readFileSync(full));
                 }

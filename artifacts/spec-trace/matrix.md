@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-12T18:49:27.758Z
+Generated: 2026-01-12T22:19:29.692Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout

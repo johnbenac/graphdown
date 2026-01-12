@@ -17,7 +17,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "npm --workspace apps/web run playwright:install",
+    "postinstall": "node tools/postinstall.cjs",
     "lint:core": "eslint \"packages/core/src/**/*.{ts,tsx}\"",
     "lint:web": "eslint \"apps/web/src/**/*.{ts,tsx}\"",
     "lint": "npm run lint:core && npm run lint:web",
