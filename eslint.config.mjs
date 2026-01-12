@@ -45,6 +45,22 @@ export default [
     }
   },
   {
+    files: ['apps/web/src/graphdown/**/*.{ts,tsx}'],
+    ignores: [
+      'apps/web/src/graphdown/**/__tests__/**',
+      'apps/web/src/graphdown/**/*.test.*',
+      'apps/web/src/graphdown/**/*.spec.*'
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/__tests__/**', '**/__fixtures__/**']
+        }
+      ]
+    }
+  },
+  {
     files: ['apps/web/src/**/*.{ts,tsx}'],
     ignores: ['apps/web/src/graphdown/**/*'],
     rules: {
