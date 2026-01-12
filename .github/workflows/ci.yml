@@ -20,8 +20,6 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
-      - name: Build
-        run: npm run build
       - name: Build web (typecheck + vite build)
         run: npm run build:web
       - name: Web unit tests (vitest)
@@ -72,17 +70,17 @@ jobs:
           cache: 'npm'
       - name: Install
         run: npm ci
-      - name: Build
-        run: npm run build
+      - name: Build core for dataset validation
+        run: npx tsc -p packages/core/tsconfig.json --outDir /tmp/core-dist
       - name: Validate research-lab-dataset (JSON)
         run: |
           set -euo pipefail
           rm -rf /tmp/research-lab-dataset
           git clone --depth 1 https://github.com/johnbenac/research-lab-dataset.git /tmp/research-lab-dataset
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/graphdown');
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { validateDatasetSnapshot } from '/tmp/core-dist/index.js';
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -115,10 +113,10 @@ jobs:
           set -euo pipefail
           rm -rf /tmp/product-tracker-dataset
           git clone --depth 1 https://github.com/johnbenac/product-tracker-dataset.git /tmp/product-tracker-dataset
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/graphdown');
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { validateDatasetSnapshot } from '/tmp/core-dist/index.js';
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();

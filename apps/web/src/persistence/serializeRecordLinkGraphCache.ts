@@ -1,4 +1,4 @@
-import type { RecordLinkGraph, RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
 import type { PersistedRecordLinkGraphCache } from "./types";
 
 class RecordLinkGraphCacheImpl implements RecordLinkGraph {

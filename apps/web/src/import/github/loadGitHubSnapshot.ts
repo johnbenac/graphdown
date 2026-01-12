@@ -1,4 +1,4 @@
-import { isRecordFileBytes, type DatasetSnapshot } from "../../graphdown";
+import { isRecordFileBytes, type DatasetSnapshot } from "@graphdown/core";
 import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 

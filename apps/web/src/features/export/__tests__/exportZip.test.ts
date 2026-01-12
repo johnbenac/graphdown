@@ -1,9 +1,9 @@
 import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
-import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes } from "../../../graphdown";
-import type { DatasetSnapshot } from "../../../graphdown";
-import { buildDatasetZipBytes } from "../../../graphdown";
-import { loadDatasetSnapshotFromZipBytes } from "../../../graphdown";
+import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/core";
+import { buildDatasetZipBytes } from "@graphdown/core";
+import { loadDatasetSnapshotFromZipBytes } from "@graphdown/core";
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
