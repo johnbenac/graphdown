@@ -48,7 +48,7 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
       await store.set(KEY.activeMeta, meta);
     },
     async loadActiveDataset() {
-      let meta = await store.get<DatasetMeta>(KEY.activeMeta);
+      const meta = await store.get<DatasetMeta>(KEY.activeMeta);
       const snapshotPayload = await store.get<PersistedDatasetSnapshot>(KEY.activeSnapshot);
       const storedGraph = await store.get<PersistedRecordLinkGraphCache>(KEY.activeRecordLinkGraphCache);
       if (!meta || !snapshotPayload || !storedGraph) {

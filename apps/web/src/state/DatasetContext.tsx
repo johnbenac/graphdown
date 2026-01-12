@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { ValidationError } from "@graphdown/core";
+import type { RecordLinkGraph, ValidationError } from "@graphdown/core";
 import { makeError } from "@graphdown/core";
 import { canonicalizeDatasetSnapshot } from "@graphdown/core";
 import { buildRecordLinkGraphFromSnapshot } from "@graphdown/core";
@@ -88,15 +88,6 @@ function encodeText(text: string): Uint8Array {
   return Uint8Array.from(text.split("").map((char) => char.charCodeAt(0)));
 }
 
-async function buildRecordLinkGraphOrThrow(snapshot: DatasetSnapshot) {
-  const result = buildRecordLinkGraphFromSnapshot(snapshot);
-  if (!result.ok) {
-    const errorMessages = result.errors.map((error) => error.message).join("\n");
-    throw new Error(`Record Link Graph build failed:\n${errorMessages}`);
-  }
-  return result.graph;
-}
-
 function buildPersistenceError(err: unknown): ImportErrorState {
   return {
     category: "persistence_unavailable",
@@ -182,7 +173,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       label: string,
       datasetSnapshot: DatasetSnapshot,
-      recordLinkGraph: Awaited<ReturnType<typeof buildRecordLinkGraphOrThrow>>,
+      recordLinkGraph: RecordLinkGraph,
       importReport?: ImportReport
     ) => {
       if (!persistence) {
@@ -379,7 +370,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       nextSnapshot: DatasetSnapshot
     ): Promise<
-      | { ok: true; recordLinkGraph: Awaited<ReturnType<typeof buildRecordLinkGraphOrThrow>> }
+      | { ok: true; recordLinkGraph: RecordLinkGraph }
       | { ok: false; errors: ValidationError[] }
     > => {
       const validation = validateDatasetSnapshot(nextSnapshot);
