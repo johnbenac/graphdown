@@ -5,7 +5,7 @@ It ships:
 
 - the **standard** (`SPEC.md`) — the single source of truth
 - a **web app** (`apps/web`) for importing/browsing/editing datasets
-- a **core domain library** (`apps/web/src/graphdown`) for parsing, validation, hashing, and export/import helpers
+- a **core domain library** (`packages/core/src`) for parsing, validation, hashing, and export/import helpers
 
 > If anything conflicts with `SPEC.md`, `SPEC.md` wins.
 
@@ -151,6 +151,6 @@ Reference datasets used for compatibility checks:
 
 * `SPEC.md` — Graphdown standard (normative)
 * `apps/web/` — React/Vite web app
-* `apps/web/src/graphdown/` — core parsing/validation/hashing/export/import utilities
+* `packages/core/src/` — core parsing/validation/hashing/export/import utilities
 * `docs/` — developer concept docs (glossary, graphs, snapshots/layout)
 * `artifacts/spec-trace/` — generated spec-to-test traceability artifacts

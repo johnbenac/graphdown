@@ -1,5 +1,5 @@
-import type { RecordLinkGraph } from "../graphdown";
-import type { DatasetSnapshot } from "../graphdown";
+import type { RecordLinkGraph } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/core";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
 import {

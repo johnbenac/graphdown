@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../graphdown";
+import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
 
 type RecordViewerProps = {
   record: RecordLinkGraphRecordNode;

@@ -1,5 +1,9 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
 
@@ -17,6 +21,11 @@ function normalizeBase(base: string | undefined): string {
 export default defineConfig({
   base: normalizeBase(pagesBase),
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@graphdown/core": path.resolve(__dirname, "../../packages/core/src")
+    }
+  },
   server: {
     port: 5173,
     host: true

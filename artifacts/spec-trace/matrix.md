@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-12T16:49:27.897Z
+Generated: 2026-01-12T18:49:27.758Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -32,7 +32,7 @@ Tests (0):
 
 ## GOV-002 — Verification matrix must match spec (testable=true)
 Tests (1):
-- apps/web/src/__tests__/governance/spec-trace-matrix.test.ts — "GOV-002: spec-trace output matches committed matrix"
+- packages/core/src/__tests__/governance/spec-trace-matrix.test.ts — "GOV-002: spec-trace output matches committed matrix"
 
 ## P-001 — Repository-first, record-canonical (testable=false)
 Tests (0):
@@ -52,11 +52,11 @@ Tests (0):
 
 ## NR-UI-002 — UI hint keys are ignored by core validation (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/gaps.test.ts — "NR-UI-002: arbitrary keys inside fields are accepted"
+- packages/core/src/__tests__/gaps.test.ts — "NR-UI-002: arbitrary keys inside fields are accepted"
 
 ## NR-SEM-001 — No semantic validation of fields (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/gaps.test.ts — "NR-SEM-001: semantic shapes are ignored by validation"
+- packages/core/src/__tests__/gaps.test.ts — "NR-SEM-001: semantic shapes are ignored by validation"
 
 ## NR-SEC-001 — No security hardening requirement (testable=false)
 Tests (0):
@@ -64,7 +64,7 @@ Tests (0):
 
 ## NR-LINK-001 — No requirement that links resolve
 Tests (1):
-- apps/web/src/graphdown/__tests__/gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
+- packages/core/src/__tests__/gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
 ## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true, verify=todo)
 Tests (0):
@@ -84,9 +84,9 @@ Tests (0):
 
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):
-- apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: accepts valid identifiers"
-- apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects recordId with colon"
-- apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
+- packages/core/src/__tests__/ids.test.ts — "ID-001: accepts valid identifiers"
+- packages/core/src/__tests__/ids.test.ts — "ID-001: rejects recordId with colon"
+- packages/core/src/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
 
 ## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true, verify=todo)
 Tests (0):
@@ -98,66 +98,66 @@ Tests (0):
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (3):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-001: duplicate identities fail hashing"
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-001: line ending normalization yields stable hashes"
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-001: non-record files are ignored"
+- packages/core/src/__tests__/hash.test.ts — "HASH-001: duplicate identities fail hashing"
+- packages/core/src/__tests__/hash.test.ts — "HASH-001: line ending normalization yields stable hashes"
+- packages/core/src/__tests__/hash.test.ts — "HASH-001: non-record files are ignored"
 
 ## HASH-002 — Schema fingerprint (types only)
 Tests (1):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-002: schema fingerprint ignores record object changes"
+- packages/core/src/__tests__/hash.test.ts — "HASH-002: schema fingerprint ignores record object changes"
 
 ## HASH-003 — Snapshot fingerprint (types + record objects + plugin objects)
 Tests (1):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-003: snapshot hash is path-independent for record files"
+- packages/core/src/__tests__/hash.test.ts — "HASH-003: snapshot hash is path-independent for record files"
 
 ## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-004: invalid hash scope fails with E_USAGE"
+- packages/core/src/__tests__/hash.test.ts — "HASH-004: invalid hash scope fails with E_USAGE"
 
 ## HASH-005 — Block content is committed by reference CIDs (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/hash.test.ts — "HASH-005: snapshot hash ignores block store bytes"
+- packages/core/src/__tests__/hash.test.ts — "HASH-005: snapshot hash ignores block store bytes"
 
 ## BLOCK-001 — Canonical block digest (sha256) (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/cid.test.ts — "BLOCK-001: digest embedded in CID is sha2-256(bytes)"
+- packages/core/src/__tests__/cid.test.ts — "BLOCK-001: digest embedded in CID is sha2-256(bytes)"
 
 ## CID-001 — CID test vector for empty bytes (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/cid.test.ts — "CID-001: cidFromRawBytes handles empty input"
+- packages/core/src/__tests__/cid.test.ts — "CID-001: cidFromRawBytes handles empty input"
 
 ## CID-002 — CID test vector for hello (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/cid.test.ts — "CID-002: cidFromRawBytes handles hello"
+- packages/core/src/__tests__/cid.test.ts — "CID-002: cidFromRawBytes handles hello"
 
 ## CID-003 — CID test vector for abc (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/cid.test.ts — "CID-003: cidFromRawBytes handles abc"
+- packages/core/src/__tests__/cid.test.ts — "CID-003: cidFromRawBytes handles abc"
 
 ## CID-004 — Decoded CID exposes raw codec and digest (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/cid.test.ts — "CID-004: decodeDaslCidString round-trips and exposes digest"
+- packages/core/src/__tests__/cid.test.ts — "CID-004: decodeDaslCidString round-trips and exposes digest"
 
 ## LAYOUT-001 — Record files are discovered by content (not path) (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "LAYOUT-001: no recordId means the object is treated as a type"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "LAYOUT-001: no recordId means the object is treated as a type"
 
 ## LAYOUT-002 — One object per file (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/layout.test.ts — "LAYOUT-002: only first front matter block defines a record object"
+- packages/core/src/__tests__/layout.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
 ## BLOCK-LAYOUT-001 — Block store paths are derived from CID (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
+- packages/core/src/__tests__/blocks.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
 
 ## BLOCK-LAYOUT-002 — Only canonical block files are allowed in the block store (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: blocks namespace is fully reserved"
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: invalid block path shape fails validation"
+- packages/core/src/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: blocks namespace is fully reserved"
+- packages/core/src/__tests__/blocks.test.ts — "BLOCK-LAYOUT-002: invalid block path shape fails validation"
 
 ## BLOCK-LAYOUT-003 — Non-record, non-block-store, non-plugin files are non-semantic (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
+- packages/core/src/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
 ## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=todo)
 Tests (0):
@@ -181,27 +181,27 @@ Tests (0):
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):
-- apps/web/src/graphdown/__tests__/frontMatter.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
-- apps/web/src/graphdown/__tests__/frontMatter.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: invalid YAML fails validation"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: missing YAML front matter fails validation"
-- apps/web/src/graphdown/__tests__/yaml.test.ts — "FR-MD-020: invalid YAML fails parsing"
-- apps/web/src/graphdown/__tests__/yaml.test.ts — "FR-MD-020: non-object YAML front matter is invalid"
-- apps/web/src/graphdown/__tests__/yaml.test.ts — "FR-MD-020: parses YAML objects"
+- packages/core/src/__tests__/frontMatter.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
+- packages/core/src/__tests__/frontMatter.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: invalid YAML fails validation"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: missing YAML front matter fails validation"
+- packages/core/src/__tests__/yaml.test.ts — "FR-MD-020: invalid YAML fails parsing"
+- packages/core/src/__tests__/yaml.test.ts — "FR-MD-020: non-object YAML front matter is invalid"
+- packages/core/src/__tests__/yaml.test.ts — "FR-MD-020: parses YAML objects"
 
 ## FR-MD-021 — Required top-level keys for type objects (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-021: fields must be an object"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-021: type objects must not define parent"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-021: fields must be an object"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-021: type objects must not define parent"
 
 ## FR-MD-023 — Required top-level keys for record objects (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-023: record objects may include parent"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-023: recordId must be a string identifier when present"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-023: record objects may include parent"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-023: recordId must be a string identifier when present"
 
 ## FR-MD-022 — Body is raw Markdown
 Tests (1):
-- apps/web/src/graphdown/__tests__/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
+- packages/core/src/__tests__/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
 
 ## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true, verify=todo)
 Tests (0):
@@ -217,43 +217,43 @@ Tests (0):
 
 ## EXT-001 — Type/record top-level vocabulary is fixed (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/reserved-vocabulary.test.ts — "EXT-001: extra top-level keys are forbidden"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "EXT-001: extra top-level keys are rejected"
+- packages/core/src/__tests__/reserved-vocabulary.test.ts — "EXT-001: extra top-level keys are forbidden"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "EXT-001: extra top-level keys are rejected"
 
 ## EXT-002 — `fields` is open
 Tests (1):
-- apps/web/src/graphdown/__tests__/reserved-vocabulary.test.ts — "EXT-002: accepts arbitrary shapes within fields"
+- packages/core/src/__tests__/reserved-vocabulary.test.ts — "EXT-002: accepts arbitrary shapes within fields"
 
 ## TYPE-001 — Types are defined by type objects (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/ids.test.ts — "TYPE-001: type object without recordId is valid"
+- packages/core/src/__tests__/ids.test.ts — "TYPE-001: type object without recordId is valid"
 
 ## TYPE-002 — typeId uniqueness (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/ids.test.ts — "TYPE-002: duplicate typeId fails validation"
+- packages/core/src/__tests__/ids.test.ts — "TYPE-002: duplicate typeId fails validation"
 
 ## TYPE-004 — fieldDefs shape (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/gaps.test.ts — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
+- packages/core/src/__tests__/gaps.test.ts — "TYPE-004: fieldDefs must be map of objects; required must be boolean when present"
 
 ## TYPE-COMP-001 — composition shape (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/composition.test.ts — "TYPE-COMP-001: composition component must include required boolean"
-- apps/web/src/graphdown/__tests__/composition.test.ts — "TYPE-COMP-001: composition must be a map with only typeId + required"
+- packages/core/src/__tests__/composition.test.ts — "TYPE-COMP-001: composition component must include required boolean"
+- packages/core/src/__tests__/composition.test.ts — "TYPE-COMP-001: composition must be a map with only typeId + required"
 
 ## REL-001 — Record relationships use composite wiki-links (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "REL-001: legacy blob references are not treated as record relationships"
+- packages/core/src/__tests__/wikiRefs.test.ts — "REL-001: legacy blob references are not treated as record relationships"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/graph.test.ts — "REL-002: does not synthesize links across separate string values"
-- apps/web/src/graphdown/__tests__/graph.test.ts — "REL-002: extracts record links from bodies and fields"
+- packages/core/src/__tests__/graph.test.ts — "REL-002: does not synthesize links across separate string values"
+- packages/core/src/__tests__/graph.test.ts — "REL-002: extracts record links from bodies and fields"
 
 ## REL-003 — Record reference normalization (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "REL-003: extracts record references from wiki-link tokens"
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "REL-003: ignores malformed record tokens and aliases"
+- packages/core/src/__tests__/wikiRefs.test.ts — "REL-003: extracts record references from wiki-link tokens"
+- packages/core/src/__tests__/wikiRefs.test.ts — "REL-003: ignores malformed record tokens and aliases"
 
 ## REL-004 — Preservation: do not rewrite link spellings (testable=false)
 Tests (0):
@@ -270,16 +270,16 @@ Tests (1):
 
 ## CID-REF-001 — Block references use CID wiki-link tokens (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "CID-REF-001: split strings do not synthesize CID references"
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "CID-REF-001: extracts CID references"
+- packages/core/src/__tests__/blocks.test.ts — "CID-REF-001: split strings do not synthesize CID references"
+- packages/core/src/__tests__/wikiRefs.test.ts — "CID-REF-001: extracts CID references"
 
 ## CID-REF-002 — CID reference normalization is strict (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/wikiRefs.test.ts — "CID-REF-002: ignores non-CID tokens"
+- packages/core/src/__tests__/wikiRefs.test.ts — "CID-REF-002: ignores non-CID tokens"
 
 ## HIER-001 — Record hierarchy uses explicit parent pointers (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "HIER-001: parent missing and parent null both define hierarchy roots"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "HIER-001: parent missing and parent null both define hierarchy roots"
 
 ## VAL-001 — Type/records/plugins/blocks must be internally consistent
 Tests (1):
@@ -287,43 +287,43 @@ Tests (1):
 
 ## VAL-002 — Identity uniqueness rules (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/graph.test.ts — "VAL-002: duplicate record identity fails Record Link Graph build"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-002: duplicate record identity fails validation"
+- packages/core/src/__tests__/graph.test.ts — "VAL-002: duplicate record identity fails Record Link Graph build"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-002: duplicate record identity fails validation"
 
 ## VAL-003 — Record objects must reference an existing type (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-003: record referencing missing type fails validation"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-003: record referencing missing type fails validation"
 
 ## VAL-005 — Required fields (schema-driven)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-005: required fields enforced when fieldDefs.required = true"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-005: required fields enforced when fieldDefs.required = true"
 
 ## VAL-006 — No semantic validation of values
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-006: semantic validation of field values is not enforced"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-006: semantic validation of field values is not enforced"
 
 ## VAL-COMP-001 — Composition referenced types must exist
 Tests (1):
-- apps/web/src/graphdown/__tests__/composition.test.ts — "VAL-COMP-001: composition referenced types must exist"
+- packages/core/src/__tests__/composition.test.ts — "VAL-COMP-001: composition referenced types must exist"
 
 ## VAL-COMP-002 — Required components must be satisfied by outgoing record links
 Tests (3):
-- apps/web/src/graphdown/__tests__/composition.test.ts — "VAL-COMP-002: link to wrong type does not satisfy requirement"
-- apps/web/src/graphdown/__tests__/composition.test.ts — "VAL-COMP-002: missing required component link fails"
-- apps/web/src/graphdown/__tests__/composition.test.ts — "VAL-COMP-002: required component link resolves to correct type"
+- packages/core/src/__tests__/composition.test.ts — "VAL-COMP-002: link to wrong type does not satisfy requirement"
+- packages/core/src/__tests__/composition.test.ts — "VAL-COMP-002: missing required component link fails"
+- packages/core/src/__tests__/composition.test.ts — "VAL-COMP-002: required component link resolves to correct type"
 
 ## VAL-PARENT-001 — Parent field shape is strict (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-001: invalid parent shapes fail validation"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-001: invalid parent shapes fail validation"
 
 ## VAL-PARENT-002 — Parent pointers must resolve (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-002: parent pointers must resolve to an existing record"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-002: parent pointers must resolve to an existing record"
 
 ## VAL-PARENT-003 — Record hierarchy must be acyclic (testable=true)
 Tests (2):
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
-- apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
+- packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
 ## VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002 (testable=true, verify=todo)
 Tests (0):
@@ -359,15 +359,15 @@ Tests (0):
 
 ## VAL-CID-001 — Invalid CID-shaped block reference tokens fail validation (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-CID-001: invalid CID-shaped tokens fail validation"
+- packages/core/src/__tests__/blocks.test.ts — "VAL-CID-001: invalid CID-shaped tokens fail validation"
 
 ## VAL-BLOCK-001 — Block references must resolve to matching block bytes (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-BLOCK-001: referenced block must exist"
+- packages/core/src/__tests__/blocks.test.ts — "VAL-BLOCK-001: referenced block must exist"
 
 ## VAL-BLOCK-002 — Block store files must match their CID digest (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
+- packages/core/src/__tests__/blocks.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
 
 ## GC-001 — Reachable block set is computed from declared block dependencies (testable=true)
 Tests (1):
@@ -375,15 +375,15 @@ Tests (1):
 
 ## GC-002 — Unreferenced blocks are garbage and are excluded from canonical dataset export (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blocks"
+- packages/core/src/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blocks"
 
 ## GC-003 — Garbage blocks do not make a dataset invalid (testable=true)
 Tests (1):
-- apps/web/src/graphdown/__tests__/blocks.test.ts — "GC-003: unreferenced but valid blocks do not fail validation"
+- packages/core/src/__tests__/blocks.test.ts — "GC-003: unreferenced but valid blocks do not fail validation"
 
 ## ERR-001 — File-specific errors when possible
 Tests (1):
-- apps/web/src/graphdown/__tests__/errors.test.ts — "ERR-001: validation errors expose stable fields"
+- packages/core/src/__tests__/errors.test.ts — "ERR-001: validation errors expose stable fields"
 
 ## ERR-002 — Clear failure categories for GitHub import
 Tests (2):
@@ -422,12 +422,12 @@ Tests (0):
 Tests (3):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-003: canonical dataset export excludes non-graph files"
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-003: canonical dataset export ignores imported record/type file paths"
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
+- packages/core/src/__tests__/roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
 
 ## EXP-006 — Canonical dataset export includes reachable blocks (testable=true)
 Tests (2):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-006: includes only referenced blocks alongside canonical records/types"
-- apps/web/src/graphdown/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blocks"
+- packages/core/src/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blocks"
 
 ## EXP-HIER-001 — Canonical parent-based export layout (testable=true)
 Tests (1):
@@ -481,29 +481,29 @@ Tests (0):
 
 ## API-001 — Runtime API is explicitly versioned (testable=true)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-001: runtime api v1 is explicitly versioned"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-001: runtime api v1 is explicitly versioned"
 
 ## API-002 — Capabilities are discoverable (testable=true)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-002: capabilities are discoverable and include gd.api.read"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-002: capabilities are discoverable and include gd.api.read"
 
 ## API-003 — All Runtime API operations are asynchronous (testable=false)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-003: all Runtime API operations are asynchronous (thenable)"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-003: all Runtime API operations are asynchronous (thenable)"
 
 ## API-004 — Runtime API addresses objects by Graphdown identities (testable=true)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
 
 ## API-005 — Runtime API payloads are structured-clone compatible (testable=false)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-005: Runtime API payloads are structured-clone compatible"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-005: Runtime API payloads are structured-clone compatible"
 
 ## API-ERR-001 — Errors are structured and include stable codes (testable=false)
 Tests (3):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: invalid CID argument rejects with structured error"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: open fails with structured error when structuredClone is unavailable"
+- packages/core/src/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint"
+- packages/core/src/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: invalid CID argument rejects with structured error"
+- packages/core/src/runtime/__tests__/runtimeApiV1.errors.test.ts — "API-ERR-001: open fails with structured error when structuredClone is unavailable"
 
 ## API-SESSION-001 — Runtime API can open a session from a snapshot (testable=false)
 Tests (0):
@@ -511,11 +511,11 @@ Tests (0):
 
 ## API-SESSION-002 — Read operations are side-effect free (testable=false)
 Tests (5):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: block bytes are returned as copies"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: getType returns isolated copies"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: listRecordsByType returns isolated copies"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: raw bytes are returned as copies"
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: block bytes are returned as copies"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: getType returns isolated copies"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: listRecordsByType returns isolated copies"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: raw bytes are returned as copies"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)"
 
 ## API-SHAPE-001 — Type object view shape (testable=false)
 Tests (0):
@@ -575,11 +575,11 @@ Tests (0):
 
 ## API-DET-001 — Read results are deterministic for a fixed snapshot (testable=false)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-DET-001: read results are deterministic for a fixed snapshot"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-DET-001: read results are deterministic for a fixed snapshot"
 
 ## API-DET-002 — List order is stable and documented (testable=false)
 Tests (1):
-- apps/web/src/graphdown/runtime/__tests__/runtimeApiV1.test.ts — "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views"
+- packages/core/src/runtime/__tests__/runtimeApiV1.test.ts — "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views"
 
 ## API-PARK-000 — Parked requirements are capability-conditional (testable=false)
 Tests (0):

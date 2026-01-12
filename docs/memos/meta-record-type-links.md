@@ -13,7 +13,7 @@ This memo discusses *type-level dependency ideas* beyond the current core standa
 - Type objects are not scanned for relationships (REL-002).
 
 In implementation terms, the UI builds and uses the **Record Link Graph**:
-- `apps/web/src/graphdown/graph/graph.ts`
+- `packages/core/src/graph/graph.ts`
 
 ### Parent hierarchy is separate and structural
 - Record hierarchy is defined only by the top-level YAML key `parent` (HIER-001).
@@ -44,7 +44,7 @@ Goal: allow a type to declare richer expectations on related records so creation
 
 ### Touchpoints if we implement stronger type-level dependencies
 - **Spec**: new requirement IDs under Types/Relationships; clarify whether they are suggestions, warnings, or hard MUST rules.
-- **Validator**: `apps/web/src/graphdown/validate/validateDatasetSnapshot.ts`
+- **Validator**: `packages/core/src/validate/validateDatasetSnapshot.ts`
 - **Graph/index**: likely unchanged unless new constraints require additional derived indexes.
 - **UI**: record creation/edit flows could surface “required/suggested related records” status.
 

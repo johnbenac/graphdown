@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import type { RecordLinkGraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraphTypeNode } from "@graphdown/core";
 import TypeViewer from "../TypeViewer";
 
 const baseType: RecordLinkGraphTypeNode = {
