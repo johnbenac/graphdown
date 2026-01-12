@@ -152,6 +152,10 @@ function collectTestFiles() {
       match: (filePath) => /\.test\.tsx?$/.test(filePath),
     },
     {
+      dir: path.join(REPO_ROOT, 'packages', 'core', 'src'),
+      match: (filePath) => /\.test\.ts$/.test(filePath),
+    },
+    {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'e2e'),
       match: (filePath) => /\.spec\.ts$/.test(filePath),
     },

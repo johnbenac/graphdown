@@ -5,39 +5,24 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['apps/web/src/graphdown/**/*.{ts,tsx}'],
+    files: ['packages/core/src/**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module'
     }
   },
   {
-    files: ['apps/web/src/graphdown/**/*.{ts,tsx}'],
+    files: ['packages/core/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            '../components/*',
-            '../components/**',
-            '../routes/*',
-            '../routes/**',
-            '../state/*',
-            '../state/**',
-            '../persistence/*',
-            '../persistence/**',
-            '../storage/*',
-            '../storage/**',
-            '../features/*',
-            '../features/**',
-            '../utils/*',
-            '../utils/**'
-          ],
           paths: [
-            { name: 'react', message: 'graphdown must remain framework-agnostic.' },
+            { name: 'react', message: 'core must remain framework-agnostic.' },
+            { name: 'react-dom', message: 'core must remain framework-agnostic.' },
             {
               name: 'react-router-dom',
-              message: 'graphdown must remain framework-agnostic.'
+              message: 'core must remain framework-agnostic.'
             }
           ]
         }
@@ -45,11 +30,12 @@ export default [
     }
   },
   {
-    files: ['apps/web/src/graphdown/**/*.{ts,tsx}'],
+    files: ['packages/core/src/**/*.{ts,tsx}'],
     ignores: [
-      'apps/web/src/graphdown/**/__tests__/**',
-      'apps/web/src/graphdown/**/*.test.*',
-      'apps/web/src/graphdown/**/*.spec.*'
+      'packages/core/src/**/__tests__/**',
+      'packages/core/src/**/__fixtures__/**',
+      'packages/core/src/**/*.test.*',
+      'packages/core/src/**/*.spec.*'
     ],
     rules: {
       'no-restricted-imports': [
@@ -62,20 +48,12 @@ export default [
   },
   {
     files: ['apps/web/src/**/*.{ts,tsx}'],
-    ignores: ['apps/web/src/graphdown/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            '../graphdown/*',
-            '../graphdown/**',
-            '../../graphdown/*',
-            '../../graphdown/**',
-            '../../../graphdown/*',
-            '../../../graphdown/**'
-          ],
-          message: 'Import from the graphdown barrel (../graphdown) instead of deep paths.'
+          patterns: ['@graphdown/core/*', '@graphdown/core/src/*', '@graphdown/core/src/**'],
+          message: 'Import from @graphdown/core (package barrel) only.'
         }
       ]
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DatasetSnapshot } from "../../graphdown";
+import type { DatasetSnapshot } from "@graphdown/core";
 import { buildImportReport } from "../importReport";
 
 const encoder = new TextEncoder();

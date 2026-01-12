@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -17,6 +18,14 @@ function normalizeBase(base: string | undefined): string {
 export default defineConfig({
   base: normalizeBase(pagesBase),
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@graphdown/core": path.resolve(
+        __dirname,
+        "../../packages/core/src/index.ts"
+      )
+    }
+  },
   server: {
     port: 5173,
     host: true

@@ -1,9 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../graphdown";
-import type { ValidationError } from "../graphdown";
-import { makeError } from "../graphdown";
-import { isObject } from "../graphdown";
+import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { ValidationError } from "@graphdown/core";
+import { makeError } from "@graphdown/core";
+import { isObject } from "@graphdown/core";
 import { useDataset } from "../state/DatasetContext";
 
 type RecordEditorProps = {

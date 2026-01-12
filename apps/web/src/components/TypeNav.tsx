@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "@graphdown/core";
 
 type TypeNavProps = {
   recordLinkGraph: RecordLinkGraph;

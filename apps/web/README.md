@@ -2,7 +2,7 @@
 
 This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets.
 
-It uses the shared `graphdown/` domain logic and persists the active dataset in the browser using IndexedDB (required).
+It uses the shared `@graphdown/core` domain logic and persists the active dataset in the browser using IndexedDB (required).
 
 ## Run the app
 From the repo root:
@@ -22,7 +22,7 @@ npm --workspace apps/web run build
 ## Project layout
 
 * `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-* `src/graphdown/` shared, pure logic for dataset parsing/validation/link extraction (hashing, IDs, refs, markdown parsing, etc.).
+* `@graphdown/core` (in `packages/core/`) shared, pure logic for dataset parsing/validation/link extraction (hashing, IDs, refs, markdown parsing, etc.).
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
 * `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → Record Link Graph build → persistence.
@@ -31,7 +31,7 @@ npm --workspace apps/web run build
 * `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 * `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
 * `src/utils/` small UI-friendly helpers (e.g., wiki-link parsing/formatting).
-* `src/__tests__/` fixture data and integration-style tests for the graphdown library.
+* `src/__tests__/` fixture data and integration-style tests for the web UI.
 * `setupTests.ts` configures the Vitest/React Testing Library environment.
 
 ## Data flow quick reference
@@ -66,6 +66,6 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.spec.ts-snapshots/
 
 ## Notes for contributors
 
-* Keep `src/graphdown/` pure and framework-agnostic; the UI should consume it, not reimplement logic.
+* Keep `@graphdown/core` pure and framework-agnostic; the UI should consume it, not reimplement logic.
 * When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
 * The app requires IndexedDB for persistence; environments that block it are unsupported.
