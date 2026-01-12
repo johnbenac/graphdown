@@ -55,9 +55,13 @@ These governance/process requirements are marked `testable=false` and are exclud
 - NR-UI-001 — No standardized UI hints
 
 ## P (3)
-- P-001 — Repository-first, Markdown-canonical
+- P-001 — Repository-first, record-canonical
 - P-002 — Dataset defines the model
 - P-003 — Universality and minimal assumptions
+
+## PLUG (2)
+- PLUG-FR-003 — Plugin manifest body is raw Markdown
+- PLUG-RES-001 — pluginId and gdApiVersion are reserved top-level keys
 
 ## REL (1)
 - REL-004 — Preservation: do not rewrite link spellings
