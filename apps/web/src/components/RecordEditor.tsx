@@ -73,7 +73,7 @@ export default function RecordEditor({
       nextErrors.push(makeError("E_USAGE", "Record ID is required."));
     }
 
-    let nextFields: Record<string, unknown> = {};
+    const nextFields: Record<string, unknown> = {};
     const rawText = fieldsText.trim();
     try {
       const parsed = rawText ? YAML.parse(rawText) : {};
