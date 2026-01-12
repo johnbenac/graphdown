@@ -19,7 +19,7 @@ A file is a record file if:
 - the parsed YAML object contains a `typeId` key
 
 This behavior is implemented by:
-- `apps/web/src/graphdown/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphdownFile`)
+- `packages/core/src/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphdownFile`)
 
 ## Type objects vs record objects
 

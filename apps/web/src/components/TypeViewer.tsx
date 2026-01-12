@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { RecordLinkGraphTypeNode } from "../graphdown";
+import type { RecordLinkGraphTypeNode } from "@graphdown/core";
 import { getTypeLabel } from "./TypeNav";
 
 type TypeViewerProps = {

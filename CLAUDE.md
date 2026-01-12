@@ -8,7 +8,7 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
-- **apps/web/src/graphdown/** — Framework-agnostic core domain library for parsing, validation, hashing, and export/import
+- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, hashing, and export/import
 
 **Critical rule**: If anything conflicts with SPEC.md, SPEC.md wins.
 
@@ -20,18 +20,22 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 # Install dependencies
 npm ci
 
-# Lint core library (apps/web/src/graphdown only)
+# Lint core library (packages/core/src only)
 npm run lint
 
 # Format all files
 npm run format
 npm run format:check
 
-# Build TypeScript (compiles graphdown core to dist/)
-npm run build
-
 # Run all Node.js tests
 npm test
+
+# Run core-only checks
+npm run check:core-scope
+npm run test:core
+
+# Run web-only tests
+npm run test:web
 
 # Regenerate spec traceability matrix (after editing SPEC.md requirements)
 npm run spec:trace
@@ -56,7 +60,7 @@ npm run build:web
 npm run test:web
 
 # Run E2E tests (Playwright)
-npm run test:e2e
+npm run test:web:e2e
 
 # Run all tests (unit + E2E)
 npm run verify:web
@@ -80,7 +84,7 @@ npm --workspace apps/web run playwright:install
 
 ## Code Architecture
 
-### Core Library Structure (apps/web/src/graphdown/)
+### Core Library Structure (packages/core/src/)
 
 The graphdown domain library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
 
@@ -182,7 +186,7 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `apps/web/src/graphdown/__tests__/`
+- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
 - **E2E tests** — Playwright tests in `apps/web/test/`
 - Run `npm run verify:web` to run both suites
 - Test layout is checked by `tools/check-web-test-layout.js`
@@ -193,7 +197,7 @@ Use these as golden compatibility references (read-only):
 
 - **No UI dependencies** — graphdown core cannot import React, react-router-dom, or app-level code
 - **Framework-agnostic** — Core must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `../graphdown` barrel, not deep paths
+- **Import from barrel** — App code must import from `@graphdown/core` barrel, not deep paths
 
 ### Spec Conformance
 

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "../RecordEditor";
-import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();

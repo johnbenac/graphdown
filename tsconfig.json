@@ -3,18 +3,18 @@
     "target": "ES2022",
     "module": "CommonJS",
     "outDir": "dist",
-    "rootDir": "apps/web/src",
+    "rootDir": "packages/core/src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["apps/web/src/graphdown/**/*.ts"],
+  "include": ["packages/core/src/**/*.ts"],
   "exclude": [
-    "apps/web/src/graphdown/**/__tests__/**",
-    "apps/web/src/graphdown/**/__fixtures__/**",
-    "apps/web/src/graphdown/**/*.test.ts",
-    "apps/web/src/graphdown/**/*.spec.ts",
-    "apps/web/src/graphdown/**/*.test.tsx",
-    "apps/web/src/graphdown/**/*.spec.tsx"
+    "packages/core/src/**/__tests__/**",
+    "packages/core/src/**/__fixtures__/**",
+    "packages/core/src/**/*.test.ts",
+    "packages/core/src/**/*.spec.ts",
+    "packages/core/src/**/*.test.tsx",
+    "packages/core/src/**/*.spec.tsx"
   ]
 }

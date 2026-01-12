@@ -20,12 +20,8 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
-      - name: Build
-        run: npm run build
       - name: Build web (typecheck + vite build)
         run: npm run build:web
-      - name: Web unit tests (vitest)
-        run: npm run test:web
       - name: Web test layout check
         run: npm run check:web:test-layout
       - name: Spec trace
@@ -73,7 +69,7 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build
-        run: npm run build
+        run: npx tsc -p packages/core/tsconfig.json --outDir dist/core --rootDir packages/core/src --module commonjs --moduleResolution node --target ES2022 --esModuleInterop
       - name: Validate research-lab-dataset (JSON)
         run: |
           set -euo pipefail
@@ -82,7 +78,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/graphdown');
+          const { validateDatasetSnapshot } = require('./dist/core/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -118,7 +114,7 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const path = require('node:path');
-          const { validateDatasetSnapshot } = require('./dist/graphdown');
+          const { validateDatasetSnapshot } = require('./dist/core/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();

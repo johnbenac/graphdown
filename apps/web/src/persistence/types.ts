@@ -1,5 +1,5 @@
-import type { RecordLinkGraph, RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "../graphdown";
-import type { DatasetSnapshot } from "../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/core";
 
 export type DatasetMeta = {
   id: string;

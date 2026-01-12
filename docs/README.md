@@ -14,7 +14,7 @@ This repository has two kinds of documentation:
 
 - If you are defining dataset rules or expected behavior: start with **`SPEC.md`**.
 - If you are working on the web app: start with **`apps/web/README.md`**.
-- If you are working inside the core domain logic: start with **`apps/web/src/graphdown/README.md`**.
+- If you are working inside the core domain logic: start with **`packages/core/src/README.md`**.
 
 ## Key concept docs
 
