@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-11T23:38:50.747Z
+Generated: 2026-01-12T16:46:54.080Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -66,19 +66,19 @@ Tests (0):
 Tests (1):
 - apps/web/src/graphdown/__tests__/gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
-## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true)
+## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## NR-PLUG-VAL-001 — No plugin-defined dataset validity rules (testable=true)
+## NR-PLUG-VAL-001 — No plugin-defined dataset validity rules (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## NR-PLUG-EXP-001 — Plugins do not define canonical export (testable=true)
+## NR-PLUG-EXP-001 — Plugins do not define canonical export (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true)
+## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -88,11 +88,11 @@ Tests (3):
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects recordId with colon"
 - apps/web/src/graphdown/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
 
-## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true)
+## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## PLUG-ID-002 — pluginId uniqueness (testable=true)
+## PLUG-ID-002 — pluginId uniqueness (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -159,11 +159,11 @@ Tests (2):
 Tests (1):
 - apps/web/src/graphdown/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
-## PLUG-000 — Plugins are a first-class dataset object class (testable=true)
+## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true)
+## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -171,11 +171,11 @@ Tests (0):
 Tests (0):
 - (none)
 
-## PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest (testable=true)
+## PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained (testable=true)
+## PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -203,11 +203,11 @@ Tests (2):
 Tests (1):
 - apps/web/src/graphdown/__tests__/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
 
-## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true)
+## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## PLUG-FR-002 — Required top-level keys for plugin manifests (testable=true)
+## PLUG-FR-002 — Required top-level keys for plugin manifests (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -325,35 +325,35 @@ Tests (2):
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer cycles fail validation"
 - apps/web/src/graphdown/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
-## VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002 (testable=true)
+## VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002 (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-002 — pluginId must be unique (testable=true)
+## VAL-PLUG-002 — pluginId must be unique (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-003 — Plugin entry must exist and be included (testable=true)
+## VAL-PLUG-003 — Plugin entry must exist and be included (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist (testable=true)
+## VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true)
+## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true)
+## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs (testable=true)
+## VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs (testable=true, verify=todo)
 Tests (0):
 - (none)
 
-## VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes (testable=true)
+## VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -414,7 +414,7 @@ Tests (1):
 Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
-## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true)
+## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
 Tests (0):
 - (none)
 
@@ -433,7 +433,7 @@ Tests (2):
 Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
-## EXP-PLUG-001 — Canonical plugin export layout (testable=true)
+## EXP-PLUG-001 — Canonical plugin export layout (testable=true, verify=todo)
 Tests (0):
 - (none)
 

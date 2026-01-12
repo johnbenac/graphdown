@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-11T23:38:50.747Z",
+  "generatedAt": "2026-01-12T16:46:54.080Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -99,28 +99,28 @@
       "id": "NR-PLUG-LINK-001",
       "title": "No relationship or CID extraction from plugin files",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "NR-PLUG-VAL-001",
       "title": "No plugin-defined dataset validity rules",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "NR-PLUG-EXP-001",
       "title": "Plugins do not define canonical export",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "NR-PLUG-HASH-001",
       "title": "Plugins do not define hashing semantics",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -150,14 +150,14 @@
       "id": "PLUG-ID-001",
       "title": "pluginId syntax is separator-safe",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "PLUG-ID-002",
       "title": "pluginId uniqueness",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -374,14 +374,14 @@
       "id": "PLUG-000",
       "title": "Plugins are a first-class dataset object class",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "PLUG-LAYOUT-001",
       "title": "Plugin manifests are discovered by content (not path)",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -395,14 +395,14 @@
       "id": "PLUG-LAYOUT-002",
       "title": "Plugin bundle files are resolved from the manifest",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "PLUG-LAYOUT-003",
       "title": "Plugin bundle file paths are safe and self-contained",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -501,14 +501,14 @@
       "id": "PLUG-FR-001",
       "title": "Plugin manifest YAML front matter is required",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "PLUG-FR-002",
       "title": "Required top-level keys for plugin manifests",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -891,56 +891,56 @@
       "id": "VAL-PLUG-001",
       "title": "Plugin manifests must parse and satisfy PLUG-FR-002",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-002",
       "title": "pluginId must be unique",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-003",
       "title": "Plugin entry must exist and be included",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-004",
       "title": "Plugin bundle file paths must resolve safely and exist",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-005",
       "title": "Plugin bundle files must be UTF-8 decodable",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-006",
       "title": "Plugin bundle must not contain reserved export paths",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-007",
       "title": "Plugin-declared block dependencies must be valid CIDs",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
       "id": "VAL-PLUG-008",
       "title": "Plugin-declared block dependencies must resolve to matching block bytes",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -1141,7 +1141,7 @@
       "id": "IMP-PLUG-001",
       "title": "Importers must include plugin manifests and bundles",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
@@ -1202,7 +1202,7 @@
       "id": "EXP-PLUG-001",
       "title": "Canonical plugin export layout",
       "testable": true,
-      "verify": null,
+      "verify": "todo",
       "tests": []
     },
     {
