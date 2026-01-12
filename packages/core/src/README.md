@@ -1,6 +1,6 @@
 # Graphdown domain logic
 
-The `graphdown/` directory contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
+This core package contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
 
 ## Vocabulary (important)
 
@@ -65,4 +65,4 @@ See `docs/terminology.md` and `docs/concepts/graphs.md`.
 
 ## Tests
 
-The `graphdown/` folder contains unit tests for parsing and validation, including `validateDatasetSnapshot.test.ts` and `markdownRecord.test.ts`.
+The core package contains unit tests for parsing and validation, including `validateDatasetSnapshot.test.ts` and `markdownRecord.test.ts`.

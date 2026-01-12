@@ -8,7 +8,7 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
-- **apps/web/src/graphdown/** — Framework-agnostic core domain library for parsing, validation, hashing, and export/import
+- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, hashing, and export/import
 
 **Critical rule**: If anything conflicts with SPEC.md, SPEC.md wins.
 
@@ -20,17 +20,14 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 # Install dependencies
 npm ci
 
-# Lint core library (apps/web/src/graphdown only)
+# Lint core library (packages/core/src only)
 npm run lint
 
 # Format all files
 npm run format
 npm run format:check
 
-# Build TypeScript (compiles graphdown core to dist/)
-npm run build
-
-# Run all Node.js tests
+# Run all tests (core + web)
 npm test
 
 # Regenerate spec traceability matrix (after editing SPEC.md requirements)
@@ -74,13 +71,17 @@ npm run check:web:test-layout
 # Run unit tests in watch mode
 npm --workspace apps/web run test
 
+# Run core tests + typecheck
+npm --workspace packages/core run typecheck
+npm --workspace packages/core run test
+
 # Install Playwright browsers
 npm --workspace apps/web run playwright:install
 ```
 
 ## Code Architecture
 
-### Core Library Structure (apps/web/src/graphdown/)
+### Core Library Structure (packages/core/src/)
 
 The graphdown domain library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
 
@@ -182,7 +183,7 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `apps/web/src/graphdown/__tests__/`
+- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
 - **E2E tests** — Playwright tests in `apps/web/test/`
 - Run `npm run verify:web` to run both suites
 - Test layout is checked by `tools/check-web-test-layout.js`

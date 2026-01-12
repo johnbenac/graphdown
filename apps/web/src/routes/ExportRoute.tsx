@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import { buildDatasetZipBytes } from "../graphdown";
+import { buildDatasetZipBytes } from "@graphdown/core";
 import { downloadZipBytes } from "../features/export";
 import { useDataset } from "../state/DatasetContext";
 

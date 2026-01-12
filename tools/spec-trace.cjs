@@ -148,6 +148,10 @@ function walkDir(rootDir, onFile) {
 function collectTestFiles() {
   const targets = [
     {
+      dir: path.join(REPO_ROOT, 'packages', 'core', 'src'),
+      match: (filePath) => /\.test\.tsx?$/.test(filePath),
+    },
+    {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'src'),
       match: (filePath) => /\.test\.tsx?$/.test(filePath),
     },

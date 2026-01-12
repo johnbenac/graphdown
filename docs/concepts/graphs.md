@@ -17,8 +17,8 @@ This document names each one precisely and points at the code that builds or val
 - type objects are not scanned for relationships
 
 **Key modules:**
-- Extraction: `apps/web/src/graphdown/parse/wikiRefs.ts`
-- Graph build/index: `apps/web/src/graphdown/graph/graph.ts`
+- Extraction: `packages/core/src/parse/wikiRefs.ts`
+- Graph build/index: `packages/core/src/graph/graph.ts`
 
 **Important properties:**
 - May contain cycles.
@@ -40,11 +40,11 @@ This document names each one precisely and points at the code that builds or val
 - The structure must be acyclic (VAL-PARENT-003).
 
 **Key module:**
-- Validation: `apps/web/src/graphdown/validate/validateDatasetSnapshot.ts`
+- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
 
 **Usage:**
 - Canonical export/import layout uses this hierarchy to nest record directories:
-  `apps/web/src/graphdown/snapshot/canonicalizeDatasetSnapshot.ts`
+  `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Important separation:**
 - `parent` pointers are *not* record relationships under REL-001/REL-002.
@@ -56,7 +56,7 @@ This document names each one precisely and points at the code that builds or val
 `fields.composition.<name> = { typeId: <otherType>, required: boolean }`
 
 **Key modules:**
-- Validation: `apps/web/src/graphdown/validate/validateDatasetSnapshot.ts`
+- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
 
 **How it is enforced:**
 - It is not satisfied by hierarchy parent pointers.
@@ -76,9 +76,9 @@ This creates a “two-layer” relationship:
 - any string value anywhere inside record `fields`
 
 **Key modules:**
-- Extraction: `apps/web/src/graphdown/parse/wikiRefs.ts`
-- Validation: `apps/web/src/graphdown/validate/validateDatasetSnapshot.ts`
-- Reachable block pruning: `apps/web/src/graphdown/snapshot/canonicalizeDatasetSnapshot.ts`
+- Extraction: `packages/core/src/parse/wikiRefs.ts`
+- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
+- Reachable block pruning: `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Validity constraints:**
 - referenced block must exist at canonical path
@@ -91,7 +91,7 @@ This creates a “two-layer” relationship:
 This is not a semantic “relationship graph.” It is a derived directory tree used for stable exports.
 
 **Key module:**
-- `apps/web/src/graphdown/snapshot/canonicalizeDatasetSnapshot.ts`
+- `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Inputs:**
 - type identities (`typeId`)

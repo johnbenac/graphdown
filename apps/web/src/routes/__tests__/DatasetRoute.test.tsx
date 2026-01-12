@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "../../graphdown";
+import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "@graphdown/core";
 import DatasetRoute from "../DatasetRoute";
 
 const typeNode: RecordLinkGraphTypeNode = {

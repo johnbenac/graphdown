@@ -13,24 +13,25 @@
     "CHANGELOG.md"
   ],
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "postinstall": "npm --workspace apps/web run playwright:install",
-    "lint": "eslint \"apps/web/src/graphdown/**/*.ts\"",
+    "lint": "eslint \"packages/core/src/**/*.ts\" \"apps/web/src/**/*.ts\" \"apps/web/src/**/*.tsx\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run build && node --test",
-    "build": "npm run check:build-scope && tsc",
-    "check:build-scope": "node tools/check-tsc-build-scope.cjs",
-    "spec:trace": "node tools/spec-trace.cjs && npm run burndown --silent",
-    "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
-    "build:web": "npm --workspace apps/web run build",
+    "check:core-scope": "node tools/check-tsc-build-scope.cjs",
+    "test:core": "npm --workspace packages/core run typecheck && npm --workspace packages/core run test",
     "test:web": "npm --workspace apps/web run test",
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
+    "test": "npm run check:core-scope && npm run test:core && npm run test:web",
+    "dev:web": "npm --workspace apps/web run dev -- --host 0.0.0.0 --port 5173",
+    "build:web": "npm --workspace apps/web run build",
+    "spec:trace": "node tools/spec-trace.cjs && npm run burndown --silent",
+    "spec:verify": "node tools/check-spec-coverage.js",
     "verify:web": "npm --workspace apps/web run verify && npm run check:web:test-layout",
     "burndown": "node tools/burndown.js",
-    "spec:verify": "node tools/check-spec-coverage.js",
     "check:web:test-layout": "node tools/check-web-test-layout.js"
   },
   "devDependencies": {

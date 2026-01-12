@@ -12,5 +12,5 @@ prompt the user to download a zip file.
 
 ## Tests
 
-- `exportZip.test.ts` exercises the export workflow with the `graphdown/` zip helpers
-  to ensure exported datasets match canonical expectations.
+- `exportZip.test.ts` exercises the export workflow with the `@graphdown/core` zip
+  helpers to ensure exported datasets match canonical expectations.

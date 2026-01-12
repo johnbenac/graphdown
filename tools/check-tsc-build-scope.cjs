@@ -4,7 +4,7 @@ const { spawnSync } = require("node:child_process");
 
 const res = spawnSync(
   process.platform === "win32" ? "npx.cmd" : "npx",
-  ["tsc", "-p", "tsconfig.json", "--noEmit", "--listFiles"],
+  ["tsc", "-p", "packages/core/tsconfig.json", "--noEmit", "--listFiles"],
   { encoding: "utf8" }
 );
 
@@ -17,13 +17,13 @@ const output = `${res.stdout}\n${res.stderr}`;
 
 // Only care about our repo paths, not TS lib files.
 const forbiddenMatchers = [
-  "/apps/web/src/graphdown/__tests__/",
-  "/apps/web/src/graphdown/__fixtures__/"
+  "/packages/core/src/__tests__/",
+  "/packages/core/src/__fixtures__/"
 ];
 
 const offending = output
   .split(/\r?\n/)
-  .filter((line) => line.includes("apps/web/src/graphdown/"))
+  .filter((line) => line.includes("packages/core/src/"))
   .filter((line) =>
     forbiddenMatchers.some((m) => line.replaceAll("\\", "/").includes(m))
   );
@@ -34,7 +34,7 @@ if (offending.length > 0) {
   );
   for (const line of offending) console.error(`  ${line}`);
   console.error(
-    "\nFix: ensure tsconfig.json excludes __tests__ and __fixtures__ under graphdown."
+    "\nFix: ensure packages/core/tsconfig.json excludes __tests__ and __fixtures__."
   );
   process.exit(1);
 }

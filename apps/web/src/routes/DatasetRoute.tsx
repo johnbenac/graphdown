@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { RecordLinkGraphRecordNode } from "../graphdown";
+import type { RecordLinkGraphRecordNode } from "@graphdown/core";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import ImportWarningBanner from "../components/ImportWarningBanner";
