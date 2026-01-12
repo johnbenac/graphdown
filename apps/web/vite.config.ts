@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
+const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
 
 function normalizeBase(base: string | undefined): string {
   if (!base) {
@@ -22,9 +23,7 @@ export default defineConfig({
   base: normalizeBase(pagesBase),
   plugins: [react()],
   resolve: {
-    alias: {
-      "@graphdown/core": path.resolve(__dirname, "../../packages/core/src")
-    }
+    alias: [{ find: /^@graphdown\/core$/, replacement: coreIndex }]
   },
   server: {
     port: 5173,

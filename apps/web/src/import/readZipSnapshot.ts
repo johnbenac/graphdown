@@ -7,7 +7,7 @@ function normalizeZipPath(path: string): string | null {
   if (path.includes("\0")) {
     return null;
   }
-  let normalized = path.replace(/\\/g, "/");
+  const normalized = path.replace(/\\/g, "/");
   if (normalized.startsWith("/")) {
     return null;
   }
