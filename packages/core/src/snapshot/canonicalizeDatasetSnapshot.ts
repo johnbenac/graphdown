@@ -3,6 +3,7 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
+import { isPluginManifestCandidateBytes, parsePluginManifest } from '../parse/pluginManifest';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
@@ -36,6 +37,33 @@ function collectReachableBlockPaths(
       for (const cid of foundCids) {
         cids.add(cid);
       }
+    }
+  }
+
+  for (const [path, bytes] of snapshot.files.entries()) {
+    if (!isPluginManifestCandidateBytes(path, bytes)) {
+      continue;
+    }
+    let text: string;
+    try {
+      const decoder = new TextDecoder('utf-8', { fatal: true });
+      text = decoder.decode(bytes);
+    } catch {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    const parsedManifest = parsePluginManifest(text, path);
+    if (!parsedManifest.ok) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    const blocks = (parsedManifest.manifest.yaml as Record<string, unknown>).blocks;
+    if (blocks === undefined) {
+      continue;
+    }
+    if (!Array.isArray(blocks) || blocks.some((item) => typeof item !== 'string')) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    for (const cid of blocks) {
+      cids.add(cid);
     }
   }
 

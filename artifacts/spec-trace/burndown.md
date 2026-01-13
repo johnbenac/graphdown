@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-13T02:10:36.251Z
+Generated: 2026-01-13T03:47:03.236Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
@@ -11,15 +11,15 @@ Source: artifacts/spec-trace/matrix.json
 
 ## Deferred backlog (verify in: todo, backlog, deferred, future, planned, manual)
 - Requirements: 22
-- Covered: 4
-- Missing: 18
-- Coverage: 18.2%
+- Covered: 12
+- Missing: 10
+- Coverage: 54.5%
 
 ## Overall (all testable requirements)
 - Requirements: 94
-- Covered: 76
-- Missing: 18
-- Coverage: 80.9%
+- Covered: 84
+- Missing: 10
+- Coverage: 89.4%
 
 The following DEFERRED requirements have **no referenced tests** (CI does NOT fail):
 
@@ -35,20 +35,12 @@ The following DEFERRED requirements have **no referenced tests** (CI does NOT fa
 - NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
 - NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
 
-### PLUG (4)
+### PLUG (3)
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-- PLUG-ID-002 — pluginId uniqueness
 
-### VAL (8)
-- VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
+### VAL (1)
 - VAL-PLUG-002 — pluginId must be unique
-- VAL-PLUG-003 — Plugin entry must exist and be included
-- VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist
-- VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable
-- VAL-PLUG-006 — Plugin bundle must not contain reserved export paths
-- VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs
-- VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes
 
 _Rule: use `verify=todo` on a requirement when it is not implemented/verified yet. Promotion = remove `verify=todo` (or set `verify=ci`) + add at least one test title prefixed with the req ID._

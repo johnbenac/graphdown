@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T02:10:36.251Z
+Generated: 2026-01-13T03:47:03.236Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -12,15 +12,7 @@ Generated: 2026-01-13T02:10:36.251Z
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-- PLUG-ID-002 — pluginId uniqueness
-- VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
 - VAL-PLUG-002 — pluginId must be unique
-- VAL-PLUG-003 — Plugin entry must exist and be included
-- VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist
-- VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable
-- VAL-PLUG-006 — Plugin bundle must not contain reserved export paths
-- VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs
-- VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -89,8 +81,8 @@ Tests (1):
 - packages/core/src/__tests__/pluginManifest.ids.test.ts — "PLUG-ID-001: pluginId matches separator-safe identifier syntax"
 
 ## PLUG-ID-002 — pluginId uniqueness (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-ID-002: duplicate pluginId fails validation"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
 Tests (3):
@@ -327,36 +319,36 @@ Tests (2):
 - packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "VAL-PARENT-003: parent pointer self-cycle fails validation"
 
 ## VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002 (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-001: plugin-valid-dataset validates successfully"
 
 ## VAL-PLUG-002 — pluginId must be unique (testable=true, verify=todo)
 Tests (0):
 - (none)
 
 ## VAL-PLUG-003 — Plugin entry must exist and be included (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-003: entry must appear in files list"
 
 ## VAL-PLUG-004 — Plugin bundle file paths must resolve safely and exist (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-004: unsafe relative paths are rejected"
 
 ## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable"
 
 ## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-006: files must not include reserved manifest.md"
 
 ## VAL-PLUG-007 — Plugin-declared block dependencies must be valid CIDs (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-007: blocks must contain valid CID strings"
 
 ## VAL-PLUG-008 — Plugin-declared block dependencies must resolve to matching block bytes (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-008: plugin-declared blocks must resolve to matching block bytes"
 
 ## VAL-CID-001 — Invalid CID-shaped block reference tokens fail validation (testable=true)
 Tests (1):
@@ -371,16 +363,19 @@ Tests (1):
 - packages/core/src/__tests__/blocks.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
 
 ## GC-001 — Reachable block set is computed from declared block dependencies (testable=true)
-Tests (1):
+Tests (2):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "GC-001: reachable block set includes references from fields"
+- packages/core/src/__tests__/plugins.gc.test.ts — "GC-001: plugin-declared blocks are included in the reachable set"
 
 ## GC-002 — Unreferenced blocks are garbage and are excluded from canonical dataset export (testable=true)
-Tests (1):
+Tests (2):
+- packages/core/src/__tests__/plugins.gc.test.ts — "GC-002: export excludes blocks not referenced by records or plugin blocks"
 - packages/core/src/__tests__/roundtrip.test.ts — "GC-002: export excludes unreferenced blocks"
 
 ## GC-003 — Garbage blocks do not make a dataset invalid (testable=true)
-Tests (1):
+Tests (2):
 - packages/core/src/__tests__/blocks.test.ts — "GC-003: unreferenced but valid blocks do not fail validation"
+- packages/core/src/__tests__/plugins.gc.test.ts — "GC-003: garbage blocks do not make dataset invalid (with plugins present)"
 
 ## ERR-001 — File-specific errors when possible
 Tests (1):
