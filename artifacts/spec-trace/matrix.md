@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-12T22:19:29.692Z
+Generated: 2026-01-13T01:42:56.569Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -12,11 +12,7 @@ Generated: 2026-01-12T22:19:29.692Z
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-- PLUG-ID-001 — pluginId syntax is separator-safe
 - PLUG-ID-002 — pluginId uniqueness
-- PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path)
-- PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest
-- PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained
 - VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
 - VAL-PLUG-002 — pluginId must be unique
 - VAL-PLUG-003 — Plugin entry must exist and be included
@@ -89,8 +85,8 @@ Tests (3):
 - packages/core/src/__tests__/ids.test.ts — "ID-001: rejects typeId with invalid characters"
 
 ## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/pluginManifest.ids.test.ts — "PLUG-ID-001: pluginId matches separator-safe identifier syntax"
 
 ## PLUG-ID-002 — pluginId uniqueness (testable=true, verify=todo)
 Tests (0):
@@ -164,20 +160,23 @@ Tests (0):
 - (none)
 
 ## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (3):
+- packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: detects plugin manifest candidates from fixtures"
+- packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: record files take precedence over plugin manifest keys"
+- packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: requires both pluginId and gdApiVersion keys"
 
 ## PLUG-RES-001 — pluginId and gdApiVersion are reserved top-level keys (testable=false)
 Tests (0):
 - (none)
 
 ## PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (2):
+- packages/core/src/__tests__/pluginManifest.paths.test.ts — "PLUG-LAYOUT-002: resolves bundle files relative to the manifest directory"
+- packages/core/src/__tests__/pluginManifest.paths.test.ts — "PLUG-LAYOUT-002: root manifest resolves bundle files without a directory prefix"
 
 ## PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/pluginManifest.paths.test.ts — "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace"
 
 ## FR-MD-020 — YAML front matter is required
 Tests (7):

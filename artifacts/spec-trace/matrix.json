@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-12T22:19:29.692Z",
+  "generatedAt": "2026-01-13T01:42:56.569Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -151,7 +151,13 @@
       "title": "pluginId syntax is separator-safe",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "PLUG-ID-001",
+          "testTitle": "PLUG-ID-001: pluginId matches separator-safe identifier syntax",
+          "filePath": "packages/core/src/__tests__/pluginManifest.ids.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-ID-002",
@@ -382,7 +388,23 @@
       "title": "Plugin manifests are discovered by content (not path)",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "PLUG-LAYOUT-001",
+          "testTitle": "PLUG-LAYOUT-001: detects plugin manifest candidates from fixtures",
+          "filePath": "packages/core/src/__tests__/pluginManifest.discovery.test.ts"
+        },
+        {
+          "reqId": "PLUG-LAYOUT-001",
+          "testTitle": "PLUG-LAYOUT-001: record files take precedence over plugin manifest keys",
+          "filePath": "packages/core/src/__tests__/pluginManifest.discovery.test.ts"
+        },
+        {
+          "reqId": "PLUG-LAYOUT-001",
+          "testTitle": "PLUG-LAYOUT-001: requires both pluginId and gdApiVersion keys",
+          "filePath": "packages/core/src/__tests__/pluginManifest.discovery.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-RES-001",
@@ -396,14 +418,31 @@
       "title": "Plugin bundle files are resolved from the manifest",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "PLUG-LAYOUT-002",
+          "testTitle": "PLUG-LAYOUT-002: resolves bundle files relative to the manifest directory",
+          "filePath": "packages/core/src/__tests__/pluginManifest.paths.test.ts"
+        },
+        {
+          "reqId": "PLUG-LAYOUT-002",
+          "testTitle": "PLUG-LAYOUT-002: root manifest resolves bundle files without a directory prefix",
+          "filePath": "packages/core/src/__tests__/pluginManifest.paths.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-LAYOUT-003",
       "title": "Plugin bundle file paths are safe and self-contained",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "PLUG-LAYOUT-003",
+          "testTitle": "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace",
+          "filePath": "packages/core/src/__tests__/pluginManifest.paths.test.ts"
+        }
+      ]
     },
     {
       "id": "FR-MD-020",
@@ -1726,24 +1765,8 @@
       "title": "Required top-level keys for plugin manifests"
     },
     {
-      "id": "PLUG-ID-001",
-      "title": "pluginId syntax is separator-safe"
-    },
-    {
       "id": "PLUG-ID-002",
       "title": "pluginId uniqueness"
-    },
-    {
-      "id": "PLUG-LAYOUT-001",
-      "title": "Plugin manifests are discovered by content (not path)"
-    },
-    {
-      "id": "PLUG-LAYOUT-002",
-      "title": "Plugin bundle files are resolved from the manifest"
-    },
-    {
-      "id": "PLUG-LAYOUT-003",
-      "title": "Plugin bundle file paths are safe and self-contained"
     },
     {
       "id": "VAL-PLUG-001",
