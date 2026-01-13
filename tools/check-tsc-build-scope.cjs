@@ -1,6 +1,26 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 const { spawnSync } = require("node:child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const REPO_ROOT = path.resolve(__dirname, "..");
+const legacyDirs = [
+  path.join(REPO_ROOT, "packages", "core", "src", "tests"),
+  path.join(REPO_ROOT, "packages", "core", "src", "fixtures"),
+  path.join(REPO_ROOT, "packages", "core", "src", "runtime", "tests")
+];
+
+const existingLegacyDirs = legacyDirs.filter((dir) => fs.existsSync(dir));
+
+if (existingLegacyDirs.length > 0) {
+  console.error("Legacy core layout detected:");
+  existingLegacyDirs.forEach((dir) =>
+    console.error(`  ${path.relative(REPO_ROOT, dir)}`)
+  );
+  console.error("Move tests to __tests__ and fixtures to __fixtures__.");
+  process.exit(1);
+}
 
 const res = spawnSync(
   process.platform === "win32" ? "npx.cmd" : "npx",
@@ -18,7 +38,10 @@ const output = `${res.stdout}\n${res.stderr}`;
 // Only care about our repo paths, not TS lib files.
 const forbiddenMatchers = [
   "/packages/core/src/__tests__/",
-  "/packages/core/src/__fixtures__/"
+  "/packages/core/src/__fixtures__/",
+  "/packages/core/src/tests/",
+  "/packages/core/src/fixtures/",
+  "/packages/core/src/runtime/tests/"
 ];
 
 const offending = output
