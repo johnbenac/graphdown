@@ -27,6 +27,11 @@ jobs:
     outputs:
       deploy_web: ${{ steps.filter.outputs.deploy_web }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # ensure git history exists for paths-filter diffing
+
       # Uses GitHub's diff; avoids brittle git-fetch edge cases on merges/force-pushes.
       - name: Decide if web deployment is needed
         id: filter
