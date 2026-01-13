@@ -18,53 +18,14 @@ import { isObject } from '../model/types';
 import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
 import { extractCidRefs, extractRecordRefs } from '../parse/wikiRefs';
 import { isValidPluginId } from '../model/ids';
+import { decodeUtf8Strict } from '../internal/text';
+import { collectStringValues } from '../internal/collectStringValues';
 
 export type ValidateDatasetResult =
   | { ok: true }
   | { ok: false; errors: ValidationError[] };
 
 type CompositionComponent = { typeId: string; required: boolean };
-
-function decodeUtf8Strict(bytes: Uint8Array): string | null {
-  if (typeof TextDecoder !== 'undefined') {
-    try {
-      const decoder = new TextDecoder('utf-8', { fatal: true });
-      return decoder.decode(bytes);
-    } catch {
-      return null;
-    }
-  }
-  if (typeof Buffer !== 'undefined') {
-    try {
-      const buffer = Buffer.from(bytes);
-      const text = buffer.toString('utf8');
-      const roundTrip = Buffer.from(text, 'utf8');
-      if (!roundTrip.equals(buffer)) return null;
-      return text;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
-
-function collectStringValues(value: unknown, into: Set<string>): void {
-  if (typeof value === 'string') {
-    into.add(value);
-    return;
-  }
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStringValues(item, into);
-    }
-    return;
-  }
-  if (isObject(value)) {
-    for (const child of Object.values(value)) {
-      collectStringValues(child, into);
-    }
-  }
-}
 
 function enforceFieldDefs(
   typeObj: ParsedTypeObject,
@@ -326,14 +287,14 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     if (!isPluginManifestCandidateBytes(path, bytes)) {
       continue;
     }
-    const text = decodeUtf8Strict(bytes);
-    if (text === null) {
+    const decoded = decodeUtf8Strict(bytes);
+    if (!decoded.ok) {
       errors.push(
         makeError('E_PLUGIN_MANIFEST_INVALID', `Plugin manifest ${path} is not valid UTF-8`, path)
       );
       continue;
     }
-    const parsedManifest = parsePluginManifest(text, path);
+    const parsedManifest = parsePluginManifest(decoded.text, path);
     if (!parsedManifest.ok) {
       errors.push(
         makeError('E_PLUGIN_MANIFEST_INVALID', parsedManifest.error.message, path)
@@ -617,7 +578,8 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
       if (!bytes) {
         continue;
       }
-      if (decodeUtf8Strict(bytes) === null) {
+      const decodedBundle = decodeUtf8Strict(bytes);
+      if (!decodedBundle.ok) {
         errors.push(
           makeError(
             'E_PLUGIN_UTF8_INVALID',
