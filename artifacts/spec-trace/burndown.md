@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-12T22:19:29.692Z
+Generated: 2026-01-13T01:44:00.507Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
@@ -11,15 +11,15 @@ Source: artifacts/spec-trace/matrix.json
 
 ## Deferred backlog (verify in: todo, backlog, deferred, future, planned, manual)
 - Requirements: 22
-- Covered: 0
-- Missing: 22
-- Coverage: 0.0%
+- Covered: 4
+- Missing: 18
+- Coverage: 18.2%
 
 ## Overall (all testable requirements)
 - Requirements: 94
-- Covered: 72
-- Missing: 22
-- Coverage: 76.6%
+- Covered: 76
+- Missing: 18
+- Coverage: 80.9%
 
 The following DEFERRED requirements have **no referenced tests** (CI does NOT fail):
 
@@ -35,15 +35,11 @@ The following DEFERRED requirements have **no referenced tests** (CI does NOT fa
 - NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
 - NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
 
-### PLUG (8)
+### PLUG (4)
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-- PLUG-ID-001 — pluginId syntax is separator-safe
 - PLUG-ID-002 — pluginId uniqueness
-- PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path)
-- PLUG-LAYOUT-002 — Plugin bundle files are resolved from the manifest
-- PLUG-LAYOUT-003 — Plugin bundle file paths are safe and self-contained
 
 ### VAL (8)
 - VAL-PLUG-001 — Plugin manifests must parse and satisfy PLUG-FR-002
