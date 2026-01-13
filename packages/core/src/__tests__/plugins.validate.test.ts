@@ -20,6 +20,11 @@ function getErrorCodes(snapshot: DatasetSnapshot): string[] {
   return result.errors.map((error) => error.code);
 }
 
+function expectDuplicatePluginIdFails() {
+  const snapshot = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
+  expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_DUPLICATE_ID");
+}
+
 describe("plugins validation", () => {
   it("VAL-PLUG-001: plugin-valid-dataset validates successfully", () => {
     const snapshot = loadFixtureSnapshot("plugin-valid-dataset");
@@ -28,8 +33,11 @@ describe("plugins validation", () => {
   });
 
   it("PLUG-ID-002: duplicate pluginId fails validation", () => {
-    const snapshot = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
-    expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_DUPLICATE_ID");
+    expectDuplicatePluginIdFails();
+  });
+
+  it("VAL-PLUG-002: duplicate pluginId fails validation", () => {
+    expectDuplicatePluginIdFails();
   });
 
   it("VAL-PLUG-003: entry must appear in files list", () => {

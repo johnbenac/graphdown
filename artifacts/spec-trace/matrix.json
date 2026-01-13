@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T06:42:28.830Z",
+  "generatedAt": "2026-01-13T17:33:41.929Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -980,7 +980,13 @@
       "title": "pluginId must be unique",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-002",
+          "testTitle": "VAL-PLUG-002: duplicate pluginId fails validation",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-003",
@@ -1863,10 +1869,6 @@
     {
       "id": "PLUG-FR-002",
       "title": "Required top-level keys for plugin manifests"
-    },
-    {
-      "id": "VAL-PLUG-002",
-      "title": "pluginId must be unique"
     }
   ]
 }

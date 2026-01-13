@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T06:42:28.830Z
+Generated: 2026-01-13T17:33:41.929Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -11,7 +11,6 @@ Generated: 2026-01-13T06:42:28.830Z
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-- VAL-PLUG-002 — pluginId must be unique
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -326,8 +325,8 @@ Tests (1):
 - packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-001: plugin-valid-dataset validates successfully"
 
 ## VAL-PLUG-002 — pluginId must be unique (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- packages/core/src/__tests__/plugins.validate.test.ts — "VAL-PLUG-002: duplicate pluginId fails validation"
 
 ## VAL-PLUG-003 — Plugin entry must exist and be included (testable=true, verify=todo)
 Tests (1):

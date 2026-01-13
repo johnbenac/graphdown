@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-13T06:01:15.482Z
+Generated: 2026-01-13T17:33:41.929Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
@@ -11,15 +11,15 @@ Source: artifacts/spec-trace/matrix.json
 
 ## Deferred backlog (verify in: todo, backlog, deferred, future, planned, manual)
 - Requirements: 22
-- Covered: 13
-- Missing: 9
-- Coverage: 59.1%
+- Covered: 14
+- Missing: 8
+- Coverage: 63.6%
 
 ## Overall (all testable requirements)
 - Requirements: 94
-- Covered: 85
-- Missing: 9
-- Coverage: 90.4%
+- Covered: 86
+- Missing: 8
+- Coverage: 91.5%
 
 The following DEFERRED requirements have **no referenced tests** (CI does NOT fail):
 
@@ -36,8 +36,5 @@ The following DEFERRED requirements have **no referenced tests** (CI does NOT fa
 - PLUG-000 — Plugins are a first-class dataset object class
 - PLUG-FR-001 — Plugin manifest YAML front matter is required
 - PLUG-FR-002 — Required top-level keys for plugin manifests
-
-### VAL (1)
-- VAL-PLUG-002 — pluginId must be unique
 
 _Rule: use `verify=todo` on a requirement when it is not implemented/verified yet. Promotion = remove `verify=todo` (or set `verify=ci`) + add at least one test title prefixed with the req ID._
