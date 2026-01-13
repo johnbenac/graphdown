@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Deploy even if no deploy-relevant files changed"
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: read
@@ -15,8 +21,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Determine whether this commit should deploy
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_web: ${{ steps.filter.outputs.deploy_web }}
+    steps:
+      # Uses GitHub's diff; avoids brittle git-fetch edge cases on merges/force-pushes.
+      - name: Decide if web deployment is needed
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # GITHUB_TOKEN is fine here; it's read-only diffing.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            deploy_web:
+              # --- Web production inputs ---
+              - "apps/web/src/**"
+              - "apps/web/index.html"
+              - "apps/web/styles.css"
+              - "apps/web/vite.config.*"
+              - "apps/web/tsconfig*.json"
+              - "apps/web/package.json"
+
+              # --- Shared runtime code that can affect the bundle ---
+              - "packages/core/src/**"
+              - "packages/core/package.json"
+
+              # --- Root build inputs that can affect output ---
+              - "package.json"
+              - "package-lock.json"
+              - "tsconfig.json"
+
+              # --- Explicit NON-deploy changes (tests, docs, CI, etc.) ---
+              - "!apps/web/e2e/**"
+              - "!apps/web/**/__tests__/**"
+              - "!apps/web/test-results/**"
+              - "!packages/core/**/__tests__/**"
+              - "!.github/**"
+              - "!docs/**"
+              - "!artifacts/**"
+
+      - name: Summarize decision
+        run: |
+          echo "deploy_web=${{ steps.filter.outputs.deploy_web }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Manual override: workflow_dispatch input force_deploy" >> $GITHUB_STEP_SUMMARY
+
   build:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.deploy_web == 'true' || (github.event_name == 'workflow_dispatch' && inputs.force_deploy)
 
     steps:
       - name: Checkout
@@ -53,7 +108,9 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [changes, build]
+    if: needs.changes.outputs.deploy_web == 'true' || (github.event_name == 'workflow_dispatch' && inputs.force_deploy)
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

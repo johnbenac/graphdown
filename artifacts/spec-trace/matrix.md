@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T17:51:36.111Z
+Generated: 2026-01-13T18:19:49.492Z
 
 ## Testable requirements with no tests
 - NR-PLUG-EXP-001 — Plugins do not define canonical export

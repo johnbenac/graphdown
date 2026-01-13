@@ -1,0 +1,3 @@
+# Deployment policy requires DevOps review
+.github/workflows/pages.yml @johnbenac
+docs/ops/deploy-contract.md @johnbenac
