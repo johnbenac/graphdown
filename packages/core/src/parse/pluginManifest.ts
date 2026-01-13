@@ -1,40 +1,13 @@
 import { parseMarkdownRecord } from './markdownRecord';
 import type { ValidationError } from '../validate/errors';
+import { decodeUtf8Strict } from '../internal/text';
+import { isRecordFileBytes } from './datasetObjects';
 
 export type ParsedPluginManifest = {
   file: string;
   yaml: Record<string, unknown>;
   body: string;
 };
-
-function hasFrontMatterAtByte0(bytes: Uint8Array): boolean {
-  if (bytes.length < 4) return false;
-  if (bytes[0] !== 0x2d || bytes[1] !== 0x2d || bytes[2] !== 0x2d) return false;
-  return bytes[3] === 0x0a || bytes[3] === 0x0d;
-}
-
-function decodeUtf8OrNull(bytes: Uint8Array): string | null {
-  if (typeof TextDecoder !== 'undefined') {
-    try {
-      const decoder = new TextDecoder('utf-8', { fatal: true });
-      return decoder.decode(bytes);
-    } catch {
-      return null;
-    }
-  }
-  if (typeof Buffer !== 'undefined') {
-    try {
-      const buffer = Buffer.from(bytes);
-      const text = buffer.toString('utf8');
-      const roundTrip = Buffer.from(text, 'utf8');
-      if (!roundTrip.equals(buffer)) return null;
-      return text;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
 
 export function parsePluginManifest(
   text: string,
@@ -96,11 +69,11 @@ export function resolvePluginBundlePaths(
 }
 
 export function isPluginManifestCandidateBytes(path: string, bytes: Uint8Array): boolean {
-  if (!path.toLowerCase().endsWith('.md')) return false;
-  if (!hasFrontMatterAtByte0(bytes)) return false;
+  if (!isRecordFileBytes(path, bytes)) return false;
 
-  const text = decodeUtf8OrNull(bytes);
-  if (text === null) return false;
+  const decoded = decodeUtf8Strict(bytes);
+  if (!decoded.ok) return false;
+  const text = decoded.text;
 
   const parsed = parsePluginManifest(text, path);
   if (!parsed.ok) return false;

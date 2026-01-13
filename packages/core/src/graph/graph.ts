@@ -1,8 +1,8 @@
 import { discoverGraphdownObjects } from '../parse/datasetObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { isObject } from '../model/types';
 import { extractRecordRefs } from '../parse/wikiRefs';
+import { collectStringValues } from '../internal/collectStringValues';
 
 export type RecordLinkGraphNodeKind = 'type' | 'record';
 
@@ -41,24 +41,6 @@ export interface RecordLinkGraph {
 export type BuildRecordLinkGraphResult =
   | { ok: true; graph: RecordLinkGraph }
   | { ok: false; errors: ValidationError[] };
-
-function collectStringValues(value: unknown, into: Set<string>): void {
-  if (typeof value === 'string') {
-    into.add(value);
-    return;
-  }
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStringValues(item, into);
-    }
-    return;
-  }
-  if (isObject(value)) {
-    for (const child of Object.values(value)) {
-      collectStringValues(child, into);
-    }
-  }
-}
 
 function collectRecordRefsFromRecord(fields: Record<string, unknown>, body: string): Set<string> {
   const strings = new Set<string>();
