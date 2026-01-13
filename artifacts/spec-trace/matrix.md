@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T06:01:15.482Z
+Generated: 2026-01-13T06:42:28.830Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -84,7 +84,10 @@ Tests (1):
 - packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-ID-002: duplicate pluginId fails validation"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
-Tests (3):
+Tests (6):
+- packages/core/src/__tests__/hash.plugins.test.ts — "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID"
+- packages/core/src/__tests__/hash.plugins.test.ts — "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID"
+- packages/core/src/__tests__/hash.plugins.test.ts — "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation"
 - packages/core/src/__tests__/hash.test.ts — "HASH-001: duplicate identities fail hashing"
 - packages/core/src/__tests__/hash.test.ts — "HASH-001: line ending normalization yields stable hashes"
 - packages/core/src/__tests__/hash.test.ts — "HASH-001: non-record files are ignored"
@@ -94,7 +97,8 @@ Tests (1):
 - packages/core/src/__tests__/hash.test.ts — "HASH-002: schema fingerprint ignores record object changes"
 
 ## HASH-003 — Snapshot fingerprint (types + record objects + plugin objects)
-Tests (1):
+Tests (2):
+- packages/core/src/__tests__/hash.plugins.test.ts — "HASH-003: snapshot fingerprint changes when a plugin bundle file changes"
 - packages/core/src/__tests__/hash.test.ts — "HASH-003: snapshot hash is path-independent for record files"
 
 ## HASH-004 — Only schema and snapshot fingerprints are defined in core (testable=true)
