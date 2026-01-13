@@ -4,9 +4,10 @@ export type Utf8DecodeResult =
   | { ok: true; text: string }
   | { ok: false; reason: Utf8DecodeFailureReason };
 
-let cachedDecoder: TextDecoder | null | undefined;
+type TextDecoderInstance = InstanceType<typeof TextDecoder>;
+let cachedDecoder: TextDecoderInstance | null | undefined;
 
-function getUtf8Decoder(): TextDecoder | null {
+function getUtf8Decoder(): TextDecoderInstance | null {
   if (cachedDecoder !== undefined) return cachedDecoder;
   cachedDecoder =
     typeof TextDecoder !== 'undefined'
