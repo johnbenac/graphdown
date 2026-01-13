@@ -5,6 +5,8 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "ES2022",
+    "outDir": "../../.ci/core-dist-cjs",
+    "tsBuildInfoFile": "../../.ci/core-dist-cjs/.tsbuildinfo",
     "noEmit": false,
     "declaration": false,
     "sourceMap": false,
