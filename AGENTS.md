@@ -3,6 +3,8 @@
 - Binary files should never be added to any PR.
 - All screenshots should be presented directly to the user, and not included in any PRs or commits created.
 - Always run tests whenever business logic is touched.
+- Before finishing any change, verify that relevant GitHub Actions workflows still pass or would pass: run the appropriate local checks that map to CI to avoid breaking the action matrix, and call out any CI gaps or limitations explicitly.
+- Treat CI stability as a first-class requirement: our actions cover many scenarios, so changes should be validated against the same checks to protect the repository from CI regressions.
 
 ## GitHub URL usage + reference repositories
 
