@@ -3,6 +3,7 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
+import { isPluginManifestCandidateBytes, parsePluginManifest } from '../parse/pluginManifest';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
@@ -16,6 +17,23 @@ function collectStringValues(value: unknown, into: Set<string>): void {
   if (isObject(value)) {
     for (const child of Object.values(value)) collectStringValues(child, into);
   }
+}
+
+function decodeUtf8Strict(bytes: Uint8Array): string {
+  if (typeof TextDecoder !== 'undefined') {
+    const decoder = new TextDecoder('utf-8', { fatal: true });
+    return decoder.decode(bytes);
+  }
+  if (typeof Buffer !== 'undefined') {
+    const buffer = Buffer.from(bytes);
+    const text = buffer.toString('utf8');
+    const roundTrip = Buffer.from(text, 'utf8');
+    if (!roundTrip.equals(buffer)) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    return text;
+  }
+  throw new Error('Canonicalization requires validated plugin manifests');
 }
 
 function collectReachableBlockPaths(
@@ -36,6 +54,27 @@ function collectReachableBlockPaths(
       for (const cid of foundCids) {
         cids.add(cid);
       }
+    }
+  }
+
+  for (const [path, bytes] of snapshot.files.entries()) {
+    if (!isPluginManifestCandidateBytes(path, bytes)) {
+      continue;
+    }
+    const text = decodeUtf8Strict(bytes);
+    const parsed = parsePluginManifest(text, path);
+    if (!parsed.ok) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    const blocks = parsed.manifest.yaml.blocks;
+    if (blocks === undefined) {
+      continue;
+    }
+    if (!Array.isArray(blocks) || blocks.some((item) => typeof item !== 'string')) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    for (const cid of blocks) {
+      cids.add(cid);
     }
   }
 
