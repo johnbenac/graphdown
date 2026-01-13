@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T06:42:52.467Z",
+  "generatedAt": "2026-01-13T06:01:15.482Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -180,21 +180,6 @@
       "tests": [
         {
           "reqId": "HASH-001",
-          "testTitle": "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID",
-          "filePath": "packages/core/src/__tests__/hash.plugins.test.ts"
-        },
-        {
-          "reqId": "HASH-001",
-          "testTitle": "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID",
-          "filePath": "packages/core/src/__tests__/hash.plugins.test.ts"
-        },
-        {
-          "reqId": "HASH-001",
-          "testTitle": "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation",
-          "filePath": "packages/core/src/__tests__/hash.plugins.test.ts"
-        },
-        {
-          "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate identities fail hashing",
           "filePath": "packages/core/src/__tests__/hash.test.ts"
         },
@@ -229,11 +214,6 @@
       "testable": null,
       "verify": null,
       "tests": [
-        {
-          "reqId": "HASH-003",
-          "testTitle": "HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
-          "filePath": "packages/core/src/__tests__/hash.plugins.test.ts"
-        },
         {
           "reqId": "HASH-003",
           "testTitle": "HASH-003: snapshot hash is path-independent for record files",
