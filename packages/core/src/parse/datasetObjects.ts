@@ -2,6 +2,7 @@ import { extractFrontMatter } from './frontMatter';
 import { makeError, type ValidationError } from '../validate/errors';
 import { isObject } from '../model/types';
 import { parseYamlObject } from './yaml';
+import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 export const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
@@ -32,9 +33,6 @@ export type ParsedGraphdownObject =
   | { kind: 'ignored' }
   | { kind: 'error'; error: ValidationError };
 
-const textDecoder =
-  typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
-
 export function isRecordFileBytes(path: string, bytes: Uint8Array): boolean {
   const lower = path.toLowerCase();
   if (!lower.endsWith('.md')) {
@@ -53,19 +51,16 @@ export function isRecordFileBytes(path: string, bytes: Uint8Array): boolean {
   return false;
 }
 
-function decodeUtf8(bytes: Uint8Array, file: string): { ok: true; text: string } | { ok: false; error: ValidationError } {
-  if (!textDecoder) {
+function decodeUtf8(
+  bytes: Uint8Array,
+  file: string
+): { ok: true; text: string } | { ok: false; error: ValidationError } {
+  const result = decodeUtf8Strict(bytes);
+  if (result.ok) return { ok: true, text: result.text };
+  if (result.reason === 'no-decoder') {
     return { ok: false, error: makeError('E_INTERNAL', 'TextDecoder not available', file) };
   }
-  try {
-    return { ok: true, text: textDecoder.decode(bytes) };
-  } catch {
-    return { ok: false, error: makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', file) };
-  }
-}
-
-function normalizeLineEndings(text: string): string {
-  return text.replace(/\r\n?/g, '\n');
+  return { ok: false, error: makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', file) };
 }
 
 function validateIdentifier(value: unknown, key: 'typeId' | 'recordId', file: string): { ok: true; value: string } | { ok: false; error: ValidationError } {

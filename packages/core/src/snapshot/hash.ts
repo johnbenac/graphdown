@@ -6,30 +6,13 @@ import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
 import { parsePluginManifest } from '../parse/pluginManifest';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
+import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
 
 export type HashScope = 'schema' | 'snapshot';
 
 type HashResult = { ok: true; cid: string } | { ok: false; errors: ValidationError[] };
 
-const decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { fatal: true }) : null;
 const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null;
-
-function decodeUtf8Fatal(raw: Uint8Array, file: string, errors: ValidationError[]): string | null {
-  try {
-    if (!decoder) {
-      errors.push(makeError('E_INTERNAL', 'TextDecoder not available for UTF-8 decode', file));
-      return null;
-    }
-    return decoder.decode(raw);
-  } catch {
-    errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', file));
-    return null;
-  }
-}
-
-function normalizeLineEndings(text: string): string {
-  return text.replace(/\r\n?/g, '\n');
-}
 
 function lexCompareBytes(a: Uint8Array, b: Uint8Array): number {
   const length = Math.min(a.length, b.length);
@@ -66,10 +49,17 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     if (!raw) continue;
     if (!isRecordFileBytes(file, raw)) continue;
 
-    const decoded = decodeUtf8Fatal(raw, file, errors);
-    if (decoded === null) continue;
+    const decoded = decodeUtf8Strict(raw);
+    if (!decoded.ok) {
+      if (decoded.reason === 'no-decoder') {
+        errors.push(makeError('E_INTERNAL', 'TextDecoder not available for UTF-8 decode', file));
+      } else {
+        errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', file));
+      }
+      continue;
+    }
 
-    const normalizedText = normalizeLineEndings(decoded);
+    const normalizedText = normalizeLineEndings(decoded.text);
     const parsed = parseGraphdownText(file, normalizedText);
     if (parsed.kind === 'error') {
       errors.push(parsed.error);
@@ -194,9 +184,22 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
           continue;
         }
 
-        const decodedBundle = decodeUtf8Fatal(raw, resolvedPath, errors);
-        if (decodedBundle === null) continue;
-        const normalizedBundle = normalizeLineEndings(decodedBundle);
+        const decodedBundle = decodeUtf8Strict(raw);
+        if (!decodedBundle.ok) {
+          if (decodedBundle.reason === 'no-decoder') {
+            errors.push(
+              makeError(
+                'E_INTERNAL',
+                'TextDecoder not available for UTF-8 decode',
+                resolvedPath
+              )
+            );
+          } else {
+            errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', resolvedPath));
+          }
+          continue;
+        }
+        const normalizedBundle = normalizeLineEndings(decodedBundle.text);
         const contentBytes = encoder.encode(normalizedBundle);
         const idBytes = encoder.encode(identity);
         entries.push({ id: identity, idBytes, file: resolvedPath, bytes: contentBytes });

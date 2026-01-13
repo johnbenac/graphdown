@@ -5,10 +5,10 @@ import type { ValidationError } from '../validate/errors';
 import { makeError } from '../validate/errors';
 import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
 import { buildRecordLinkGraphFromSnapshot } from '../graph/graph';
-import { isObject } from '../model/types';
 import { discoverGraphdownObjects, IDENTIFIER_PATTERN, RECORD_KEY_PATTERN } from '../parse/datasetObjects';
 import { extractCidRefs } from '../parse/wikiRefs';
 import { validateDatasetSnapshot } from '../validate/validateDatasetSnapshot';
+import { collectStringValues } from '../internal/collectStringValues';
 import { fail } from './errors';
 
 export const RUNTIME_API_VERSION_V1 = 1 as const;
@@ -154,24 +154,6 @@ function requireCid(
   } catch (error) {
     const hint = error instanceof Error ? error.message : String(error);
     fail(op, 'E_CID_INVALID', 'Invalid DASL CIDv1 string', { hint, details: { cid: trimmed } });
-  }
-}
-
-function collectStringValues(value: unknown, into: Set<string>): void {
-  if (typeof value === 'string') {
-    into.add(value);
-    return;
-  }
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStringValues(item, into);
-    }
-    return;
-  }
-  if (isObject(value)) {
-    for (const child of Object.values(value)) {
-      collectStringValues(child, into);
-    }
   }
 }
 

@@ -1,6 +1,5 @@
 import { discoverGraphdownObjects, type ParsedRecordObject } from '../parse/datasetObjects';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { isObject } from '../model/types';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
 import {
@@ -9,37 +8,8 @@ import {
   resolvePluginBundlePaths,
 } from '../parse/pluginManifest';
 import { isValidPluginId } from '../model/ids';
-
-function collectStringValues(value: unknown, into: Set<string>): void {
-  if (typeof value === 'string') {
-    into.add(value);
-    return;
-  }
-  if (Array.isArray(value)) {
-    for (const item of value) collectStringValues(item, into);
-    return;
-  }
-  if (isObject(value)) {
-    for (const child of Object.values(value)) collectStringValues(child, into);
-  }
-}
-
-function decodeUtf8Strict(bytes: Uint8Array): string {
-  if (typeof TextDecoder !== 'undefined') {
-    const decoder = new TextDecoder('utf-8', { fatal: true });
-    return decoder.decode(bytes);
-  }
-  if (typeof Buffer !== 'undefined') {
-    const buffer = Buffer.from(bytes);
-    const text = buffer.toString('utf8');
-    const roundTrip = Buffer.from(text, 'utf8');
-    if (!roundTrip.equals(buffer)) {
-      throw new Error('Invalid UTF-8');
-    }
-    return text;
-  }
-  throw new Error('No UTF-8 decoder available');
-}
+import { collectStringValues } from '../internal/collectStringValues';
+import { decodeUtf8StrictOrThrow } from '../internal/text';
 
 function collectReachableBlockPaths(
   snapshot: DatasetSnapshot,
@@ -66,7 +36,7 @@ function collectReachableBlockPaths(
     if (!isPluginManifestCandidateBytes(path, bytes)) {
       continue;
     }
-    const text = decodeUtf8Strict(bytes);
+    const text = decodeUtf8StrictOrThrow(bytes);
     const parsed = parsePluginManifest(text, path);
     if (!parsed.ok) {
       throw new Error('Canonicalization requires validated plugin manifests');
@@ -150,7 +120,7 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     if (!bytes) continue;
     if (!isPluginManifestCandidateBytes(path, bytes)) continue;
 
-    const text = decodeUtf8Strict(bytes);
+    const text = decodeUtf8StrictOrThrow(bytes);
     const parsedManifest = parsePluginManifest(text, path);
     if (!parsedManifest.ok) {
       throw new Error('Canonicalization requires validated plugin manifests');
