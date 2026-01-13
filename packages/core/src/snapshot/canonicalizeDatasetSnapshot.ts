@@ -3,7 +3,12 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
-import { isPluginManifestCandidateBytes, parsePluginManifest } from '../parse/pluginManifest';
+import {
+  isPluginManifestCandidateBytes,
+  parsePluginManifest,
+  resolvePluginBundlePaths,
+} from '../parse/pluginManifest';
+import { isValidPluginId } from '../model/ids';
 
 function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {
@@ -136,6 +141,55 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     }
     const recordDir = resolveRecordDir(recordObj.identity);
     outputFiles.set(`${recordDir}/${recordObj.recordId}.md`, bytes);
+  }
+
+  // --- Plugins: canonical export layout (EXP-PLUG-001) ---
+  const allPaths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
+  for (const path of allPaths) {
+    const bytes = snapshot.files.get(path);
+    if (!bytes) continue;
+    if (!isPluginManifestCandidateBytes(path, bytes)) continue;
+
+    const text = decodeUtf8Strict(bytes);
+    const parsedManifest = parsePluginManifest(text, path);
+    if (!parsedManifest.ok) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+
+    const yaml = parsedManifest.manifest.yaml;
+    const pluginId = yaml.pluginId;
+    const files = yaml.files;
+
+    if (typeof pluginId !== 'string' || !isValidPluginId(pluginId)) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+    if (!Array.isArray(files) || files.some((item) => typeof item !== 'string')) {
+      throw new Error('Canonicalization requires validated plugin manifests');
+    }
+
+    const pluginRoot = `plugins/${pluginId}`;
+    const manifestDest = `${pluginRoot}/manifest.md`;
+    if (outputFiles.has(manifestDest)) {
+      throw new Error(`Duplicate plugin export path ${manifestDest}`);
+    }
+    outputFiles.set(manifestDest, bytes);
+
+    const resolved = resolvePluginBundlePaths(path, files);
+    for (const rel of files) {
+      const resolvedPath = resolved.get(rel);
+      if (!resolvedPath) {
+        throw new Error('Canonicalization requires validated plugin manifests');
+      }
+      const bundleBytes = snapshot.files.get(resolvedPath);
+      if (!bundleBytes) {
+        throw new Error('Canonicalization requires validated plugin manifests');
+      }
+      const bundleDest = `${pluginRoot}/${rel}`;
+      if (outputFiles.has(bundleDest)) {
+        throw new Error(`Duplicate plugin export path ${bundleDest}`);
+      }
+      outputFiles.set(bundleDest, bundleBytes);
+    }
   }
 
   const blockPaths = collectReachableBlockPaths(snapshot, parsed.recordObjects);
