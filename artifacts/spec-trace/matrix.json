@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T03:47:04.986Z",
+  "generatedAt": "2026-01-13T06:01:15.482Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1254,7 +1254,18 @@
       "title": "Importers must include plugin manifests and bundles",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "IMP-PLUG-001",
+          "testTitle": "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot",
+          "filePath": "apps/web/src/import/__tests__/readZipSnapshot.plugins.test.ts"
+        },
+        {
+          "reqId": "IMP-PLUG-001",
+          "testTitle": "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files",
+          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-003",
@@ -1804,10 +1815,6 @@
     {
       "id": "EXP-PLUG-001",
       "title": "Canonical plugin export layout"
-    },
-    {
-      "id": "IMP-PLUG-001",
-      "title": "Importers must include plugin manifests and bundles"
     },
     {
       "id": "NR-PLUG-EXP-001",

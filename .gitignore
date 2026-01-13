@@ -31,6 +31,3 @@ Thumbs.db
 # Test runner artifacts (Playwright/Vitest/etc.)
 test-results/
 playwright-report/
-
-# Spec trace artifacts
-artifacts/

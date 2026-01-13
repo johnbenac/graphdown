@@ -1,10 +1,9 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T03:47:04.986Z
+Generated: 2026-01-13T06:01:15.482Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
-- IMP-PLUG-001 — Importers must include plugin manifests and bundles
 - NR-PLUG-EXP-001 — Plugins do not define canonical export
 - NR-PLUG-HASH-001 — Plugins do not define hashing semantics
 - NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
@@ -411,8 +410,9 @@ Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (2):
+- apps/web/src/import/__tests__/readZipSnapshot.plugins.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
+- apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
 
 ## EXP-003 — Canonical dataset export
 Tests (3):

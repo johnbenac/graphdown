@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-13T03:47:04.986Z
+Generated: 2026-01-13T06:01:15.482Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
@@ -11,23 +11,20 @@ Source: artifacts/spec-trace/matrix.json
 
 ## Deferred backlog (verify in: todo, backlog, deferred, future, planned, manual)
 - Requirements: 22
-- Covered: 12
-- Missing: 10
-- Coverage: 54.5%
+- Covered: 13
+- Missing: 9
+- Coverage: 59.1%
 
 ## Overall (all testable requirements)
 - Requirements: 94
-- Covered: 84
-- Missing: 10
-- Coverage: 89.4%
+- Covered: 85
+- Missing: 9
+- Coverage: 90.4%
 
 The following DEFERRED requirements have **no referenced tests** (CI does NOT fail):
 
 ### EXP (1)
 - EXP-PLUG-001 — Canonical plugin export layout
-
-### IMP (1)
-- IMP-PLUG-001 — Importers must include plugin manifests and bundles
 
 ### NR (4)
 - NR-PLUG-EXP-001 — Plugins do not define canonical export
