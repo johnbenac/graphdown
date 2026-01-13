@@ -8,6 +8,7 @@ export * from './parse/yaml';
 export * from './parse/wikiRefs';
 export * from './parse/datasetObjects';
 export * from './parse/markdownRecord';
+export * from './parse/pluginManifest';
 export * from './validate/errors';
 export * from './validate/validateDatasetSnapshot';
 export * from './graph/graph';
