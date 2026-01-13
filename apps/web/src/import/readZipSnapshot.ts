@@ -1,5 +1,11 @@
 import { unzipSync } from "fflate";
-import { isRecordFileBytes, type DatasetSnapshot } from "@graphdown/core";
+import {
+  isRecordFileBytes,
+  isPluginManifestCandidateBytes,
+  parsePluginManifest,
+  resolvePluginBundlePaths,
+  type DatasetSnapshot
+} from "@graphdown/core";
 
 const ROOT_DIRS = new Set(["types", "records", "blocks"]);
 
@@ -28,14 +34,6 @@ function normalizeZipPath(path: string): string | null {
   return safeSegments.join("/");
 }
 
-function shouldIncludeInSnapshot(path: string, contents: Uint8Array): boolean {
-  if (path.startsWith("blocks/")) {
-    return true;
-  }
-  // LAYOUT-001: record/type markdown is discovered by content, not directory.
-  return isRecordFileBytes(path, contents);
-}
-
 export async function readZipSnapshot(
   file: File
 ): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
@@ -59,18 +57,73 @@ export async function readZipSnapshot(
     Boolean(root) &&
     !ROOT_DIRS.has(root) &&
     normalizedEntries.every((entry) => entry.path.startsWith(`${root}/`));
-  const files = new Map<string, Uint8Array>();
-  const ignored: string[] = [];
+  const allEntries = new Map<string, Uint8Array>();
   for (const entry of normalizedEntries) {
     const finalPath = shouldStripRoot ? entry.path.split("/").slice(1).join("/") : entry.path;
     if (!finalPath) {
       continue;
     }
-    if (shouldIncludeInSnapshot(finalPath, entry.contents)) {
-      files.set(finalPath, entry.contents);
-    } else {
-      ignored.push(finalPath);
+    allEntries.set(finalPath, entry.contents);
+  }
+  const files = new Map<string, Uint8Array>();
+  const ignored = new Set<string>();
+  const pluginManifestPaths: string[] = [];
+  for (const [path, contents] of allEntries) {
+    if (path.startsWith("blocks/")) {
+      files.set(path, contents);
+      continue;
+    }
+    const isRecord = isRecordFileBytes(path, contents);
+    const isManifest = isPluginManifestCandidateBytes(path, contents);
+    if (isRecord || isManifest) {
+      files.set(path, contents);
+      if (isManifest) {
+        pluginManifestPaths.push(path);
+      }
+      continue;
+    }
+    ignored.add(path);
+  }
+
+  const decoder = new TextDecoder("utf-8");
+  for (const manifestPath of pluginManifestPaths) {
+    const manifestBytes = files.get(manifestPath);
+    if (!manifestBytes) {
+      continue;
+    }
+    let text: string;
+    try {
+      text = decoder.decode(manifestBytes);
+    } catch {
+      continue;
+    }
+    const parsed = parsePluginManifest(text, manifestPath);
+    if (!parsed.ok) {
+      continue;
+    }
+    const declaredRelativePaths = new Set<string>();
+    const entry = parsed.manifest.yaml.entry;
+    if (typeof entry === "string") {
+      declaredRelativePaths.add(entry);
+    }
+    const manifestFiles = parsed.manifest.yaml.files;
+    if (Array.isArray(manifestFiles)) {
+      for (const file of manifestFiles) {
+        if (typeof file === "string") {
+          declaredRelativePaths.add(file);
+        }
+      }
+    }
+    const resolved = resolvePluginBundlePaths(manifestPath, [...declaredRelativePaths]);
+    for (const resolvedPath of resolved.values()) {
+      const bundleBytes = allEntries.get(resolvedPath);
+      if (!bundleBytes) {
+        continue;
+      }
+      files.set(resolvedPath, bundleBytes);
+      ignored.delete(resolvedPath);
     }
   }
-  return { snapshot: { files }, ignored };
+
+  return { snapshot: { files }, ignored: [...ignored] };
 }
