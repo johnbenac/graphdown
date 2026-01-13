@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T17:33:41.929Z",
+  "generatedAt": "2026-01-13T17:51:36.111Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1324,6 +1324,11 @@
       "tests": [
         {
           "reqId": "EXP-006",
+          "testTitle": "EXP-006: includes plugin-declared blocks even when records do not reference them",
+          "filePath": "apps/web/src/features/export/__tests__/exportZip.plugins.test.ts"
+        },
+        {
+          "reqId": "EXP-006",
           "testTitle": "EXP-006: includes only referenced blocks alongside canonical records/types",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
         },
@@ -1352,7 +1357,13 @@
       "title": "Canonical plugin export layout",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "EXP-PLUG-001",
+          "testTitle": "EXP-PLUG-001: exports plugin bundles in canonical layout with exact bytes",
+          "filePath": "apps/web/src/features/export/__tests__/exportZip.plugins.test.ts"
+        }
+      ]
     },
     {
       "id": "EXP-005",
@@ -1838,10 +1849,6 @@
   ],
   "unknownReferences": [],
   "missingTestable": [
-    {
-      "id": "EXP-PLUG-001",
-      "title": "Canonical plugin export layout"
-    },
     {
       "id": "NR-PLUG-EXP-001",
       "title": "Plugins do not define canonical export"
