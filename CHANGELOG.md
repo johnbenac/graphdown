@@ -1,3 +1,10 @@
+## [0.12.2](https://github.com/johnbenac/graphdown/compare/v0.12.1...v0.12.2) (2026-01-13)
+
+
+### Bug Fixes
+
+* **core:** use InstanceType for TextDecoder cache ([70271b5](https://github.com/johnbenac/graphdown/commit/70271b5bb3419fc29604b3ebc4ec3fffe8375117))
+
 ## [0.12.1](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.12.1) (2026-01-13)
 
 
