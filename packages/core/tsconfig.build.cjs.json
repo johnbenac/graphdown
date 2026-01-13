@@ -14,6 +14,9 @@
   "exclude": [
     "src/**/__tests__/**",
     "src/**/__fixtures__/**",
+    "src/tests/**",
+    "src/fixtures/**",
+    "src/runtime/tests/**",
     "src/**/*.test.*",
     "src/**/*.spec.*"
   ]

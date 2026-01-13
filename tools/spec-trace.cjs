@@ -25,6 +25,7 @@ const SKIP_DIR_NAMES = new Set([
   'test-results',
   'playwright-report',
   'app.spec.ts-snapshots',
+  '__fixtures__',
 ]);
 
 const PLAYWRIGHT_SNAPSHOT_DIR_POSIX = toPosixPath(
