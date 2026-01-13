@@ -10,6 +10,14 @@ import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { isObject } from '../model/types';
 import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
 import { extractCidRefs, extractRecordRefs } from '../parse/wikiRefs';
+import {
+  isPluginManifestCandidateBytes,
+  isSafeRelativePath,
+  parsePluginManifest,
+  resolvePluginBundlePaths,
+  type ParsedPluginManifest,
+} from '../parse/pluginManifest';
+import { isValidPluginId } from '../model/ids';
 
 export type ValidateDatasetResult =
   | { ok: true }
@@ -33,6 +41,29 @@ function collectStringValues(value: unknown, into: Set<string>): void {
       collectStringValues(child, into);
     }
   }
+}
+
+function decodeUtf8Fatal(bytes: Uint8Array): string | null {
+  if (typeof TextDecoder !== 'undefined') {
+    try {
+      const decoder = new TextDecoder('utf-8', { fatal: true });
+      return decoder.decode(bytes);
+    } catch {
+      return null;
+    }
+  }
+  if (typeof Buffer !== 'undefined') {
+    try {
+      const buffer = Buffer.from(bytes);
+      const text = buffer.toString('utf8');
+      const roundTrip = Buffer.from(text, 'utf8');
+      if (!roundTrip.equals(buffer)) return null;
+      return text;
+    } catch {
+      return null;
+    }
+  }
+  return null;
 }
 
 function enforceFieldDefs(
@@ -282,6 +313,345 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
   const parsed = discoverGraphdownObjects(snapshot);
   if (parsed.errors.length) {
     return { ok: false, errors: parsed.errors };
+  }
+
+  const pluginManifests: ParsedPluginManifest[] = [];
+  const pluginManifestPaths = new Set<string>();
+  const allPaths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
+  for (const path of allPaths) {
+    const bytes = snapshot.files.get(path);
+    if (!bytes) {
+      continue;
+    }
+    if (!isPluginManifestCandidateBytes(path, bytes)) {
+      continue;
+    }
+    const text = decodeUtf8Fatal(bytes);
+    if (text === null) {
+      errors.push(
+        makeError('E_PLUGIN_MANIFEST_INVALID', `Plugin manifest ${path} is not valid UTF-8`, path)
+      );
+      continue;
+    }
+    const parsedManifest = parsePluginManifest(text, path);
+    if (!parsedManifest.ok) {
+      errors.push(makeError('E_PLUGIN_MANIFEST_INVALID', parsedManifest.error.message, path));
+      continue;
+    }
+    pluginManifests.push(parsedManifest.manifest);
+    pluginManifestPaths.add(path);
+  }
+  pluginManifests.sort((a, b) => a.file.localeCompare(b.file));
+
+  const recordFilePaths = new Set<string>([
+    ...parsed.typeObjects.map((obj) => obj.file),
+    ...parsed.recordObjects.map((obj) => obj.file),
+  ]);
+
+  const requiredPluginKeys = ['pluginId', 'gdApiVersion', 'entry', 'files'];
+  const optionalPluginKeys = ['meta', 'config', 'requires', 'blocks'];
+  const forbiddenPluginKeys = ['typeId', 'recordId', 'parent', 'fields'];
+  const allowedPluginKeys = new Set([...requiredPluginKeys, ...optionalPluginKeys]);
+
+  const pushPluginError = (
+    code: ValidationError['code'],
+    message: string,
+    file: string,
+    hint?: string
+  ) => {
+    errors.push(makeError(code, message, file, hint));
+  };
+
+  for (const manifest of pluginManifests) {
+    const yaml = manifest.yaml;
+    for (const key of requiredPluginKeys) {
+      if (!Object.prototype.hasOwnProperty.call(yaml, key)) {
+        pushPluginError(
+          'E_PLUGIN_KEYS_INVALID',
+          `Plugin manifest ${manifest.file} is missing required key "${key}"`,
+          manifest.file
+        );
+      }
+    }
+    for (const key of forbiddenPluginKeys) {
+      if (Object.prototype.hasOwnProperty.call(yaml, key)) {
+        pushPluginError(
+          'E_PLUGIN_KEYS_INVALID',
+          `Plugin manifest ${manifest.file} contains forbidden key "${key}"`,
+          manifest.file
+        );
+      }
+    }
+    for (const key of Object.keys(yaml)) {
+      if (!allowedPluginKeys.has(key)) {
+        pushPluginError(
+          'E_PLUGIN_KEYS_INVALID',
+          `Plugin manifest ${manifest.file} contains unknown key "${key}"`,
+          manifest.file
+        );
+      }
+    }
+
+    const pluginId = yaml.pluginId;
+    if (typeof pluginId !== 'string' || !isValidPluginId(pluginId)) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid pluginId`,
+        manifest.file
+      );
+    }
+    const gdApiVersion = yaml.gdApiVersion;
+    if (typeof gdApiVersion !== 'number' || !Number.isInteger(gdApiVersion) || gdApiVersion < 1) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid gdApiVersion`,
+        manifest.file
+      );
+    }
+    const entry = yaml.entry;
+    if (typeof entry !== 'string') {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid entry`,
+        manifest.file
+      );
+    }
+    const files = yaml.files;
+    if (!Array.isArray(files) || files.some((file) => typeof file !== 'string')) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid files list`,
+        manifest.file
+      );
+    }
+    if ('meta' in yaml && (!isObject(yaml.meta) || Array.isArray(yaml.meta))) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid meta`,
+        manifest.file
+      );
+    }
+    if ('config' in yaml && (!isObject(yaml.config) || Array.isArray(yaml.config))) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid config`,
+        manifest.file
+      );
+    }
+    if (
+      'requires' in yaml &&
+      (!Array.isArray(yaml.requires) || yaml.requires.some((req) => typeof req !== 'string'))
+    ) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid requires list`,
+        manifest.file
+      );
+    }
+    if ('blocks' in yaml && !Array.isArray(yaml.blocks)) {
+      pushPluginError(
+        'E_PLUGIN_KEYS_INVALID',
+        `Plugin manifest ${manifest.file} has invalid blocks list`,
+        manifest.file
+      );
+    }
+  }
+
+  const pluginIdToManifestPath = new Map<string, string>();
+  for (const manifest of pluginManifests) {
+    const pluginId = manifest.yaml.pluginId;
+    if (!isValidPluginId(pluginId)) {
+      continue;
+    }
+    const existing = pluginIdToManifestPath.get(pluginId);
+    if (existing) {
+      pushPluginError(
+        'E_PLUGIN_DUPLICATE_ID',
+        `Plugin ID "${pluginId}" is duplicated in ${existing} and ${manifest.file}`,
+        manifest.file
+      );
+      continue;
+    }
+    pluginIdToManifestPath.set(pluginId, manifest.file);
+  }
+
+  for (const manifest of pluginManifests) {
+    const entry = manifest.yaml.entry;
+    const files = manifest.yaml.files;
+    const filesAreStrings = Array.isArray(files) && files.every((file) => typeof file === 'string');
+    if (typeof entry === 'string' && filesAreStrings) {
+      if (entry.trim().length === 0 || !isSafeRelativePath(entry)) {
+        pushPluginError(
+          'E_PLUGIN_ENTRY_INVALID',
+          `Plugin manifest ${manifest.file} has invalid entry path "${entry}"`,
+          manifest.file
+        );
+      }
+      if (!files.includes(entry)) {
+        pushPluginError(
+          'E_PLUGIN_ENTRY_INVALID',
+          `Plugin manifest ${manifest.file} entry "${entry}" is missing from files list`,
+          manifest.file
+        );
+      }
+    }
+  }
+
+  for (const manifest of pluginManifests) {
+    const files = manifest.yaml.files;
+    if (Array.isArray(files) && files.includes('manifest.md')) {
+      pushPluginError(
+        'E_PLUGIN_PATH_RESERVED',
+        `Plugin manifest ${manifest.file} declares reserved bundle path "manifest.md"`,
+        manifest.file
+      );
+    }
+  }
+
+  for (const manifest of pluginManifests) {
+    const files = manifest.yaml.files;
+    if (!Array.isArray(files) || files.some((file) => typeof file !== 'string')) {
+      continue;
+    }
+
+    const seenFiles = new Set<string>();
+    for (const file of files) {
+      if (seenFiles.has(file)) {
+        pushPluginError(
+          'E_PLUGIN_FILES_DUPLICATE',
+          `Plugin manifest ${manifest.file} lists duplicate bundle entry "${file}"`,
+          manifest.file
+        );
+      }
+      seenFiles.add(file);
+    }
+
+    for (const file of files) {
+      if (!isSafeRelativePath(file)) {
+        pushPluginError(
+          'E_PLUGIN_PATH_INVALID',
+          `Plugin manifest ${manifest.file} contains unsafe bundle path "${file}"`,
+          manifest.file
+        );
+      }
+    }
+
+    const resolved = resolvePluginBundlePaths(manifest.file, files);
+    const resolvedToRelative = new Map<string, string>();
+    for (const [relativePath, resolvedPath] of resolved.entries()) {
+      const existing = resolvedToRelative.get(resolvedPath);
+      if (existing && existing !== relativePath) {
+        pushPluginError(
+          'E_PLUGIN_FILES_DUPLICATE',
+          `Plugin manifest ${manifest.file} resolves "${existing}" and "${relativePath}" to ${resolvedPath}`,
+          manifest.file
+        );
+      } else {
+        resolvedToRelative.set(resolvedPath, relativePath);
+      }
+    }
+
+    for (const file of files) {
+      const resolvedPath = resolved.get(file);
+      if (!resolvedPath) {
+        continue;
+      }
+      if (!snapshot.files.has(resolvedPath)) {
+        pushPluginError(
+          'E_PLUGIN_FILE_MISSING',
+          `Plugin manifest ${manifest.file} references missing bundle file ${resolvedPath}`,
+          manifest.file
+        );
+      }
+      if (
+        recordFilePaths.has(resolvedPath) ||
+        resolvedPath.startsWith('blocks/') ||
+        pluginManifestPaths.has(resolvedPath)
+      ) {
+        pushPluginError(
+          'E_PLUGIN_FILE_KIND_FORBIDDEN',
+          `Plugin manifest ${manifest.file} references forbidden bundle file ${resolvedPath}`,
+          manifest.file
+        );
+      }
+    }
+
+    for (const file of files) {
+      const resolvedPath = resolved.get(file);
+      if (!resolvedPath) {
+        continue;
+      }
+      const bytes = snapshot.files.get(resolvedPath);
+      if (!bytes) {
+        continue;
+      }
+      if (decodeUtf8Fatal(bytes) === null) {
+        pushPluginError(
+          'E_PLUGIN_UTF8_INVALID',
+          `Plugin manifest ${manifest.file} bundle file ${resolvedPath} is not valid UTF-8`,
+          manifest.file
+        );
+      }
+    }
+  }
+
+  for (const manifest of pluginManifests) {
+    const blocks = manifest.yaml.blocks;
+    if (blocks === undefined) {
+      continue;
+    }
+    if (!Array.isArray(blocks) || blocks.some((block) => typeof block !== 'string')) {
+      pushPluginError(
+        'E_PLUGIN_BLOCK_CID_INVALID',
+        `Plugin manifest ${manifest.file} has invalid blocks list`,
+        manifest.file
+      );
+      continue;
+    }
+
+    for (const cid of blocks) {
+      let decoded: ReturnType<typeof decodeDaslCidString>;
+      try {
+        decoded = decodeDaslCidString(cid);
+      } catch {
+        pushPluginError(
+          'E_PLUGIN_BLOCK_CID_INVALID',
+          `Plugin manifest ${manifest.file} includes invalid block CID ${cid}`,
+          manifest.file
+        );
+        continue;
+      }
+
+      const path = blockPathForCid(cid);
+      const bytes = snapshot.files.get(path);
+      if (!bytes) {
+        pushPluginError(
+          'E_PLUGIN_BLOCK_MISSING_OR_INVALID',
+          `Plugin manifest ${manifest.file} references missing block ${cid}`,
+          manifest.file
+        );
+        continue;
+      }
+      const digest = sha256(bytes);
+      if (digest.length !== decoded.digest.length) {
+        pushPluginError(
+          'E_PLUGIN_BLOCK_MISSING_OR_INVALID',
+          `Plugin manifest ${manifest.file} references block ${cid} with mismatched digest`,
+          manifest.file
+        );
+        continue;
+      }
+      for (let i = 0; i < digest.length; i += 1) {
+        if (digest[i] !== decoded.digest[i]) {
+          pushPluginError(
+            'E_PLUGIN_BLOCK_MISSING_OR_INVALID',
+            `Plugin manifest ${manifest.file} references block ${cid} with mismatched digest`,
+            manifest.file
+          );
+          break;
+        }
+      }
+    }
   }
 
   const typesById = new Map<string, ParsedTypeObject>();

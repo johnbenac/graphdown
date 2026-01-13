@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T02:10:36.251Z",
+  "generatedAt": "2026-01-13T03:47:10.489Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -164,7 +164,13 @@
       "title": "pluginId uniqueness",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "PLUG-ID-002",
+          "testTitle": "PLUG-ID-002: duplicate pluginId fails validation",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "HASH-001",
@@ -941,7 +947,13 @@
       "title": "Plugin manifests must parse and satisfy PLUG-FR-002",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-001",
+          "testTitle": "VAL-PLUG-001: plugin-valid-dataset validates successfully",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-002",
@@ -955,42 +967,78 @@
       "title": "Plugin entry must exist and be included",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-003",
+          "testTitle": "VAL-PLUG-003: entry must appear in files list",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-004",
       "title": "Plugin bundle file paths must resolve safely and exist",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-004",
+          "testTitle": "VAL-PLUG-004: unsafe relative paths are rejected",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-005",
       "title": "Plugin bundle files must be UTF-8 decodable",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-005",
+          "testTitle": "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-006",
       "title": "Plugin bundle must not contain reserved export paths",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-006",
+          "testTitle": "VAL-PLUG-006: files must not include reserved manifest.md",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-007",
       "title": "Plugin-declared block dependencies must be valid CIDs",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-007",
+          "testTitle": "VAL-PLUG-007: blocks must contain valid CID strings",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-PLUG-008",
       "title": "Plugin-declared block dependencies must resolve to matching block bytes",
       "testable": true,
       "verify": "todo",
-      "tests": []
+      "tests": [
+        {
+          "reqId": "VAL-PLUG-008",
+          "testTitle": "VAL-PLUG-008: plugin-declared blocks must resolve to matching block bytes",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "VAL-CID-001",
@@ -1041,6 +1089,11 @@
           "reqId": "GC-001",
           "testTitle": "GC-001: reachable block set includes references from fields",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.test.ts"
+        },
+        {
+          "reqId": "GC-001",
+          "testTitle": "GC-001: plugin-declared blocks are included in the reachable set",
+          "filePath": "packages/core/src/__tests__/plugins.gc.test.ts"
         }
       ]
     },
@@ -1050,6 +1103,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "GC-002",
+          "testTitle": "GC-002: export excludes blocks not referenced by records or plugin blocks",
+          "filePath": "packages/core/src/__tests__/plugins.gc.test.ts"
+        },
         {
           "reqId": "GC-002",
           "testTitle": "GC-002: export excludes unreferenced blocks",
@@ -1067,6 +1125,11 @@
           "reqId": "GC-003",
           "testTitle": "GC-003: unreferenced but valid blocks do not fail validation",
           "filePath": "packages/core/src/__tests__/blocks.test.ts"
+        },
+        {
+          "reqId": "GC-003",
+          "testTitle": "GC-003: garbage blocks do not make dataset invalid (with plugins present)",
+          "filePath": "packages/core/src/__tests__/plugins.gc.test.ts"
         }
       ]
     },
@@ -1775,40 +1838,8 @@
       "title": "Required top-level keys for plugin manifests"
     },
     {
-      "id": "PLUG-ID-002",
-      "title": "pluginId uniqueness"
-    },
-    {
-      "id": "VAL-PLUG-001",
-      "title": "Plugin manifests must parse and satisfy PLUG-FR-002"
-    },
-    {
       "id": "VAL-PLUG-002",
       "title": "pluginId must be unique"
-    },
-    {
-      "id": "VAL-PLUG-003",
-      "title": "Plugin entry must exist and be included"
-    },
-    {
-      "id": "VAL-PLUG-004",
-      "title": "Plugin bundle file paths must resolve safely and exist"
-    },
-    {
-      "id": "VAL-PLUG-005",
-      "title": "Plugin bundle files must be UTF-8 decodable"
-    },
-    {
-      "id": "VAL-PLUG-006",
-      "title": "Plugin bundle must not contain reserved export paths"
-    },
-    {
-      "id": "VAL-PLUG-007",
-      "title": "Plugin-declared block dependencies must be valid CIDs"
-    },
-    {
-      "id": "VAL-PLUG-008",
-      "title": "Plugin-declared block dependencies must resolve to matching block bytes"
     }
   ]
 }
