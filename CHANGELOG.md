@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.12.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **parse:** handle CR-only front matter for manifests ([d2fed98](https://github.com/johnbenac/graphdown/commit/d2fed980943f6e2d4c718dd02f6c2be292d8f63a))
+
 # [0.12.0](https://github.com/johnbenac/graphdown/compare/v0.11.0...v0.12.0) (2026-01-05)
 
 
