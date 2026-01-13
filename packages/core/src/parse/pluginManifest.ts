@@ -1,6 +1,5 @@
 import { parseMarkdownRecord } from './markdownRecord';
 import type { ValidationError } from '../validate/errors';
-import { isRecordFileBytes } from './datasetObjects';
 
 export type ParsedPluginManifest = {
   file: string;
@@ -107,9 +106,7 @@ export function isPluginManifestCandidateBytes(path: string, bytes: Uint8Array):
   if (!parsed.ok) return false;
 
   const yaml = parsed.manifest.yaml;
-  if (isRecordFileBytes(path, bytes) && Object.prototype.hasOwnProperty.call(yaml, 'typeId')) {
-    return false;
-  }
+  if (Object.prototype.hasOwnProperty.call(yaml, 'typeId')) return false;
   const hasPluginId = Object.prototype.hasOwnProperty.call(yaml, 'pluginId');
   const hasApiVersion = Object.prototype.hasOwnProperty.call(yaml, 'gdApiVersion');
   return hasPluginId && hasApiVersion;

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T01:44:23.090Z",
+  "generatedAt": "2026-01-13T02:10:36.251Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -391,6 +391,11 @@
       "tests": [
         {
           "reqId": "PLUG-LAYOUT-001",
+          "testTitle": "PLUG-LAYOUT-001: detects plugin manifests with CR-only line endings",
+          "filePath": "packages/core/src/__tests__/pluginManifest.discovery.test.ts"
+        },
+        {
+          "reqId": "PLUG-LAYOUT-001",
           "testTitle": "PLUG-LAYOUT-001: discovers plugin manifests in fixtures",
           "filePath": "packages/core/src/__tests__/pluginManifest.discovery.test.ts"
         },
@@ -458,6 +463,11 @@
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: missing YAML front matter fails parsing",
+          "filePath": "packages/core/src/__tests__/frontMatter.test.ts"
+        },
+        {
+          "reqId": "FR-MD-020",
+          "testTitle": "FR-MD-020: parses YAML front matter with CR-only line endings",
           "filePath": "packages/core/src/__tests__/frontMatter.test.ts"
         },
         {

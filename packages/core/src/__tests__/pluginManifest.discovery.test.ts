@@ -13,6 +13,12 @@ describe("plugin manifest discovery", () => {
     expect(isPluginManifestCandidateBytes("extensions/demo/plugin.md", bytes!)).toBe(true);
   });
 
+  it("PLUG-LAYOUT-001: detects plugin manifests with CR-only line endings", () => {
+    const text = ["---", "pluginId: demo", "gdApiVersion: 1", "---", "body"].join("\r");
+    const bytes = encoder.encode(text);
+    expect(isPluginManifestCandidateBytes("extensions/demo/plugin.md", bytes)).toBe(true);
+  });
+
   it("PLUG-LAYOUT-001: record precedence keeps type records from being plugin manifests", () => {
     const text = ["---", "typeId: note", "pluginId: demo", "gdApiVersion: 1", "---", "body"].join("\n");
     const bytes = encoder.encode(text);

@@ -1,5 +1,5 @@
 export function extractFrontMatter(markdown: string): { yaml: string; body: string } {
-  const lines = markdown.replace(/\r\n/g, '\n').split('\n');
+  const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
   if (lines.length < 3 || lines[0].trim() !== '---') {
     throw new Error('Missing YAML front matter delimiter at top of file');
   }
@@ -19,7 +19,7 @@ export function extractFrontMatter(markdown: string): { yaml: string; body: stri
 }
 
 export function buildFrontMatter(yaml: string, body: string): string {
-  const normalizedBody = body.replace(/\r\n/g, '\n');
+  const normalizedBody = body.replace(/\r\n?/g, '\n');
   const normalizedYaml = yaml.trimEnd();
   return `---\n${normalizedYaml}\n---\n${normalizedBody}\n`;
 }

@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T01:44:23.090Z
+Generated: 2026-01-13T02:10:36.251Z
 
 ## Testable requirements with no tests
 - EXP-PLUG-001 — Canonical plugin export layout
@@ -160,7 +160,8 @@ Tests (0):
 - (none)
 
 ## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true, verify=todo)
-Tests (3):
+Tests (4):
+- packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: detects plugin manifests with CR-only line endings"
 - packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: discovers plugin manifests in fixtures"
 - packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: record precedence keeps type records from being plugin manifests"
 - packages/core/src/__tests__/pluginManifest.discovery.test.ts — "PLUG-LAYOUT-001: requires pluginId and gdApiVersion keys"
@@ -179,9 +180,10 @@ Tests (1):
 - packages/core/src/__tests__/pluginManifest.paths.test.ts — "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace"
 
 ## FR-MD-020 — YAML front matter is required
-Tests (7):
+Tests (8):
 - packages/core/src/__tests__/frontMatter.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
 - packages/core/src/__tests__/frontMatter.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
+- packages/core/src/__tests__/frontMatter.test.ts — "FR-MD-020: parses YAML front matter with CR-only line endings"
 - packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: invalid YAML fails validation"
 - packages/core/src/__tests__/validateDatasetSnapshot.test.ts — "FR-MD-020: missing YAML front matter fails validation"
 - packages/core/src/__tests__/yaml.test.ts — "FR-MD-020: invalid YAML fails parsing"
