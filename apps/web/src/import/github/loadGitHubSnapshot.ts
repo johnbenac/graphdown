@@ -1,4 +1,10 @@
-import { isRecordFileBytes, type DatasetSnapshot } from "@graphdown/core";
+import {
+  isRecordFileBytes,
+  isPluginManifestCandidateBytes,
+  parsePluginManifest,
+  resolvePluginBundlePaths,
+  type DatasetSnapshot
+} from "@graphdown/core";
 import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -67,7 +73,8 @@ export async function loadGitHubSnapshot(input: {
     snapshotPath: string;
     kind: "block" | "markdown";
   }> = [];
-  const ignored: string[] = [];
+  const ignored = new Set<string>();
+  const treePaths = new Set<string>();
 
   for (const entry of treeResponse.tree) {
     if (entry.type !== "blob") {
@@ -77,6 +84,7 @@ export async function loadGitHubSnapshot(input: {
     if (!snapshotPath) {
       continue;
     }
+    treePaths.add(snapshotPath);
     if (snapshotPath.startsWith("blocks/")) {
       allFiles.push({ repoPath: entry.path, snapshotPath, kind: "block" });
       continue;
@@ -86,13 +94,16 @@ export async function loadGitHubSnapshot(input: {
       allFiles.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
       continue;
     }
-    ignored.push(snapshotPath);
+    ignored.add(snapshotPath);
   }
+  const downloaded = new Map<string, Uint8Array>();
   const files = new Map<string, Uint8Array>();
+  const manifestPaths: string[] = [];
 
   onProgress?.({ phase: "downloading_files", completed: 0, total: allFiles.length });
 
   let completed = 0;
+  let total = allFiles.length;
   for (const file of allFiles) {
     const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`);
     if (!response.ok) {
@@ -101,21 +112,100 @@ export async function loadGitHubSnapshot(input: {
     }
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
+    downloaded.set(file.snapshotPath, bytes);
     if (file.kind === "block") {
       files.set(file.snapshotPath, bytes);
-    } else if (isRecordFileBytes(file.snapshotPath, bytes)) {
-      files.set(file.snapshotPath, bytes);
     } else {
-      ignored.push(file.snapshotPath);
+      const isRecord = isRecordFileBytes(file.snapshotPath, bytes);
+      const isManifest = isPluginManifestCandidateBytes(file.snapshotPath, bytes);
+      if (isRecord || isManifest) {
+        files.set(file.snapshotPath, bytes);
+        if (isManifest) {
+          manifestPaths.push(file.snapshotPath);
+        }
+      } else {
+        ignored.add(file.snapshotPath);
+      }
     }
     completed += 1;
     onProgress?.({
       phase: "downloading_files",
       completed,
-      total: allFiles.length,
+      total,
       detail: file.snapshotPath
     });
   }
 
-  return { snapshot: { files }, ignored };
+  const decoder = new TextDecoder("utf-8");
+  const requiredBundlePaths = new Set<string>();
+
+  for (const manifestPath of manifestPaths) {
+    const manifestBytes = files.get(manifestPath) ?? downloaded.get(manifestPath);
+    if (!manifestBytes) {
+      continue;
+    }
+    const text = decoder.decode(manifestBytes);
+    const parsed = parsePluginManifest(text, manifestPath);
+    if (!parsed.ok) {
+      continue;
+    }
+    const declaredPaths = new Set<string>();
+    const entry = parsed.manifest.yaml.entry;
+    if (typeof entry === "string") {
+      declaredPaths.add(entry);
+    }
+    const bundleFiles = parsed.manifest.yaml.files;
+    if (Array.isArray(bundleFiles)) {
+      for (const file of bundleFiles) {
+        if (typeof file === "string") {
+          declaredPaths.add(file);
+        }
+      }
+    }
+    const resolved = resolvePluginBundlePaths(manifestPath, [...declaredPaths]);
+    for (const resolvedPath of resolved.values()) {
+      requiredBundlePaths.add(resolvedPath);
+    }
+  }
+
+  const stage2FetchList: string[] = [];
+  for (const bundleSnapshotPath of requiredBundlePaths) {
+    if (files.has(bundleSnapshotPath)) {
+      continue;
+    }
+    const downloadedBytes = downloaded.get(bundleSnapshotPath);
+    if (downloadedBytes) {
+      files.set(bundleSnapshotPath, downloadedBytes);
+      ignored.delete(bundleSnapshotPath);
+      continue;
+    }
+    if (treePaths.has(bundleSnapshotPath)) {
+      stage2FetchList.push(bundleSnapshotPath);
+    }
+  }
+
+  if (stage2FetchList.length > 0) {
+    total += stage2FetchList.length;
+  }
+
+  for (const path of stage2FetchList) {
+    const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${path}`);
+    if (!response.ok) {
+      const message = await readResponseMessage(response);
+      throw new GitHubImportError(mapGitHubError(response, message));
+    }
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    files.set(path, bytes);
+    ignored.delete(path);
+    completed += 1;
+    onProgress?.({
+      phase: "downloading_files",
+      completed,
+      total,
+      detail: path
+    });
+  }
+
+  return { snapshot: { files }, ignored: [...ignored] };
 }
