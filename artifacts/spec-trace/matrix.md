@@ -1,9 +1,8 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T17:33:41.929Z
+Generated: 2026-01-13T17:51:06.389Z
 
 ## Testable requirements with no tests
-- EXP-PLUG-001 — Canonical plugin export layout
 - NR-PLUG-EXP-001 — Plugins do not define canonical export
 - NR-PLUG-HASH-001 — Plugins do not define hashing semantics
 - NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
@@ -424,7 +423,8 @@ Tests (3):
 - packages/core/src/__tests__/roundtrip.test.ts — "EXP-003: canonical dataset export round-trips bytes and graph"
 
 ## EXP-006 — Canonical dataset export includes reachable blocks (testable=true)
-Tests (2):
+Tests (3):
+- apps/web/src/features/export/__tests__/exportZip.plugins.test.ts — "EXP-006: reachable blocks include plugin-declared blocks"
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-006: includes only referenced blocks alongside canonical records/types"
 - packages/core/src/__tests__/roundtrip.test.ts — "EXP-006: export includes reachable blocks"
 
@@ -433,8 +433,8 @@ Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
 ## EXP-PLUG-001 — Canonical plugin export layout (testable=true, verify=todo)
-Tests (0):
-- (none)
+Tests (1):
+- apps/web/src/features/export/__tests__/exportZip.plugins.test.ts — "EXP-PLUG-001: exports plugin manifests and bundles in canonical layout"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
 Tests (1):

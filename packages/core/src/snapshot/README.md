@@ -5,10 +5,11 @@
 ## Key modules
 
 - `canonicalizeDatasetSnapshot.ts`
-  - Rewrites a snapshot into the **canonical record-only layout**:
+  - Rewrites a snapshot into the **canonical layout**:
     - types in `types/<typeId>.md`
     - records nested under `records/<typeId>.<recordId>/.../<recordId>.md` using `parent:` pointers
-    - reachable blocks only (derived from CID references)
+    - plugins in `plugins/<pluginId>/manifest.md` and `plugins/<pluginId>/<relativePath>`
+    - reachable blocks only (derived from CID references and plugin manifests)
   - Preserves original bytes for the canonical paths (it changes paths, not content).
 
   This canonicalization is a *layout* operation (filesystem tree), not a semantic “graph” operation.
