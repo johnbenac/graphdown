@@ -3,7 +3,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { encodeBase32 } from '../cid/base32';
 import { isValidPluginId } from '../model/ids';
 import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
-import { parsePluginManifest } from '../parse/pluginManifest';
+import { discoverPluginObjects } from '../parse/pluginObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
@@ -66,62 +66,6 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
       continue;
     }
     if (parsed.kind === 'ignored') {
-      if (scope === 'snapshot') {
-        const parsedManifest = parsePluginManifest(normalizedText, file);
-        if (parsedManifest.ok) {
-          const yaml = parsedManifest.manifest.yaml;
-          const hasPluginId = Object.prototype.hasOwnProperty.call(yaml, 'pluginId');
-          const hasApiVersion = Object.prototype.hasOwnProperty.call(yaml, 'gdApiVersion');
-          const hasTypeId = Object.prototype.hasOwnProperty.call(yaml, 'typeId');
-          if (hasPluginId && hasApiVersion && !hasTypeId) {
-            const pluginId = yaml.pluginId;
-            if (typeof pluginId !== 'string' || !isValidPluginId(pluginId)) {
-              errors.push(
-                makeError(
-                  'E_PLUGIN_KEYS_INVALID',
-                  `Plugin manifest ${file} pluginId must satisfy PLUG-ID-001`,
-                  file
-                )
-              );
-              continue;
-            }
-            const declaredFiles = yaml.files;
-            if (
-              !Array.isArray(declaredFiles) ||
-              declaredFiles.some((item) => typeof item !== 'string')
-            ) {
-              errors.push(
-                makeError(
-                  'E_PLUGIN_KEYS_INVALID',
-                  `Plugin manifest ${file} files must be a list of strings`,
-                  file
-                )
-              );
-              continue;
-            }
-            const identity = `plugin.${pluginId}`;
-            if (seenIds.has(identity)) {
-              errors.push(
-                makeError(
-                  'E_DUPLICATE_ID',
-                  `Duplicate identity detected during hashing: ${identity}`,
-                  file
-                )
-              );
-              continue;
-            }
-            seenIds.add(identity);
-            const contentBytes = encoder.encode(normalizedText);
-            const idBytes = encoder.encode(identity);
-            entries.push({ id: identity, idBytes, file, bytes: contentBytes });
-            pluginManifests.push({
-              pluginId,
-              manifestPath: file,
-              declaredFiles,
-            });
-          }
-        }
-      }
       continue;
     }
 
@@ -142,6 +86,75 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
   }
 
   if (scope === 'snapshot') {
+    const discovered = discoverPluginObjects(snapshot);
+
+    for (const plugin of discovered.plugins) {
+      const manifestPath = plugin.manifest.file;
+      const yaml = plugin.manifest.yaml;
+
+      const pluginId = yaml.pluginId;
+      if (typeof pluginId !== 'string' || !isValidPluginId(pluginId)) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_KEYS_INVALID',
+            `Plugin manifest ${manifestPath} pluginId must satisfy PLUG-ID-001`,
+            manifestPath
+          )
+        );
+        continue;
+      }
+
+      const declaredFiles = yaml.files;
+      if (!Array.isArray(declaredFiles) || declaredFiles.some((item) => typeof item !== 'string')) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_KEYS_INVALID',
+            `Plugin manifest ${manifestPath} files must be a list of strings`,
+            manifestPath
+          )
+        );
+        continue;
+      }
+
+      const raw = snapshot.files.get(manifestPath);
+      if (!raw) continue;
+
+      const decoded = decodeUtf8Strict(raw);
+      if (!decoded.ok) {
+        if (decoded.reason === 'no-decoder') {
+          errors.push(makeError('E_INTERNAL', 'TextDecoder not available for UTF-8 decode', manifestPath));
+        } else {
+          errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', manifestPath));
+        }
+        continue;
+      }
+
+      const normalizedText = normalizeLineEndings(decoded.text);
+      const identity = `plugin.${pluginId}`;
+
+      if (seenIds.has(identity)) {
+        errors.push(
+          makeError(
+            'E_DUPLICATE_ID',
+            `Duplicate identity detected during hashing: ${identity}`,
+            manifestPath
+          )
+        );
+        continue;
+      }
+      seenIds.add(identity);
+
+      const contentBytes = encoder.encode(normalizedText);
+      const idBytes = encoder.encode(identity);
+      entries.push({ id: identity, idBytes, file: manifestPath, bytes: contentBytes });
+
+      pluginManifests.push({
+        pluginId,
+        manifestPath,
+        declaredFiles,
+      });
+    }
+
     for (const manifest of pluginManifests) {
       const manifestPath = manifest.manifestPath;
       const lastSlash = manifestPath.lastIndexOf('/');
