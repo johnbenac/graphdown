@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T22:36:21.031Z",
+  "generatedAt": "2026-01-14T23:26:59.185Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -204,12 +204,22 @@
       "tests": [
         {
           "reqId": "HASH-001",
+          "testTitle": "HASH-001: binary plugin bundle files hash raw bytes",
+          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+        },
+        {
+          "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID",
           "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID",
+          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+        },
+        {
+          "reqId": "HASH-001",
+          "testTitle": "HASH-001: plugin bundle text files normalize line endings",
           "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
@@ -475,6 +485,11 @@
       "testable": true,
       "verify": "ci",
       "tests": [
+        {
+          "reqId": "PLUG-000",
+          "testTitle": "PLUG-000: binary plugin bundle files are validated, hashed, and exported as raw bytes",
+          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+        },
         {
           "reqId": "PLUG-000",
           "testTitle": "PLUG-000: dataset remains valid without plugins present",
@@ -1141,13 +1156,18 @@
     },
     {
       "id": "VAL-PLUG-005",
-      "title": "Plugin bundle files must be UTF-8 decodable",
+      "title": "Plugin bundle file encoding modes are validated",
       "testable": true,
       "verify": "todo",
       "tests": [
         {
           "reqId": "VAL-PLUG-005",
-          "testTitle": "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable",
+          "testTitle": "VAL-PLUG-005: binaryFiles entries allow non-UTF-8 plugin bundle files",
+          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-PLUG-005",
+          "testTitle": "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable unless declared binary",
           "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
@@ -1506,6 +1526,11 @@
         {
           "reqId": "EXP-PLUG-001",
           "testTitle": "EXP-PLUG-001: exports plugin bundles in canonical layout with exact bytes",
+          "filePath": "apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts"
+        },
+        {
+          "reqId": "EXP-PLUG-001",
+          "testTitle": "EXP-PLUG-001: preserves binary plugin bundle files across export/import",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts"
         }
       ]

@@ -54,6 +54,43 @@ describe("plugins first-class behavior", () => {
     expect(canonical.files.has("extensions/demo/ui.md")).toBe(false);
   });
 
+  it("PLUG-000: binary plugin bundle files are validated, hashed, and exported as raw bytes", () => {
+    const manifestBytes = encoder.encode(
+      [
+        "---",
+        "pluginId: demo",
+        "gdApiVersion: 1",
+        "entry: entry.js",
+        "files:",
+        "  - entry.js",
+        "  - assets/logo.bin",
+        "binaryFiles:",
+        "  - assets/logo.bin",
+        "---",
+        "Plugin manifest body"
+      ].join("\n")
+    );
+    const entryBytes = encoder.encode("console.log('entry');\n");
+    const binaryBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
+
+    const snapshot: DatasetSnapshot = {
+      files: new Map<string, Uint8Array>([
+        ["extensions/demo/plugin.md", manifestBytes],
+        ["extensions/demo/entry.js", entryBytes],
+        ["extensions/demo/assets/logo.bin", binaryBytes]
+      ])
+    };
+
+    const validation = validateDatasetSnapshot(snapshot);
+    expect(validation.ok).toBe(true);
+
+    const digest = digestSnapshot(snapshot);
+    expect(typeof digest).toBe("string");
+
+    const canonical = canonicalizeDatasetSnapshot(snapshot);
+    expect(canonical.files.get("plugins/demo/assets/logo.bin")).toEqual(binaryBytes);
+  });
+
   it("LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported", () => {
     const manifestBytes = encoder.encode(
       [
