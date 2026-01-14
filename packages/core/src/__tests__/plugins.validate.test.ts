@@ -32,6 +32,12 @@ describe("plugins validation", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("PLUG-FR-002: plugin-valid-dataset passes manifest schema validation", () => {
+    const snapshot = loadFixtureSnapshot("plugin-valid-dataset");
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("PLUG-ID-002: duplicate pluginId fails validation", () => {
     expectDuplicatePluginIdFails();
   });
@@ -110,5 +116,65 @@ describe("plugins validation", () => {
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_BLOCK_MISSING_OR_INVALID");
+  });
+
+  it("PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent(["pluginId: demo", "gdApiVersion: 1"]);
+    const snapshot = snapshotFromEntries([["extensions/demo/plugin.md", manifest]]);
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.map((error) => error.code)).toContain("E_PLUGIN_KEYS_INVALID");
+    expect(result.errors.map((error) => error.message)).toEqual(
+      expect.arrayContaining([expect.stringContaining("missing required keys")])
+    );
+  });
+
+  it("PLUG-FR-002: unknown top-level keys fail with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "extra: true"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.map((error) => error.code)).toContain("E_PLUGIN_KEYS_INVALID");
+    expect(result.errors.map((error) => error.message)).toEqual(
+      expect.arrayContaining([expect.stringContaining("unknown key")])
+    );
+  });
+
+  it("PLUG-FR-002: forbidden top-level keys fail with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "fields:",
+      "  title: forbidden"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.map((error) => error.code)).toContain("E_PLUGIN_KEYS_INVALID");
+    expect(result.errors.map((error) => error.message)).toEqual(
+      expect.arrayContaining([expect.stringContaining("forbidden keys")])
+    );
   });
 });
