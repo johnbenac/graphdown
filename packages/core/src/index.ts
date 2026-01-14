@@ -9,6 +9,8 @@ export * from './parse/wikiRefs';
 export * from './parse/datasetObjects';
 export * from './parse/markdownRecord';
 export * from './parse/pluginManifest';
+export * from './parse/pluginObjects';
+export * from './parse/recordFile';
 export * from './validate/errors';
 export * from './validate/validateDatasetSnapshot';
 export * from './graph/graph';

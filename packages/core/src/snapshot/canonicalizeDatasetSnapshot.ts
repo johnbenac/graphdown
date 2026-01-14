@@ -2,13 +2,8 @@ import { discoverGraphdownObjects, type ParsedRecordObject } from '../parse/data
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
-import {
-  isPluginManifestCandidateBytes,
-  parsePluginManifest,
-  resolvePluginBundlePaths,
-} from '../parse/pluginManifest';
+import { discoverPluginObjects } from '../parse/pluginObjects';
 import { isValidPluginId } from '../model/ids';
-import { decodeUtf8StrictOrThrow } from '../internal/text';
 import { collectStringValues } from '../internal/collectStringValues';
 
 function collectReachableBlockPaths(
@@ -32,16 +27,9 @@ function collectReachableBlockPaths(
     }
   }
 
-  for (const [path, bytes] of snapshot.files) {
-    if (!isPluginManifestCandidateBytes(path, bytes)) {
-      continue;
-    }
-    const text = decodeUtf8StrictOrThrow(bytes);
-    const parsed = parsePluginManifest(text, path);
-    if (!parsed.ok) {
-      throw new Error('Canonicalization requires validated plugin manifests');
-    }
-    const blocks = parsed.manifest.yaml.blocks;
+  const discovered = discoverPluginObjects(snapshot);
+  for (const plugin of discovered.plugins) {
+    const blocks = plugin.manifest.yaml.blocks;
     if (blocks === undefined) {
       continue;
     }
@@ -114,19 +102,13 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
   }
 
   // --- Plugins: canonical export layout (EXP-PLUG-001) ---
-  const allPaths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
-  for (const path of allPaths) {
+  const discoveredPlugins = discoverPluginObjects(snapshot);
+  for (const plugin of discoveredPlugins.plugins) {
+    const path = plugin.manifest.file;
     const bytes = snapshot.files.get(path);
     if (!bytes) continue;
-    if (!isPluginManifestCandidateBytes(path, bytes)) continue;
 
-    const text = decodeUtf8StrictOrThrow(bytes);
-    const parsedManifest = parsePluginManifest(text, path);
-    if (!parsedManifest.ok) {
-      throw new Error('Canonicalization requires validated plugin manifests');
-    }
-
-    const yaml = parsedManifest.manifest.yaml;
+    const yaml = plugin.manifest.yaml;
     const pluginId = yaml.pluginId;
     const files = yaml.files;
 
@@ -144,9 +126,8 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     }
     outputFiles.set(manifestDest, bytes);
 
-    const resolved = resolvePluginBundlePaths(path, files);
     for (const rel of files) {
-      const resolvedPath = resolved.get(rel);
+      const resolvedPath = plugin.resolvedFiles.get(rel);
       if (!resolvedPath) {
         throw new Error('Canonicalization requires validated plugin manifests');
       }
