@@ -8,9 +8,9 @@ import {
   cidFromRawBytes,
   loadDatasetSnapshotFromZipBytes,
   validateDatasetSnapshot
-} from "..";
-import type { DatasetSnapshot } from "..";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+} from "../..";
+import type { DatasetSnapshot } from "../..";
+import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();
 

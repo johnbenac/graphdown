@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { cidFromRawBytes, validateDatasetSnapshot } from "..";
-import type { DatasetSnapshot } from "..";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+import { cidFromRawBytes, validateDatasetSnapshot } from "../..";
+import type { DatasetSnapshot } from "../..";
+import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();
 

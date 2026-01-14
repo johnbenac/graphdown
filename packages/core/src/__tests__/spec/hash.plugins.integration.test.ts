@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { computeGdHashV1 } from "..";
-import type { DatasetSnapshot } from "..";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+import { computeGdHashV1 } from "../..";
+import type { DatasetSnapshot } from "../..";
+import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();
 

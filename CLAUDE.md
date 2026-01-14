@@ -186,10 +186,19 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
-- **E2E tests** — Playwright tests in `apps/web/test/`
-- Run `npm run verify:web` to run both suites
-- Test layout is checked by `tools/check-web-test-layout.js`
+- **Core unit tests** — co-located under `packages/core/src/<module>/__tests__/`
+  and named `*.unit.test.ts`
+- **Core spec/integration tests** — centralized under
+  `packages/core/src/__tests__/spec/` and named `*.integration.test.ts`
+- **Core governance tests** — centralized under
+  `packages/core/src/__tests__/governance/` and named
+  `*.governance.integration.test.ts`
+- **Web unit/integration tests** — co-located under
+  `apps/web/src/**/__tests__/` and named `*.unit.test.tsx` or
+  `*.integration.test.tsx` (optionally `*.nfr.(unit|integration).test.tsx`)
+- **E2E tests** — Playwright tests in `apps/web/e2e/` named `*.e2e.spec.(js|ts)`
+- Run `npm run verify:web` to run web unit tests and E2E tests
+- Test layout is checked by `tools/check-test-conventions.js`
 
 ## Development Guidelines
 
@@ -216,7 +225,8 @@ Use these as golden compatibility references (read-only):
 - **tools/spec-trace.cjs** — Generate requirement traceability matrix from SPEC.md
 - **tools/burndown.js** — Generate progress burndown report
 - **tools/check-spec-coverage.js** — Verify all testable requirements have tests
-- **tools/check-web-test-layout.js** — Enforce test file organization
+- **tools/check-web-test-layout.js** — Legacy check for web test file organization
+- **tools/check-test-conventions.js** — Enforce repo-wide test naming/layout conventions
 
 ## Commit and PR Workflow
 
