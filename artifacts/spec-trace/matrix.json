@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T19:19:30.009Z",
+  "generatedAt": "2026-01-14T21:23:35.976Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -383,6 +383,49 @@
       ]
     },
     {
+      "id": "LAYOUT-003",
+      "title": "Malformed YAML front matter in non-semantic Markdown is ignored",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: invalid YAML front matter is ignored for discovery and validation",
+          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: malformed YAML front matter is ignored for hashing",
+          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: valid YAML without reserved keys is ignored for hashing",
+          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported",
+          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: invalid YAML in non-semantic markdown is ignored",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: unterminated YAML front matter in non-semantic markdown is ignored",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: valid YAML without reserved keys is ignored",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        }
+      ]
+    },
+    {
       "id": "BLOCK-LAYOUT-001",
       "title": "Block store paths are derived from CID",
       "testable": true,
@@ -528,16 +571,6 @@
       "tests": [
         {
           "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: invalid YAML fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: missing YAML front matter fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: extracts yaml and body for valid front matter",
           "filePath": "packages/core/src/parse/__tests__/frontMatter.unit.test.ts"
         },
@@ -592,6 +625,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "FR-MD-023",
+          "testTitle": "FR-MD-023: missing fields in a record fails validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: record objects may include parent",

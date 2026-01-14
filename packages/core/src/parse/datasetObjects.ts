@@ -84,21 +84,15 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
     let body: string;
     try {
       ({ yaml: yamlSection, body } = extractFrontMatter(normalized));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      const code = message.includes('Missing closing YAML front matter delimiter')
-        ? 'E_FRONT_MATTER_UNTERMINATED'
-        : 'E_FRONT_MATTER_MISSING';
-      return { kind: 'error', error: makeError(code, message, path) };
+    } catch {
+      return { kind: 'ignored' };
     }
 
     let yamlObject: Record<string, unknown>;
     try {
       yamlObject = parseYamlObject(yamlSection);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      const code = message === 'YAML front matter is not a valid object' ? 'E_YAML_NOT_OBJECT' : 'E_YAML_INVALID';
-      return { kind: 'error', error: makeError(code, message, path) };
+    } catch {
+      return { kind: 'ignored' };
     }
 
     const typeIdCheck = validateIdentifier(yamlObject.typeId, 'typeId', path);
