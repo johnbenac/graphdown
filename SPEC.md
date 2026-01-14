@@ -523,7 +523,7 @@ MUST be ignored by core for identity, linking, validation semantics, and export 
 
 Path names and directory names carry no semantic meaning for these ignored files.
 
-<!-- req:id=PLUG-000 title="Plugins are a first-class dataset object class" testable=true verify=todo -->
+<!-- req:id=PLUG-000 title="Plugins are a first-class dataset object class" testable=true verify=ci -->
 ### PLUG-000 — Plugins are a first-class dataset object class
 
 Graphdown defines **plugin objects** as a first-class semantic object class in the dataset repository.
@@ -669,7 +669,7 @@ Core MUST treat the body as an uninterpreted string (except for link extraction;
 
 ## 5.1 Plugin manifest file format
 
-<!-- req:id=PLUG-FR-001 title="Plugin manifest YAML front matter is required" testable=true verify=todo -->
+<!-- req:id=PLUG-FR-001 title="Plugin manifest YAML front matter is required" testable=true verify=ci -->
 ### PLUG-FR-001 — Plugin manifest YAML front matter is required
 
 Every plugin manifest file MUST start with YAML front matter delimited by:
@@ -689,7 +689,7 @@ Validation MUST fail if:
 
 The plugin manifest body is optional and treated as uninterpreted Markdown text (PLUG-FR-003).
 
-<!-- req:id=PLUG-FR-002 title="Required top-level keys for plugin manifests" testable=true verify=todo -->
+<!-- req:id=PLUG-FR-002 title="Required top-level keys for plugin manifests" testable=true verify=ci -->
 
 ### PLUG-FR-002 — Required top-level keys for plugin manifests
 
