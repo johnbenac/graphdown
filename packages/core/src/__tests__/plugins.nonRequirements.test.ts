@@ -52,7 +52,8 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
         "entry: entry.js",
         "files:",
         "  - entry.js",
-        "  - ui.md"
+        "  - ui.md",
+        "  - recordlike.md"
       ],
       [
         // These MUST be ignored for relationship/CID extraction:
@@ -60,6 +61,18 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
         "Record ref that must NOT become a relationship edge: [[note:target]]",
         `Valid CID-shaped token that must NOT become a block ref: [[${orphanCid}]]`,
         `Invalid CID-shaped token that must NOT cause E_CID_INVALID: [[${invalidCidToken}]]`
+      ]
+    );
+
+    // Plugin bundle markdown that looks like a record (front matter present); it must still be ignored.
+    const recordLikePluginMdBytes = mdWithFrontMatter(
+      ["typeId: note", "recordId: bundle", "fields: {}"],
+      [
+        "This plugin bundle file contains record-looking front matter.",
+        "Links/CIDs here MUST NOT be scanned by core:",
+        "Smuggled record link: [[note:target]]",
+        `Smuggled CID: [[${orphanCid}]]`,
+        `Smuggled invalid CID: [[${invalidCidToken}]]`
       ]
     );
 
@@ -90,6 +103,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
         ["extensions/demo/plugin.md", manifestBytes],
         ["extensions/demo/entry.js", entryBytes],
         ["extensions/demo/ui.md", uiBytes],
+        ["extensions/demo/recordlike.md", recordLikePluginMdBytes],
 
         // Present but garbage (should remain valid; should be excluded from canonical export).
         [orphanPath, orphanBlockBytes]
@@ -109,6 +123,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
 
     expect(graphResult.graph.getIncomingRecordLinks("note:target")).toEqual([]);
     expect(graphResult.graph.getOutgoingRecordLinks("note:a")).toEqual([]);
+    expect(graphResult.graph.getOutgoingRecordLinks("note:bundle")).toEqual([]);
 
     // If core incorrectly scans plugin bodies/bundles for CID refs during GC/export reachability,
     // it would include orphanPath in canonical output. It MUST NOT.

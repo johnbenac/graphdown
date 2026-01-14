@@ -3,6 +3,7 @@ import { makeError, type ValidationError } from '../validate/errors';
 import { isObject } from '../model/types';
 import { parseYamlObject } from './yaml';
 import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
+import { isPluginManifestCandidateBytes, parsePluginManifest, resolvePluginBundlePaths } from './pluginManifest';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 export const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
@@ -239,7 +240,38 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
   const errors: ValidationError[] = [];
 
   const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
+
+  // Collect plugin bundle paths so they can be excluded from record/type discovery.
+  const pluginBundlePaths = new Set<string>();
+  const pluginManifestPaths = new Set<string>();
   for (const file of files) {
+    const bytes = snapshot.files.get(file);
+    if (!bytes) continue;
+    if (!isPluginManifestCandidateBytes(file, bytes)) continue;
+
+    const decoded = decodeUtf8Strict(bytes);
+    if (!decoded.ok) continue;
+
+    const parsedManifest = parsePluginManifest(decoded.text, file);
+    if (!parsedManifest.ok) continue;
+
+    pluginManifestPaths.add(file);
+
+    const filesField = parsedManifest.manifest.yaml.files;
+    if (!Array.isArray(filesField) || filesField.some((item) => typeof item !== 'string')) {
+      continue;
+    }
+    const resolved = resolvePluginBundlePaths(file, filesField);
+    for (const resolvedPath of resolved.values()) {
+      pluginBundlePaths.add(resolvedPath);
+    }
+  }
+
+  for (const file of files) {
+    if (pluginBundlePaths.has(file) || pluginManifestPaths.has(file)) {
+      ignored.push(file);
+      continue;
+    }
     const bytes = snapshot.files.get(file);
     if (!bytes) continue;
     const parsed = parseGraphdownFile(file, bytes);
