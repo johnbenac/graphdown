@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T22:36:21.031Z
+Generated: 2026-01-14T23:26:14.801Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -73,9 +73,11 @@ Tests (1):
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "PLUG-ID-002: duplicate pluginId fails validation"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
-Tests (6):
+Tests (8):
+- packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: binary plugin bundle files hash raw bytes"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID"
+- packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: plugin text bundle files normalize line endings"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation"
 - packages/core/src/snapshot/__tests__/hash.unit.test.ts — "HASH-001: duplicate identities fail hashing"
 - packages/core/src/snapshot/__tests__/hash.unit.test.ts — "HASH-001: line ending normalization yields stable hashes"
@@ -344,9 +346,11 @@ Tests (1):
 Tests (1):
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-004: unsafe relative paths are rejected"
 
-## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true, verify=todo)
-Tests (1):
-- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable"
+## VAL-PLUG-005 — Plugin bundle file encoding modes are validated (testable=true, verify=todo)
+Tests (3):
+- packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "VAL-PLUG-005: binary plugin bundle files are validated and exported with raw bytes"
+- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: binaryFiles entries skip UTF-8 validation"
+- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: non-binary plugin bundle files must be UTF-8 decodable"
 
 ## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true, verify=todo)
 Tests (1):
@@ -446,8 +450,9 @@ Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.unit.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
 ## EXP-PLUG-001 — Canonical plugin export layout (testable=true, verify=todo)
-Tests (1):
+Tests (2):
 - apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts — "EXP-PLUG-001: exports plugin bundles in canonical layout with exact bytes"
+- apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts — "EXP-PLUG-001: preserves binary plugin bundle files through export/import"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
 Tests (1):

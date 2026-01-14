@@ -310,7 +310,7 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
   ]);
 
   const requiredKeys = ['pluginId', 'gdApiVersion', 'entry', 'files'];
-  const optionalKeys = ['meta', 'config', 'requires', 'blocks'];
+  const optionalKeys = ['meta', 'config', 'requires', 'blocks', 'binaryFiles'];
   const forbiddenKeys = ['typeId', 'recordId', 'parent', 'fields'];
   const allowedKeys = new Set<string>([...requiredKeys, ...optionalKeys]);
 
@@ -431,6 +431,18 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
         )
       );
     }
+    if (
+      Object.prototype.hasOwnProperty.call(yaml, 'binaryFiles') &&
+      (!Array.isArray(yaml.binaryFiles) || yaml.binaryFiles.some((item) => typeof item !== 'string'))
+    ) {
+      errors.push(
+        makeError(
+          'E_PLUGIN_KEYS_INVALID',
+          `Plugin manifest ${manifest.file} binaryFiles must be a list of strings`,
+          manifest.file
+        )
+      );
+    }
   }
 
   const pluginIdToManifestPath = new Map<string, string>();
@@ -473,6 +485,32 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     const files = manifest.yaml.files;
     if (!Array.isArray(files) || files.some((item) => typeof item !== 'string')) {
       continue;
+    }
+    const binaryFilesRaw = manifest.yaml.binaryFiles;
+    const binaryFiles =
+      Array.isArray(binaryFilesRaw) && binaryFilesRaw.every((item) => typeof item === 'string')
+        ? binaryFilesRaw
+        : [];
+    const binaryFileSet = new Set(binaryFiles);
+    for (const file of binaryFiles) {
+      if (!isSafeRelativePath(file)) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_PATH_INVALID',
+            `Plugin manifest ${manifest.file} binary file path "${file}" is not a safe relative path`,
+            manifest.file
+          )
+        );
+      }
+      if (!files.includes(file)) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_KEYS_INVALID',
+            `Plugin manifest ${manifest.file} binaryFiles entry "${file}" must be listed in files`,
+            manifest.file
+          )
+        );
+      }
     }
     if (files.includes('manifest.md')) {
       errors.push(
@@ -573,6 +611,9 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
       }
       const bytes = snapshot.files.get(resolvedPath);
       if (!bytes) {
+        continue;
+      }
+      if (binaryFileSet.has(file)) {
         continue;
       }
       const decodedBundle = decodeUtf8Strict(bytes);
