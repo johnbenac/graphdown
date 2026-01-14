@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { encodeBase32 } from "../cid/base32";
-import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "..";
-import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
+import { encodeBase32 } from "../../cid/base32";
+import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "../../index";
+import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "../../index";
 
 const encoder = new TextEncoder();
 

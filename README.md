@@ -218,7 +218,9 @@ Regenerate spec trace artifacts (when editing SPEC requirements):
 npm run spec:trace
 ```
 
----
+Development docs:
+
+- [Testing conventions](docs/testing.md)
 
 ## Dataset format (minimal examples)
 

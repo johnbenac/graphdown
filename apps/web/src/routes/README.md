@@ -19,4 +19,4 @@ Each screen composes `components/` and reads from the dataset context.
 
 ## Tests
 
-- `DatasetRoute.test.tsx` covers navigation and record selection behaviors.
+- `DatasetRoute.unit.test.tsx` covers navigation and record selection behaviors.

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from "..";
-import type { BuildRecordLinkGraphResult, DatasetSnapshot, ValidateDatasetResult } from "..";
+import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from "../../index";
+import type { BuildRecordLinkGraphResult, DatasetSnapshot, ValidateDatasetResult } from "../../index";
 
 const encoder = new TextEncoder();
 

@@ -65,4 +65,6 @@ See `docs/terminology.md` and `docs/concepts/graphs.md`.
 
 ## Tests
 
-The core package contains unit tests for parsing and validation, including `validateDatasetSnapshot.test.ts` and `markdownRecord.test.ts`.
+The core package contains unit and integration tests for parsing and validation,
+including `__tests__/spec/validateDatasetSnapshot.integration.test.ts` and
+`parse/__tests__/markdownRecord.unit.test.ts`.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { extractFrontMatter } from "..";
+import { extractFrontMatter } from "../frontMatter";
 
 test('FR-MD-020: extracts yaml and body for valid front matter', () => {
   const content = ['---', 'id: dataset:demo', '---', 'Body text'].join('\n');

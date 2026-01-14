@@ -62,7 +62,7 @@ Install Playwright once (or after CI cache busts):
 npx playwright install --with-deps chromium
 ```
 
-Playwright snapshots live next to the spec: `apps/web/e2e/app.spec.ts-snapshots/`. Update them intentionally with `npm --workspace apps/web run test:e2e:update`.
+Playwright snapshots live next to the spec: `apps/web/e2e/app.e2e.spec.js-snapshots/`. Update them intentionally with `npm --workspace apps/web run test:e2e:update`.
 
 ## Notes for contributors
 

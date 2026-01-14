@@ -15,4 +15,4 @@ are placed in this directory.
 
 ## Tests
 
-- `wikiRefStrings.test.ts` covers ref parsing and serialization behavior.
+- `wikiRefStrings.unit.test.ts` covers ref parsing and serialization behavior.

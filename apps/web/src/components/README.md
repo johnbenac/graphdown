@@ -50,5 +50,5 @@ components are presentational and consume data passed from `routes/` or the
 
 Component-level tests live next to their components:
 
-- `RecordEditor.raw.test.tsx` and `TypeViewer.test.tsx` validate editor and
+- `RecordEditor.raw.unit.test.tsx` and `TypeViewer.unit.test.tsx` validate editor and
   viewer behavior.

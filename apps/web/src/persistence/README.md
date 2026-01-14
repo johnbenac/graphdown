@@ -42,4 +42,4 @@ Persistence is implemented against a pluggable storage backend (IndexedDB in the
 
 ## Tests
 
-- `persistence.test.ts` validates persistence behavior and serialization round-trips.
+- `persistence.unit.test.ts` validates persistence behavior and serialization round-trips.
