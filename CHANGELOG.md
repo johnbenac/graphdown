@@ -1,3 +1,10 @@
+## [0.12.4](https://github.com/johnbenac/graphdown/compare/v0.12.3...v0.12.4) (2026-01-14)
+
+
+### Bug Fixes
+
+* remove excessive timeout from Pages deployment ([e0e045f](https://github.com/johnbenac/graphdown/commit/e0e045ffbfa7a8ee596a7f740c525abb33ae6d8c))
+
 ## [0.12.3](https://github.com/johnbenac/graphdown/compare/v0.12.2...v0.12.3) (2026-01-14)
 
 
