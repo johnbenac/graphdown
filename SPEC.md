@@ -146,7 +146,7 @@ It does not apply to record hierarchy parent pointers (HIER-001): parent pointer
 
 Exception: unresolved links **do not** satisfy composition constraints (VAL-COMP-002). Import MUST fail when composition requirements are unmet. Unresolved block references are an import-failing error (VAL-BLOCK-001).
 
-<!-- req:id=NR-PLUG-LINK-001 title="No relationship or CID extraction from plugin files" testable=true verify=todo -->
+<!-- req:id=NR-PLUG-LINK-001 title="No relationship or CID extraction from plugin files" testable=true verify=ci -->
 ### NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
 
 Core MUST NOT extract record relationships (REL-001/REL-002) or block references (CID-REF-001/002) from:
@@ -156,19 +156,19 @@ Core MUST NOT extract record relationships (REL-001/REL-002) or block references
 
 Only record objects participate in relationship and CID reference extraction, and plugins declare block dependencies only via plugin manifest `blocks[]` (PLUG-FR-002).
 
-<!-- req:id=NR-PLUG-VAL-001 title="No plugin-defined dataset validity rules" testable=true verify=todo -->
+<!-- req:id=NR-PLUG-VAL-001 title="No plugin-defined dataset validity rules" testable=true verify=ci -->
 ### NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
 
 Core validation (VAL-001 and related requirements) MUST NOT depend on executing plugins or interpreting plugin bundle content.
 Plugins MUST NOT be able to make an otherwise-valid dataset invalid for import/export conformance.
 
-<!-- req:id=NR-PLUG-EXP-001 title="Plugins do not define canonical export" testable=true verify=todo -->
+<!-- req:id=NR-PLUG-EXP-001 title="Plugins do not define canonical export" testable=true verify=ci -->
 ### NR-PLUG-EXP-001 — Plugins do not define canonical export
 
 Canonical export (EXP-003 and related requirements) is defined by core.
 Plugins MUST NOT modify which files are included, how they are laid out, or how bytes are rewritten for canonical export.
 
-<!-- req:id=NR-PLUG-HASH-001 title="Plugins do not define hashing semantics" testable=true verify=todo -->
+<!-- req:id=NR-PLUG-HASH-001 title="Plugins do not define hashing semantics" testable=true verify=ci -->
 ### NR-PLUG-HASH-001 — Plugins do not define hashing semantics
 
 Dataset hashing (gdhash-v1) is defined by core (HASH-001/002/003).

@@ -1,32 +1,24 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-14T06:26:04.007Z
+Generated: 2026-01-14T09:33:12.035Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
-- Requirements: 75
-- Covered: 75
+- Requirements: 79
+- Covered: 79
 - Missing: 0
 - Coverage: 100.0%
 
 ## Deferred backlog (verify in: todo, backlog, deferred, future, planned, manual)
-- Requirements: 19
+- Requirements: 15
 - Covered: 15
-- Missing: 4
-- Coverage: 78.9%
+- Missing: 0
+- Coverage: 100.0%
 
 ## Overall (all testable requirements)
 - Requirements: 94
-- Covered: 90
-- Missing: 4
-- Coverage: 95.7%
+- Covered: 94
+- Missing: 0
+- Coverage: 100.0%
 
-The following DEFERRED requirements have **no referenced tests** (CI does NOT fail):
-
-### NR (4)
-- NR-PLUG-EXP-001 — Plugins do not define canonical export
-- NR-PLUG-HASH-001 — Plugins do not define hashing semantics
-- NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
-- NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
-
-_Rule: use `verify=todo` on a requirement when it is not implemented/verified yet. Promotion = remove `verify=todo` (or set `verify=ci`) + add at least one test title prefixed with the req ID._
+All requirements have at least one referenced test. 🎉
