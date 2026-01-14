@@ -3,7 +3,10 @@ import { makeError, type ValidationError } from '../validate/errors';
 import { isObject } from '../model/types';
 import { parseYamlObject } from './yaml';
 import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
-import { isPluginManifestCandidateBytes, parsePluginManifest, resolvePluginBundlePaths } from './pluginManifest';
+import { discoverPluginObjects } from './pluginObjects';
+import { isRecordFileBytes } from './recordFile';
+
+export { isRecordFileBytes };
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 export const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
@@ -33,24 +36,6 @@ export type ParsedGraphdownObject =
   | ParsedRecordObject
   | { kind: 'ignored' }
   | { kind: 'error'; error: ValidationError };
-
-export function isRecordFileBytes(path: string, bytes: Uint8Array): boolean {
-  const lower = path.toLowerCase();
-  if (!lower.endsWith('.md')) {
-    return false;
-  }
-  if (bytes.length < 4) {
-    return false;
-  }
-  if (bytes[0] !== 45 || bytes[1] !== 45 || bytes[2] !== 45) {
-    return false;
-  }
-  const next = bytes[3];
-  if (next === 10) return true; // \n
-  if (next === 13 && bytes.length >= 5 && bytes[4] === 10) return true; // \r\n
-  if (next === 13) return true; // bare \r
-  return false;
-}
 
 function decodeUtf8(bytes: Uint8Array, file: string): { ok: true; text: string } | { ok: false; error: ValidationError } {
   const result = decodeUtf8Strict(bytes);
@@ -242,30 +227,7 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
   const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
 
   // Collect plugin bundle paths so they can be excluded from record/type discovery.
-  const pluginBundlePaths = new Set<string>();
-  const pluginManifestPaths = new Set<string>();
-  for (const file of files) {
-    const bytes = snapshot.files.get(file);
-    if (!bytes) continue;
-    if (!isPluginManifestCandidateBytes(file, bytes)) continue;
-
-    const decoded = decodeUtf8Strict(bytes);
-    if (!decoded.ok) continue;
-
-    const parsedManifest = parsePluginManifest(decoded.text, file);
-    if (!parsedManifest.ok) continue;
-
-    pluginManifestPaths.add(file);
-
-    const filesField = parsedManifest.manifest.yaml.files;
-    if (!Array.isArray(filesField) || filesField.some((item) => typeof item !== 'string')) {
-      continue;
-    }
-    const resolved = resolvePluginBundlePaths(file, filesField);
-    for (const resolvedPath of resolved.values()) {
-      pluginBundlePaths.add(resolvedPath);
-    }
-  }
+  const { pluginManifestPaths, pluginBundlePaths } = discoverPluginObjects(snapshot);
 
   for (const file of files) {
     if (pluginBundlePaths.has(file) || pluginManifestPaths.has(file)) {

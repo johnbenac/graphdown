@@ -5,12 +5,11 @@ import {
   type ParsedTypeObject,
 } from '../parse/datasetObjects';
 import {
-  isPluginManifestCandidateBytes,
   isSafeRelativePath,
-  parsePluginManifest,
   resolvePluginBundlePaths,
   type ParsedPluginManifest,
 } from '../parse/pluginManifest';
+import { discoverPluginObjects } from '../parse/pluginObjects';
 import { sha256 } from '@noble/hashes/sha256';
 import { makeError, type ValidationError } from './errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
@@ -276,36 +275,9 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     return { ok: false, errors: parsed.errors };
   }
 
-  const pluginManifests: ParsedPluginManifest[] = [];
-  const pluginManifestPaths = new Set<string>();
-  const allPaths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
-  for (const path of allPaths) {
-    const bytes = snapshot.files.get(path);
-    if (!bytes) {
-      continue;
-    }
-    if (!isPluginManifestCandidateBytes(path, bytes)) {
-      continue;
-    }
-    const decoded = decodeUtf8Strict(bytes);
-    if (!decoded.ok) {
-      errors.push(
-        makeError('E_PLUGIN_MANIFEST_INVALID', `Plugin manifest ${path} is not valid UTF-8`, path)
-      );
-      continue;
-    }
-    const parsedManifest = parsePluginManifest(decoded.text, path);
-    if (!parsedManifest.ok) {
-      errors.push(
-        makeError('E_PLUGIN_MANIFEST_INVALID', parsedManifest.error.message, path)
-      );
-      continue;
-    }
-    pluginManifests.push(parsedManifest.manifest);
-    pluginManifestPaths.add(path);
-  }
-
-  pluginManifests.sort((a, b) => a.file.localeCompare(b.file));
+  const discovered = discoverPluginObjects(snapshot);
+  const pluginManifests: ParsedPluginManifest[] = discovered.plugins.map((p) => p.manifest);
+  const pluginManifestPaths = discovered.pluginManifestPaths;
 
   const recordFilePaths = new Set<string>([
     ...parsed.typeObjects.map((obj) => obj.file),
