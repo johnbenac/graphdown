@@ -5,9 +5,9 @@ import {
   canonicalizeDatasetSnapshot,
   computeGdHashV1,
   validateDatasetSnapshot
-} from "..";
-import type { DatasetSnapshot } from "..";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+} from "../../index";
+import type { DatasetSnapshot } from "../../index";
+import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();
 

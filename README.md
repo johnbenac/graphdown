@@ -49,6 +49,10 @@ npm --workspace apps/web run test
 npm --workspace apps/web run verify
 ```
 
+Contributing/development notes:
+
+- Testing conventions and required layouts: `docs/testing.md`
+
 Regenerate spec trace artifacts (when editing SPEC requirements):
 
 ```sh

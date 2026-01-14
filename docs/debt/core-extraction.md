@@ -105,24 +105,23 @@ This is a successful **internal extraction**: the web app no longer owns the imp
 
 ---
 
-### TD-004 — Spec trace tooling likely does not cover Playwright E2E tests and may not skip snapshot directories correctly
+### TD-004 — Spec trace tooling must stay aligned with Playwright E2E naming
 
 **Category:** Tooling / Governance  
 **Current situation (based on current config/code):**
 
-* `tools/spec-trace.cjs` collects Playwright tests matching `apps/web/e2e/*.spec.ts`
-* Repo tree shows Playwright test as `apps/web/e2e/app.spec.js`
-* Snapshot skip path in `spec-trace.cjs` references `app.spec.ts-snapshots`, while the repo tree shows `app.spec.js-snapshots`
+* `tools/spec-trace.cjs` collects Playwright tests matching `apps/web/e2e/*.e2e.spec.{js,ts}`
+* Repo tree uses `apps/web/e2e/app.e2e.spec.js`
+* Snapshot skip path in `spec-trace.cjs` references `app.e2e.spec.js-snapshots`
 
 **Why this is debt:**
 
-* Spec verification matrices may be missing E2E coverage signals.
-* Tool may waste time walking snapshot directories or fail to skip them reliably.
+* If naming drifts again, spec verification matrices may miss E2E coverage signals.
+* Mismatched snapshot dirs can cause slow scans or brittle skip behavior.
 
 **Suggested later work:**
 
-* Update spec-trace to detect `.spec.{js,ts}` (and snapshots dir patterns accordingly), **or** rename the e2e test files to match the tool.
-* Add a small unit test around spec-trace discovery rules so it doesn’t regress.
+* Keep spec-trace detection rules in sync with Playwright naming (or add a focused unit test around discovery).
 
 **Priority:** Low–Medium (depending on how important E2E tests are for spec coverage)
 

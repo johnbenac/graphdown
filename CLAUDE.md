@@ -68,8 +68,8 @@ npm run verify:web
 # Update Playwright snapshots
 npm --workspace apps/web run test:e2e:update
 
-# Check test layout structure
-npm run check:web:test-layout
+# Check test layout and naming conventions
+npm run check:test-conventions
 ```
 
 ### Working with specific workspaces
@@ -186,10 +186,12 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
-- **E2E tests** — Playwright tests in `apps/web/test/`
-- Run `npm run verify:web` to run both suites
-- Test layout is checked by `tools/check-web-test-layout.js`
+- **Unit tests** — Vitest tests co-located under `src/**/__tests__/` and named `*.unit.test.ts(x)`.
+- **Integration/spec tests** — Core black-box tests under `packages/core/src/__tests__/spec/` named `*.integration.test.ts`.
+- **Governance tests** — Core meta/spec tests under `packages/core/src/__tests__/governance/` named `*.governance.integration.test.ts`.
+- **E2E tests** — Playwright tests in `apps/web/e2e/` named `*.e2e.spec.(js|ts)`.
+- Run `npm run verify:web` to run web unit + E2E suites.
+- Test layout and naming are checked by `tools/check-test-conventions.js`.
 
 ## Development Guidelines
 

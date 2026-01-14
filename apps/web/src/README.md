@@ -53,5 +53,6 @@ The routes themselves live in `routes/` and are rendered through the
 ## Testing entry points
 
 Tests for UI and dataset logic live alongside their modules (for example
-`App.test.tsx`, `__tests__/`, and the per-module `*.test.ts(x)` files in
-subdirectories). The test utilities are wired in `setupTests.ts`.
+`App.unit.test.tsx`, `__tests__/`, and the per-module `*.unit.test.ts(x)` or
+`*.integration.test.ts(x)` files in subdirectories). The test utilities are
+wired in `setupTests.ts`.

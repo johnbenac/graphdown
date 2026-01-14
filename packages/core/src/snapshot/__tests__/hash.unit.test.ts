@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { blockPathForCid, cidFromRawBytes, computeGdHashV1 } from "..";
-import type { DatasetSnapshot, HashScope } from "..";
+import { cidFromRawBytes, blockPathForCid } from "../../cid/daslCid";
+import { computeGdHashV1, type HashScope } from "../hash";
+import type { DatasetSnapshot } from "../../model/snapshotTypes";
 
 const encoder = new TextEncoder();
 
