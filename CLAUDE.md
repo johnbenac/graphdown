@@ -186,10 +186,13 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
-- **E2E tests** — Playwright tests in `apps/web/test/`
-- Run `npm run verify:web` to run both suites
-- Test layout is checked by `tools/check-web-test-layout.js`
+- **Core unit tests** — `packages/core/src/**/__tests__/*.unit.test.ts`
+- **Core integration/spec tests** — `packages/core/src/__tests__/spec/*.integration.test.ts`
+- **Core governance tests** — `packages/core/src/__tests__/governance/*.governance.integration.test.ts`
+- **Web unit/integration tests** — `apps/web/src/**/__tests__/*.(unit|integration).test.(ts|tsx)`
+- **E2E tests** — Playwright specs in `apps/web/e2e/*.e2e.spec.(js|ts)`
+- Run `npm run verify:web` to run web unit + E2E suites
+- Test layout is checked by `tools/check-web-test-layout.js` and `tools/check-test-conventions.js`
 
 ## Development Guidelines
 

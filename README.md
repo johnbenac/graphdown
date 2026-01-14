@@ -55,6 +55,10 @@ Regenerate spec trace artifacts (when editing SPEC requirements):
 npm run spec:trace
 ```
 
+## Development
+
+- Testing conventions: see [`docs/testing.md`](docs/testing.md).
+
 ## Dataset format (minimal examples)
 
 Graphdown distinguishes **type objects** and **record objects**.

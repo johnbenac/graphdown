@@ -110,18 +110,18 @@ This is a successful **internal extraction**: the web app no longer owns the imp
 **Category:** Tooling / Governance  
 **Current situation (based on current config/code):**
 
-* `tools/spec-trace.cjs` collects Playwright tests matching `apps/web/e2e/*.spec.ts`
-* Repo tree shows Playwright test as `apps/web/e2e/app.spec.js`
-* Snapshot skip path in `spec-trace.cjs` references `app.spec.ts-snapshots`, while the repo tree shows `app.spec.js-snapshots`
+* `tools/spec-trace.cjs` collects Playwright tests matching `apps/web/e2e/*.e2e.spec.(js|ts)`
+* Repo tree uses `apps/web/e2e/app.e2e.spec.js`
+* Snapshot skip path in `spec-trace.cjs` references `app.e2e.spec.js-snapshots`
 
 **Why this is debt:**
 
-* Spec verification matrices may be missing E2E coverage signals.
-* Tool may waste time walking snapshot directories or fail to skip them reliably.
+* If these drift, spec verification matrices could miss E2E coverage signals.
+* Snapshot directories could be walked unnecessarily.
 
 **Suggested later work:**
 
-* Update spec-trace to detect `.spec.{js,ts}` (and snapshots dir patterns accordingly), **or** rename the e2e test files to match the tool.
+* Keep spec-trace discovery rules aligned with any future Playwright naming changes.
 * Add a small unit test around spec-trace discovery rules so it doesn’t regress.
 
 **Priority:** Low–Medium (depending on how important E2E tests are for spec coverage)

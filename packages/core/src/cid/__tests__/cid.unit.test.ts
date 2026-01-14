@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 import { sha256 } from "@noble/hashes/sha256";
 
-import { cidFromRawBytes, decodeDaslCidString } from "..";
+import { cidFromRawBytes, decodeDaslCidString } from "../daslCid";
 
 const encoder = new TextEncoder();
 

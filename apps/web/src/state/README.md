@@ -32,6 +32,6 @@ components to load, edit, and persist datasets.
 
 ## Tests
 
-- `DatasetContext.test.tsx` and `DatasetContext.nfr.test.tsx` cover import and
-  update workflows.
-- `importReport.test.ts` verifies report counting and sample limits.
+- `DatasetContext.unit.test.tsx` and `DatasetContext.nfr.integration.test.tsx` cover
+  import and update workflows.
+- `importReport.unit.test.ts` verifies report counting and sample limits.

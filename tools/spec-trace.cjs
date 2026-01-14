@@ -24,12 +24,12 @@ const SKIP_DIR_NAMES = new Set([
   'artifacts',
   'test-results',
   'playwright-report',
-  'app.spec.ts-snapshots',
+  'app.e2e.spec.js-snapshots',
   '__fixtures__',
 ]);
 
 const PLAYWRIGHT_SNAPSHOT_DIR_POSIX = toPosixPath(
-  path.join('apps', 'web', 'e2e', 'app.spec.ts-snapshots'),
+  path.join('apps', 'web', 'e2e', 'app.e2e.spec.js-snapshots'),
 );
 const ENFORCE_TESTABLE =
   process.env.TRACE_ENFORCE_TESTABLE &&
@@ -158,7 +158,7 @@ function collectTestFiles() {
     },
     {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'e2e'),
-      match: (filePath) => /\.spec\.ts$/.test(filePath),
+      match: (filePath) => /\.e2e\.spec\.(js|ts)$/.test(filePath),
     },
     {
       dir: path.join(REPO_ROOT, 'tests'),

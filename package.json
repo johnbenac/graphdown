@@ -37,7 +37,8 @@
     "verify:web": "npm --workspace apps/web run verify && npm run check:web:test-layout",
     "burndown": "node tools/burndown.js",
     "spec:verify": "node tools/check-spec-coverage.js",
-    "check:web:test-layout": "node tools/check-web-test-layout.js"
+    "check:web:test-layout": "node tools/check-web-test-layout.js",
+    "check:test-conventions": "node tools/check-test-conventions.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",

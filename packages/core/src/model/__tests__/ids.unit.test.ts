@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { parseGraphdownText, validateDatasetSnapshot } from "..";
-import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "..";
+import { parseGraphdownText, validateDatasetSnapshot } from "../../index";
+import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "../../index";
 
 const encoder = new TextEncoder();
 

@@ -4,8 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "vitest";
 
-import { validateDatasetSnapshot } from "..";
-import type { DatasetSnapshot } from "..";
+import { validateDatasetSnapshot } from "../../index";
+import type { DatasetSnapshot } from "../../index";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,7 +34,7 @@ function loadDatasetSnapshotFromFs(root: string): DatasetSnapshot {
 }
 
 test('ERR-001: validation errors expose stable fields', () => {
-  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, "..", "__fixtures__", "invalid-dataset"));
+  const snapshot = loadDatasetSnapshotFromFs(path.join(__dirname, "..", "..", "__fixtures__", "invalid-dataset"));
 
   const result = validateDatasetSnapshot(snapshot);
   if (result.ok) {

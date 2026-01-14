@@ -7,12 +7,12 @@ import {
   cidFromRawBytes,
   computeGdHashV1,
   validateDatasetSnapshot
-} from "..";
-import type { DatasetSnapshot } from "..";
+} from "../../index";
+import type { DatasetSnapshot } from "../../index";
 
 // This is intentionally imported from the internal module so the test does not
 // depend on index exports and directly exercises link-graph behavior.
-import { buildRecordLinkGraphFromSnapshot } from "../graph/graph";
+import { buildRecordLinkGraphFromSnapshot } from "../../graph/graph";
 
 const encoder = new TextEncoder();
 
