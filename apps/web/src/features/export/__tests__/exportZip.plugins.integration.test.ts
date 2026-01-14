@@ -91,6 +91,41 @@ describe("buildDatasetZipBytes plugin export", () => {
     );
   });
 
+  it("EXP-PLUG-001: preserves binary plugin bundle bytes across export/import", () => {
+    const binaryBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
+    const manifest = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - assets/logo.bin",
+      "binaryFiles:",
+      "  - assets/logo.bin",
+      "---",
+      "",
+      "Plugin manifest."
+    ].join("\n");
+
+    const entryBytes = new Uint8Array(strToU8("console.log('entry');"));
+
+    const snapshot = snapshotFromEntries([
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      [
+        "records/note/record.md",
+        ["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body"].join("\n")
+      ],
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", entryBytes],
+      ["extensions/demo/assets/logo.bin", binaryBytes]
+    ]);
+
+    const imported = exportAndLoad(snapshot);
+
+    expect(imported.files.get("plugins/demo/assets/logo.bin")).toEqual(binaryBytes);
+  });
+
   it("EXP-006: includes plugin-declared blocks even when records do not reference them", () => {
     const pluginBlockBytes = new Uint8Array(strToU8("plugin-only-block"));
     const pluginCid = cidFromRawBytes(pluginBlockBytes);

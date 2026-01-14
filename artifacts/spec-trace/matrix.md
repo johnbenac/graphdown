@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T22:36:21.031Z
+Generated: 2026-01-14T23:25:00.248Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -73,9 +73,11 @@ Tests (1):
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "PLUG-ID-002: duplicate pluginId fails validation"
 
 ## HASH-001 — Canonical dataset hashing (gdhash-v1)
-Tests (6):
+Tests (8):
+- packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: binary plugin bundle files hash raw bytes"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID"
+- packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: plugin bundle text files normalize line endings"
 - packages/core/src/__tests__/spec/hash.plugins.integration.test.ts — "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation"
 - packages/core/src/snapshot/__tests__/hash.unit.test.ts — "HASH-001: duplicate identities fail hashing"
 - packages/core/src/snapshot/__tests__/hash.unit.test.ts — "HASH-001: line ending normalization yields stable hashes"
@@ -150,7 +152,8 @@ Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
 ## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=ci)
-Tests (4):
+Tests (5):
+- packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: binary plugin bundle files validate, hash, and export with raw bytes"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: dataset remains valid without plugins present"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin objects are included in canonical dataset export"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin objects are validated at import time"
@@ -344,9 +347,10 @@ Tests (1):
 Tests (1):
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-004: unsafe relative paths are rejected"
 
-## VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable (testable=true, verify=todo)
-Tests (1):
-- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: plugin bundle files must be UTF-8 decodable"
+## VAL-PLUG-005 — Plugin bundle file encoding modes are validated (testable=true, verify=todo)
+Tests (2):
+- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: binaryFiles allow non-UTF8 plugin bundle files"
+- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: non-binary plugin bundle files must be UTF-8 decodable"
 
 ## VAL-PLUG-006 — Plugin bundle must not contain reserved export paths (testable=true, verify=todo)
 Tests (1):
@@ -446,8 +450,9 @@ Tests (1):
 - apps/web/src/features/export/__tests__/exportZip.unit.test.ts — "EXP-HIER-001: export uses canonical layout paths"
 
 ## EXP-PLUG-001 — Canonical plugin export layout (testable=true, verify=todo)
-Tests (1):
+Tests (2):
 - apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts — "EXP-PLUG-001: exports plugin bundles in canonical layout with exact bytes"
+- apps/web/src/features/export/__tests__/exportZip.plugins.integration.test.ts — "EXP-PLUG-001: preserves binary plugin bundle bytes across export/import"
 
 ## EXP-005 — Content preservation (no “reformat the universe”)
 Tests (1):

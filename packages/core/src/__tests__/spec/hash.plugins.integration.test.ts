@@ -50,6 +50,71 @@ test("HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
   assert.notEqual(digestUpdated, digestBase);
 });
 
+test("HASH-001: plugin bundle text files normalize line endings", () => {
+  const manifest = [
+    "---",
+    "pluginId: demo",
+    "gdApiVersion: 1",
+    "entry: entry.js",
+    "files:",
+    "  - entry.js",
+    "---",
+    ""
+  ].join("\n");
+  const baseSnapshot: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["extensions/demo/plugin.md", encoder.encode(manifest)],
+      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\n")]
+    ])
+  };
+  const windowsSnapshot: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["extensions/demo/plugin.md", encoder.encode(manifest)],
+      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\r\n")]
+    ])
+  };
+
+  const digestBase = digest(computeGdHashV1(baseSnapshot, "snapshot"));
+  const digestWindows = digest(computeGdHashV1(windowsSnapshot, "snapshot"));
+
+  assert.equal(digestBase, digestWindows);
+});
+
+test("HASH-001: binary plugin bundle files hash raw bytes", () => {
+  const manifest = [
+    "---",
+    "pluginId: demo",
+    "gdApiVersion: 1",
+    "entry: entry.js",
+    "files:",
+    "  - entry.js",
+    "  - assets/logo.bin",
+    "binaryFiles:",
+    "  - assets/logo.bin",
+    "---",
+    ""
+  ].join("\n");
+  const baseSnapshot: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["extensions/demo/plugin.md", encoder.encode(manifest)],
+      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\n")],
+      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00])]
+    ])
+  };
+  const updatedSnapshot: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["extensions/demo/plugin.md", encoder.encode(manifest)],
+      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\n")],
+      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x01])]
+    ])
+  };
+
+  const digestBase = digest(computeGdHashV1(baseSnapshot, "snapshot"));
+  const digestUpdated = digest(computeGdHashV1(updatedSnapshot, "snapshot"));
+
+  assert.notEqual(digestBase, digestUpdated);
+});
+
 test("HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID", () => {
   const snap = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
   const result = computeGdHashV1(snap, "snapshot");

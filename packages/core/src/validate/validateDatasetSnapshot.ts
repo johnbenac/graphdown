@@ -310,7 +310,7 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
   ]);
 
   const requiredKeys = ['pluginId', 'gdApiVersion', 'entry', 'files'];
-  const optionalKeys = ['meta', 'config', 'requires', 'blocks'];
+  const optionalKeys = ['meta', 'config', 'requires', 'blocks', 'binaryFiles'];
   const forbiddenKeys = ['typeId', 'recordId', 'parent', 'fields'];
   const allowedKeys = new Set<string>([...requiredKeys, ...optionalKeys]);
 
@@ -431,6 +431,18 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
         )
       );
     }
+    if (
+      Object.prototype.hasOwnProperty.call(yaml, 'binaryFiles') &&
+      (!Array.isArray(yaml.binaryFiles) || yaml.binaryFiles.some((item) => typeof item !== 'string'))
+    ) {
+      errors.push(
+        makeError(
+          'E_PLUGIN_KEYS_INVALID',
+          `Plugin manifest ${manifest.file} binaryFiles must be a list of strings`,
+          manifest.file
+        )
+      );
+    }
   }
 
   const pluginIdToManifestPath = new Map<string, string>();
@@ -474,6 +486,10 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     if (!Array.isArray(files) || files.some((item) => typeof item !== 'string')) {
       continue;
     }
+    const binaryFiles =
+      Array.isArray(manifest.yaml.binaryFiles) && manifest.yaml.binaryFiles.every((item) => typeof item === 'string')
+        ? manifest.yaml.binaryFiles
+        : [];
     if (files.includes('manifest.md')) {
       errors.push(
         makeError(
@@ -513,6 +529,30 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
           )
         );
       }
+    }
+    const binarySet = new Set<string>();
+    for (const binaryFile of binaryFiles) {
+      if (!isSafeRelativePath(binaryFile)) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_PATH_INVALID',
+            `Plugin manifest ${manifest.file} binaryFiles path "${binaryFile}" is not a safe relative path`,
+            manifest.file
+          )
+        );
+        continue;
+      }
+      if (!files.includes(binaryFile)) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_KEYS_INVALID',
+            `Plugin manifest ${manifest.file} binaryFiles entry "${binaryFile}" must be listed in files`,
+            manifest.file
+          )
+        );
+        continue;
+      }
+      binarySet.add(binaryFile);
     }
 
     const resolved = resolvePluginBundlePaths(manifest.file, files);
@@ -573,6 +613,9 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
       }
       const bytes = snapshot.files.get(resolvedPath);
       if (!bytes) {
+        continue;
+      }
+      if (binarySet.has(file)) {
         continue;
       }
       const decodedBundle = decodeUtf8Strict(bytes);

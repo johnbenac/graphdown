@@ -57,7 +57,7 @@ describe("plugins validation", () => {
     );
   });
 
-  it("VAL-PLUG-005: plugin bundle files must be UTF-8 decodable", () => {
+  it("VAL-PLUG-005: non-binary plugin bundle files must be UTF-8 decodable", () => {
     const manifest = manifestContent([
       "pluginId: demo",
       "gdApiVersion: 1",
@@ -73,6 +73,27 @@ describe("plugins validation", () => {
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_UTF8_INVALID");
+  });
+
+  it("VAL-PLUG-005: binaryFiles allow non-UTF8 plugin bundle files", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - assets/logo.bin",
+      "binaryFiles:",
+      "  - assets/logo.bin"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")],
+      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xfe, 0x80])]
+    ]);
+
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
   it("VAL-PLUG-007: blocks must contain valid CID strings", () => {
