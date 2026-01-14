@@ -1,3 +1,10 @@
+## [0.12.3](https://github.com/johnbenac/graphdown/compare/v0.12.2...v0.12.3) (2026-01-14)
+
+
+### Bug Fixes
+
+* ignore plugin bundle markdown in discovery ([0756bd7](https://github.com/johnbenac/graphdown/commit/0756bd7f65bc790e4e49d69e6d8853d6ce689ae3))
+
 ## [0.12.2](https://github.com/johnbenac/graphdown/compare/v0.12.1...v0.12.2) (2026-01-13)
 
 
