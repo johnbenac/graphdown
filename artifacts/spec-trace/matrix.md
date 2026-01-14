@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T19:19:30.009Z
+Generated: 2026-01-14T21:23:35.976Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -126,6 +126,16 @@ Tests (1):
 Tests (1):
 - packages/core/src/__tests__/spec/layout.integration.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
+## LAYOUT-003 — Malformed YAML front matter in non-semantic Markdown is ignored (testable=true)
+Tests (7):
+- packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: invalid YAML front matter is ignored for discovery and validation"
+- packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: malformed YAML front matter is ignored for hashing"
+- packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: valid YAML without reserved keys is ignored for hashing"
+- packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: invalid YAML in non-semantic markdown is ignored"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: unterminated YAML front matter in non-semantic markdown is ignored"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: valid YAML without reserved keys is ignored"
+
 ## BLOCK-LAYOUT-001 — Block store paths are derived from CID (testable=true)
 Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
@@ -167,9 +177,7 @@ Tests (1):
 - packages/core/src/parse/__tests__/pluginManifest.paths.unit.test.ts — "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace"
 
 ## FR-MD-020 — YAML front matter is required
-Tests (8):
-- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-020: invalid YAML fails validation"
-- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-020: missing YAML front matter fails validation"
+Tests (6):
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: parses YAML front matter with CR-only line endings"
@@ -183,7 +191,8 @@ Tests (2):
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-021: type objects must not define parent"
 
 ## FR-MD-023 — Required top-level keys for record objects (testable=true)
-Tests (2):
+Tests (3):
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: missing fields in a record fails validation"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: record objects may include parent"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: recordId must be a string identifier when present"
 

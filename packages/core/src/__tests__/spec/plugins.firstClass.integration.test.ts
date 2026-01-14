@@ -54,6 +54,43 @@ describe("plugins first-class behavior", () => {
     expect(canonical.files.has("extensions/demo/ui.md")).toBe(false);
   });
 
+  it("LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported", () => {
+    const manifestBytes = encoder.encode(
+      [
+        "---",
+        "pluginId: demo",
+        "gdApiVersion: 1",
+        "entry: entry.js",
+        "files:",
+        "  - entry.js",
+        "  - DEVLOG.md",
+        "---",
+        "Plugin manifest body"
+      ].join("\n")
+    );
+    const entryBytes = encoder.encode("console.log('entry');\n");
+    const devlogBytes = encoder.encode(["---", "not: [valid, yaml", "# missing bracket"].join("\n"));
+
+    const snapshot: DatasetSnapshot = {
+      files: new Map<string, Uint8Array>([
+        ["extensions/demo/plugin.md", manifestBytes],
+        ["extensions/demo/entry.js", entryBytes],
+        ["extensions/demo/DEVLOG.md", devlogBytes]
+      ])
+    };
+
+    const validation = validateDatasetSnapshot(snapshot);
+    expect(validation.ok).toBe(true);
+
+    const digest = digestSnapshot(snapshot);
+    expect(typeof digest).toBe("string");
+
+    const canonical = canonicalizeDatasetSnapshot(snapshot);
+    expect(canonical.files.has("plugins/demo/manifest.md")).toBe(true);
+    expect(canonical.files.has("plugins/demo/entry.js")).toBe(true);
+    expect(canonical.files.has("plugins/demo/DEVLOG.md")).toBe(true);
+  });
+
   it("PLUG-000: dataset remains valid without plugins present", () => {
     const snapshot: DatasetSnapshot = {
       files: new Map([
