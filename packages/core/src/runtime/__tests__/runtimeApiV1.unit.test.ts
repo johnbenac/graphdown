@@ -10,7 +10,7 @@ import {
 } from '../../index';
 import {
   invalidDataset_badBlockPathUnderBlocks,
-  invalidDataset_missingFrontMatter,
+  invalidDataset_missingFields,
   invalidDataset_missingTypeForRecord,
   invalidDataset_unknownTopLevelKey,
   recordFile,
@@ -66,7 +66,7 @@ test('runtime api v1 open returns session for valid dataset', async () => {
 
 test('runtime api v1 open fails for invalid snapshot and preserves validation errors exactly', async () => {
   const snapshots = [
-    invalidDataset_missingFrontMatter(),
+    invalidDataset_missingFields(),
     invalidDataset_unknownTopLevelKey(),
     invalidDataset_missingTypeForRecord(),
     invalidDataset_badBlockPathUnderBlocks()

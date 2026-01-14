@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { computeGdHashV1 } from "../../index";
+import { computeGdHashV1, validateDatasetSnapshot } from "../../index";
 import type { DatasetSnapshot } from "../../index";
 import { loadFixtureSnapshot } from "../fixtureLoader";
 
@@ -48,6 +48,48 @@ test("HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
   const digestUpdated = digest(computeGdHashV1({ files: updatedFiles }, "snapshot"));
 
   assert.notEqual(digestUpdated, digestBase);
+});
+
+test("HASH-001: plugin bundle files with invalid YAML are still hashed", () => {
+  const manifest = [
+    "---",
+    "pluginId: demo",
+    "gdApiVersion: 1",
+    "entry: entry.js",
+    "files:",
+    "  - entry.js",
+    "  - DEVLOG.md",
+    "---",
+    ""
+  ].join("\n");
+
+  const devlogA = "---\nnot: [valid, yaml\n";
+  const devlogB = "---\nnot: [valid, yaml\n# updated\n";
+
+  const snapshotA: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["plugin.md", encoder.encode(manifest)],
+      ["entry.js", encoder.encode("console.log('entry');\n")],
+      ["DEVLOG.md", encoder.encode(devlogA)]
+    ])
+  };
+
+  const snapshotB: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["plugin.md", encoder.encode(manifest)],
+      ["entry.js", encoder.encode("console.log('entry');\n")],
+      ["DEVLOG.md", encoder.encode(devlogB)]
+    ])
+  };
+
+  const validation = validateDatasetSnapshot(snapshotA);
+  if (!validation.ok) {
+    assert.fail(JSON.stringify(validation.errors));
+  }
+
+  const digestA = digest(computeGdHashV1(snapshotA, "snapshot"));
+  const digestB = digest(computeGdHashV1(snapshotB, "snapshot"));
+  assert.notEqual(digestA, digestB);
 });
 
 test("HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID", () => {

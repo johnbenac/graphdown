@@ -24,18 +24,30 @@ function getErrorCodes(snapshot: DatasetSnapshot) {
 }
 
 describe("validateDatasetSnapshot", () => {
-  it("FR-MD-020: missing YAML front matter fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: bar\nbody"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_UNTERMINATED");
+  it("LAYOUT-003: unterminated YAML front matter in non-semantic markdown is ignored", () => {
+    const snapshot = snapshotFromEntries([["docs/bad-frontmatter.md", "---\nnot: [valid, yaml\n# missing delimiter"]]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
-  it("FR-MD-020: invalid YAML fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: [\n---"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
+  it("LAYOUT-003: non-semantic markdown with valid YAML front matter is ignored", () => {
+    const snapshot = snapshotFromEntries([
+      [
+        "notes/obsidian.md",
+        ["---", "tags: [camping, meeting]", "aliases: [\"Pack meeting notes\"]", "---", "# notes"].join("\n")
+      ]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
   it("FR-MD-021: fields must be an object", () => {
     const snapshot = snapshotFromEntries([rec("type.md", ["typeId: note", "fields: []"])]);
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
+  });
+
+  it("FR-MD-023: missing fields fails validation for discovered records", () => {
+    const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "recordId: x"])]);
     expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
