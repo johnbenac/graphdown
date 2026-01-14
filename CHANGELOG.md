@@ -1,3 +1,10 @@
+## [0.12.5](https://github.com/johnbenac/graphdown/compare/v0.12.4...v0.12.5) (2026-01-14)
+
+
+### Bug Fixes
+
+* dedupe record export and align plugin test naming ([535f9ca](https://github.com/johnbenac/graphdown/commit/535f9ca7add75cffb8fa95191d083ceeef526737))
+
 ## [0.12.4](https://github.com/johnbenac/graphdown/compare/v0.12.3...v0.12.4) (2026-01-14)
 
 
