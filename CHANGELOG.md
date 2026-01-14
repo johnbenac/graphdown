@@ -1,3 +1,10 @@
+## [0.12.6](https://github.com/johnbenac/graphdown/compare/v0.12.5...v0.12.6) (2026-01-14)
+
+
+### Bug Fixes
+
+* include type block references ([23bd7b1](https://github.com/johnbenac/graphdown/commit/23bd7b13bd03ef5305933afdf3785bc6b8d62443))
+
 ## [0.12.5](https://github.com/johnbenac/graphdown/compare/v0.12.4...v0.12.5) (2026-01-14)
 
 
