@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T18:48:13.136Z
+Generated: 2026-01-14T19:19:30.009Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -478,7 +478,7 @@ Tests (0):
 
 ## PLUG-UTIL-001 — Core exposes deterministic plugin object discovery (testable=true)
 Tests (1):
-- packages/core/src/__tests__/pluginObjects.discoveryUtility.test.ts — "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)"
+- packages/core/src/__tests__/pluginObjects.discoveryUtility.unit.test.ts — "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)"
 
 ## API-V1-000 — Runtime API v1 conformance scope (testable=false)
 Tests (0):

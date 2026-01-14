@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T18:48:13.136Z",
+  "generatedAt": "2026-01-14T19:19:30.009Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1574,7 +1574,7 @@
         {
           "reqId": "PLUG-UTIL-001",
           "testTitle": "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)",
-          "filePath": "packages/core/src/__tests__/pluginObjects.discoveryUtility.test.ts"
+          "filePath": "packages/core/src/__tests__/pluginObjects.discoveryUtility.unit.test.ts"
         }
       ]
     },

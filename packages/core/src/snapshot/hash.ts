@@ -2,7 +2,8 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import { encodeBase32 } from '../cid/base32';
 import { isValidPluginId } from '../model/ids';
-import { isRecordFileBytes, parseGraphdownText } from '../parse/datasetObjects';
+import { parseGraphdownText } from '../parse/datasetObjects';
+import { isRecordFileBytes } from '../parse/recordFile';
 import { discoverPluginObjects } from '../parse/pluginObjects';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';

@@ -6,8 +6,6 @@ import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
 import { discoverPluginObjects } from './pluginObjects';
 import { isRecordFileBytes } from './recordFile';
 
-export { isRecordFileBytes };
-
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 export const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
