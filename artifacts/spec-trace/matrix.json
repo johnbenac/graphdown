@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T17:59:57.648Z",
+  "generatedAt": "2026-01-14T18:48:06.164Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1564,6 +1564,19 @@
       "testable": false,
       "verify": null,
       "tests": []
+    },
+    {
+      "id": "PLUG-UTIL-001",
+      "title": "Core exposes deterministic plugin object discovery",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "PLUG-UTIL-001",
+          "testTitle": "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)",
+          "filePath": "packages/core/src/__tests__/pluginObjects.discoveryUtility.test.ts"
+        }
+      ]
     },
     {
       "id": "API-V1-000",

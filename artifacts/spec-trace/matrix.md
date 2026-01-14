@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T17:59:57.648Z
+Generated: 2026-01-14T18:48:06.164Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -475,6 +475,10 @@ Tests (0):
 ## NFR-031 — New field kinds without rewriting CRUD (testable=false)
 Tests (0):
 - (none)
+
+## PLUG-UTIL-001 — Core exposes deterministic plugin object discovery (testable=true)
+Tests (1):
+- packages/core/src/__tests__/pluginObjects.discoveryUtility.test.ts — "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)"
 
 ## API-V1-000 — Runtime API v1 conformance scope (testable=false)
 Tests (0):
