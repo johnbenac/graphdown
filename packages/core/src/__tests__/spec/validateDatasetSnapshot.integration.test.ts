@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "../../index";
+import { discoverGraphdownObjects, validateDatasetSnapshot } from "../../index";
 import type { DatasetSnapshot } from "../../index";
+import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();
 
@@ -24,14 +25,16 @@ function getErrorCodes(snapshot: DatasetSnapshot) {
 }
 
 describe("validateDatasetSnapshot", () => {
-  it("FR-MD-020: missing YAML front matter fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: bar\nbody"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_UNTERMINATED");
-  });
+  it("LAYOUT-003: malformed front matter in non-semantic markdown is ignored", () => {
+    const snapshot = loadFixtureSnapshot("frontmatter-permissive-dataset");
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
 
-  it("FR-MD-020: invalid YAML fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: [\n---"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
+    const discovered = discoverGraphdownObjects(snapshot);
+    expect(discovered.errors).toEqual([]);
+    expect(discovered.ignored).toEqual(
+      expect.arrayContaining(["docs/bad-frontmatter.md", "notes/obsidian.md"])
+    );
   });
 
   it("FR-MD-021: fields must be an object", () => {
@@ -42,6 +45,11 @@ describe("validateDatasetSnapshot", () => {
   it("FR-MD-023: recordId must be a string identifier when present", () => {
     const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "recordId: 123", "fields: {}"])]);
     expect(getErrorCodes(snapshot)).toContain("E_INVALID_IDENTIFIER");
+  });
+
+  it("FR-MD-023: missing fields in a discovered record fails validation", () => {
+    const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "recordId: one"])]);
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
   it("LAYOUT-001: no recordId means the object is treated as a type", () => {

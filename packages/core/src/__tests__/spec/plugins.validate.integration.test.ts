@@ -118,6 +118,12 @@ describe("plugins validation", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("LAYOUT-003: plugin bundle files may contain malformed front matter", () => {
+    const snapshot = loadFixtureSnapshot("plugin-bundle-bad-frontmatter");
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
   it("PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID", () => {
     const manifest = manifestContent(["pluginId: demo", "gdApiVersion: 1"]);
     const snapshot = snapshotFromEntries([["extensions/demo/plugin.md", manifest]]);

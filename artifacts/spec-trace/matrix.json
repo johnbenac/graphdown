@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T19:19:30.009Z",
+  "generatedAt": "2026-01-14T21:22:37.462Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -214,6 +214,11 @@
         },
         {
           "reqId": "HASH-001",
+          "testTitle": "HASH-001: plugin bundle files with broken front matter are hashed",
+          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+        },
+        {
+          "reqId": "HASH-001",
           "testTitle": "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation",
           "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
@@ -383,6 +388,24 @@
       ]
     },
     {
+      "id": "LAYOUT-003",
+      "title": "Malformed YAML front matter in non-semantic Markdown is ignored",
+      "testable": true,
+      "verify": null,
+      "tests": [
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: plugin bundle files may contain malformed front matter",
+          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: malformed front matter in non-semantic markdown is ignored",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        }
+      ]
+    },
+    {
       "id": "BLOCK-LAYOUT-001",
       "title": "Block store paths are derived from CID",
       "testable": true,
@@ -528,16 +551,6 @@
       "tests": [
         {
           "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: invalid YAML fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
-          "testTitle": "FR-MD-020: missing YAML front matter fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
-        },
-        {
-          "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: extracts yaml and body for valid front matter",
           "filePath": "packages/core/src/parse/__tests__/frontMatter.unit.test.ts"
         },
@@ -592,6 +605,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "FR-MD-023",
+          "testTitle": "FR-MD-023: missing fields in a discovered record fails validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: record objects may include parent",

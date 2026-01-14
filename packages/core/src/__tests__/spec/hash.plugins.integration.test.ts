@@ -50,6 +50,20 @@ test("HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
   assert.notEqual(digestUpdated, digestBase);
 });
 
+test("HASH-001: plugin bundle files with broken front matter are hashed", () => {
+  const base = loadFixtureSnapshot("plugin-bundle-bad-frontmatter");
+  const digestBase = digest(computeGdHashV1(base, "snapshot"));
+
+  const updatedFiles = new Map(base.files);
+  updatedFiles.set(
+    "extensions/demo/DEVLOG.md",
+    encoder.encode("---\nnot: [still, broken\n# updated\n")
+  );
+  const digestUpdated = digest(computeGdHashV1({ files: updatedFiles }, "snapshot"));
+
+  assert.notEqual(digestUpdated, digestBase);
+});
+
 test("HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID", () => {
   const snap = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
   const result = computeGdHashV1(snap, "snapshot");

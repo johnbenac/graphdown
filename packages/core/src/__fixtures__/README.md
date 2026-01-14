@@ -24,6 +24,9 @@ key requirements for types and records.
   - Dataset with nested `types/` and `records/` paths plus an extra file under
     `assets/` to ensure ignored files are ignored by validation and export.
   - Records include link references in both YAML fields and markdown body text.
+- `frontmatter-permissive-dataset/`
+  - Valid dataset with extra Markdown files that start with YAML front matter
+    (including invalid/unterminated YAML) to validate LAYOUT-003 behavior.
 
 ## Plugin fixtures (SPEC v0.5)
 
@@ -31,6 +34,10 @@ key requirements for types and records.
   - Valid plugin manifest + UTF-8 bundle files.
   - Includes an empty-bytes block file using CID-001 for later plugin block
     reachability/export tests.
+- `plugin-bundle-bad-frontmatter/`
+  - Valid plugin manifest that bundles a Markdown file with broken YAML front
+    matter to ensure plugin bundles are hashed/exported regardless of YAML
+    validity.
 
 - `plugin-invalid-duplicate-pluginId/`
   - Two manifests share the same `pluginId` (to exercise PLUG-ID-002 /
