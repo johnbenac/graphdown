@@ -1,12 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T06:26:04.007Z
-
-## Testable requirements with no tests
-- NR-PLUG-EXP-001 — Plugins do not define canonical export
-- NR-PLUG-HASH-001 — Plugins do not define hashing semantics
-- NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
-- NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
+Generated: 2026-01-14T09:33:11.092Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -48,21 +42,21 @@ Tests (0):
 Tests (1):
 - packages/core/src/__tests__/gaps.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
-## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true, verify=todo)
-Tests (0):
-- (none)
+## NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files (testable=true, verify=ci)
+Tests (1):
+- packages/core/src/__tests__/plugins.nonRequirements.test.ts — "NR-PLUG-LINK-001: no relationship or CID extraction from plugin manifest bodies or bundle contents"
 
-## NR-PLUG-VAL-001 — No plugin-defined dataset validity rules (testable=true, verify=todo)
-Tests (0):
-- (none)
+## NR-PLUG-VAL-001 — No plugin-defined dataset validity rules (testable=true, verify=ci)
+Tests (1):
+- packages/core/src/__tests__/plugins.nonRequirements.test.ts — "NR-PLUG-VAL-001: plugin bundle content is not executed or interpreted as additional validity rules"
 
-## NR-PLUG-EXP-001 — Plugins do not define canonical export (testable=true, verify=todo)
-Tests (0):
-- (none)
+## NR-PLUG-EXP-001 — Plugins do not define canonical export (testable=true, verify=ci)
+Tests (1):
+- packages/core/src/__tests__/plugins.nonRequirements.test.ts — "NR-PLUG-EXP-001: plugins do not define canonical export (no extra includes, no layout overrides, no rewrites)"
 
-## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true, verify=todo)
-Tests (0):
-- (none)
+## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true, verify=ci)
+Tests (1):
+- packages/core/src/__tests__/plugins.nonRequirements.test.ts — "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)"
 
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):
