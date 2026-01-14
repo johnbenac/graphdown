@@ -39,9 +39,10 @@ export function validDatasetWeirdPaths(): DatasetSnapshot {
   });
 }
 
-export function invalidDataset_missingFrontMatter(): DatasetSnapshot {
+export function invalidDataset_recordMissingFields(): DatasetSnapshot {
   return makeSnapshot({
-    'broken.md': '---\nfoo: bar\nbody'
+    'types/note.md': typeFile('note'),
+    'records/note-one.md': ['---', 'typeId: note', 'recordId: one', '---', ''].join('\n')
   });
 }
 

@@ -469,12 +469,22 @@ Decoding a DASL CIDv1 string produced by `cidFromRawBytes` MUST:
 
 A **record file** is any file that:
 
-* ends in `.md`,
-* begins with YAML front matter at byte 0 (the first three bytes are `---` followed by a line break), and
+* ends in `.md`, and
+* begins with a YAML front matter delimiter at byte 0 (the first three bytes are `---` followed by a line break), and
+* contains a closing YAML front matter delimiter `---`, and
+* whose front matter YAML parses successfully to an object/map, and
 * whose parsed YAML object contains a `typeId` key.
 
-Files that do not meet these conditions are ignored by core. Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
-For record files, paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
+If a `.md` file begins with `---` but:
+
+* the closing delimiter is missing,
+* YAML parsing fails, or
+* YAML parses to a non-object,
+
+then the file MUST NOT be treated as a record file and MUST be ignored per LAYOUT-003 and BLOCK-LAYOUT-003.
+
+Files that do not meet the record file conditions are ignored by core for record discovery.
+Paths and directory names carry no semantic meaning and MUST NOT affect validity, identity, or hashing.
 
 <!-- req:id=LAYOUT-002 title="One object per file" testable=true -->
 ### LAYOUT-002 — One object per file
@@ -482,6 +492,22 @@ For record files, paths and directory names carry no semantic meaning and MUST N
 Each record file MUST contain exactly one YAML front matter block at the start of the file (per FR-MD-020). The remainder of the file is the record body (FR-MD-022).
 
 Core MUST NOT support multiple record objects in a single file.
+
+<!-- req:id=LAYOUT-003 title="Malformed YAML front matter in non-semantic Markdown is ignored" testable=true -->
+### LAYOUT-003 — Malformed YAML front matter in non-semantic Markdown is ignored
+
+Graphdown repositories MAY contain arbitrary Markdown files that begin with `---` (YAML front matter),
+including files whose front matter is unterminated, invalid YAML, or parses to a non-object.
+
+Such files:
+
+* MUST NOT cause import/validation to fail solely due to front matter shape or YAML parsing errors, and
+* MUST NOT be treated as record files (LAYOUT-001) or plugin manifest files (PLUG-LAYOUT-001).
+
+Note:
+If such a file is included as a plugin bundle file via a valid plugin manifest (PLUG-LAYOUT-002),
+it remains a semantic plugin bundle file for hashing/export purposes (HASH-001 / EXP-PLUG-001),
+regardless of whether it contains valid YAML front matter.
 
 <!-- req:id=BLOCK-LAYOUT-001 title="Block store paths are derived from CID" testable=true -->
 ### BLOCK-LAYOUT-001 — Block store paths are derived from CID
@@ -554,6 +580,9 @@ Plugin manifest discovery MUST NOT depend on directory names or specific paths.
 A file that satisfies LAYOUT-001 is a record file, not a plugin manifest file:
 * If a file contains `typeId` and satisfies LAYOUT-001, it MUST be treated as a record file and MUST NOT be treated as a plugin manifest file.
 
+Files that begin with `---` but have unterminated front matter, invalid YAML, or YAML that parses to a non-object
+MUST NOT be treated as plugin manifest files and MUST NOT cause import failure solely due to YAML parsing errors (LAYOUT-003).
+
 Notes:
 * Discovery is intentionally broader than PLUG-FR-002 so that malformed manifests are not silently ignored; they are discovered and then rejected by validation (VAL-PLUG-001).
 * Discovery MUST NOT depend on the numeric value of `gdApiVersion`.
@@ -619,7 +648,7 @@ Violation of any rule in this requirement MUST fail validation (VAL-PLUG-004).
 <!-- req:id=FR-MD-020 title="YAML front matter is required" -->
 ### FR-MD-020 — YAML front matter is required
 
-Every record file **MUST** start with YAML front matter delimited by:
+Every **type object** and **record object** file MUST start with YAML front matter delimited by:
 
 ```md
 ---
@@ -628,11 +657,12 @@ Every record file **MUST** start with YAML front matter delimited by:
 <body markdown>
 ```
 
-Import/validation **MUST** fail if:
+This requirement applies only to files that are discovered as record files per LAYOUT-001.
 
-* front matter is missing,
-* YAML is invalid, or
-* YAML parses to a non-object (array/string/null).
+For avoidance of doubt:
+* Graphdown repositories MAY contain other Markdown files with YAML front matter (including invalid YAML).
+* Such files are non-semantic unless they are discovered as record files (LAYOUT-001) or plugin manifests (PLUG-LAYOUT-001),
+  and MUST NOT cause import failure merely due to invalid or unterminated YAML (LAYOUT-003).
 
 <!-- req:id=FR-MD-021 title="Required top-level keys for type objects" testable=true -->
 ### FR-MD-021 — Required top-level keys for type objects
@@ -681,11 +711,9 @@ Every plugin manifest file MUST start with YAML front matter delimited by:
 <body markdown>
 ```
 
-Validation MUST fail if:
+This requirement applies only to files discovered as plugin manifest files per PLUG-LAYOUT-001.
 
-* front matter is missing,
-* YAML is invalid, or
-* YAML parses to a non-object (array/string/null).
+Non-semantic Markdown files (including those with invalid or unterminated YAML front matter) MUST NOT cause import failure (LAYOUT-003).
 
 The plugin manifest body is optional and treated as uninterpreted Markdown text (PLUG-FR-003).
 

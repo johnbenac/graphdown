@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from "../../index";
+import { buildRecordLinkGraphFromSnapshot, computeGdHashV1, validateDatasetSnapshot } from "../../index";
 import type { BuildRecordLinkGraphResult, DatasetSnapshot, ValidateDatasetResult } from "../../index";
 
 const encoder = new TextEncoder();
@@ -24,6 +24,14 @@ function expectGraphOk(
   if (!result.ok) {
     assert.fail(JSON.stringify(result.errors));
   }
+}
+
+function digestSnapshot(snapshot: DatasetSnapshot): string {
+  const result = computeGdHashV1(snapshot, "snapshot");
+  if (!result.ok) {
+    assert.fail(JSON.stringify(result.errors));
+  }
+  return result.cid;
 }
 
 test('LAYOUT-002: only first front matter block defines a record object', () => {
@@ -57,4 +65,14 @@ test('LAYOUT-002: only first front matter block defines a record object', () => 
   assert.ok(recordLinkGraph.getRecord("note:one"));
   assert.equal(recordLinkGraph.getRecord("note:two"), null);
   assert.deepEqual(recordLinkGraph.getOutgoingRecordLinks("note:one"), []);
+});
+
+test("LAYOUT-003: malformed front matter markdown is ignored for hashing", () => {
+  const base = snapshot([["types/note.md", ["---", "typeId: note", "fields: {}", "---", ""].join("\n")]]);
+  const withBadFrontMatter = snapshot([
+    ["types/note.md", ["---", "typeId: note", "fields: {}", "---", ""].join("\n")],
+    ["docs/bad-frontmatter.md", ["---", "not: [valid, yaml", "---", ""].join("\n")]
+  ]);
+
+  assert.equal(digestSnapshot(withBadFrontMatter), digestSnapshot(base));
 });

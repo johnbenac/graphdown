@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T19:19:30.009Z
+Generated: 2026-01-14T21:21:39.684Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -126,6 +126,13 @@ Tests (1):
 Tests (1):
 - packages/core/src/__tests__/spec/layout.integration.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
+## LAYOUT-003 — Malformed YAML front matter in non-semantic Markdown is ignored (testable=true)
+Tests (4):
+- packages/core/src/__tests__/spec/layout.integration.test.ts — "LAYOUT-003: malformed front matter markdown is ignored for hashing"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: invalid YAML front matter in non-semantic markdown is ignored"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: unterminated front matter in non-semantic markdown is ignored"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: YAML front matter without reserved keys is ignored"
+
 ## BLOCK-LAYOUT-001 — Block store paths are derived from CID (testable=true)
 Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "BLOCK-LAYOUT-001: canonical block path is accepted"
@@ -140,8 +147,9 @@ Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
 ## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=ci)
-Tests (4):
+Tests (5):
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: dataset remains valid without plugins present"
+- packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin bundle files with malformed YAML are still hashed and exported"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin objects are included in canonical dataset export"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin objects are validated at import time"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "PLUG-000: plugin objects participate in snapshot hashing"
@@ -167,9 +175,7 @@ Tests (1):
 - packages/core/src/parse/__tests__/pluginManifest.paths.unit.test.ts — "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace"
 
 ## FR-MD-020 — YAML front matter is required
-Tests (8):
-- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-020: invalid YAML fails validation"
-- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-020: missing YAML front matter fails validation"
+Tests (6):
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: extracts yaml and body for valid front matter"
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: missing YAML front matter fails parsing"
 - packages/core/src/parse/__tests__/frontMatter.unit.test.ts — "FR-MD-020: parses YAML front matter with CR-only line endings"
@@ -183,8 +189,9 @@ Tests (2):
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-021: type objects must not define parent"
 
 ## FR-MD-023 — Required top-level keys for record objects (testable=true)
-Tests (2):
+Tests (3):
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: record objects may include parent"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: record objects missing fields fail validation"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "FR-MD-023: recordId must be a string identifier when present"
 
 ## FR-MD-022 — Body is raw Markdown

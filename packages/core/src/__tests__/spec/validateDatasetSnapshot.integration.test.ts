@@ -24,14 +24,24 @@ function getErrorCodes(snapshot: DatasetSnapshot) {
 }
 
 describe("validateDatasetSnapshot", () => {
-  it("FR-MD-020: missing YAML front matter fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: bar\nbody"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_FRONT_MATTER_UNTERMINATED");
+  it("LAYOUT-003: invalid YAML front matter in non-semantic markdown is ignored", () => {
+    const snapshot = snapshotFromEntries([["docs/bad-frontmatter.md", "---\nnot: [valid, yaml\n---"]]);
+    expect(getErrorCodes(snapshot)).toEqual([]);
   });
 
-  it("FR-MD-020: invalid YAML fails validation", () => {
-    const snapshot = snapshotFromEntries([["note.md", "---\nfoo: [\n---"]]);
-    expect(getErrorCodes(snapshot)).toContain("E_YAML_INVALID");
+  it("LAYOUT-003: unterminated front matter in non-semantic markdown is ignored", () => {
+    const snapshot = snapshotFromEntries([["docs/unterminated.md", "---\nnot: [valid, yaml\n# missing close"]]);
+    expect(getErrorCodes(snapshot)).toEqual([]);
+  });
+
+  it("LAYOUT-003: YAML front matter without reserved keys is ignored", () => {
+    const snapshot = snapshotFromEntries([
+      [
+        "notes/obsidian.md",
+        ["---", "tags: [camping, meeting]", "aliases: [\"Pack meeting notes\"]", "---", "# notes"].join("\n")
+      ]
+    ]);
+    expect(getErrorCodes(snapshot)).toEqual([]);
   });
 
   it("FR-MD-021: fields must be an object", () => {
@@ -42,6 +52,14 @@ describe("validateDatasetSnapshot", () => {
   it("FR-MD-023: recordId must be a string identifier when present", () => {
     const snapshot = snapshotFromEntries([rec("record.md", ["typeId: note", "recordId: 123", "fields: {}"])]);
     expect(getErrorCodes(snapshot)).toContain("E_INVALID_IDENTIFIER");
+  });
+
+  it("FR-MD-023: record objects missing fields fail validation", () => {
+    const snapshot = snapshotFromEntries([
+      rec("type.md", ["typeId: pack", "fields: {}"]),
+      rec("record.md", ["typeId: pack", "recordId: x"])
+    ]);
+    expect(getErrorCodes(snapshot)).toContain("E_REQUIRED_FIELD_MISSING");
   });
 
   it("LAYOUT-001: no recordId means the object is treated as a type", () => {
