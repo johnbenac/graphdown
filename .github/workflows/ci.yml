@@ -22,8 +22,8 @@ jobs:
         run: npm test
       - name: Build web (typecheck + vite build)
         run: npm run build:web
-      - name: Web test layout check
-        run: npm run check:web:test-layout
+      - name: Test convention check
+        run: npm run check:test-conventions
       - name: Spec trace
         id: spec_trace
         run: npm run spec:trace

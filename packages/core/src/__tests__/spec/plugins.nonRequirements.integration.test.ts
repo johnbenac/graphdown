@@ -3,16 +3,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   blockPathForCid,
+  buildRecordLinkGraphFromSnapshot,
   canonicalizeDatasetSnapshot,
   cidFromRawBytes,
   computeGdHashV1,
   validateDatasetSnapshot
-} from "..";
-import type { DatasetSnapshot } from "..";
-
-// This is intentionally imported from the internal module so the test does not
-// depend on index exports and directly exercises link-graph behavior.
-import { buildRecordLinkGraphFromSnapshot } from "../graph/graph";
+} from "../../index";
+import type { DatasetSnapshot } from "../../index";
 
 const encoder = new TextEncoder();
 

@@ -24,4 +24,5 @@ IndexedDB is required for the web app.
 
 ## Tests
 
-- `PersistStore.test.ts` exercises the storage abstraction.
+- `PersistStore.unit.test.ts` exercises the storage abstraction.
+- `createPersistStore.unit.test.ts` covers the IndexedDB capability checks.

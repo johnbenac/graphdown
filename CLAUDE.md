@@ -186,10 +186,16 @@ Use these as golden compatibility references (read-only):
 
 ## Testing Strategy
 
-- **Unit tests** — Vitest tests in `packages/core/src/__tests__/`
-- **E2E tests** — Playwright tests in `apps/web/test/`
-- Run `npm run verify:web` to run both suites
-- Test layout is checked by `tools/check-web-test-layout.js`
+- **Unit tests** — co-located in `src/<area>/__tests__/` and named
+  `*.unit.test.ts(x)`.
+- **Integration/spec tests** — centralized in `src/__tests__/spec/` and named
+  `*.integration.test.ts`.
+- **Governance tests** — centralized in `src/__tests__/governance/` and named
+  `*.governance.integration.test.ts`.
+- **E2E tests** — Playwright tests in `apps/web/e2e/` and named
+  `*.e2e.spec.(js|ts)`.
+- Run `npm run verify:web` to run web unit + E2E suites.
+- Test conventions are checked by `tools/check-test-conventions.js`.
 
 ## Development Guidelines
 

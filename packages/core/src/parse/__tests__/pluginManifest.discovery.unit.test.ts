@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { isPluginManifestCandidateBytes } from "../parse/pluginManifest";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+import { isPluginManifestCandidateBytes } from "../pluginManifest";
+import { loadFixtureSnapshot } from "../../__tests__/fixtureLoader";
 
 const encoder = new TextEncoder();
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { extractCidRefs, extractRecordRefs } from "..";
+import { extractCidRefs, extractRecordRefs } from "../wikiRefs";
 
 test('REL-003: extracts record references from wiki-link tokens', () => {
   assert.deepEqual(extractRecordRefs('see [[note:one]] and [[note:two]]'), ['note:one', 'note:two']);

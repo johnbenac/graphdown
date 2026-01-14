@@ -24,13 +24,15 @@ const SKIP_DIR_NAMES = new Set([
   'artifacts',
   'test-results',
   'playwright-report',
-  'app.spec.ts-snapshots',
+  'app.e2e.spec.js-snapshots',
+  'app.e2e.spec.ts-snapshots',
   '__fixtures__',
 ]);
 
-const PLAYWRIGHT_SNAPSHOT_DIR_POSIX = toPosixPath(
-  path.join('apps', 'web', 'e2e', 'app.spec.ts-snapshots'),
-);
+const PLAYWRIGHT_SNAPSHOT_DIR_POSIXES = [
+  path.join('apps', 'web', 'e2e', 'app.e2e.spec.js-snapshots'),
+  path.join('apps', 'web', 'e2e', 'app.e2e.spec.ts-snapshots'),
+].map(toPosixPath);
 const ENFORCE_TESTABLE =
   process.env.TRACE_ENFORCE_TESTABLE &&
   process.env.TRACE_ENFORCE_TESTABLE.toLowerCase() === 'true';
@@ -122,7 +124,7 @@ function shouldSkipDir(fullPath, name) {
 
   // Also skip if path contains the snapshots dir (handles nested paths robustly)
   const posix = toPosixPath(fullPath);
-  if (posix.includes(PLAYWRIGHT_SNAPSHOT_DIR_POSIX)) return true;
+  if (PLAYWRIGHT_SNAPSHOT_DIR_POSIXES.some((dir) => posix.includes(dir))) return true;
 
   return false;
 }
@@ -158,7 +160,7 @@ function collectTestFiles() {
     },
     {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'e2e'),
-      match: (filePath) => /\.spec\.ts$/.test(filePath),
+      match: (filePath) => /\.e2e\.spec\.(js|ts)$/.test(filePath),
     },
     {
       dir: path.join(REPO_ROOT, 'tests'),

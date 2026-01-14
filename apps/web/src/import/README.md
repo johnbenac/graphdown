@@ -46,8 +46,10 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 ## Tests
 
-- `readZipSnapshot.test.ts`
-- `github/loadGitHubSnapshot.test.ts`
-- `github/parseGitHubUrl.test.ts`
+- `readZipSnapshot.unit.test.ts`
+- `readZipSnapshot.plugins.integration.test.ts`
+- `github/loadGitHubSnapshot.unit.test.ts`
+- `github/loadGitHubSnapshot.plugins.integration.test.ts`
+- `github/parseGitHubUrl.unit.test.ts`
 
 These tests cover zip parsing, URL validation, and GitHub response handling.

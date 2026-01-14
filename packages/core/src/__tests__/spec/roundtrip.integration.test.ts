@@ -8,8 +8,8 @@ import {
   cidFromRawBytes,
   buildDatasetZipBytes,
   loadDatasetSnapshotFromZipBytes
-} from "..";
-import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "..";
+} from "../../index";
+import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "../../index";
 
 const encoder = new TextEncoder();
 
