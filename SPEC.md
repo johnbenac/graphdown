@@ -660,9 +660,9 @@ Every **type object** and **record object** file MUST start with YAML front matt
 This requirement applies only to files that are discovered as record files per LAYOUT-001.
 
 For avoidance of doubt:
-  * Graphdown repositories MAY contain other Markdown files with YAML front matter (including invalid YAML).
-  * Such files are non-semantic unless they are discovered as record files (LAYOUT-001) or plugin manifests (PLUG-LAYOUT-001),
-and MUST NOT cause import failure merely due to invalid or unterminated YAML (LAYOUT-003).
+* Graphdown repositories MAY contain other Markdown files with YAML front matter (including invalid YAML).
+* Such files are non-semantic unless they are discovered as record files (LAYOUT-001) or plugin manifests (PLUG-LAYOUT-001),
+  and MUST NOT cause import failure merely due to invalid or unterminated YAML (LAYOUT-003).
 
 <!-- req:id=FR-MD-021 title="Required top-level keys for type objects" testable=true -->
 ### FR-MD-021 — Required top-level keys for type objects
