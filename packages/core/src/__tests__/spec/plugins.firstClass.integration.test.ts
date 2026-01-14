@@ -91,6 +91,45 @@ describe("plugins first-class behavior", () => {
     expect(canonical.files.has("plugins/demo/DEVLOG.md")).toBe(true);
   });
 
+  it("PLUG-000: binary plugin bundle files are validated, hashed, and exported", () => {
+    const manifestBytes = encoder.encode(
+      [
+        "---",
+        "pluginId: demo",
+        "gdApiVersion: 1",
+        "entry: entry.js",
+        "files:",
+        "  - entry.js",
+        "  - assets/logo.bin",
+        "binaryFiles:",
+        "  - assets/logo.bin",
+        "---",
+        "Plugin manifest body"
+      ].join("\n")
+    );
+    const entryBytes = encoder.encode("console.log('entry');\n");
+    const logoBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
+
+    const snapshot: DatasetSnapshot = {
+      files: new Map<string, Uint8Array>([
+        ["extensions/demo/plugin.md", manifestBytes],
+        ["extensions/demo/entry.js", entryBytes],
+        ["extensions/demo/assets/logo.bin", logoBytes]
+      ])
+    };
+
+    const validation = validateDatasetSnapshot(snapshot);
+    expect(validation.ok).toBe(true);
+
+    const digest = digestSnapshot(snapshot);
+    expect(typeof digest).toBe("string");
+
+    const canonical = canonicalizeDatasetSnapshot(snapshot);
+    expect(canonical.files.get("plugins/demo/manifest.md")).toEqual(manifestBytes);
+    expect(canonical.files.get("plugins/demo/entry.js")).toEqual(entryBytes);
+    expect(canonical.files.get("plugins/demo/assets/logo.bin")).toEqual(logoBytes);
+  });
+
   it("PLUG-000: dataset remains valid without plugins present", () => {
     const snapshot: DatasetSnapshot = {
       files: new Map([

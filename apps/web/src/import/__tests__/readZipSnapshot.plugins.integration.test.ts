@@ -3,6 +3,7 @@ import { zipSync } from "fflate";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildDatasetZipBytes, canonicalizeDatasetSnapshot } from "@graphdown/core";
 import { readZipSnapshot } from "../readZipSnapshot";
 
 async function collectEntries(dir: string, rootDir: string, entries: Record<string, Uint8Array>) {
@@ -44,5 +45,43 @@ describe("readZipSnapshot plugin bundles", () => {
     expect(ignored).toContain("assets/logo.png");
     expect(ignored).not.toContain("extensions/demo/entry.js");
     expect(ignored).not.toContain("extensions/demo/ui.md");
+  });
+
+  it("IMP-PLUG-001: preserves binary plugin bundle bytes on export/import", async () => {
+    const encoder = new TextEncoder();
+    const toBytes = (value: string): Uint8Array => Uint8Array.from(encoder.encode(value));
+    const manifest = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - assets/logo.bin",
+      "binaryFiles:",
+      "  - assets/logo.bin",
+      "---",
+      ""
+    ].join("\n");
+    const binaryBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
+
+    const snapshot = {
+      files: new Map<string, Uint8Array>([
+        ["types/note.md", toBytes(["---", "typeId: note", "fields: {}", "---"].join("\n"))],
+        ["extensions/demo/plugin.md", toBytes(manifest)],
+        ["extensions/demo/entry.js", toBytes("console.log('entry');")],
+        ["extensions/demo/assets/logo.bin", binaryBytes]
+      ])
+    };
+
+    const canonical = canonicalizeDatasetSnapshot(snapshot);
+    const zipBytes = buildDatasetZipBytes(canonical);
+    const file = {
+      arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
+    } as File;
+
+    const { snapshot: imported } = await readZipSnapshot(file);
+
+    expect(imported.files.get("plugins/demo/assets/logo.bin")).toEqual(binaryBytes);
   });
 });

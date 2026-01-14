@@ -2,7 +2,7 @@
 # Graphdown Standard: Dataset Repositories
 
 **Spec Version:** 0.5 (Draft)
-**Last Updated:** 2026-01-11
+**Last Updated:** 2026-01-14
 **Status:** Normative / single source of truth
 
 This document is the **only** authoritative specification for Graphdown. It **absorbs** and **replaces** any separate “dataset validity” documents. If there’s a conflict between documents, **this** one wins.
@@ -338,8 +338,12 @@ Block store files are not hashed directly (HASH-005).
 2. **Normalize each included semantic file**
    For each included semantic file:
    * Read the entire file as bytes.
-   * Decode as UTF-8 text. Hashing MUST fail if UTF-8 decoding fails.
-   * For hashing only, normalize line endings by converting all `\r\n` and bare `\r` to `\n`.
+   * For type objects, record objects, and plugin manifest files:
+     * Decode as UTF-8 text. Hashing MUST fail if UTF-8 decoding fails.
+     * For hashing only, normalize line endings by converting all `\r\n` and bare `\r` to `\n`.
+   * For plugin bundle files:
+     * If the bundle file path is listed in its manifest’s `binaryFiles[]`, hash the raw bytes exactly (no decoding, no newline normalization).
+     * Otherwise, decode as UTF-8 text. Hashing MUST fail if UTF-8 decoding fails, and line endings MUST be normalized as above.
 
 3. **Determine the identity string for hashing**
    Determine a stable identity string for each included semantic file:
@@ -739,8 +743,10 @@ Optional keys:
 * `config` (object/map; optional; arbitrary plugin configuration; treated as opaque by core)
 * `requires` (array of strings; optional; host capability identifiers the plugin expects; treated as opaque by core)
 * `blocks` (array of strings; optional; each entry is a block CID string)
+* `binaryFiles` (array of strings; optional; each entry is a relative path; subset of `files`)
 
 The `blocks` list is interpreted by core for block reachability and validation (VAL-PLUG-007/VAL-PLUG-008/GC-001) and is not treated as opaque.
+Any bundle file listed in `binaryFiles[]` is treated as binary for hashing (HASH-001); all other bundle files are treated as text.
 
 Forbidden keys:
 
@@ -1098,15 +1104,21 @@ Recommended error codes:
 * `E_PLUGIN_FILE_KIND_FORBIDDEN`
 * `E_PLUGIN_FILES_DUPLICATE`
 
-<!-- req:id=VAL-PLUG-005 title="Plugin bundle files must be UTF-8 decodable" testable=true verify=todo -->
-### VAL-PLUG-005 — Plugin bundle files must be UTF-8 decodable
+<!-- req:id=VAL-PLUG-005 title="Plugin bundle file encoding modes are validated" testable=true verify=todo -->
+### VAL-PLUG-005 — Plugin bundle file encoding modes are validated
 
-For determinism and hashing portability, every plugin bundle file MUST be decodable as UTF-8 text.
-
-Validation MUST fail if UTF-8 decoding fails for any plugin bundle file.
+* `binaryFiles` MAY be omitted; if omitted, it is treated as an empty list.
+* If present:
+  * `binaryFiles` MUST be an array.
+  * Every element MUST be a string.
+  * Every element MUST satisfy PLUG-LAYOUT-003 safe relative path rules.
+  * Every element MUST appear in `files[]` by exact string equality.
+* For each bundle file in `files[]`:
+  * If the path is **not** in `binaryFiles[]`, the file MUST be UTF-8 decodable (validation fails otherwise).
+  * If the path **is** in `binaryFiles[]`, the file MAY be any bytes.
 
 Note:
-Binary assets SHOULD be stored as blocks and referenced by CID via plugin runtime mechanisms (plugin-defined), not as raw plugin bundle files.
+Binary assets MAY be shipped as plugin bundle files. Large assets SHOULD be stored as blocks when beneficial.
 
 <!-- req:id=VAL-PLUG-006 title="Plugin bundle must not contain reserved export paths" testable=true verify=todo -->
 ### VAL-PLUG-006 — Plugin bundle must not contain reserved export paths

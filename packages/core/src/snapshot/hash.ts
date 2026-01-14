@@ -5,6 +5,7 @@ import { isValidPluginId } from '../model/ids';
 import { parseGraphdownText } from '../parse/datasetObjects';
 import { isRecordFileBytes } from '../parse/recordFile';
 import { discoverPluginObjects } from '../parse/pluginObjects';
+import { isSafeRelativePath } from '../parse/pluginManifest';
 import { makeError, type ValidationError } from '../validate/errors';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
@@ -41,6 +42,7 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     pluginId: string;
     manifestPath: string;
     declaredFiles: string[];
+    binaryFiles: Set<string>;
   }> = [];
 
   const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
@@ -117,6 +119,49 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
         continue;
       }
 
+      const binaryFilesRaw = yaml.binaryFiles;
+      const binaryFiles =
+        Array.isArray(binaryFilesRaw) && binaryFilesRaw.every((item) => typeof item === 'string')
+          ? binaryFilesRaw
+          : null;
+      if (Object.prototype.hasOwnProperty.call(yaml, 'binaryFiles') && !binaryFiles) {
+        errors.push(
+          makeError(
+            'E_PLUGIN_KEYS_INVALID',
+            `Plugin manifest ${manifestPath} binaryFiles must be a list of strings`,
+            manifestPath
+          )
+        );
+        continue;
+      }
+
+      const binarySet = new Set<string>();
+      if (binaryFiles) {
+        for (const file of binaryFiles) {
+          if (!isSafeRelativePath(file)) {
+            errors.push(
+              makeError(
+                'E_PLUGIN_KEYS_INVALID',
+                `Plugin manifest ${manifestPath} binaryFiles entry "${file}" must be a safe relative path`,
+                manifestPath
+              )
+            );
+            continue;
+          }
+          if (!declaredFiles.includes(file)) {
+            errors.push(
+              makeError(
+                'E_PLUGIN_KEYS_INVALID',
+                `Plugin manifest ${manifestPath} binaryFiles entry "${file}" must be listed in files`,
+                manifestPath
+              )
+            );
+            continue;
+          }
+          binarySet.add(file);
+        }
+      }
+
       const raw = snapshot.files.get(manifestPath);
       if (!raw) continue;
 
@@ -153,6 +198,7 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
         pluginId,
         manifestPath,
         declaredFiles,
+        binaryFiles: binarySet,
       });
     }
 
@@ -198,19 +244,24 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
           continue;
         }
 
-        const decodedBundle = decodeUtf8Strict(raw);
-        if (!decodedBundle.ok) {
-          if (decodedBundle.reason === 'no-decoder') {
-            errors.push(
-              makeError('E_INTERNAL', 'TextDecoder not available for UTF-8 decode', resolvedPath)
-            );
-          } else {
-            errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', resolvedPath));
+        let contentBytes: Uint8Array;
+        if (manifest.binaryFiles.has(relativePath)) {
+          contentBytes = raw;
+        } else {
+          const decodedBundle = decodeUtf8Strict(raw);
+          if (!decodedBundle.ok) {
+            if (decodedBundle.reason === 'no-decoder') {
+              errors.push(
+                makeError('E_INTERNAL', 'TextDecoder not available for UTF-8 decode', resolvedPath)
+              );
+            } else {
+              errors.push(makeError('E_UTF8_INVALID', 'Invalid UTF-8 encoding', resolvedPath));
+            }
+            continue;
           }
-          continue;
+          const normalizedBundle = normalizeLineEndings(decodedBundle.text);
+          contentBytes = encoder.encode(normalizedBundle);
         }
-        const normalizedBundle = normalizeLineEndings(decodedBundle.text);
-        const contentBytes = encoder.encode(normalizedBundle);
         const idBytes = encoder.encode(identity);
         entries.push({ id: identity, idBytes, file: resolvedPath, bytes: contentBytes });
       }
