@@ -32,6 +32,82 @@ describe("plugins validation", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("PLUG-FR-002: plugin-valid-dataset passes manifest schema validation", () => {
+    const snapshot = loadFixtureSnapshot("plugin-valid-dataset");
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent(["pluginId: demo", "gdApiVersion: 1"]);
+    const snapshot = snapshotFromEntries([["extensions/demo/plugin.md", manifest]]);
+
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((error) => error.code === "E_PLUGIN_KEYS_INVALID")).toBe(true);
+    expect(
+      result.errors.some(
+        (error) =>
+          error.code === "E_PLUGIN_KEYS_INVALID" && error.message.includes("missing required keys")
+      )
+    ).toBe(true);
+  });
+
+  it("PLUG-FR-002: unknown top-level keys fail with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "extra: true"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+    ]);
+
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((error) => error.code === "E_PLUGIN_KEYS_INVALID")).toBe(true);
+    expect(
+      result.errors.some(
+        (error) => error.code === "E_PLUGIN_KEYS_INVALID" && error.message.includes("unknown key")
+      )
+    ).toBe(true);
+  });
+
+  it("PLUG-FR-002: forbidden top-level keys fail with E_PLUGIN_KEYS_INVALID", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "fields: {}"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+    ]);
+
+    const result = validateDatasetSnapshot(snapshot);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((error) => error.code === "E_PLUGIN_KEYS_INVALID")).toBe(true);
+    expect(
+      result.errors.some(
+        (error) =>
+          error.code === "E_PLUGIN_KEYS_INVALID" && error.message.includes("forbidden keys")
+      )
+    ).toBe(true);
+  });
+
   it("PLUG-ID-002: duplicate pluginId fails validation", () => {
     expectDuplicatePluginIdFails();
   });

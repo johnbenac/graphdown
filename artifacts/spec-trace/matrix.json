@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-13T18:19:49.492Z",
+  "generatedAt": "2026-01-14T06:26:19.508Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -406,8 +406,29 @@
       "id": "PLUG-000",
       "title": "Plugins are a first-class dataset object class",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "PLUG-000",
+          "testTitle": "PLUG-000: dataset remains valid without plugins present",
+          "filePath": "packages/core/src/__tests__/plugins.firstClass.test.ts"
+        },
+        {
+          "reqId": "PLUG-000",
+          "testTitle": "PLUG-000: plugin objects are included in canonical dataset export",
+          "filePath": "packages/core/src/__tests__/plugins.firstClass.test.ts"
+        },
+        {
+          "reqId": "PLUG-000",
+          "testTitle": "PLUG-000: plugin objects are validated at import time",
+          "filePath": "packages/core/src/__tests__/plugins.firstClass.test.ts"
+        },
+        {
+          "reqId": "PLUG-000",
+          "testTitle": "PLUG-000: plugin objects participate in snapshot hashing",
+          "filePath": "packages/core/src/__tests__/plugins.firstClass.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-LAYOUT-001",
@@ -576,15 +597,57 @@
       "id": "PLUG-FR-001",
       "title": "Plugin manifest YAML front matter is required",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "PLUG-FR-001",
+          "testTitle": "PLUG-FR-001: invalid YAML returns E_YAML_INVALID",
+          "filePath": "packages/core/src/__tests__/pluginManifest.frontMatter.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-001",
+          "testTitle": "PLUG-FR-001: missing closing delimiter returns E_FRONT_MATTER_UNTERMINATED",
+          "filePath": "packages/core/src/__tests__/pluginManifest.frontMatter.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-001",
+          "testTitle": "PLUG-FR-001: missing opening delimiter returns E_FRONT_MATTER_MISSING",
+          "filePath": "packages/core/src/__tests__/pluginManifest.frontMatter.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-001",
+          "testTitle": "PLUG-FR-001: non-object YAML returns E_YAML_NOT_OBJECT",
+          "filePath": "packages/core/src/__tests__/pluginManifest.frontMatter.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-FR-002",
       "title": "Required top-level keys for plugin manifests",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "PLUG-FR-002",
+          "testTitle": "PLUG-FR-002: forbidden top-level keys fail with E_PLUGIN_KEYS_INVALID",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-002",
+          "testTitle": "PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-002",
+          "testTitle": "PLUG-FR-002: plugin-valid-dataset passes manifest schema validation",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        },
+        {
+          "reqId": "PLUG-FR-002",
+          "testTitle": "PLUG-FR-002: unknown top-level keys fail with E_PLUGIN_KEYS_INVALID",
+          "filePath": "packages/core/src/__tests__/plugins.validate.test.ts"
+        }
+      ]
     },
     {
       "id": "PLUG-FR-003",
@@ -1864,18 +1927,6 @@
     {
       "id": "NR-PLUG-VAL-001",
       "title": "No plugin-defined dataset validity rules"
-    },
-    {
-      "id": "PLUG-000",
-      "title": "Plugins are a first-class dataset object class"
-    },
-    {
-      "id": "PLUG-FR-001",
-      "title": "Plugin manifest YAML front matter is required"
-    },
-    {
-      "id": "PLUG-FR-002",
-      "title": "Required top-level keys for plugin manifests"
     }
   ]
 }

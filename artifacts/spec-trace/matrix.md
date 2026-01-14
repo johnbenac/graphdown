@@ -1,15 +1,12 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-13T18:19:49.492Z
+Generated: 2026-01-14T06:26:19.508Z
 
 ## Testable requirements with no tests
 - NR-PLUG-EXP-001 — Plugins do not define canonical export
 - NR-PLUG-HASH-001 — Plugins do not define hashing semantics
 - NR-PLUG-LINK-001 — No relationship or CID extraction from plugin files
 - NR-PLUG-VAL-001 — No plugin-defined dataset validity rules
-- PLUG-000 — Plugins are a first-class dataset object class
-- PLUG-FR-001 — Plugin manifest YAML front matter is required
-- PLUG-FR-002 — Required top-level keys for plugin manifests
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -148,9 +145,12 @@ Tests (2):
 Tests (1):
 - packages/core/src/__tests__/blocks.test.ts — "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation"
 
-## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=todo)
-Tests (0):
-- (none)
+## PLUG-000 — Plugins are a first-class dataset object class (testable=true, verify=ci)
+Tests (4):
+- packages/core/src/__tests__/plugins.firstClass.test.ts — "PLUG-000: dataset remains valid without plugins present"
+- packages/core/src/__tests__/plugins.firstClass.test.ts — "PLUG-000: plugin objects are included in canonical dataset export"
+- packages/core/src/__tests__/plugins.firstClass.test.ts — "PLUG-000: plugin objects are validated at import time"
+- packages/core/src/__tests__/plugins.firstClass.test.ts — "PLUG-000: plugin objects participate in snapshot hashing"
 
 ## PLUG-LAYOUT-001 — Plugin manifests are discovered by content (not path) (testable=true, verify=todo)
 Tests (4):
@@ -197,13 +197,19 @@ Tests (2):
 Tests (1):
 - packages/core/src/__tests__/markdownRecord.test.ts — "FR-MD-022: serializer preserves raw Markdown body and updated YAML"
 
-## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true, verify=todo)
-Tests (0):
-- (none)
+## PLUG-FR-001 — Plugin manifest YAML front matter is required (testable=true, verify=ci)
+Tests (4):
+- packages/core/src/__tests__/pluginManifest.frontMatter.test.ts — "PLUG-FR-001: invalid YAML returns E_YAML_INVALID"
+- packages/core/src/__tests__/pluginManifest.frontMatter.test.ts — "PLUG-FR-001: missing closing delimiter returns E_FRONT_MATTER_UNTERMINATED"
+- packages/core/src/__tests__/pluginManifest.frontMatter.test.ts — "PLUG-FR-001: missing opening delimiter returns E_FRONT_MATTER_MISSING"
+- packages/core/src/__tests__/pluginManifest.frontMatter.test.ts — "PLUG-FR-001: non-object YAML returns E_YAML_NOT_OBJECT"
 
-## PLUG-FR-002 — Required top-level keys for plugin manifests (testable=true, verify=todo)
-Tests (0):
-- (none)
+## PLUG-FR-002 — Required top-level keys for plugin manifests (testable=true, verify=ci)
+Tests (4):
+- packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-FR-002: forbidden top-level keys fail with E_PLUGIN_KEYS_INVALID"
+- packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID"
+- packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-FR-002: plugin-valid-dataset passes manifest schema validation"
+- packages/core/src/__tests__/plugins.validate.test.ts — "PLUG-FR-002: unknown top-level keys fail with E_PLUGIN_KEYS_INVALID"
 
 ## PLUG-FR-003 — Plugin manifest body is raw Markdown (testable=false)
 Tests (0):
