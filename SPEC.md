@@ -900,7 +900,9 @@ Where `<cid>` is a DASL CIDv1 string.
 
 Block references MUST be extracted from:
 * the record body, and
-* any string value anywhere within the record `fields` map (including nested objects/arrays).
+* any string value anywhere within the record `fields` map (including nested objects/arrays), and
+* the type body, and
+* any string value anywhere within the type `fields` map (including nested objects/arrays).
 
 <!-- req:id=CID-REF-002 title="CID reference normalization is strict" testable=true -->
 ### CID-REF-002 — CID reference normalization is strict
@@ -1151,7 +1153,7 @@ Validation MUST fail with error code `E_CID_INVALID`, attributing the error to t
 <!-- req:id=VAL-BLOCK-001 title="Block references must resolve to matching block bytes" testable=true -->
 ### VAL-BLOCK-001 — Block references must resolve to matching block bytes
 
-For every block reference extracted per CID-REF-001/CID-REF-002:
+For every block reference extracted per CID-REF-001/CID-REF-002 (from record or type objects):
 
 1. A corresponding block file MUST exist at the canonical block store path derived from the referenced `<cid>` (BLOCK-LAYOUT-001).
 2. The block file’s computed digest (BLOCK-001) MUST equal the digest embedded in `<cid>` exactly.
@@ -1174,7 +1176,7 @@ Validation MUST fail otherwise.
 
 The reachable block set is defined as the union of:
 
-1. All `<cid>` values referenced by block references extracted from all record objects per CID-REF-001/CID-REF-002, and
+1. All `<cid>` values referenced by block references extracted from all record and type objects per CID-REF-001/CID-REF-002, and
 2. All `<cid>` values listed in any plugin manifest `blocks[]` list (PLUG-FR-002 / VAL-PLUG-007).
 
 Implementations MUST be able to compute this reachable set deterministically.

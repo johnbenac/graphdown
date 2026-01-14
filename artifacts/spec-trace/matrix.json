@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T21:23:35.976Z",
+  "generatedAt": "2026-01-14T22:33:17.053Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1214,6 +1214,11 @@
           "reqId": "VAL-BLOCK-001",
           "testTitle": "VAL-BLOCK-001: referenced block must exist",
           "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-BLOCK-001",
+          "testTitle": "VAL-BLOCK-001: type object block reference must exist",
+          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -1240,6 +1245,11 @@
           "reqId": "GC-001",
           "testTitle": "GC-001: reachable block set includes references from fields",
           "filePath": "apps/web/src/features/export/__tests__/exportZip.unit.test.ts"
+        },
+        {
+          "reqId": "GC-001",
+          "testTitle": "GC-001: block referenced from type object is reachable for export",
+          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "GC-001",

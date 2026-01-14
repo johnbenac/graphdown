@@ -173,6 +173,7 @@ function enforceCompositionShape(typeObj: ParsedTypeObject, errors: ValidationEr
 function validateBlockStore(
   snapshot: DatasetSnapshot,
   records: ParsedRecordObject[],
+  types: ParsedTypeObject[],
   errors: ValidationError[]
 ): void {
   const blockFiles = [...snapshot.files.keys()].filter((p) => p.startsWith('blocks/'));
@@ -244,6 +245,30 @@ function validateBlockStore(
               'E_BLOCK_REFERENCE_MISSING',
               `Block ${cid} referenced from ${record.identity} is missing`,
               record.file
+            )
+          );
+        }
+      }
+    }
+  }
+
+  for (const type of types) {
+    const strings = new Set<string>();
+    collectStringValues(type.fields, strings);
+    collectStringValues(type.body, strings);
+    for (const value of strings) {
+      const { cids, invalidCidTokens } = extractCidRefs(value);
+      for (const token of invalidCidTokens) {
+        errors.push(makeError('E_CID_INVALID', `Invalid CID reference ${token}`, type.file));
+      }
+      for (const cid of cids) {
+        const path = blockPathForCid(cid);
+        if (!snapshot.files.has(path)) {
+          errors.push(
+            makeError(
+              'E_BLOCK_REFERENCE_MISSING',
+              `Block ${cid} referenced from type ${type.typeId} is missing`,
+              type.file
             )
           );
         }
@@ -762,7 +787,7 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     }
   }
 
-  validateBlockStore(snapshot, parsed.recordObjects, errors);
+  validateBlockStore(snapshot, parsed.recordObjects, parsed.typeObjects, errors);
 
   if (errors.length) {
     return { ok: false, errors };

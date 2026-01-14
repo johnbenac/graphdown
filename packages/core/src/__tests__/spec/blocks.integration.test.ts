@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 
 import { encodeBase32 } from "../../cid/base32";
-import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from "../../index";
+import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes, validateDatasetSnapshot } from "../../index";
 import type { DatasetSnapshot, ValidateDatasetResult, ValidationError } from "../../index";
 
 const encoder = new TextEncoder();
@@ -48,6 +48,30 @@ test("VAL-BLOCK-001: referenced block must exist", () => {
   );
   const errors = expectErrors(result);
   assert.ok(errors.some((e) => e.code === "E_BLOCK_REFERENCE_MISSING"));
+});
+
+test("VAL-BLOCK-001: type object block reference must exist", () => {
+  const blockBytes = encoder.encode("flower");
+  const cid = cidFromRawBytes(blockBytes);
+  const result = validateDatasetSnapshot(
+    snapshot([
+      record("types/photo.md", ["typeId: photo", "fields: {}"], `[[${cid}]]`)
+    ])
+  );
+  const errors = expectErrors(result);
+  assert.ok(errors.some((e) => e.code === "E_BLOCK_REFERENCE_MISSING"));
+});
+
+test("GC-001: block referenced from type object is reachable for export", () => {
+  const blockBytes = encoder.encode("diagram");
+  const cid = cidFromRawBytes(blockBytes);
+  const snap = snapshot([
+    record("types/photo.md", ["typeId: photo", "fields: {}"], `[[${cid}]]`),
+    [blockPathForCid(cid), blockBytes]
+  ]);
+  expectOk(validateDatasetSnapshot(snap));
+  const canonical = canonicalizeDatasetSnapshot(snap);
+  assert.ok(canonical.files.has(blockPathForCid(cid)));
 });
 
 test("VAL-BLOCK-002: block bytes must match referenced CID digest", () => {

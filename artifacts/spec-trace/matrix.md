@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T21:23:35.976Z
+Generated: 2026-01-14T22:33:17.053Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -365,16 +365,18 @@ Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "VAL-CID-001: invalid CID-shaped tokens fail validation"
 
 ## VAL-BLOCK-001 — Block references must resolve to matching block bytes (testable=true)
-Tests (1):
+Tests (2):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "VAL-BLOCK-001: referenced block must exist"
+- packages/core/src/__tests__/spec/blocks.integration.test.ts — "VAL-BLOCK-001: type object block reference must exist"
 
 ## VAL-BLOCK-002 — Block store files must match their CID digest (testable=true)
 Tests (1):
 - packages/core/src/__tests__/spec/blocks.integration.test.ts — "VAL-BLOCK-002: block bytes must match referenced CID digest"
 
 ## GC-001 — Reachable block set is computed from declared block dependencies (testable=true)
-Tests (2):
+Tests (3):
 - apps/web/src/features/export/__tests__/exportZip.unit.test.ts — "GC-001: reachable block set includes references from fields"
+- packages/core/src/__tests__/spec/blocks.integration.test.ts — "GC-001: block referenced from type object is reachable for export"
 - packages/core/src/__tests__/spec/plugins.gc.integration.test.ts — "GC-001: plugin-declared blocks are included in the reachable set"
 
 ## GC-002 — Unreferenced blocks are garbage and are excluded from canonical dataset export (testable=true)

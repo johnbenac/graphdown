@@ -1,4 +1,4 @@
-import { discoverGraphdownObjects, type ParsedRecordObject } from '../parse/datasetObjects';
+import { discoverGraphdownObjects, type ParsedRecordObject, type ParsedTypeObject } from '../parse/datasetObjects';
 import type { DatasetSnapshot } from '../model/snapshotTypes';
 import { blockPathForCid } from '../cid/daslCid';
 import { extractCidRefs } from '../parse/wikiRefs';
@@ -8,7 +8,8 @@ import { collectStringValues } from '../internal/collectStringValues';
 
 function collectReachableBlockPaths(
   snapshot: DatasetSnapshot,
-  recordObjects: ParsedRecordObject[]
+  recordObjects: ParsedRecordObject[],
+  typeObjects: ParsedTypeObject[]
 ): Set<string> {
   const cids = new Set<string>();
 
@@ -16,6 +17,21 @@ function collectReachableBlockPaths(
     const strings = new Set<string>();
     collectStringValues(record.fields, strings);
     collectStringValues(record.body, strings);
+    for (const value of strings) {
+      const { cids: foundCids, invalidCidTokens } = extractCidRefs(value);
+      if (invalidCidTokens.length > 0) {
+        throw new Error('Canonicalization requires validated CID references');
+      }
+      for (const cid of foundCids) {
+        cids.add(cid);
+      }
+    }
+  }
+
+  for (const type of typeObjects) {
+    const strings = new Set<string>();
+    collectStringValues(type.fields, strings);
+    collectStringValues(type.body, strings);
     for (const value of strings) {
       const { cids: foundCids, invalidCidTokens } = extractCidRefs(value);
       if (invalidCidTokens.length > 0) {
@@ -143,7 +159,7 @@ export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetS
     }
   }
 
-  const blockPaths = collectReachableBlockPaths(snapshot, parsed.recordObjects);
+  const blockPaths = collectReachableBlockPaths(snapshot, parsed.recordObjects, parsed.typeObjects);
   for (const blockPath of blockPaths) {
     const bytes = snapshot.files.get(blockPath);
     if (bytes) {
