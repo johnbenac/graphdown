@@ -154,6 +154,8 @@ Core MUST NOT extract record relationships (REL-001/REL-002) or block references
 * plugin manifest bodies, or
 * plugin bundle file contents.
 
+Core MUST NOT extract record relationships or block references from any plugin manifest YAML values other than `blocks[]`, which is interpreted only as a list of CID strings for reachability/validation.
+
 Only record objects participate in relationship and CID reference extraction, and plugins declare block dependencies only via plugin manifest `blocks[]` (PLUG-FR-002).
 
 <!-- req:id=NR-PLUG-VAL-001 title="No plugin-defined dataset validity rules" testable=true verify=ci -->
