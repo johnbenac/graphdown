@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T06:26:04.007Z",
+  "generatedAt": "2026-01-14T09:33:12.035Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -99,29 +99,53 @@
       "id": "NR-PLUG-LINK-001",
       "title": "No relationship or CID extraction from plugin files",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "NR-PLUG-LINK-001",
+          "testTitle": "NR-PLUG-LINK-001: no relationship or CID extraction from plugin manifest bodies or bundle contents",
+          "filePath": "packages/core/src/__tests__/plugins.nonRequirements.test.ts"
+        }
+      ]
     },
     {
       "id": "NR-PLUG-VAL-001",
       "title": "No plugin-defined dataset validity rules",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "NR-PLUG-VAL-001",
+          "testTitle": "NR-PLUG-VAL-001: plugin bundle content is not executed or interpreted as additional validity rules",
+          "filePath": "packages/core/src/__tests__/plugins.nonRequirements.test.ts"
+        }
+      ]
     },
     {
       "id": "NR-PLUG-EXP-001",
       "title": "Plugins do not define canonical export",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "NR-PLUG-EXP-001",
+          "testTitle": "NR-PLUG-EXP-001: plugins do not define canonical export (no extra includes, no layout overrides, no rewrites)",
+          "filePath": "packages/core/src/__tests__/plugins.nonRequirements.test.ts"
+        }
+      ]
     },
     {
       "id": "NR-PLUG-HASH-001",
       "title": "Plugins do not define hashing semantics",
       "testable": true,
-      "verify": "todo",
-      "tests": []
+      "verify": "ci",
+      "tests": [
+        {
+          "reqId": "NR-PLUG-HASH-001",
+          "testTitle": "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)",
+          "filePath": "packages/core/src/__tests__/plugins.nonRequirements.test.ts"
+        }
+      ]
     },
     {
       "id": "ID-001",
@@ -1911,22 +1935,5 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": [
-    {
-      "id": "NR-PLUG-EXP-001",
-      "title": "Plugins do not define canonical export"
-    },
-    {
-      "id": "NR-PLUG-HASH-001",
-      "title": "Plugins do not define hashing semantics"
-    },
-    {
-      "id": "NR-PLUG-LINK-001",
-      "title": "No relationship or CID extraction from plugin files"
-    },
-    {
-      "id": "NR-PLUG-VAL-001",
-      "title": "No plugin-defined dataset validity rules"
-    }
-  ]
+  "missingTestable": []
 }
