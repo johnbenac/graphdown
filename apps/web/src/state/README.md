@@ -12,7 +12,10 @@ components to load, edit, and persist datasets.
     2) validation (`validateDatasetSnapshot`)
     3) canonical record-only layout (`canonicalizeDatasetSnapshot`)
     4) Record Link Graph build (`buildRecordLinkGraphFromSnapshot`)
-    5) persistence (IndexedDB; required)
+    5) Runtime API v1 session (`openRuntimeApiV1`)
+    6) persistence (IndexedDB; required)
+
+  - Runtime sessions are not persisted. They are rebuilt on load and after every snapshot change.
 
   - Tracks import progress stages, error states, and the active dataset.
   - Provides record editing helpers (`updateRecord`, `createRecord`) that:

@@ -90,6 +90,8 @@ describe("DatasetContext non-functional requirements", () => {
     await waitFor(() => expect(ctx?.status).toBe("ready"));
     expect(ctx).not.toBeNull();
     expect(ctx!.activeDataset?.datasetSnapshot.files.size).toBeGreaterThan(0);
+    expect(ctx!.activeDataset?.runtimeApiV1).toBeDefined();
+    await expect(ctx!.activeDataset!.runtimeApiV1.listTypeIds()).resolves.toContain("note");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
