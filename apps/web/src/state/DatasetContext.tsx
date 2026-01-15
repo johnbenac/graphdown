@@ -122,13 +122,19 @@ function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
       category: "unknown",
       title: "Runtime unavailable",
       message: internal.message,
-      hint: internal.hint
+      hint: [
+        internal.hint,
+        "Your dataset is still saved offline in this browser. Update/reload and try again, or clear offline storage if you want to start over."
+      ]
+        .filter(Boolean)
+        .join(" ")
     };
   }
   return {
     category: "dataset_invalid",
     title: "Dataset invalid",
-    message: "The dataset could not be opened by the runtime session.",
+    message:
+      "The dataset could not be opened by the runtime session. Your dataset is still saved offline in this browser. Update/reload and try again, or clear offline storage if you want to start over.",
     errors
   };
 }
@@ -180,7 +186,6 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
       const runtime = await openRuntimeOrErrors(dataset.datasetSnapshot);
       if (!runtime.ok) {
-        await persistence.clearActiveDataset();
         setActiveDataset(undefined);
         setStatus("error");
         setError(mapRuntimeOpenFailure(runtime.errors));
