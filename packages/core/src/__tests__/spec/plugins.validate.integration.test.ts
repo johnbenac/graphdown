@@ -97,6 +97,24 @@ describe("plugins validation", () => {
     expect(getErrorCodes(snapshot)).not.toContain("E_PLUGIN_UTF8_INVALID");
   });
 
+  it("VAL-PLUG-005: binaryFiles entries must be listed in files", () => {
+    const manifest = manifestContent([
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "binaryFiles:",
+      "  - assets/logo.bin"
+    ]);
+    const snapshot = snapshotFromEntries([
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+    ]);
+
+    expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_KEYS_INVALID");
+  });
+
   it("VAL-PLUG-007: blocks must contain valid CID strings", () => {
     const manifest = manifestContent([
       "pluginId: demo",

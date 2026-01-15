@@ -1,6 +1,6 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-14T23:26:14.801Z
+Generated: 2026-01-15T00:30:57.811Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)

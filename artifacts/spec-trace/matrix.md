@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-14T23:26:14.801Z
+Generated: 2026-01-15T00:30:57.811Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -347,8 +347,9 @@ Tests (1):
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-004: unsafe relative paths are rejected"
 
 ## VAL-PLUG-005 — Plugin bundle file encoding modes are validated (testable=true, verify=todo)
-Tests (3):
+Tests (4):
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "VAL-PLUG-005: binary plugin bundle files are validated and exported with raw bytes"
+- packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: binaryFiles entries must be listed in files"
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: binaryFiles entries skip UTF-8 validation"
 - packages/core/src/__tests__/spec/plugins.validate.integration.test.ts — "VAL-PLUG-005: non-binary plugin bundle files must be UTF-8 decodable"
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-14T23:26:14.801Z",
+  "generatedAt": "2026-01-15T00:30:57.811Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1159,6 +1159,11 @@
           "reqId": "VAL-PLUG-005",
           "testTitle": "VAL-PLUG-005: binary plugin bundle files are validated and exported with raw bytes",
           "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-PLUG-005",
+          "testTitle": "VAL-PLUG-005: binaryFiles entries must be listed in files",
+          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "VAL-PLUG-005",
