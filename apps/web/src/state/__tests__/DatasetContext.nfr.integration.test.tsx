@@ -55,7 +55,7 @@ async function seedActiveDataset() {
   });
 }
 
-function Harness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
+function Harness({ onReady }: { onReady: (ctx: DatasetContextValue) => void }) {
   const ctx = useDataset();
   useEffect(() => {
     onReady(ctx);
@@ -91,6 +91,8 @@ describe("DatasetContext non-functional requirements", () => {
     expect(ctx).not.toBeNull();
     expect(ctx!.activeDataset?.datasetSnapshot.files.size).toBeGreaterThan(0);
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(ctx!.activeDataset?.runtimeApiV1).toBeDefined();
+    await expect(ctx!.activeDataset!.runtimeApiV1.listTypeIds()).resolves.toContain("note");
   });
 
   it("NFR-001: CRUD actions do not trigger a full document load event", async () => {
