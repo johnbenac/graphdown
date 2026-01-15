@@ -172,10 +172,62 @@ function checkCoreTests() {
   });
 }
 
+function checkRuntimeTests() {
+  const runtimeRoot = path.join(repoRoot, "packages", "runtime", "src");
+  if (!fs.existsSync(runtimeRoot)) {
+    return;
+  }
+
+  walk(runtimeRoot, (fullPath) => {
+    const relPath = toPosix(path.relative(repoRoot, fullPath));
+    const fileName = path.basename(fullPath);
+    if (!/\.test\.ts$/.test(fileName)) {
+      return;
+    }
+
+    const isInTestsDir = relPath.split("/").includes("__tests__");
+    if (!isInTestsDir) {
+      violations.push({
+        path: relPath,
+        reason: "Runtime tests must live under a __tests__ directory"
+      });
+      return;
+    }
+
+    if (relPath.includes("/__tests__/spec/")) {
+      if (!/\.integration\.test\.ts$/.test(fileName)) {
+        violations.push({
+          path: relPath,
+          reason: "Runtime spec tests must be named *.integration.test.ts"
+        });
+      }
+      return;
+    }
+
+    if (relPath.includes("/__tests__/governance/")) {
+      if (!/\.governance\.integration\.test\.ts$/.test(fileName)) {
+        violations.push({
+          path: relPath,
+          reason: "Runtime governance tests must be named *.governance.integration.test.ts"
+        });
+      }
+      return;
+    }
+
+    if (!/\.unit\.test\.ts$/.test(fileName)) {
+      violations.push({
+        path: relPath,
+        reason: "Runtime unit tests must be named *.unit.test.ts"
+      });
+    }
+  });
+}
+
 checkGeneralTestNaming();
 checkWebTests();
 checkWebE2E();
 checkCoreTests();
+checkRuntimeTests();
 
 if (violations.length > 0) {
   console.error("Test convention violations found:\n");
