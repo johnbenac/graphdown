@@ -13,6 +13,7 @@ const PROGRESS_STEPS: Array<{ phase: ImportProgress["phase"]; label: string }> =
   { phase: "downloading_files", label: "Downloading files" },
   { phase: "validating_dataset", label: "Validating dataset" },
   { phase: "building_record_link_graph", label: "Building Record Link Graph" },
+  { phase: "opening_runtime", label: "Opening runtime session" },
   { phase: "persisting", label: "Saving offline" }
 ];
 
