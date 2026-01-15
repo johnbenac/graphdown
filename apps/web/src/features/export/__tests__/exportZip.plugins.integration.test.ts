@@ -124,4 +124,40 @@ describe("buildDatasetZipBytes plugin export", () => {
     const imported = exportAndLoad(snapshot);
     expect(imported.files.has(pluginBlockPath)).toBe(true);
   });
+
+  it("EXP-PLUG-001: preserves binary plugin bundle files through export/import", () => {
+    const manifest = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - assets/logo.bin",
+      "binaryFiles:",
+      "  - assets/logo.bin",
+      "---",
+      "",
+      "Plugin manifest."
+    ].join("\n");
+
+    const entryBytes = new Uint8Array(strToU8("console.log('entry');"));
+    const logoBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
+
+    const snapshot = snapshotFromEntries([
+      ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
+      [
+        "records/note/record.md",
+        ["---", "typeId: note", "recordId: one", "fields: {}", "---", "No refs"].join("\n")
+      ],
+      ["extensions/demo/plugin.md", manifest],
+      ["extensions/demo/entry.js", entryBytes],
+      ["extensions/demo/assets/logo.bin", logoBytes]
+    ]);
+
+    const imported = exportAndLoad(snapshot);
+
+    expect(imported.files.get("plugins/demo/assets/logo.bin")).toEqual(logoBytes);
+    expect(imported.files.get("plugins/demo/manifest.md")).toEqual(snapshot.files.get("extensions/demo/plugin.md"));
+  });
 });
