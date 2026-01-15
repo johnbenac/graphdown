@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { blockPathForCid, cidFromRawBytes } from "../../cid/daslCid";
 import { computeGdHashV1 } from "../hash";
 import type { HashScope } from "../hash";
 import type { DatasetSnapshot } from "../../model/snapshotTypes";
 
 const encoder = new TextEncoder();
+const BLOCK_CID = "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
+const BLOCK_PATH = `blocks/sha2-256/e3/${BLOCK_CID}`;
 
 type StringEntry = [string, string];
 type SnapshotEntry = StringEntry | [string, Uint8Array];
@@ -84,12 +85,10 @@ test('HASH-004: invalid hash scope fails with E_USAGE', () => {
 test('HASH-005: snapshot hash ignores block store bytes', () => {
   const type = typeFile("type.md", "note");
   const blobBytes = encoder.encode("block");
-  const blockCid = cidFromRawBytes(blobBytes);
-  const blockPath = blockPathForCid(blockCid);
-  const record = recordFile("r.md", "note", "one", `Body with [[${blockCid}]]`);
+  const record = recordFile("r.md", "note", "one", `Body with [[${BLOCK_CID}]]`);
   // Referenced block bytes differ, but hashes should ignore block store contents
-  const base = snapshot([type, record, [blockPath, blobBytes]]);
-  const changedBlob = snapshot([type, record, [blockPath, encoder.encode("two")]]);
+  const base = snapshot([type, record, [BLOCK_PATH, blobBytes]]);
+  const changedBlob = snapshot([type, record, [BLOCK_PATH, encoder.encode("two")]]);
 
   const baseDigest = digest(computeGdHashV1(base, "snapshot"));
   const changedDigest = digest(computeGdHashV1(changedBlob, "snapshot"));
