@@ -224,6 +224,53 @@ Use these as golden compatibility references (read-only):
 - **tools/check-spec-coverage.js** — Verify all testable requirements have tests
 - **tools/check-web-test-layout.js** — Enforce test file organization
 
+## Compiling Files for Context Sharing
+
+Use `big_picture` to compile multiple files into a single output for sharing context with others or for AI assistance.
+
+### Basic Usage
+
+```bash
+# Compile files with descriptive headings
+big_picture -f \
+  "path/to/file1.ts:Description of file1" \
+  "path/to/file2.ts:Description of file2" \
+  -o output.txt
+
+# Without system info (faster, cleaner for code review)
+big_picture -f \
+  "src/main.ts:Main application logic" \
+  "src/utils.ts:Helper functions" \
+  --no-system-info -o context.txt
+```
+
+### Common Patterns
+
+```bash
+# Feature overview
+big_picture -f \
+  "packages/core/src/parse/*.ts:Parsing modules" \
+  "packages/core/src/validate/*.ts:Validation modules" \
+  -o feature-context.txt
+
+# Debug context
+big_picture -f \
+  "src/problematic-module.ts:Where error occurs" \
+  "src/caller.ts:What calls the module" \
+  "src/config.ts:Configuration" \
+  --no-system-info -o debug-context.txt
+
+# Architecture overview
+big_picture -f packages/core/src/**/*.ts -o architecture.txt
+```
+
+### Tips
+
+- Use descriptive headings that explain what each file does
+- Keep compilations focused (5-10 files is usually optimal)
+- Use `--no-system-info` for code-only compilations
+- Save output to `/tmp/` for temporary compilations
+
 ## Commit and PR Workflow
 
 From AGENTS.md:

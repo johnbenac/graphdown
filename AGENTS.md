@@ -14,10 +14,42 @@
   - https://github.com/johnbenac/research-lab-dataset
   - https://github.com/johnbenac/product-tracker-dataset
 
-## big_picture tool
+## Compiling Files for Context Sharing
 
-- Located at `/opt/centroid-tools/bin/big_picture`; compiles multiple files into one output file (often placed in `/tmp/`).
-- Two modes: (1) Big Picture Protocol for consultant requests; (2) regular quick compilations for personal use.
-- Big Picture Protocol (strict order): create any optional supporting docs in `/tmp/`, create a required consultant memo in `/tmp/` using the provided template, then run `big_picture -f ... -o /tmp/...` with raw files first, supporting docs next, and the memo last.
-- Default run includes system info; add `--no-system-info` for code-only compilations.
-- Use descriptive, unique output and memo names (avoid generic names like `consultant-memo.md`) to prevent collisions; place temp artifacts in `/tmp/`.
+Use `big_picture` to compile multiple files into a single output for sharing context with others or for AI assistance.
+
+### Basic Usage
+
+```bash
+# Compile files with descriptive headings
+big_picture -f \
+  "path/to/file1.ts:Description of file1" \
+  "path/to/file2.ts:Description of file2" \
+  -o output.txt
+
+# Without system info (faster, cleaner for code review)
+big_picture -f \
+  "src/main.ts:Main application logic" \
+  "src/utils.ts:Helper functions" \
+  --no-system-info -o context.txt
+```
+
+### Common Patterns
+
+```bash
+# Feature overview
+big_picture -f \
+  "packages/core/src/parse/*.ts:Parsing modules" \
+  "packages/core/src/validate/*.ts:Validation modules" \
+  -o feature-context.txt
+
+# Debug context
+big_picture -f \
+  "src/problematic-module.ts:Where error occurs" \
+  "src/caller.ts:What calls the module" \
+  "src/config.ts:Configuration" \
+  --no-system-info -o debug-context.txt
+
+# Architecture overview
+big_picture -f packages/core/src/**/*.ts -o architecture.txt
+```
