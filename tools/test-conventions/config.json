@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Test colocation enforcement configuration. See README.md for details.",
+  "colocationAllowlist": {
+  }
+}

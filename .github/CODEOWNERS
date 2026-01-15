@@ -1,3 +1,7 @@
 # Deployment policy requires DevOps review
 .github/workflows/pages.yml @johnbenac
 docs/ops/deploy-contract.md @johnbenac
+
+# Test conventions policy requires maintainer review
+/tools/check-test-conventions.js @johnbenac
+/tools/test-conventions/ @johnbenac
