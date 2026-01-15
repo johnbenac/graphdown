@@ -27,11 +27,17 @@ big_picture -f \
   "path/to/file2.ts:Description of file2" \
   -o output.txt
 
-# Without system info (faster, cleaner for code review)
+# Default: no system info (cleaner for code review)
 big_picture -f \
   "src/main.ts:Main application logic" \
   "src/utils.ts:Helper functions" \
-  --no-system-info -o context.txt
+  -o context.txt
+
+# Include system info when sharing with others
+big_picture -f \
+  "src/main.ts:Main application logic" \
+  "src/utils.ts:Helper functions" \
+  --system-info -o context-with-env.txt
 ```
 
 ### Common Patterns
@@ -48,7 +54,7 @@ big_picture -f \
   "src/problematic-module.ts:Where error occurs" \
   "src/caller.ts:What calls the module" \
   "src/config.ts:Configuration" \
-  --no-system-info -o debug-context.txt
+  -o debug-context.txt
 
 # Architecture overview
 big_picture -f packages/core/src/**/*.ts -o architecture.txt
