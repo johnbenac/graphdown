@@ -3,8 +3,9 @@ import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DatasetProvider, useDataset } from "../DatasetContext";
+import type { DatasetContextValue } from "../DatasetContext";
 
-function TestHarness({ onReady }: { onReady: (ctx: ReturnType<typeof useDataset>) => void }) {
+function TestHarness({ onReady }: { onReady: (ctx: DatasetContextValue) => void }) {
   const ctx = useDataset();
   useEffect(() => {
     onReady(ctx);
@@ -23,7 +24,7 @@ describe("DatasetContext GitHub import", () => {
       })
     );
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <TestHarness onReady={(value) => (ctx = value)} />
@@ -53,7 +54,7 @@ describe("DatasetContext GitHub import", () => {
       })
     );
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <TestHarness onReady={(value) => (ctx = value)} />
@@ -129,7 +130,7 @@ describe("DatasetContext GitHub import", () => {
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <TestHarness onReady={(value) => (ctx = value)} />
@@ -145,6 +146,9 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
+    const runtimeApiV1 = (ctx as DatasetContextValue | null)?.activeDataset?.runtimeApiV1;
+    expect(runtimeApiV1).toBeDefined();
+    await expect(runtimeApiV1?.listTypeIds()).resolves.toEqual(["note"]);
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(fetchMock.mock.calls.some(([url]) => String(url).startsWith("https://raw.githubusercontent.com/"))).toBe(
       true
@@ -162,7 +166,7 @@ describe("DatasetContext zip import", () => {
       arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
     } as File;
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <TestHarness onReady={(value) => (ctx = value)} />
@@ -191,7 +195,7 @@ describe("DatasetContext persistence requirements", () => {
     vi.stubGlobal("indexedDB", undefined);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    let ctx: ReturnType<typeof useDataset> | null = null;
+    let ctx: DatasetContextValue | null = null;
     render(
       <DatasetProvider>
         <TestHarness onReady={(value) => (ctx = value)} />

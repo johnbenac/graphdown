@@ -6,7 +6,8 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@graphdown/core": ["../../packages/core/src/index.ts"]
+      "@graphdown/core": ["../../packages/core/src/index.ts"],
+      "@graphdown/runtime": ["../../packages/runtime/src/index.ts"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
