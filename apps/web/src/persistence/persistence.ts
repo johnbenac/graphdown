@@ -1,16 +1,10 @@
-import type { RecordLinkGraph } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
 import type { PersistStore } from "../storage/PersistStore";
 import { KEY } from "./keys";
-import {
-  serializeRecordLinkGraphCache,
-  deserializeRecordLinkGraphCache
-} from "./serializeRecordLinkGraphCache";
 import { deserializeSnapshot, serializeSnapshot } from "./serializeSnapshot";
 import type {
   DatasetMeta,
   LoadedDataset,
-  PersistedRecordLinkGraphCache,
   PersistedDatasetSnapshot,
   PersistedUiState
 } from "./types";
@@ -19,7 +13,6 @@ export interface Persistence {
   saveActiveDataset(input: {
     meta: DatasetMeta;
     datasetSnapshot: DatasetSnapshot;
-    recordLinkGraph?: RecordLinkGraph;
     uiState?: PersistedUiState;
   }): Promise<void>;
   loadActiveDataset(): Promise<LoadedDataset | undefined>;
@@ -35,13 +28,9 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
   const { store } = options;
 
   return {
-    async saveActiveDataset({ meta, datasetSnapshot, recordLinkGraph, uiState }) {
+    async saveActiveDataset({ meta, datasetSnapshot, uiState }) {
       const persistedSnapshot: PersistedDatasetSnapshot = serializeSnapshot(datasetSnapshot);
       await store.set(KEY.activeSnapshot, persistedSnapshot);
-      if (recordLinkGraph) {
-        const persistedGraph: PersistedRecordLinkGraphCache = serializeRecordLinkGraphCache(recordLinkGraph);
-        await store.set(KEY.activeRecordLinkGraphCache, persistedGraph);
-      }
       if (uiState) {
         await store.set(KEY.activeUiState, uiState);
       }
@@ -50,17 +39,18 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
     async loadActiveDataset() {
       const meta = await store.get<DatasetMeta>(KEY.activeMeta);
       const snapshotPayload = await store.get<PersistedDatasetSnapshot>(KEY.activeSnapshot);
-      const storedGraph = await store.get<PersistedRecordLinkGraphCache>(KEY.activeRecordLinkGraphCache);
-      if (!meta || !snapshotPayload || !storedGraph) {
-        await store.del(KEY.activeMeta);
-        await store.del(KEY.activeSnapshot);
-        await store.del(KEY.activeRecordLinkGraphCache);
+      if (!meta || !snapshotPayload) {
+        if (meta) {
+          await store.del(KEY.activeMeta);
+        }
+        if (snapshotPayload) {
+          await store.del(KEY.activeSnapshot);
+        }
         return undefined;
       }
       const datasetSnapshot = deserializeSnapshot(snapshotPayload);
-      const recordLinkGraph = deserializeRecordLinkGraphCache(storedGraph);
       const uiState = await store.get<PersistedUiState>(KEY.activeUiState);
-      return { meta, datasetSnapshot, recordLinkGraph, uiState };
+      return { meta, datasetSnapshot, uiState };
     },
     async clearActiveDataset() {
       await store.del(KEY.activeMeta);

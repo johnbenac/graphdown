@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
 import type { ValidationError } from "@graphdown/core";
 import { makeError } from "@graphdown/core";
 import { isObject } from "@graphdown/core";
@@ -8,8 +8,8 @@ import { useDataset } from "../state/DatasetContext";
 
 type RecordEditorProps = {
   mode: "edit" | "create";
-  record?: RecordLinkGraphRecordNode | null;
-  typeDef: RecordLinkGraphTypeNode;
+  record?: RuntimeRecordViewV1 | null;
+  typeDef: RuntimeTypeViewV1;
   onCancel: () => void;
   onComplete: (recordKey: string) => void;
 };

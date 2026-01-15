@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "../RecordEditor";
-import type { RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();
@@ -13,12 +13,10 @@ vi.mock("../../state/DatasetContext", () => ({
   })
 }));
 
-const typeDef: RecordLinkGraphTypeNode = {
-  kind: "type",
+const typeDef: RuntimeTypeViewV1 = {
   typeId: "note",
   fields: { name: "Note" },
-  body: "",
-  file: "types/type--note.md"
+  body: ""
 };
 
 describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
@@ -29,14 +27,12 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: edits arbitrary fields without kind semantics", async () => {
-    const record: RecordLinkGraphRecordNode = {
+    const record: RuntimeRecordViewV1 = {
       recordKey: "note:record-1",
       recordId: "record-1",
       typeId: "note",
       fields: { weird: "before" },
-      body: "existing body",
-      file: "records/note/record--1.md",
-      kind: "record"
+      body: "existing body"
     };
     render(
       <RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />
@@ -57,14 +53,12 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: edits fields outside any schema and persists them", async () => {
-    const record: RecordLinkGraphRecordNode = {
+    const record: RuntimeRecordViewV1 = {
       recordKey: "note:record-2",
       recordId: "record-2",
       typeId: "note",
       fields: { count: 5, extra: { nested: true } },
-      body: "",
-      file: "records/note/record--2.md",
-      kind: "record"
+      body: ""
     };
     render(
       <RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />
@@ -84,14 +78,12 @@ describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   });
 
   it("UI-RAW-001: removes fields when YAML omits them", async () => {
-    const record: RecordLinkGraphRecordNode = {
+    const record: RuntimeRecordViewV1 = {
       recordKey: "note:record-3",
       recordId: "record-3",
       typeId: "note",
       fields: { keep: 1, drop: true },
-      body: "body",
-      file: "records/note/record--3.md",
-      kind: "record"
+      body: "body"
     };
 
     render(<RecordEditor mode="edit" record={record} typeDef={typeDef} onCancel={() => {}} onComplete={() => {}} />);

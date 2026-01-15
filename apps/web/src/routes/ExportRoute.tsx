@@ -45,7 +45,6 @@ export default function ExportRoute() {
             <div className="export-summary">
               <div>
                 <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
-                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
               </div>
             </div>
 

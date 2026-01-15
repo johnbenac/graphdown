@@ -1,4 +1,3 @@
-import type { RecordLinkGraph, RecordLinkGraphRecordNode, RecordLinkGraphTypeNode } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
 
 export type DatasetMeta = {
@@ -14,19 +13,11 @@ export type PersistedDatasetSnapshot = {
   files: Array<{ path: string; contents: Uint8Array }>;
 };
 
-export type PersistedRecordLinkGraphCache = {
-  types: RecordLinkGraphTypeNode[];
-  records: RecordLinkGraphRecordNode[];
-  outgoing: Array<[string, string[]]>;
-  incoming: Array<[string, string[]]>;
-};
-
 export type PersistedUiState = Record<string, unknown>;
 
 export type LoadedDataset = {
   meta: DatasetMeta;
   datasetSnapshot: DatasetSnapshot;
-  recordLinkGraph?: RecordLinkGraph;
   uiState?: PersistedUiState;
 };
 

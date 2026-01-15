@@ -1,13 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import type { RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { RuntimeTypeViewV1 } from "@graphdown/runtime";
 import TypeViewer from "../TypeViewer";
 
-const baseType: RecordLinkGraphTypeNode = {
-  kind: "type",
+const baseType: RuntimeTypeViewV1 = {
   typeId: "note",
   fields: { name: "Note", description: "A note record" },
-  body: "Type docs live here.",
-  file: "types/note.md"
+  body: "Type docs live here."
 };
 
 describe("TypeViewer", () => {
