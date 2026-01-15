@@ -1,4 +1,4 @@
-import type { ValidationErrorCode } from '../validate/errors';
+import type { ValidationErrorCode } from '@graphdown/core';
 
 export type RuntimeApiError = {
   code: ValidationErrorCode;
