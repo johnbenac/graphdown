@@ -216,16 +216,26 @@ function parseImportDeclarations(filePath) {
 
     const spec = stmt.moduleSpecifier.text;
     const clause = stmt.importClause;
-    if (!clause) continue;
 
-    // Check if entire import is type-only
+    // Side-effect-only imports should still count as value imports
+    if (!clause) {
+      imports.push({ spec, isTypeOnly: false });
+      continue;
+    }
+
+    // Entire import is type-only: import type ...
     let isTypeOnly = clause.isTypeOnly === true;
 
-    // Check for per-specifier type-only imports: import { type Foo } from "..."
-    if (!isTypeOnly && clause.namedBindings && ts.isNamedImports(clause.namedBindings)) {
-      const elems = clause.namedBindings.elements;
-      const hasValue = elems.some((e) => e.isTypeOnly !== true);
-      isTypeOnly = !hasValue;
+    if (!isTypeOnly) {
+      // Default import without `import type` is always a value import
+      if (clause.name) {
+        isTypeOnly = false;
+      } else if (clause.namedBindings && ts.isNamedImports(clause.namedBindings)) {
+        // import { type Foo } from "..."
+        const elems = clause.namedBindings.elements;
+        const hasValue = elems.some((e) => e.isTypeOnly !== true);
+        isTypeOnly = !hasValue; // true only if ALL named imports are type-only
+      }
     }
 
     imports.push({ spec, isTypeOnly });
@@ -395,20 +405,22 @@ function checkPackageColocationCompleteness(packageName) {
     areasWithTests.add(area);
   });
 
+  // Warn if allowlisted areas now have tests (debt cleanup)
+  for (const [area, meta] of Object.entries(packageAllowlist)) {
+    if (areasWithTests.has(area)) {
+      console.warn(
+        `Warning: ${packageName}/${area} is allowlisted but now has tests. ` +
+        `Consider removing from allowlist (issue: ${meta.issue})`
+      );
+    }
+  }
+
   // Check for areas with production code but no tests
   for (const area of areasWithProdCode) {
     if (areasWithTests.has(area)) continue;
 
     // Check allowlist
     if (packageAllowlist[area]) {
-      // Area is allowlisted - optionally check if it now has tests
-      if (areasWithTests.has(area)) {
-        const metadata = packageAllowlist[area];
-        console.warn(
-          `Warning: ${packageName}/${area} is allowlisted but now has tests. ` +
-          `Consider removing from allowlist (issue: ${metadata.issue})`
-        );
-      }
       continue;
     }
 
