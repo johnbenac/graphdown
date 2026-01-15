@@ -6,6 +6,8 @@ import { buildRecordLinkGraphFromSnapshot } from "@graphdown/core";
 import { parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
 import { validateDatasetSnapshot } from "@graphdown/core";
+import type { RuntimeApiV1 } from "@graphdown/runtime";
+import { openRuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
@@ -42,10 +44,14 @@ export type ImportErrorState =
       errors: ValidationError[];
     };
 
+type ActiveDataset = LoadedDataset & {
+  runtimeApiV1: RuntimeApiV1;
+};
+
 export type DatasetContextValue = {
   status: "idle" | "loading" | "ready" | "error";
   progress: ImportProgress;
-  activeDataset?: LoadedDataset;
+  activeDataset?: ActiveDataset;
   error?: ImportErrorState;
   importDatasetZip: (file: File) => Promise<void>;
   importDatasetFromGitHub: (url: string) => Promise<void>;
@@ -99,9 +105,37 @@ function buildPersistenceError(err: unknown): ImportErrorState {
   };
 }
 
+async function openRuntimeOrErrors(
+  snapshot: DatasetSnapshot
+): Promise<{ ok: true; api: RuntimeApiV1 } | { ok: false; errors: ValidationError[] }> {
+  const result = await openRuntimeApiV1({ snapshot });
+  if (!result.ok) {
+    return { ok: false, errors: result.errors };
+  }
+  return { ok: true, api: result.value };
+}
+
+function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
+  const internal = errors.find((error) => error.code === "E_INTERNAL");
+  if (internal) {
+    return {
+      category: "unknown",
+      title: "Runtime unavailable",
+      message: internal.message,
+      hint: internal.hint
+    };
+  }
+  return {
+    category: "dataset_invalid",
+    title: "Dataset invalid",
+    message: "The dataset could not be opened by the runtime session.",
+    errors
+  };
+}
+
 export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<DatasetContextValue["status"]>("idle");
-  const [activeDataset, setActiveDataset] = useState<LoadedDataset | undefined>(undefined);
+  const [activeDataset, setActiveDataset] = useState<ActiveDataset | undefined>(undefined);
   const [error, setError] = useState<ImportErrorState | undefined>(undefined);
   const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
 
@@ -139,7 +173,20 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     setProgress({ phase: "idle" });
     try {
       const dataset = await persistence.loadActiveDataset();
-      setActiveDataset(dataset);
+      if (!dataset) {
+        setActiveDataset(undefined);
+        setStatus((prev) => (prev === "loading" ? "ready" : prev));
+        return;
+      }
+      const runtime = await openRuntimeOrErrors(dataset.datasetSnapshot);
+      if (!runtime.ok) {
+        await persistence.clearActiveDataset();
+        setActiveDataset(undefined);
+        setStatus("error");
+        setError(mapRuntimeOpenFailure(runtime.errors));
+        return;
+      }
+      setActiveDataset({ ...dataset, runtimeApiV1: runtime.api });
       setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
       console.error("Persistence is required but failed to initialize/use IndexedDB.", err);
@@ -163,6 +210,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       clearPersistence: async () => {
         await persistence.clearActiveDataset();
         setActiveDataset(undefined);
+        setError(undefined);
         setStatus("ready");
         setProgress({ phase: "idle" });
       }
@@ -174,6 +222,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       label: string,
       datasetSnapshot: DatasetSnapshot,
       recordLinkGraph: RecordLinkGraph,
+      runtimeApiV1: RuntimeApiV1,
       importReport?: ImportReport
     ) => {
       if (!persistence) {
@@ -189,7 +238,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         importReport
       };
       await persistence.saveActiveDataset({ meta, datasetSnapshot, recordLinkGraph });
-      setActiveDataset({ meta, datasetSnapshot, recordLinkGraph });
+      setActiveDataset({ meta, datasetSnapshot, recordLinkGraph, runtimeApiV1 });
     },
     [persistence]
   );
@@ -231,9 +280,16 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         }
+        setProgress({ phase: "opening_runtime" });
+        const runtime = await openRuntimeOrErrors(datasetSnapshot);
+        if (!runtime.ok) {
+          setStatus("error");
+          setError(mapRuntimeOpenFailure(runtime.errors));
+          return;
+        }
         setProgress({ phase: "persisting" });
         persisted = true;
-        await saveActiveDataset(file.name, datasetSnapshot, recordLinkGraphResult.graph, importReport);
+        await saveActiveDataset(file.name, datasetSnapshot, recordLinkGraphResult.graph, runtime.api, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -314,9 +370,22 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        setProgress({ phase: "opening_runtime" });
+        const runtime = await openRuntimeOrErrors(datasetSnapshot);
+        if (!runtime.ok) {
+          setStatus("error");
+          setError(mapRuntimeOpenFailure(runtime.errors));
+          return;
+        }
         setProgress({ phase: "persisting" });
         persisted = true;
-        await saveActiveDataset(parsed.value.canonicalRepoUrl, datasetSnapshot, recordLinkGraphResult.graph, importReport);
+        await saveActiveDataset(
+          parsed.value.canonicalRepoUrl,
+          datasetSnapshot,
+          recordLinkGraphResult.graph,
+          runtime.api,
+          importReport
+        );
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -362,6 +431,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     }
     await persistence.clearActiveDataset();
     setActiveDataset(undefined);
+    setError(undefined);
     setStatus("ready");
     setProgress({ phase: "idle" });
   }, [persistence]);
@@ -369,10 +439,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const commitSnapshot = useCallback(
     async (
       nextSnapshot: DatasetSnapshot
-    ): Promise<
-      | { ok: true; recordLinkGraph: RecordLinkGraph }
-      | { ok: false; errors: ValidationError[] }
-    > => {
+    ): Promise<{ ok: true } | { ok: false; errors: ValidationError[] }> => {
       const validation = validateDatasetSnapshot(nextSnapshot);
       if (!validation.ok) {
         return { ok: false, errors: validation.errors } as const;
@@ -380,6 +447,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(nextSnapshot);
       if (!recordLinkGraphResult.ok) {
         return { ok: false, errors: recordLinkGraphResult.errors } as const;
+      }
+      const runtime = await openRuntimeOrErrors(nextSnapshot);
+      if (!runtime.ok) {
+        return { ok: false, errors: runtime.errors } as const;
       }
       if (!activeDataset) {
         return {
@@ -399,8 +470,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         datasetSnapshot: nextSnapshot,
         recordLinkGraph: recordLinkGraphResult.graph
       });
-      setActiveDataset({ meta: nextMeta, datasetSnapshot: nextSnapshot, recordLinkGraph: recordLinkGraphResult.graph });
-      return { ok: true, recordLinkGraph: recordLinkGraphResult.graph } as const;
+      setActiveDataset({
+        meta: nextMeta,
+        datasetSnapshot: nextSnapshot,
+        recordLinkGraph: recordLinkGraphResult.graph,
+        runtimeApiV1: runtime.api
+      });
+      return { ok: true } as const;
     },
     [activeDataset, persistence]
   );

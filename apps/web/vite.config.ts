@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
 const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
+const runtimeIndex = path.resolve(__dirname, "../../packages/runtime/src/index.ts");
 
 function normalizeBase(base: string | undefined): string {
   if (!base) {
@@ -23,7 +24,10 @@ export default defineConfig({
   base: normalizeBase(pagesBase),
   plugins: [react()],
   resolve: {
-    alias: [{ find: /^@graphdown\/core$/, replacement: coreIndex }]
+    alias: [
+      { find: /^@graphdown\/core$/, replacement: coreIndex },
+      { find: /^@graphdown\/runtime$/, replacement: runtimeIndex }
+    ]
   },
   server: {
     port: 5173,

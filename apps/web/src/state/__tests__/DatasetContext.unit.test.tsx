@@ -145,6 +145,8 @@ describe("DatasetContext GitHub import", () => {
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
+    expect(ctx?.activeDataset?.runtimeApiV1).toBeDefined();
+    await expect(ctx!.activeDataset!.runtimeApiV1.listTypeIds()).resolves.toEqual(["note"]);
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(fetchMock.mock.calls.some(([url]) => String(url).startsWith("https://raw.githubusercontent.com/"))).toBe(
       true
