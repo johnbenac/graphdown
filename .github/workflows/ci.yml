@@ -24,6 +24,12 @@ jobs:
         run: npm run build:web
       - name: Test convention check
         run: npm run check:test-conventions
+      - name: Upload test conventions report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-conventions-violations
+          path: test-results/test-conventions/violations.json
       - name: Spec trace
         id: spec_trace
         run: npm run spec:trace

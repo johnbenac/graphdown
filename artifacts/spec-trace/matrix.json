@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-15T03:34:49.510Z",
+  "generatedAt": "2026-01-15T19:44:38.536Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -156,17 +156,17 @@
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: accepts valid identifiers",
-          "filePath": "packages/core/src/model/__tests__/ids.unit.test.ts"
+          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects recordId with colon",
-          "filePath": "packages/core/src/model/__tests__/ids.unit.test.ts"
+          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects typeId with invalid characters",
-          "filePath": "packages/core/src/model/__tests__/ids.unit.test.ts"
+          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
@@ -179,7 +179,7 @@
         {
           "reqId": "PLUG-ID-001",
           "testTitle": "PLUG-ID-001: pluginId matches separator-safe identifier syntax",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.ids.unit.test.ts"
+          "filePath": "packages/core/src/model/__tests__/pluginId.unit.test.ts"
         }
       ]
     },
@@ -768,7 +768,7 @@
         {
           "reqId": "TYPE-001",
           "testTitle": "TYPE-001: type object without recordId is valid",
-          "filePath": "packages/core/src/model/__tests__/ids.unit.test.ts"
+          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
@@ -781,7 +781,7 @@
         {
           "reqId": "TYPE-002",
           "testTitle": "TYPE-002: duplicate typeId fails validation",
-          "filePath": "packages/core/src/model/__tests__/ids.unit.test.ts"
+          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
