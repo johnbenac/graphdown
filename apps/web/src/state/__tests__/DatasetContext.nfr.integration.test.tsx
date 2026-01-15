@@ -3,11 +3,14 @@ import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
+import { makeError } from "@graphdown/core";
 import { buildRecordLinkGraphFromSnapshot } from "@graphdown/core";
+import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { createPersistence } from "../../persistence/persistence";
+import { createPersistStore } from "../../storage/createPersistStore";
 
 let store: IndexedDbStore;
 
@@ -126,5 +129,29 @@ describe("DatasetContext non-functional requirements", () => {
     });
 
     expect(loadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not clear the persisted dataset when runtime fails to open on loadActive", async () => {
+    await seedActiveDataset();
+
+    vi.mocked(openRuntimeApiV1).mockResolvedValueOnce({
+      ok: false,
+      errors: [makeError("E_INTERNAL", "structuredClone is not defined")]
+    });
+
+    let ctx: DatasetContextValue | null = null;
+    render(
+      <DatasetProvider>
+        <Harness onReady={(value) => (ctx = value)} />
+      </DatasetProvider>
+    );
+
+    await waitFor(() => expect(ctx?.status).toBe("error"));
+
+    const persistence = createPersistence({ store: createPersistStore({ logger: console }) });
+    const stillThere = await persistence.loadActiveDataset();
+
+    expect(stillThere).toBeTruthy();
+    expect(stillThere?.datasetSnapshot.files.size).toBeGreaterThan(0);
   });
 });
