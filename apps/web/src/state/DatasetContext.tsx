@@ -117,18 +117,20 @@ async function openRuntimeOrErrors(
 
 function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
   const internal = errors.find((error) => error.code === "E_INTERNAL");
+  const dataSafeHint =
+    "Your dataset is still saved offline in this browser. Reload and try again, or clear offline storage if you want to start over.";
   if (internal) {
     return {
       category: "unknown",
       title: "Runtime unavailable",
       message: internal.message,
-      hint: internal.hint
+      hint: internal.hint ? `${internal.hint} ${dataSafeHint}` : dataSafeHint
     };
   }
   return {
     category: "dataset_invalid",
     title: "Dataset invalid",
-    message: "The dataset could not be opened by the runtime session.",
+    message: `The dataset could not be opened by the runtime session. ${dataSafeHint}`,
     errors
   };
 }
@@ -180,7 +182,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       }
       const runtime = await openRuntimeOrErrors(dataset.datasetSnapshot);
       if (!runtime.ok) {
-        await persistence.clearActiveDataset();
+        // Important: do NOT clear persisted storage here.
+        // Runtime failures can be transient or environmental; the user’s offline data must remain intact.
         setActiveDataset(undefined);
         setStatus("error");
         setError(mapRuntimeOpenFailure(runtime.errors));
