@@ -1,15 +1,19 @@
 import { sha256 } from '@noble/hashes/sha256';
 
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import type { ValidationError } from '../validate/errors';
-import { makeError } from '../validate/errors';
-import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
-import { buildRecordLinkGraphFromSnapshot } from '../graph/graph';
-import { discoverGraphdownObjects, IDENTIFIER_PATTERN, RECORD_KEY_PATTERN } from '../parse/datasetObjects';
-import { extractCidRefs } from '../parse/wikiRefs';
-import { validateDatasetSnapshot } from '../validate/validateDatasetSnapshot';
+import type { DatasetSnapshot, ValidationError } from '@graphdown/core';
+import {
+  blockPathForCid,
+  decodeDaslCidString,
+  buildRecordLinkGraphFromSnapshot,
+  discoverGraphdownObjects,
+  IDENTIFIER_PATTERN,
+  RECORD_KEY_PATTERN,
+  extractCidRefs,
+  makeError,
+  validateDatasetSnapshot
+} from '@graphdown/core';
 import { fail } from './errors';
-import { collectStringValues } from '../internal/collectStringValues';
+import { collectStringValues } from './internal/collectStringValues';
 
 export const RUNTIME_API_VERSION_V1 = 1 as const;
 

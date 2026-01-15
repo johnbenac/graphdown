@@ -172,10 +172,42 @@ function checkCoreTests() {
   });
 }
 
+function checkRuntimeTests() {
+  const runtimeRoot = path.join(repoRoot, "packages", "runtime", "src");
+  if (!fs.existsSync(runtimeRoot)) {
+    return;
+  }
+
+  walk(runtimeRoot, (fullPath) => {
+    const relPath = toPosix(path.relative(repoRoot, fullPath));
+    const fileName = path.basename(fullPath);
+    if (!/\.test\.ts$/.test(fileName)) {
+      return;
+    }
+
+    const isInTestsDir = relPath.split("/").includes("__tests__");
+    if (!isInTestsDir) {
+      violations.push({
+        path: relPath,
+        reason: "Runtime tests must live under a __tests__ directory"
+      });
+      return;
+    }
+
+    if (!/\.unit\.test\.ts$/.test(fileName) && !/\.integration\.test\.ts$/.test(fileName)) {
+      violations.push({
+        path: relPath,
+        reason: "Runtime tests must be named *.unit.test.ts or *.integration.test.ts"
+      });
+    }
+  });
+}
+
 checkGeneralTestNaming();
 checkWebTests();
 checkWebE2E();
 checkCoreTests();
+checkRuntimeTests();
 
 if (violations.length > 0) {
   console.error("Test convention violations found:\n");
