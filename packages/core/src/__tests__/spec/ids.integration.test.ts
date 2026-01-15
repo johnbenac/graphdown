@@ -3,7 +3,7 @@ import { test } from "vitest";
 
 import { parseGraphdownText } from "../../parse/datasetObjects";
 import { validateDatasetSnapshot } from "../../validate/validateDatasetSnapshot";
-import type { DatasetSnapshot } from "../snapshotTypes";
+import type { DatasetSnapshot } from "../../model/snapshotTypes";
 import type { ValidateDatasetResult } from "../../validate/validateDatasetSnapshot";
 import type { ValidationError } from "../../validate/errors";
 

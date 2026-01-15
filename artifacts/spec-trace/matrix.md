@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-15T03:34:49.510Z
+Generated: 2026-01-15T19:44:50.795Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -60,13 +60,13 @@ Tests (1):
 
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):
-- packages/core/src/model/__tests__/ids.unit.test.ts — "ID-001: accepts valid identifiers"
-- packages/core/src/model/__tests__/ids.unit.test.ts — "ID-001: rejects recordId with colon"
-- packages/core/src/model/__tests__/ids.unit.test.ts — "ID-001: rejects typeId with invalid characters"
+- packages/core/src/__tests__/spec/ids.integration.test.ts — "ID-001: accepts valid identifiers"
+- packages/core/src/__tests__/spec/ids.integration.test.ts — "ID-001: rejects recordId with colon"
+- packages/core/src/__tests__/spec/ids.integration.test.ts — "ID-001: rejects typeId with invalid characters"
 
 ## PLUG-ID-001 — pluginId syntax is separator-safe (testable=true, verify=todo)
 Tests (1):
-- packages/core/src/parse/__tests__/pluginManifest.ids.unit.test.ts — "PLUG-ID-001: pluginId matches separator-safe identifier syntax"
+- packages/core/src/model/__tests__/pluginId.unit.test.ts — "PLUG-ID-001: pluginId matches separator-safe identifier syntax"
 
 ## PLUG-ID-002 — pluginId uniqueness (testable=true, verify=todo)
 Tests (1):
@@ -231,11 +231,11 @@ Tests (1):
 
 ## TYPE-001 — Types are defined by type objects (testable=true)
 Tests (1):
-- packages/core/src/model/__tests__/ids.unit.test.ts — "TYPE-001: type object without recordId is valid"
+- packages/core/src/__tests__/spec/ids.integration.test.ts — "TYPE-001: type object without recordId is valid"
 
 ## TYPE-002 — typeId uniqueness (testable=true)
 Tests (1):
-- packages/core/src/model/__tests__/ids.unit.test.ts — "TYPE-002: duplicate typeId fails validation"
+- packages/core/src/__tests__/spec/ids.integration.test.ts — "TYPE-002: duplicate typeId fails validation"
 
 ## TYPE-004 — fieldDefs shape (testable=true)
 Tests (1):
