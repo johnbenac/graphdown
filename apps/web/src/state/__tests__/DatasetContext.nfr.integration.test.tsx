@@ -3,7 +3,7 @@ import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
-import { buildRecordLinkGraphFromSnapshot, makeError } from "@graphdown/core";
+import { makeError } from "@graphdown/core";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
@@ -38,10 +38,6 @@ function makeSnapshot(): DatasetSnapshot {
 async function seedActiveDataset() {
   if (!store) throw new Error("Persist store not initialized");
   const snapshot = makeSnapshot();
-  const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(snapshot);
-  if (!recordLinkGraphResult.ok) {
-    throw new Error(`Record Link Graph build failed: ${JSON.stringify(recordLinkGraphResult.errors)}`);
-  }
   const persistence = createPersistence({
     store
   });
@@ -52,8 +48,7 @@ async function seedActiveDataset() {
   };
   await persistence.saveActiveDataset({
     meta,
-    datasetSnapshot: snapshot,
-    recordLinkGraph: recordLinkGraphResult.graph
+    datasetSnapshot: snapshot
   });
 }
 

@@ -14,7 +14,7 @@ components are presentational and consume data passed from `routes/` or the
   - Uses `NavLink` to apply active styles automatically.
 - `TypeNav.tsx`
   - Sidebar navigation for record types when browsing a dataset.
-  - Calculates record counts per type and derives labels from type metadata via
+  - Displays record counts per type and derives labels from type metadata via
     `getTypeLabel`.
 
 ## Buttons and UI helpers

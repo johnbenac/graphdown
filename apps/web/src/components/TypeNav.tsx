@@ -1,12 +1,13 @@
 import { NavLink } from "react-router-dom";
-import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "@graphdown/core";
+import type { RuntimeTypeViewV1 } from "@graphdown/runtime";
 
 type TypeNavProps = {
-  recordLinkGraph: RecordLinkGraph;
+  types: RuntimeTypeViewV1[];
+  counts?: Map<string, number>;
   basePath?: string;
 };
 
-export function getTypeLabel(type: RecordLinkGraphTypeNode): string {
+export function getTypeLabel(type: RuntimeTypeViewV1): string {
   const fields = type.fields ?? {};
   const pluralName = typeof fields.pluralName === "string" ? fields.pluralName : null;
   const displayName = typeof fields.displayName === "string" ? fields.displayName : null;
@@ -14,18 +15,8 @@ export function getTypeLabel(type: RecordLinkGraphTypeNode): string {
   return pluralName ?? displayName ?? name ?? type.typeId;
 }
 
-export default function TypeNav({ recordLinkGraph, basePath = "/datasets" }: TypeNavProps) {
-  const types = [...recordLinkGraph.typesById.values()].sort((a, b) =>
-    a.typeId.localeCompare(b.typeId)
-  );
-
-  const counts = new Map<string, number>();
-  for (const node of recordLinkGraph.nodesByIdentity.values()) {
-    if (node.kind !== "record") {
-      continue;
-    }
-    counts.set(node.typeId, (counts.get(node.typeId) ?? 0) + 1);
-  }
+export default function TypeNav({ types, counts, basePath = "/datasets" }: TypeNavProps) {
+  const sortedTypes = [...types].sort((a, b) => a.typeId.localeCompare(b.typeId));
 
   const normalizedBasePath = basePath.replace(/\/$/, "");
 
@@ -33,14 +24,16 @@ export default function TypeNav({ recordLinkGraph, basePath = "/datasets" }: Typ
     <nav className="type-nav" aria-label="Types" data-testid="type-nav">
       <div className="type-nav__header">Types</div>
       <ul className="type-nav__list">
-        {types.map((type) => (
+        {sortedTypes.map((type) => (
           <li key={type.typeId}>
             <NavLink
               className={({ isActive }) => (isActive ? "type-nav__link active" : "type-nav__link")}
               to={`${normalizedBasePath}/${type.typeId}`}
             >
               <span className="type-nav__label">{getTypeLabel(type)}</span>
-              <span className="type-nav__count">{counts.get(type.typeId) ?? 0}</span>
+              <span className="type-nav__count">
+                {counts ? counts.get(type.typeId) ?? 0 : "…"}
+              </span>
             </NavLink>
           </li>
         ))}
