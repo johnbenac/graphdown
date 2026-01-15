@@ -33,7 +33,8 @@ my-dataset/
       (bundle files live alongside)
 ```
 
-> Graphdown identities do **not** depend on file paths, but this layout is the **canonical export shape** and a very sane default for humans and tooling.
+> Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
+> Plugins are typically authored under `extensions/`, but exported in canonical form under `plugins/`.
 
 ### 1) Define a type: `types/task.md`
 
@@ -165,9 +166,11 @@ Examples that work:
 
 - `:` (colon) is reserved for `typeId:recordId`
 - spaces (`"my record"`)
-- dots (`project.alpha` — use `project-alpha`)
+- dots in IDs (`alpha.v2` — use `alpha-v2`)
 - leading hyphen (`-bad`)
 - empty strings
+
+Dots are fine in folder names; the common `records/<typeId>.<recordId>/` convention uses a dot as a separator, but the IDs themselves can’t contain dots.
 
 **Practical tip:** treat IDs as “permanent URLs.” If you rename them, you’re doing a migration.
 
@@ -241,7 +244,7 @@ Hello world.
 fields:
   title: "Example"
   done: false
-  tags: [writing, specs, v0-4]
+  tags: [writing, specs, v0-5]
   metadata:
     created: 2026-01-09
     estimateMinutes: 30
@@ -610,6 +613,9 @@ This matters for determinism and “why did my dataset hash change?” debugging
 
 - `E_PLUGIN_KEYS_INVALID` complaining that a `binaryFiles` entry “must be listed in files”  
   → Add the missing file path to `files[]` or remove it from `binaryFiles[]`.
+
+- Validation complaining about **reserved export paths** (for example: you listed `manifest.md` in `files[]`)  
+  → Rename the bundle file and update `files[]`. `manifest.md` is reserved for canonical export (`plugins/<pluginId>/manifest.md`).
 
 ---
 
