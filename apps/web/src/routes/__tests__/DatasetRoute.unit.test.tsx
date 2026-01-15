@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
 import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "@graphdown/core";
 import DatasetRoute from "../DatasetRoute";
+import { createRuntimeApiV1Mock } from "../../testUtils/runtimeApiV1Mock";
 
 const typeNode: RecordLinkGraphTypeNode = {
   kind: "type",
@@ -39,7 +40,10 @@ vi.mock("../../state/DatasetContext", () => ({
         source: "import"
       },
       datasetSnapshot: { files: new Map([["types/note.md", new Uint8Array()]]) },
-      recordLinkGraph
+      recordLinkGraph,
+      runtimeApiV1: createRuntimeApiV1Mock({
+        files: new Map([["types/note.md", new Uint8Array()]])
+      })
     },
     error: undefined,
     importDatasetZip: vi.fn(),
