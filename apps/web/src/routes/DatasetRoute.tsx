@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { RecordLinkGraphRecordNode } from "@graphdown/core";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import ImportWarningBanner from "../components/ImportWarningBanner";
@@ -15,43 +15,106 @@ export default function DatasetRoute() {
   const [selectedRecordKey, setSelectedRecordKey] = useState<string | null>(null);
   const [editorMode, setEditorMode] = useState<"view" | "edit" | "create">("view");
   const [previousRecordKey, setPreviousRecordKey] = useState<string | null>(null);
+  const [typeIds, setTypeIds] = useState<string[]>([]);
+  const [typesById, setTypesById] = useState<Map<string, RuntimeTypeViewV1>>(new Map());
+  const [typeCounts, setTypeCounts] = useState<Map<string, number>>(new Map());
+  const [typesLoading, setTypesLoading] = useState(false);
+  const [recordsForSelectedType, setRecordsForSelectedType] = useState<RuntimeRecordViewV1[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+  const [outgoingLinks, setOutgoingLinks] = useState<string[]>([]);
+  const [incomingLinks, setIncomingLinks] = useState<string[]>([]);
+  const [linksLoading, setLinksLoading] = useState(false);
   const { typeId } = useParams();
   const navigate = useNavigate();
 
-  const recordLinkGraph = activeDataset?.recordLinkGraph;
-
-  const sortedTypeIds = useMemo(() => {
-    if (!recordLinkGraph) {
-      return [];
-    }
-    return [...recordLinkGraph.typesById.keys()].sort((a, b) => a.localeCompare(b));
-  }, [recordLinkGraph]);
+  const runtimeApiV1 = activeDataset?.runtimeApiV1;
 
   useEffect(() => {
-    if (!recordLinkGraph || sortedTypeIds.length === 0) {
+    if (!runtimeApiV1) {
+      setTypeIds([]);
+      setTypesById(new Map());
+      setTypeCounts(new Map());
       return;
     }
-    const isValidType = typeId && recordLinkGraph.typesById.has(typeId);
+    let cancelled = false;
+    setTypesLoading(true);
+    (async () => {
+      const types = await runtimeApiV1.listTypes();
+      types.sort((a, b) => a.typeId.localeCompare(b.typeId));
+      const nextTypesById = new Map(types.map((type) => [type.typeId, type]));
+      const counts = new Map<string, number>();
+      await Promise.all(
+        types.map(async (type) => {
+          const keys = await runtimeApiV1.listRecordKeysByType(type.typeId);
+          counts.set(type.typeId, keys.length);
+        })
+      );
+      if (cancelled) {
+        return;
+      }
+      setTypesById(nextTypesById);
+      setTypeIds(types.map((type) => type.typeId));
+      setTypeCounts(counts);
+      setTypesLoading(false);
+    })().catch((err) => {
+      console.error("Failed to load types from runtime API.", err);
+      if (!cancelled) {
+        setTypesById(new Map());
+        setTypeIds([]);
+        setTypeCounts(new Map());
+        setTypesLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [runtimeApiV1]);
+
+  useEffect(() => {
+    if (!runtimeApiV1 || typeIds.length === 0) {
+      return;
+    }
+    const isValidType = typeId && typesById.has(typeId);
     if (!isValidType) {
-      navigate(`/datasets/${sortedTypeIds[0]}`, { replace: true });
+      navigate(`/datasets/${typeIds[0]}`, { replace: true });
     }
-  }, [recordLinkGraph, sortedTypeIds, typeId, navigate]);
+  }, [runtimeApiV1, typeIds, typeId, typesById, navigate]);
 
-  const selectedTypeId =
-    typeId && recordLinkGraph?.typesById.has(typeId) ? typeId : null;
-  const selectedTypeDef = selectedTypeId ? recordLinkGraph?.typesById.get(selectedTypeId) ?? null : null;
+  const selectedTypeId = typeId && typesById.has(typeId) ? typeId : null;
+  const selectedTypeDef = selectedTypeId ? typesById.get(selectedTypeId) ?? null : null;
 
-  const recordsForSelectedType = useMemo(() => {
-    if (!recordLinkGraph || !selectedTypeId) {
-      return [];
+  useEffect(() => {
+    if (!runtimeApiV1 || !selectedTypeId) {
+      setRecordsForSelectedType([]);
+      return;
     }
-    return [...recordLinkGraph.nodesByIdentity.values()]
-      .filter(
-        (node): node is RecordLinkGraphRecordNode =>
-          node.kind === "record" && node.typeId === selectedTypeId
-      )
-      .sort((a, b) => a.recordId.localeCompare(b.recordId));
-  }, [recordLinkGraph, selectedTypeId]);
+    let cancelled = false;
+    setRecordsLoading(true);
+    runtimeApiV1
+      .listRecordsByType(selectedTypeId)
+      .then((records) => {
+        if (cancelled) {
+          return;
+        }
+        const sorted = [...records].sort((a, b) => a.recordId.localeCompare(b.recordId));
+        setRecordsForSelectedType(sorted);
+        setRecordsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load records from runtime API.", err);
+        if (!cancelled) {
+          setRecordsForSelectedType([]);
+          setRecordsLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [runtimeApiV1, selectedTypeId]);
+
+  const recordsByKey = useMemo(() => {
+    return new Map(recordsForSelectedType.map((record) => [record.recordKey, record]));
+  }, [recordsForSelectedType]);
 
   useEffect(() => {
     if (!selectedTypeId) {
@@ -62,27 +125,66 @@ export default function DatasetRoute() {
     if (editorMode === "create") {
       return;
     }
-    if (selectedRecordKey && recordsForSelectedType.some((record) => record.recordKey === selectedRecordKey)) {
+    if (selectedRecordKey && recordsByKey.has(selectedRecordKey)) {
       return;
     }
     const firstRecordKey = recordsForSelectedType[0]?.recordKey ?? null;
     setSelectedRecordKey(firstRecordKey);
-  }, [recordsForSelectedType, selectedRecordKey, selectedTypeId, editorMode]);
+  }, [recordsForSelectedType, recordsByKey, selectedRecordKey, selectedTypeId, editorMode]);
 
   useEffect(() => {
     setEditorMode("view");
     setPreviousRecordKey(null);
   }, [selectedTypeId]);
 
-  const selectedRecord = selectedRecordKey ? recordLinkGraph?.nodesByIdentity.get(selectedRecordKey) ?? null : null;
-  const selectedRecordNode =
-    selectedRecord && selectedRecord.kind === "record" ? selectedRecord : null;
-  const outgoingLinks = selectedRecordNode
-    ? recordLinkGraph?.getOutgoingRecordLinks(selectedRecordNode.recordKey) ?? []
-    : [];
-  const incomingLinks = selectedRecordNode
-    ? recordLinkGraph?.getIncomingRecordLinks(selectedRecordNode.recordKey) ?? []
-    : [];
+  const selectedRecord = selectedRecordKey ? recordsByKey.get(selectedRecordKey) ?? null : null;
+
+  useEffect(() => {
+    if (!runtimeApiV1 || !selectedRecordKey) {
+      setOutgoingLinks([]);
+      setIncomingLinks([]);
+      return;
+    }
+    let cancelled = false;
+    setLinksLoading(true);
+    Promise.all([
+      runtimeApiV1.getOutgoingRecordLinks(selectedRecordKey),
+      runtimeApiV1.getIncomingRecordLinks(selectedRecordKey)
+    ])
+      .then(([outgoing, incoming]) => {
+        if (cancelled) {
+          return;
+        }
+        setOutgoingLinks(outgoing);
+        setIncomingLinks(incoming);
+        setLinksLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load record links from runtime API.", err);
+        if (!cancelled) {
+          setOutgoingLinks([]);
+          setIncomingLinks([]);
+          setLinksLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [runtimeApiV1, selectedRecordKey]);
+
+  const sortedTypes = useMemo(() => {
+    return typeIds.map((id) => typesById.get(id)).filter(Boolean) as RuntimeTypeViewV1[];
+  }, [typeIds, typesById]);
+
+  const totalRecordCount = useMemo(() => {
+    let total = 0;
+    for (const count of typeCounts.values()) {
+      total += count;
+    }
+    return total;
+  }, [typeCounts]);
+
+  const recordNotFound = Boolean(selectedRecordKey && !selectedRecord && !recordsLoading);
 
   return (
     <AppShell
@@ -93,7 +195,11 @@ export default function DatasetRoute() {
               <p>Active dataset:</p>
               <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
             </div>
-            {recordLinkGraph ? <TypeNav recordLinkGraph={recordLinkGraph} /> : null}
+            {sortedTypes.length ? (
+              <TypeNav types={sortedTypes} recordCounts={typeCounts} />
+            ) : typesLoading ? (
+              <p>Loading types...</p>
+            ) : null}
             <Link to="/import">Import another dataset</Link>
           </div>
         ) : (
@@ -103,19 +209,18 @@ export default function DatasetRoute() {
     >
       <section data-testid="dataset-screen">
         <h1>{selectedTypeDef ? getTypeLabel(selectedTypeDef) : "Datasets"}</h1>
-        {activeDataset && recordLinkGraph ? (
-          sortedTypeIds.length ? (
+        {activeDataset ? (
+          sortedTypes.length ? (
             <div className="dataset-browse">
               <div className="dataset-summary">
                 <p>
-                  <strong>
-                    {activeDataset.meta.label ?? activeDataset.meta.id}
-                  </strong>
+                  <strong>{activeDataset.meta.label ?? activeDataset.meta.id}</strong>
                 </p>
                 <p>ID: {activeDataset.meta.id}</p>
                 <p>Created: {new Date(activeDataset.meta.createdAt).toISOString()}</p>
                 <p>Updated: {new Date(activeDataset.meta.updatedAt).toISOString()}</p>
-                <p>Stored files: {activeDataset.datasetSnapshot.files.size}</p>
+                <p>Types: {sortedTypes.length}</p>
+                <p>Records: {totalRecordCount}</p>
                 <ImportWarningBanner report={activeDataset.meta.importReport} />
               </div>
               {selectedTypeDef ? (
@@ -125,6 +230,8 @@ export default function DatasetRoute() {
                   </div>
                   <TypeViewer typeDef={selectedTypeDef} />
                 </div>
+              ) : typesLoading ? (
+                <p>Loading types...</p>
               ) : null}
 
               <div className="dataset-records" data-testid="record-list">
@@ -144,7 +251,9 @@ export default function DatasetRoute() {
                     New record
                   </button>
                 </div>
-                {recordsForSelectedType.length ? (
+                {recordsLoading ? (
+                  <p>Loading records...</p>
+                ) : recordsForSelectedType.length ? (
                   <ul>
                     {recordsForSelectedType.map((record) => (
                       <li key={record.recordKey}>
@@ -171,7 +280,7 @@ export default function DatasetRoute() {
               <div className="record-details" data-testid="record-details">
                 <div className="record-details__header">
                   <h2>Record details</h2>
-                  {selectedRecordNode && editorMode === "view" ? (
+                  {selectedRecord && editorMode === "view" ? (
                     <button
                       type="button"
                       className="button secondary"
@@ -182,7 +291,7 @@ export default function DatasetRoute() {
                     </button>
                   ) : null}
                 </div>
-                {editorMode === "create" && selectedTypeDef && recordLinkGraph ? (
+                {editorMode === "create" && selectedTypeDef ? (
                   <RecordEditor
                     mode="create"
                     typeDef={selectedTypeDef}
@@ -195,11 +304,11 @@ export default function DatasetRoute() {
                       setSelectedRecordKey(newId);
                     }}
                   />
-                ) : selectedRecordNode && selectedTypeDef && recordLinkGraph ? (
+                ) : selectedRecord && selectedTypeDef ? (
                   editorMode === "edit" ? (
                     <RecordEditor
                       mode="edit"
-                      record={selectedRecordNode}
+                      record={selectedRecord}
                       typeDef={selectedTypeDef}
                       onCancel={() => setEditorMode("view")}
                       onComplete={(id) => {
@@ -209,17 +318,23 @@ export default function DatasetRoute() {
                     />
                   ) : (
                     <RecordViewer
-                      record={selectedRecordNode}
+                      record={selectedRecord}
                       typeDef={selectedTypeDef}
                       outgoingLinks={outgoingLinks}
                       incomingLinks={incomingLinks}
                     />
                   )
+                ) : recordNotFound ? (
+                  <p>Record not found.</p>
+                ) : linksLoading ? (
+                  <p>Loading record details...</p>
                 ) : (
                   <p>Select a record to view details.</p>
                 )}
               </div>
             </div>
+          ) : typesLoading ? (
+            <p>Loading types...</p>
           ) : (
             <EmptyState title="No types defined in this dataset" />
           )

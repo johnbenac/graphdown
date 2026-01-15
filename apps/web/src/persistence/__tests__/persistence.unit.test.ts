@@ -1,13 +1,10 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import type { RecordLinkGraphTypeNode } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { KEY } from "../keys";
 import { createPersistence } from "../persistence";
-import { deserializeRecordLinkGraphCache } from "../serializeRecordLinkGraphCache";
 import { serializeSnapshot } from "../serializeSnapshot";
-import type { PersistedRecordLinkGraphCache } from "../types";
 
 function makeDbName(prefix: string) {
   return `${prefix}-${Math.random().toString(16).slice(2)}`;
@@ -24,21 +21,6 @@ const sampleSnapshot: DatasetSnapshot = {
   ])
 };
 
-const sampleType: RecordLinkGraphTypeNode = {
-  kind: "type",
-  typeId: "note",
-  fields: { name: "Note" },
-  body: "Demo",
-  file: "types/note.md"
-};
-
-const samplePersistedGraph: PersistedRecordLinkGraphCache = {
-  types: [sampleType],
-  records: [],
-  outgoing: [],
-  incoming: []
-};
-
 describe("persistence service", () => {
   it("saves and loads the active dataset", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
@@ -50,17 +32,15 @@ describe("persistence service", () => {
         createdAt: 1,
         updatedAt: 1
       },
-      datasetSnapshot: sampleSnapshot,
-      recordLinkGraph: deserializeRecordLinkGraphCache(samplePersistedGraph)
+      datasetSnapshot: sampleSnapshot
     });
 
     const loaded = await persistence.loadActiveDataset();
     expect(loaded?.meta.id).toBe("dataset-1");
     expect(loaded?.datasetSnapshot.files.size).toBe(1);
-    expect(loaded?.recordLinkGraph?.nodesByIdentity.size).toBe(1);
   });
 
-  it("clears the active dataset when the graph cache is missing", async () => {
+  it("loads datasets even when legacy graph cache entries exist", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const persistence = createPersistence({ store });
 
@@ -70,18 +50,17 @@ describe("persistence service", () => {
       createdAt: 1,
       updatedAt: 1
     });
+    await store.set(KEY.activeRecordLinkGraphCache, { legacy: true });
 
     const loaded = await persistence.loadActiveDataset();
-    expect(loaded).toBeUndefined();
-    await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
-    await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
+    expect(loaded?.meta.id).toBe("dataset-2");
+    expect(loaded?.datasetSnapshot.files.size).toBe(1);
   });
 
-  it("clears the active dataset when records are missing", async () => {
+  it("clears the active dataset when snapshot or meta is missing", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
     const persistence = createPersistence({ store });
 
-    await store.set(KEY.activeRecordLinkGraphCache, samplePersistedGraph);
     await store.set(KEY.activeMeta, {
       id: "dataset-3",
       createdAt: 1,
@@ -91,7 +70,6 @@ describe("persistence service", () => {
     const loaded = await persistence.loadActiveDataset();
     expect(loaded).toBeUndefined();
     await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
-    await expect(store.get(KEY.activeRecordLinkGraphCache)).resolves.toBeUndefined();
     await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
   });
 });

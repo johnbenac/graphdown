@@ -1,30 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { RecordLinkGraph, RecordLinkGraphTypeNode } from "@graphdown/core";
 import DatasetRoute from "../DatasetRoute";
 import { createRuntimeApiV1Mock } from "../../testUtils/runtimeApiV1Mock";
 
-const typeNode: RecordLinkGraphTypeNode = {
-  kind: "type",
-  typeId: "note",
-  fields: { name: "Note", description: "Docs" },
-  body: "Type-level markdown lives here.",
-  file: "types/note.md"
-};
-
-const recordLinkGraph: RecordLinkGraph = {
-  typesById: new Map([[typeNode.typeId, typeNode]]),
-  recordsByKey: new Map(),
-  nodesByIdentity: new Map([[typeNode.typeId, typeNode]]),
-  outgoingRecordLinks: new Map(),
-  incomingRecordLinks: new Map(),
-  getOutgoingRecordLinks: () => [],
-  getIncomingRecordLinks: () => [],
-  getType: () => typeNode,
-  getRecord: () => null,
-  getTypeForRecord: () => typeNode,
-  getTypeIdForIdentity: () => typeNode.typeId
+const sampleSnapshot = {
+  files: new Map([
+    [
+      "types/note.md",
+      new TextEncoder().encode(
+        ["---", "typeId: note", "fields:", "  name: Note", "---", "Type-level markdown lives here."].join("\n")
+      )
+    ]
+  ])
 };
 
 vi.mock("../../state/DatasetContext", () => ({
@@ -39,11 +27,12 @@ vi.mock("../../state/DatasetContext", () => ({
         label: "Test dataset",
         source: "import"
       },
-      datasetSnapshot: { files: new Map([["types/note.md", new Uint8Array()]]) },
-      recordLinkGraph,
-      runtimeApiV1: createRuntimeApiV1Mock({
-        files: new Map([["types/note.md", new Uint8Array()]])
-      })
+      datasetSnapshot: sampleSnapshot,
+      runtimeApiV1: createRuntimeApiV1Mock(sampleSnapshot),
+      index: {
+        typeFileById: new Map([["note", "types/note.md"]]),
+        recordFileByKey: new Map()
+      }
     },
     error: undefined,
     importDatasetZip: vi.fn(),
@@ -66,8 +55,8 @@ function renderDatasetRoute(path = "/datasets/note") {
 }
 
 describe("DatasetRoute", () => {
-  it("shows the selected type body content", () => {
+  it("shows the selected type body content", async () => {
     renderDatasetRoute();
-    expect(screen.getByTestId("type-body")).toHaveTextContent("Type-level markdown lives here.");
+    expect(await screen.findByTestId("type-body")).toHaveTextContent("Type-level markdown lives here.");
   });
 });

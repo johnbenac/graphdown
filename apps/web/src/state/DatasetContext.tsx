@@ -1,13 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { RecordLinkGraph, ValidationError } from "@graphdown/core";
-import { makeError } from "@graphdown/core";
-import { canonicalizeDatasetSnapshot } from "@graphdown/core";
-import { buildRecordLinkGraphFromSnapshot } from "@graphdown/core";
-import { parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
+import type { ValidationError } from "@graphdown/core";
+import { canonicalizeDatasetSnapshot, makeError, parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
-import { validateDatasetSnapshot } from "@graphdown/core";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
-import { openRuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
 import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
@@ -18,6 +13,7 @@ import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
 import { createPersistStore } from "../storage/createPersistStore";
 import { buildImportReport } from "./importReport";
+import { openDatasetSession, type SnapshotIndex } from "./openDatasetSession";
 
 export type ImportErrorCategory =
   | "invalid_url"
@@ -46,6 +42,7 @@ export type ImportErrorState =
 
 type ActiveDataset = LoadedDataset & {
   runtimeApiV1: RuntimeApiV1;
+  index: SnapshotIndex;
 };
 
 export type DatasetContextValue = {
@@ -103,16 +100,6 @@ function buildPersistenceError(err: unknown): ImportErrorState {
         ? err.message
         : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
   };
-}
-
-async function openRuntimeOrErrors(
-  snapshot: DatasetSnapshot
-): Promise<{ ok: true; api: RuntimeApiV1 } | { ok: false; errors: ValidationError[] }> {
-  const result = await openRuntimeApiV1({ snapshot });
-  if (!result.ok) {
-    return { ok: false, errors: result.errors };
-  }
-  return { ok: true, api: result.value };
 }
 
 function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
@@ -184,14 +171,14 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         setStatus((prev) => (prev === "loading" ? "ready" : prev));
         return;
       }
-      const runtime = await openRuntimeOrErrors(dataset.datasetSnapshot);
-      if (!runtime.ok) {
+      const opened = await openDatasetSession(dataset.datasetSnapshot);
+      if (!opened.ok) {
         setActiveDataset(undefined);
         setStatus("error");
-        setError(mapRuntimeOpenFailure(runtime.errors));
+        setError(mapRuntimeOpenFailure(opened.errors));
         return;
       }
-      setActiveDataset({ ...dataset, runtimeApiV1: runtime.api });
+      setActiveDataset({ ...dataset, runtimeApiV1: opened.runtimeApiV1, index: opened.index });
       setStatus((prev) => (prev === "loading" ? "ready" : prev));
     } catch (err) {
       console.error("Persistence is required but failed to initialize/use IndexedDB.", err);
@@ -226,8 +213,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       label: string,
       datasetSnapshot: DatasetSnapshot,
-      recordLinkGraph: RecordLinkGraph,
       runtimeApiV1: RuntimeApiV1,
+      index: SnapshotIndex,
       importReport?: ImportReport
     ) => {
       if (!persistence) {
@@ -242,8 +229,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         source: "import",
         importReport
       };
-      await persistence.saveActiveDataset({ meta, datasetSnapshot, recordLinkGraph });
-      setActiveDataset({ meta, datasetSnapshot, recordLinkGraph, runtimeApiV1 });
+      await persistence.saveActiveDataset({ meta, datasetSnapshot });
+      setActiveDataset({ meta, datasetSnapshot, runtimeApiV1, index });
     },
     [persistence]
   );
@@ -256,51 +243,22 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setProgress({ phase: "validating_dataset" });
       try {
         const { snapshot: rawSnapshot, ignored } = await readZipSnapshot(file);
-        const validation = validateDatasetSnapshot(rawSnapshot);
-        if (!validation.ok) {
-          setStatus("error");
-          setError({
-            category: "dataset_invalid",
-            title: "Dataset invalid",
-            message: "This dataset does not meet the required structure.",
-            errors: validation.errors
-          });
-          return;
-        }
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
         const importReport = buildImportReport({
           rawSnapshot,
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_record_link_graph" });
-        const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
-        if (!recordLinkGraphResult.ok) {
-          setStatus("error");
-          setError({
-            category: "dataset_invalid",
-            title: "Dataset invalid",
-            message: "Dataset records could not be parsed.",
-            errors: recordLinkGraphResult.errors
-          });
-          return;
-        }
         setProgress({ phase: "opening_runtime" });
-        const runtime = await openRuntimeOrErrors(datasetSnapshot);
-        if (!runtime.ok) {
+        const opened = await openDatasetSession(datasetSnapshot);
+        if (!opened.ok) {
           setStatus("error");
-          setError(mapRuntimeOpenFailure(runtime.errors));
+          setError(mapRuntimeOpenFailure(opened.errors));
           return;
         }
         setProgress({ phase: "persisting" });
         persisted = true;
-        await saveActiveDataset(
-          file.name,
-          datasetSnapshot,
-          recordLinkGraphResult.graph,
-          runtime.api,
-          importReport
-        );
+        await saveActiveDataset(file.name, datasetSnapshot, opened.runtimeApiV1, opened.index, importReport);
         setStatus("ready");
         setProgress({ phase: "done" });
       } catch (err) {
@@ -350,41 +308,17 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         });
 
         setProgress({ phase: "validating_dataset" });
-        const validation = validateDatasetSnapshot(rawSnapshot);
-        if (!validation.ok) {
-          setStatus("error");
-          setError({
-            category: "dataset_invalid",
-            title: "Dataset invalid",
-            message: "This dataset does not meet the required structure.",
-            errors: validation.errors
-          });
-          return;
-        }
-
         const datasetSnapshot = canonicalizeDatasetSnapshot(rawSnapshot);
         const importReport: ImportReport = buildImportReport({
           rawSnapshot,
           canonicalSnapshot: datasetSnapshot,
           ignored
         });
-        setProgress({ phase: "building_record_link_graph" });
-        const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(datasetSnapshot);
-        if (!recordLinkGraphResult.ok) {
-          setStatus("error");
-          setError({
-            category: "dataset_invalid",
-            title: "Dataset invalid",
-            message: "Dataset records could not be parsed.",
-            errors: recordLinkGraphResult.errors
-          });
-          return;
-        }
         setProgress({ phase: "opening_runtime" });
-        const runtime = await openRuntimeOrErrors(datasetSnapshot);
-        if (!runtime.ok) {
+        const opened = await openDatasetSession(datasetSnapshot);
+        if (!opened.ok) {
           setStatus("error");
-          setError(mapRuntimeOpenFailure(runtime.errors));
+          setError(mapRuntimeOpenFailure(opened.errors));
           return;
         }
         setProgress({ phase: "persisting" });
@@ -392,8 +326,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         await saveActiveDataset(
           parsed.value.canonicalRepoUrl,
           datasetSnapshot,
-          recordLinkGraphResult.graph,
-          runtime.api,
+          opened.runtimeApiV1,
+          opened.index,
           importReport
         );
         setStatus("ready");
@@ -450,17 +384,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     async (
       nextSnapshot: DatasetSnapshot
     ): Promise<{ ok: true } | { ok: false; errors: ValidationError[] }> => {
-      const validation = validateDatasetSnapshot(nextSnapshot);
-      if (!validation.ok) {
-        return { ok: false, errors: validation.errors } as const;
-      }
-      const recordLinkGraphResult = buildRecordLinkGraphFromSnapshot(nextSnapshot);
-      if (!recordLinkGraphResult.ok) {
-        return { ok: false, errors: recordLinkGraphResult.errors } as const;
-      }
-      const runtime = await openRuntimeOrErrors(nextSnapshot);
-      if (!runtime.ok) {
-        return { ok: false, errors: runtime.errors } as const;
+      const opened = await openDatasetSession(nextSnapshot);
+      if (!opened.ok) {
+        return { ok: false, errors: opened.errors } as const;
       }
       if (!activeDataset) {
         return {
@@ -477,14 +403,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
       await persistence.saveActiveDataset({
         meta: nextMeta,
-        datasetSnapshot: nextSnapshot,
-        recordLinkGraph: recordLinkGraphResult.graph
+        datasetSnapshot: nextSnapshot
       });
       setActiveDataset({
         meta: nextMeta,
         datasetSnapshot: nextSnapshot,
-        recordLinkGraph: recordLinkGraphResult.graph,
-        runtimeApiV1: runtime.api
+        runtimeApiV1: opened.runtimeApiV1,
+        index: opened.index
       });
       return { ok: true } as const;
     },
@@ -497,21 +422,21 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       nextFields: Record<string, unknown>;
       nextBody: string;
     }) => {
-      if (!activeDataset?.recordLinkGraph) {
+      if (!activeDataset) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
-      const node = activeDataset.recordLinkGraph.nodesByIdentity.get(input.recordKey);
-      if (!node || node.kind !== "record") {
+      const filePath = activeDataset.index.recordFileByKey.get(input.recordKey);
+      if (!filePath) {
         return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
-      const currentBytes = activeDataset.datasetSnapshot.files.get(node.file);
+      const currentBytes = activeDataset.datasetSnapshot.files.get(filePath);
       if (!currentBytes) {
         return {
           ok: false,
-          errors: [makeError("E_INTERNAL", "Record file missing from snapshot.", node.file)]
+          errors: [makeError("E_INTERNAL", "Record file missing from snapshot.", filePath)]
         } as const;
       }
-      const parsed = parseMarkdownRecord(decodeBytes(currentBytes), node.file);
+      const parsed = parseMarkdownRecord(decodeBytes(currentBytes), filePath);
       if (!parsed.ok) {
         return { ok: false, errors: [parsed.error] } as const;
       }
@@ -531,7 +456,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
       const nextFiles = new Map(activeDataset.datasetSnapshot.files);
-      nextFiles.set(node.file, encodeText(nextText));
+      nextFiles.set(filePath, encodeText(nextText));
       const nextSnapshot = { ...activeDataset.datasetSnapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
@@ -544,32 +469,35 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const createRecord = useCallback<DatasetContextValue["createRecord"]>(
     async (input: { typeId: string; recordId: string; fields: Record<string, unknown>; body: string }) => {
-      if (!activeDataset?.recordLinkGraph) {
+      if (!activeDataset) {
         return { ok: false, errors: [makeError("E_INTERNAL", "No active dataset is loaded.")] } as const;
       }
       const trimmedRecordId = input.recordId.trim();
       if (!trimmedRecordId) {
         return { ok: false, errors: [makeError("E_USAGE", "Record ID is required.")] } as const;
       }
-      if (!activeDataset.recordLinkGraph.typesById.has(input.typeId)) {
+      const existingType = await activeDataset.runtimeApiV1.getType(input.typeId);
+      if (!existingType) {
         return {
           ok: false,
           errors: [makeError("E_UNKNOWN_RECORD_DIR", "Unknown record type.", input.typeId)]
         } as const;
       }
       const recordKey = `${input.typeId}:${trimmedRecordId}`;
-      if (activeDataset.recordLinkGraph.nodesByIdentity.has(recordKey)) {
+      const existingRecord = await activeDataset.runtimeApiV1.getRecord(recordKey);
+      if (existingRecord) {
         return {
           ok: false,
           errors: [makeError("E_DUPLICATE_ID", `Record id ${trimmedRecordId} already exists.`)]
         } as const;
       }
       const safeId = trimmedRecordId.replace(/[^A-Za-z0-9_-]+/g, "-");
-      let filePath = `records/${input.typeId}/record--${safeId}.md`;
-      let counter = 1;
+      let counter = 0;
+      let filePath = `records/${input.typeId}.${safeId}/${safeId}.md`;
       while (activeDataset.datasetSnapshot.files.has(filePath)) {
         counter += 1;
-        filePath = `records/${input.typeId}/record--${safeId}-${counter}.md`;
+        const suffixedId = `${safeId}-${counter}`;
+        filePath = `records/${input.typeId}.${suffixedId}/${suffixedId}.md`;
       }
       const fields: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(input.fields)) {

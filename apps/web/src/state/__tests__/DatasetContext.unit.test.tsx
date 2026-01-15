@@ -159,7 +159,9 @@ describe("DatasetContext GitHub import", () => {
 describe("DatasetContext zip import", () => {
   it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
     const zipBytes = zipSync({
-      "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: []\n---"))
+      "records/note/one.md": new Uint8Array(
+        strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---\nBody")
+      )
     });
     const file = {
       name: "demo.zip",
