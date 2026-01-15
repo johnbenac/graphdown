@@ -121,13 +121,13 @@ function checkWebE2E() {
   });
 }
 
-function checkCoreTests() {
-  const coreRoot = path.join(repoRoot, "packages", "core", "src");
-  if (!fs.existsSync(coreRoot)) {
+function checkPackageTests(packageName) {
+  const packageRoot = path.join(repoRoot, "packages", packageName, "src");
+  if (!fs.existsSync(packageRoot)) {
     return;
   }
 
-  walk(coreRoot, (fullPath) => {
+  walk(packageRoot, (fullPath) => {
     const relPath = toPosix(path.relative(repoRoot, fullPath));
     const fileName = path.basename(fullPath);
     if (!/\.test\.ts$/.test(fileName)) {
@@ -138,7 +138,7 @@ function checkCoreTests() {
     if (!isInTestsDir) {
       violations.push({
         path: relPath,
-        reason: "Core tests must live under a __tests__ directory"
+        reason: `${packageName} tests must live under a __tests__ directory`
       });
       return;
     }
@@ -147,7 +147,7 @@ function checkCoreTests() {
       if (!/\.integration\.test\.ts$/.test(fileName)) {
         violations.push({
           path: relPath,
-          reason: "Core spec tests must be named *.integration.test.ts"
+          reason: `${packageName} spec tests must be named *.integration.test.ts`
         });
       }
       return;
@@ -157,7 +157,7 @@ function checkCoreTests() {
       if (!/\.governance\.integration\.test\.ts$/.test(fileName)) {
         violations.push({
           path: relPath,
-          reason: "Governance tests must be named *.governance.integration.test.ts"
+          reason: `${packageName} governance tests must be named *.governance.integration.test.ts`
         });
       }
       return;
@@ -166,68 +166,31 @@ function checkCoreTests() {
     if (!/\.unit\.test\.ts$/.test(fileName)) {
       violations.push({
         path: relPath,
-        reason: "Core unit tests must be named *.unit.test.ts"
+        reason: `${packageName} unit tests must be named *.unit.test.ts`
       });
     }
   });
 }
 
-function checkRuntimeTests() {
-  const runtimeRoot = path.join(repoRoot, "packages", "runtime", "src");
-  if (!fs.existsSync(runtimeRoot)) {
-    return;
+function discoverLibraryPackages() {
+  const packagesDir = path.join(repoRoot, "packages");
+  if (!fs.existsSync(packagesDir)) {
+    return [];
   }
-
-  walk(runtimeRoot, (fullPath) => {
-    const relPath = toPosix(path.relative(repoRoot, fullPath));
-    const fileName = path.basename(fullPath);
-    if (!/\.test\.ts$/.test(fileName)) {
-      return;
-    }
-
-    const isInTestsDir = relPath.split("/").includes("__tests__");
-    if (!isInTestsDir) {
-      violations.push({
-        path: relPath,
-        reason: "Runtime tests must live under a __tests__ directory"
-      });
-      return;
-    }
-
-    if (relPath.includes("/__tests__/spec/")) {
-      if (!/\.integration\.test\.ts$/.test(fileName)) {
-        violations.push({
-          path: relPath,
-          reason: "Runtime spec tests must be named *.integration.test.ts"
-        });
-      }
-      return;
-    }
-
-    if (relPath.includes("/__tests__/governance/")) {
-      if (!/\.governance\.integration\.test\.ts$/.test(fileName)) {
-        violations.push({
-          path: relPath,
-          reason: "Runtime governance tests must be named *.governance.integration.test.ts"
-        });
-      }
-      return;
-    }
-
-    if (!/\.unit\.test\.ts$/.test(fileName)) {
-      violations.push({
-        path: relPath,
-        reason: "Runtime unit tests must be named *.unit.test.ts"
-      });
-    }
-  });
+  return fs.readdirSync(packagesDir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name);
 }
 
 checkGeneralTestNaming();
 checkWebTests();
 checkWebE2E();
-checkCoreTests();
-checkRuntimeTests();
+
+// Check all library packages (core, runtime, etc.)
+const libraryPackages = discoverLibraryPackages();
+for (const packageName of libraryPackages) {
+  checkPackageTests(packageName);
+}
 
 if (violations.length > 0) {
   console.error("Test convention violations found:\n");

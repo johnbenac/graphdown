@@ -59,7 +59,11 @@ export default [
                 '../core/**',
                 '../../core/*',
                 '../../core/**',
-                '../../core/src/**'
+                '../../core/src/**',
+                '../../../core/*',
+                '../../../core/**',
+                '../../../../core/**',
+                '**/packages/core/**'
               ],
               message: 'Runtime must import @graphdown/core via the package barrel only.'
             }
@@ -71,9 +75,12 @@ export default [
   {
     files: [
       'packages/core/src/**/__tests__/**/*.{ts,tsx}',
+      'packages/runtime/src/**/__tests__/**/*.{ts,tsx}',
       'apps/web/src/**/__tests__/**/*.{ts,tsx}',
       'packages/core/src/**/*.test.{ts,tsx}',
       'packages/core/src/**/*.spec.{ts,tsx}',
+      'packages/runtime/src/**/*.test.{ts,tsx}',
+      'packages/runtime/src/**/*.spec.{ts,tsx}',
       'apps/web/src/**/*.test.{ts,tsx}',
       'apps/web/src/**/*.spec.{ts,tsx}'
     ],
