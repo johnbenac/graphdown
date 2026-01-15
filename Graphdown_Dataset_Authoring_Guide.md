@@ -1,9 +1,12 @@
 # Graphdown Dataset Authoring Guide
 *Practical guidance for writing and maintaining Graphdown datasets (Markdown + YAML front matter).*  
-Based on **Graphdown Standard v0.4 (Draft)** (last updated 2026-01-04).
+Based on **Graphdown Standard v0.5 (Draft)** (last updated 2026-01-14).
 
 > This guide is intentionally **author-focused**: how to structure content, write files, and avoid common pitfalls.  
 > For the exact normative rules, see `SPEC.md` in the Graphdown repo.
+>
+> Note: Graphdown plugins are now first-class dataset objects. This guide includes a practical, minimal “how to bundle a plugin”
+> section, including support for binary bundle assets via `binaryFiles`.
 
 ---
 
@@ -24,6 +27,10 @@ my-dataset/
   blocks/
     sha2-256/
       (optional attachments live here)
+  extensions/            (optional: plugin bundles; see “Plugins” below)
+    <pluginId>/
+      plugin.md
+      (bundle files live alongside)
 ```
 
 > Graphdown identities do **not** depend on file paths, but this layout is the **canonical export shape** and a very sane default for humans and tooling.
@@ -499,6 +506,111 @@ blocks/sha2-256/2c/bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq
   3) writes the file to the canonical path
   4) inserts `[[<cid>]]` into the record
 
+One more nuance:
+- **Dataset attachments** (images/PDFs/audio that are part of the dataset’s content) should generally be **blocks**.
+- **Plugin-local assets** (icons/fonts/wasm/zips used by the plugin itself) may be shipped as **plugin bundle files**.
+  If a plugin bundle file is binary, it must be declared in the plugin manifest’s `binaryFiles[]` list (see next section).
+
+---
+
+## Plugins
+
+Plugins let you ship **behavior + UI + supporting files** alongside a dataset.
+
+This authoring guide focuses on the **packaging rules** (what files go where, what the manifest looks like, and what’s valid).
+The details of *what plugin code can do at runtime* are evolving and should be treated as “check the current app/runtime docs.”
+
+### Plugin bundle layout (authoring)
+
+In a repo you author directly, a plugin typically lives under:
+
+```text
+extensions/<pluginId>/
+  plugin.md            # plugin manifest (Markdown + YAML front matter)
+  entry.js             # entrypoint JS (must be listed in files[])
+  ui.md                # optional docs/metadata the plugin uses
+  assets/
+    logo.bin           # example binary asset
+```
+
+When Graphdown exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
+placing the manifest at `plugins/<pluginId>/manifest.md`). Don’t panic if you see `plugins/` in exports — it’s the same plugin,
+just in canonical shape.
+
+### Plugin manifest (what you must write)
+
+The plugin manifest is a Markdown file with YAML front matter.
+
+Example: `extensions/demo/plugin.md`
+
+```md
+---
+pluginId: demo
+gdApiVersion: 1
+entry: entry.js
+files:
+  - entry.js
+  - ui.md
+  - assets/logo.bin
+
+# NEW in v0.5: declare which bundle files are binary (hashed/validated as raw bytes)
+binaryFiles:
+  - assets/logo.bin
+
+# Optional keys (core mostly treats these as opaque except blocks reachability)
+meta: {}
+config: {}
+requires: []
+blocks: []
+---
+
+Plugin manifest body text (optional).
+```
+
+Key rules you should internalize:
+
+- `files[]` is the list of **bundle files** (relative paths) that are part of the plugin.
+- `entry` **must appear** in `files[]`.
+- `binaryFiles[]` is optional. If present:
+  - it must be a list of strings,
+  - every entry must be a **safe relative path**,
+  - every entry must also appear in `files[]` (exact string match).
+- For each file in `files[]`:
+  - if the path is **not** in `binaryFiles[]`, the file must be **UTF-8 decodable**
+  - if the path **is** in `binaryFiles[]`, it may be **any bytes**
+
+Practical takeaway: keep your JS/MD/etc as UTF-8 text; put images/fonts/wasm/zips in `binaryFiles`.
+
+### Blocks declared by plugins
+
+If your plugin needs blocks that are not referenced by any record (for example, plugin-owned assets stored as blocks),
+it may declare them explicitly in the manifest:
+
+```yaml
+blocks:
+  - bafkrei...
+  - bafkrei...
+```
+
+This ensures they’re considered reachable for validation/export/GC workflows.
+
+### Hashing behavior for plugin bundle files
+
+This matters for determinism and “why did my dataset hash change?” debugging:
+
+- **Text plugin bundle files** (not in `binaryFiles[]`) are hashed as UTF-8 text with line ending normalization.
+  - `\n` vs `\r\n` does *not* change the hash.
+- **Binary plugin bundle files** (listed in `binaryFiles[]`) are hashed as **raw bytes**.
+  - any byte change changes the dataset hash.
+
+### Common plugin authoring errors (and fixes)
+
+- `E_PLUGIN_UTF8_INVALID` for a plugin file like `logo.png` / `font.ttf` / `plugin.wasm`  
+  → Add that path to `binaryFiles[]` in the manifest (and ensure it is also listed in `files[]`).
+
+- `E_PLUGIN_KEYS_INVALID` complaining that a `binaryFiles` entry “must be listed in files”  
+  → Add the missing file path to `files[]` or remove it from `binaryFiles[]`.
+
 ---
 
 ## Recommended repository structure and conventions
@@ -520,6 +632,11 @@ blocks/
   sha2-256/
     <prefix>/
       <cid>
+
+extensions/                      (optional plugins, authoring layout)
+  <pluginId>/
+    plugin.md
+    (bundle files listed in files[])
 ```
 
 ### Naming conventions that age well
@@ -741,6 +858,15 @@ Fix: the block file must exist at the canonical path under `blocks/sha2-256/...`
 ### “Invalid CID reference …”
 
 Fix: avoid CID-shaped tokens that aren’t real CIDs. If you meant a record link, it should be `[[typeId:recordId]]` not a base32 CID.
+
+### “E_PLUGIN_UTF8_INVALID” for a plugin asset
+
+Fix: if the plugin bundle includes non-text bytes (png/ttf/wasm/zip/etc), list that path under `binaryFiles:` in the plugin manifest.
+If it’s *not* in `binaryFiles`, Graphdown treats it as text and requires valid UTF-8.
+
+### “binaryFiles entry … must be listed in files”
+
+Fix: every path listed in `binaryFiles:` must also appear in `files:` by exact string equality.
 
 ---
 
