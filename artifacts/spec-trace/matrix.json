@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-15T00:30:57.811Z",
+  "generatedAt": "2026-01-15T03:33:48.407Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1672,7 +1672,7 @@
         {
           "reqId": "API-001",
           "testTitle": "API-001: runtime api v1 is explicitly versioned",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1685,7 +1685,7 @@
         {
           "reqId": "API-002",
           "testTitle": "API-002: capabilities are discoverable and include gd.api.read",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1698,7 +1698,7 @@
         {
           "reqId": "API-003",
           "testTitle": "API-003: all Runtime API operations are asynchronous (thenable)",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1711,7 +1711,7 @@
         {
           "reqId": "API-004",
           "testTitle": "API-004: runtime api methods are identity-addressed and path-independent",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1724,7 +1724,7 @@
         {
           "reqId": "API-005",
           "testTitle": "API-005: Runtime API payloads are structured-clone compatible",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1737,17 +1737,17 @@
         {
           "reqId": "API-ERR-001",
           "testTitle": "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts"
         },
         {
           "reqId": "API-ERR-001",
           "testTitle": "API-ERR-001: invalid CID argument rejects with structured error",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts"
         },
         {
           "reqId": "API-ERR-001",
           "testTitle": "API-ERR-001: open fails with structured error when structuredClone is unavailable",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts"
         }
       ]
     },
@@ -1767,27 +1767,27 @@
         {
           "reqId": "API-SESSION-002",
           "testTitle": "API-SESSION-002: block bytes are returned as copies",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         },
         {
           "reqId": "API-SESSION-002",
           "testTitle": "API-SESSION-002: getType returns isolated copies",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         },
         {
           "reqId": "API-SESSION-002",
           "testTitle": "API-SESSION-002: listRecordsByType returns isolated copies",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         },
         {
           "reqId": "API-SESSION-002",
           "testTitle": "API-SESSION-002: raw bytes are returned as copies",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         },
         {
           "reqId": "API-SESSION-002",
           "testTitle": "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1898,7 +1898,7 @@
         {
           "reqId": "API-DET-001",
           "testTitle": "API-DET-001: read results are deterministic for a fixed snapshot",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },
@@ -1911,7 +1911,7 @@
         {
           "reqId": "API-DET-002",
           "testTitle": "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views",
-          "filePath": "packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts"
+          "filePath": "packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts"
         }
       ]
     },

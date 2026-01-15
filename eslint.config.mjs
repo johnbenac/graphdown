@@ -75,5 +75,25 @@ export default [
         }
       ]
     }
+  },
+  {
+    files: ['packages/runtime/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@graphdown/core/*',
+                '@graphdown/core/src/*',
+                '@graphdown/core/src/**'
+              ],
+              message: 'Import from @graphdown/core (package barrel) only.'
+            }
+          ]
+        }
+      ]
+    }
   }
 ];

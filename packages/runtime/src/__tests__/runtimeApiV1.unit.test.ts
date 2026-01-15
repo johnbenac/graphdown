@@ -1,13 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import {
-  blockPathForCid,
-  cidFromRawBytes,
-  openRuntimeApiV1,
-  RUNTIME_API_VERSION_V1,
-  validateDatasetSnapshot
-} from '../../index';
+import { blockPathForCid, cidFromRawBytes, validateDatasetSnapshot } from '@graphdown/core';
+
+import { openRuntimeApiV1, RUNTIME_API_VERSION_V1 } from '../index';
 import {
   invalidDataset_badBlockPathUnderBlocks,
   invalidDataset_missingFields,
