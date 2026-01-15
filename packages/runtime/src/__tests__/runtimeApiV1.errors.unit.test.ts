@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import { blockPathForCid, cidFromRawBytes, openRuntimeApiV1 } from '../../index';
-import { isRuntimeApiError } from '../errors';
+import { blockPathForCid, cidFromRawBytes } from '@graphdown/core';
+import { isRuntimeApiError, openRuntimeApiV1 } from '../index';
 import { utf8, validDatasetMinimal } from './fixtures';
 
 test('API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint', async () => {

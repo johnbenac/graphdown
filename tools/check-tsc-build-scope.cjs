@@ -8,7 +8,6 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const legacyDirs = [
   path.join(REPO_ROOT, "packages", "core", "src", "tests"),
   path.join(REPO_ROOT, "packages", "core", "src", "fixtures"),
-  path.join(REPO_ROOT, "packages", "core", "src", "runtime", "tests")
 ];
 
 const existingLegacyDirs = legacyDirs.filter((dir) => fs.existsSync(dir));
@@ -40,8 +39,7 @@ const forbiddenMatchers = [
   "/packages/core/src/__tests__/",
   "/packages/core/src/__fixtures__/",
   "/packages/core/src/tests/",
-  "/packages/core/src/fixtures/",
-  "/packages/core/src/runtime/tests/"
+  "/packages/core/src/fixtures/"
 ];
 
 const offending = output

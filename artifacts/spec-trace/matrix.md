@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-15T00:30:57.811Z
+Generated: 2026-01-15T03:33:35.777Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -503,29 +503,29 @@ Tests (0):
 
 ## API-001 — Runtime API is explicitly versioned (testable=true)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-001: runtime api v1 is explicitly versioned"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-001: runtime api v1 is explicitly versioned"
 
 ## API-002 — Capabilities are discoverable (testable=true)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-002: capabilities are discoverable and include gd.api.read"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-002: capabilities are discoverable and include gd.api.read"
 
 ## API-003 — All Runtime API operations are asynchronous (testable=false)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-003: all Runtime API operations are asynchronous (thenable)"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-003: all Runtime API operations are asynchronous (thenable)"
 
 ## API-004 — Runtime API addresses objects by Graphdown identities (testable=true)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
 
 ## API-005 — Runtime API payloads are structured-clone compatible (testable=false)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-005: Runtime API payloads are structured-clone compatible"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-005: Runtime API payloads are structured-clone compatible"
 
 ## API-ERR-001 — Errors are structured and include stable codes (testable=false)
 Tests (3):
-- packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint"
-- packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: invalid CID argument rejects with structured error"
-- packages/core/src/runtime/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: open fails with structured error when structuredClone is unavailable"
+- packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: getBlockBytes missing block rejects with structured error + file + hint"
+- packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: invalid CID argument rejects with structured error"
+- packages/runtime/src/__tests__/runtimeApiV1.errors.unit.test.ts — "API-ERR-001: open fails with structured error when structuredClone is unavailable"
 
 ## API-SESSION-001 — Runtime API can open a session from a snapshot (testable=false)
 Tests (0):
@@ -533,11 +533,11 @@ Tests (0):
 
 ## API-SESSION-002 — Read operations are side-effect free (testable=false)
 Tests (5):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: block bytes are returned as copies"
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: getType returns isolated copies"
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: listRecordsByType returns isolated copies"
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: raw bytes are returned as copies"
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: block bytes are returned as copies"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: getType returns isolated copies"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: listRecordsByType returns isolated copies"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: raw bytes are returned as copies"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-SESSION-002: view getters return isolated copies (mutations do not affect subsequent reads)"
 
 ## API-SHAPE-001 — Type object view shape (testable=false)
 Tests (0):
@@ -597,11 +597,11 @@ Tests (0):
 
 ## API-DET-001 — Read results are deterministic for a fixed snapshot (testable=false)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-DET-001: read results are deterministic for a fixed snapshot"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-DET-001: read results are deterministic for a fixed snapshot"
 
 ## API-DET-002 — List order is stable and documented (testable=false)
 Tests (1):
-- packages/core/src/runtime/__tests__/runtimeApiV1.unit.test.ts — "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views"
+- packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-DET-002: runtime api v1 listTypes + listRecordsByType return deterministic sorted views"
 
 ## API-PARK-000 — Parked requirements are capability-conditional (testable=false)
 Tests (0):

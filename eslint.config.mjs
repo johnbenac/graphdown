@@ -44,10 +44,35 @@ export default [
     }
   },
   {
+    files: ['packages/runtime/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@graphdown/core/*',
+                '@graphdown/core/src/*',
+                '@graphdown/core/src/**',
+                '**/packages/core/*',
+                '../core/*',
+                '../../core/*'
+              ],
+              message: 'Import from @graphdown/core (package barrel) only.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: [
       'packages/core/src/**/__tests__/**/*.{ts,tsx}',
+      'packages/runtime/src/**/__tests__/**/*.{ts,tsx}',
       'apps/web/src/**/__tests__/**/*.{ts,tsx}',
       'packages/core/src/**/*.test.{ts,tsx}',
+      'packages/runtime/src/**/*.test.{ts,tsx}',
       'packages/core/src/**/*.spec.{ts,tsx}',
       'apps/web/src/**/*.test.{ts,tsx}',
       'apps/web/src/**/*.spec.{ts,tsx}'
