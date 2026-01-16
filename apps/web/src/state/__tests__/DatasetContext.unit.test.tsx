@@ -16,7 +16,7 @@ function TestHarness({ onReady }: { onReady: (ctx: DatasetContextValue) => void 
 describe("DatasetContext GitHub import", () => {
   it("ERR-002: maps GitHub 404 repo responses to not_found", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "Not Found" }), {
         status: 404,
@@ -43,7 +43,7 @@ describe("DatasetContext GitHub import", () => {
 
   it("ERR-002: maps GitHub rate limits to rate_limited", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "API rate limit exceeded" }), {
         status: 403,
@@ -128,7 +128,7 @@ describe("DatasetContext GitHub import", () => {
 
       throw new Error(`Unexpected fetch: ${url.toString()}`);
     });
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     let ctx: DatasetContextValue | null = null;
     render(
@@ -142,11 +142,21 @@ describe("DatasetContext GitHub import", () => {
     });
 
     await waitFor(() => {
+      if (ctx?.status === "error") {
+        console.error("Import failed with error:", ctx.error);
+      }
       expect(ctx?.status).toBe("ready");
       expect(ctx?.activeDataset).toBeDefined();
       expect(ctx?.activeDataset?.datasetSnapshot.files.size).toBe(2);
     });
     const runtimeApiV1 = (ctx as DatasetContextValue | null)?.activeDataset?.runtimeApiV1;
+    if (!runtimeApiV1) {
+      console.error("runtimeApiV1 is undefined. Context:", {
+        status: ctx?.status,
+        hasActiveDataset: !!ctx?.activeDataset,
+        error: ctx?.error
+      });
+    }
     expect(runtimeApiV1).toBeDefined();
     await expect(runtimeApiV1?.listTypeIds()).resolves.toEqual(["note"]);
     expect(fetchMock).toHaveBeenCalledTimes(4);

@@ -6,8 +6,11 @@ import react from "@vitejs/plugin-react";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
+const isCI = !!process.env.CI;
+const lightRoutes = process.env.VITEST_LIGHT_ROUTES === "1";
 const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
 const runtimeIndex = path.resolve(__dirname, "../../packages/runtime/src/index.ts");
+const runtimeStub = path.resolve(__dirname, "src/testStubs/runtime.ts");
 
 function normalizeBase(base: string | undefined): string {
   if (!base) {
@@ -22,11 +25,20 @@ function normalizeBase(base: string | undefined): string {
 
 export default defineConfig({
   base: normalizeBase(pagesBase),
-  plugins: [react()],
+  esbuild: {
+    sourcemap: false,
+  },
+  plugins: [
+    react({
+      babel: { sourceMaps: false },
+    })
+  ],
   resolve: {
     alias: [
       { find: /^@graphdown\/core$/, replacement: coreIndex },
-      { find: /^@graphdown\/runtime$/, replacement: runtimeIndex }
+      // For routes shard only, alias runtime to stub to reduce Vite transform demand
+      // Other tests use vi.mock which allows real runtime when needed
+      { find: /^@graphdown\/runtime$/, replacement: lightRoutes ? runtimeStub : runtimeIndex }
     ]
   },
   server: {
@@ -37,6 +49,10 @@ export default defineConfig({
     // Ensure describe/it/expect exist globally at runtime
     globals: true,
 
+    // Automatically restore globals/envs between tests to prevent leaks
+    unstubGlobals: true,
+    unstubEnvs: true,
+
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
 
@@ -46,7 +62,18 @@ export default defineConfig({
     // Make sure Playwright specs never get collected by Vitest
     exclude: ["e2e/**", "**/e2e/**", "node_modules/**", "dist/**"],
 
-    // optional, but helps when importing CSS in components
-    css: true,
+    // Disable CSS processing in unit tests to reduce memory usage
+    css: false,
+
+    // Prevent hanging tests and reduce memory pressure
+    testTimeout: 30000,
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: isCI,
+        maxForks: isCI ? 1 : 2,
+        minForks: 1
+      }
+    }
   },
 });

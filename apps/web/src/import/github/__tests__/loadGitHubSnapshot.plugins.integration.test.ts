@@ -72,7 +72,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       return new Response("Not found", { status: 404 });
     });
 
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 

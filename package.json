@@ -29,6 +29,7 @@
     "test:core": "npm --workspace packages/core run typecheck && npm --workspace packages/core run test",
     "test:runtime": "npm --workspace packages/runtime run typecheck && npm --workspace packages/runtime run test",
     "test:web": "npm --workspace apps/web run test",
+    "test:web:ci": "npm --workspace apps/web run test:ci",
     "test:web:e2e": "npm --workspace apps/web run test:e2e",
     "test": "npm run check:core-scope && npm run test:core && npm run test:runtime && npm run test:web",
     "build:core:cjs": "rm -rf .ci/core-dist-cjs && tsc -p packages/core/tsconfig.build.cjs.json --outDir .ci/core-dist-cjs",
