@@ -16,4 +16,5 @@ vi.mock("@graphdown/runtime", async () => {
 
 afterEach(() => {
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
 });

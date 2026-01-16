@@ -4,7 +4,6 @@ import { IndexedDbStore } from "../IndexedDbStore";
 
 describe("createPersistStore", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
@@ -12,8 +11,12 @@ describe("createPersistStore", () => {
     vi.stubGlobal("indexedDB", undefined);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    expect(() => createPersistStore({ logger: console })).toThrow(/requires IndexedDB/i);
-    expect(errorSpy).toHaveBeenCalled();
+    try {
+      expect(() => createPersistStore({ logger: console })).toThrow(/requires IndexedDB/i);
+      expect(errorSpy).toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 
   it("returns an IndexedDbStore when IndexedDB is available", async () => {

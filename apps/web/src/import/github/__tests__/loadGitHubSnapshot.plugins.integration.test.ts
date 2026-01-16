@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,10 +11,6 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot plugin bundles", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files", async () => {
     const testDir = path.dirname(fileURLToPath(import.meta.url));
     const fixturePath = path.resolve(
@@ -72,7 +68,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       return new Response("Not found", { status: 404 });
     });
 
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
 
