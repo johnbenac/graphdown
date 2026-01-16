@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
 import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
@@ -188,8 +189,11 @@ describe("DatasetContext zip import", () => {
 });
 
 describe("DatasetContext persistence requirements", () => {
+  const originalFetch = globalThis.fetch;
+
   afterEach(() => {
-    vi.restoreAllMocks();
+    globalThis.fetch = originalFetch;
+    vi.clearAllMocks();
     vi.unstubAllGlobals();
   });
 

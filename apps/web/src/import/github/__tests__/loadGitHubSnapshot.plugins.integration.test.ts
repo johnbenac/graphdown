@@ -11,8 +11,11 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot plugin bundles", () => {
+  const originalFetch = globalThis.fetch;
+
   afterEach(() => {
-    vi.restoreAllMocks();
+    globalThis.fetch = originalFetch;
+    vi.clearAllMocks();
   });
 
   it("IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files", async () => {

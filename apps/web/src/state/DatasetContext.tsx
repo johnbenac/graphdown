@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ValidationError } from "@graphdown/core";
 import { canonicalizeDatasetSnapshot, makeError, parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
@@ -70,6 +70,11 @@ const DatasetContext = createContext<DatasetContextValue | undefined>(undefined)
 
 const textEncoder = typeof TextEncoder !== "undefined" ? new TextEncoder() : null;
 const textDecoder = typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8") : null;
+const isTestEnv =
+  (typeof process !== "undefined" && process.env?.NODE_ENV === "test") ||
+  (typeof import.meta !== "undefined" &&
+    typeof import.meta.env !== "undefined" &&
+    import.meta.env.MODE === "test");
 
 function decodeBytes(raw: Uint8Array): string {
   if (textDecoder) {
@@ -131,6 +136,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
   const [activeDataset, setActiveDataset] = useState<ActiveDataset | undefined>(undefined);
   const [error, setError] = useState<ImportErrorState | undefined>(undefined);
   const [progress, setProgress] = useState<ImportProgress>({ phase: "idle" });
+  const loadActiveId = useRef(0);
 
   const { store, storeError } = useMemo(() => {
     try {
@@ -161,17 +167,24 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     if (!persistence) {
       return;
     }
+    const runId = (loadActiveId.current += 1);
     setStatus("loading");
     setError(undefined);
     setProgress({ phase: "idle" });
     try {
       const dataset = await persistence.loadActiveDataset();
+      if (loadActiveId.current !== runId) {
+        return;
+      }
       if (!dataset) {
         setActiveDataset(undefined);
         setStatus((prev) => (prev === "loading" ? "ready" : prev));
         return;
       }
       const opened = await openDatasetSession(dataset.datasetSnapshot);
+      if (loadActiveId.current !== runId) {
+        return;
+      }
       if (!opened.ok) {
         setActiveDataset(undefined);
         setStatus("error");
@@ -198,7 +211,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     if (!persistence) {
       return;
     }
-    (window as Window & { __appDebug?: { clearPersistence: () => Promise<void> } }).__appDebug = {
+    const debugHandle = {
       clearPersistence: async () => {
         await persistence.clearActiveDataset();
         setActiveDataset(undefined);
@@ -207,7 +220,33 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         setProgress({ phase: "idle" });
       }
     };
+    const win = window as Window & { __appDebug?: { clearPersistence: () => Promise<void> } };
+    win.__appDebug = debugHandle;
+    return () => {
+      if (win.__appDebug === debugHandle) {
+        delete win.__appDebug;
+      }
+    };
   }, [persistence]);
+
+  useEffect(() => {
+    if (!store) {
+      return;
+    }
+    return () => {
+      const storeWithClose = store as {
+        close?: () => Promise<void>;
+        destroy?: () => Promise<void>;
+      };
+      if (isTestEnv && typeof storeWithClose.destroy === "function") {
+        void storeWithClose.destroy.call(store);
+        return;
+      }
+      if (typeof storeWithClose.close === "function") {
+        void storeWithClose.close.call(store);
+      }
+    };
+  }, [store, isTestEnv]);
 
   const saveActiveDataset = useCallback(
     async (
@@ -237,6 +276,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const importDatasetZip = useCallback(
     async (file: File) => {
+      loadActiveId.current += 1;
       let persisted = false;
       setStatus("loading");
       setError(undefined);
@@ -282,6 +322,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const importDatasetFromGitHub = useCallback(
     async (url: string) => {
+      loadActiveId.current += 1;
       let persisted = false;
       setStatus("loading");
       setError(undefined);

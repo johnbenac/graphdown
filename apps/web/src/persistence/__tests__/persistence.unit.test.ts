@@ -24,52 +24,64 @@ const sampleSnapshot: DatasetSnapshot = {
 describe("persistence service", () => {
   it("saves and loads the active dataset", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
-    const persistence = createPersistence({ store });
+    try {
+      const persistence = createPersistence({ store });
 
-    await persistence.saveActiveDataset({
-      meta: {
-        id: "dataset-1",
-        createdAt: 1,
-        updatedAt: 1
-      },
-      datasetSnapshot: sampleSnapshot
-    });
+      await persistence.saveActiveDataset({
+        meta: {
+          id: "dataset-1",
+          createdAt: 1,
+          updatedAt: 1
+        },
+        datasetSnapshot: sampleSnapshot
+      });
 
-    const loaded = await persistence.loadActiveDataset();
-    expect(loaded?.meta.id).toBe("dataset-1");
-    expect(loaded?.datasetSnapshot.files.size).toBe(1);
+      const loaded = await persistence.loadActiveDataset();
+      expect(loaded?.meta.id).toBe("dataset-1");
+      expect(loaded?.datasetSnapshot.files.size).toBe(1);
+    } finally {
+      await store.destroy();
+    }
   });
 
   it("loads datasets even when legacy graph cache entries exist", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
-    const persistence = createPersistence({ store });
+    try {
+      const persistence = createPersistence({ store });
 
-    await store.set(KEY.activeSnapshot, serializeSnapshot(sampleSnapshot));
-    await store.set(KEY.activeMeta, {
-      id: "dataset-2",
-      createdAt: 1,
-      updatedAt: 1
-    });
-    await store.set(KEY.activeRecordLinkGraphCache, { legacy: true });
+      await store.set(KEY.activeSnapshot, serializeSnapshot(sampleSnapshot));
+      await store.set(KEY.activeMeta, {
+        id: "dataset-2",
+        createdAt: 1,
+        updatedAt: 1
+      });
+      await store.set(KEY.activeRecordLinkGraphCache, { legacy: true });
 
-    const loaded = await persistence.loadActiveDataset();
-    expect(loaded?.meta.id).toBe("dataset-2");
-    expect(loaded?.datasetSnapshot.files.size).toBe(1);
+      const loaded = await persistence.loadActiveDataset();
+      expect(loaded?.meta.id).toBe("dataset-2");
+      expect(loaded?.datasetSnapshot.files.size).toBe(1);
+    } finally {
+      await store.destroy();
+    }
   });
 
   it("clears the active dataset when snapshot or meta is missing", async () => {
     const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
-    const persistence = createPersistence({ store });
+    try {
+      const persistence = createPersistence({ store });
 
-    await store.set(KEY.activeMeta, {
-      id: "dataset-3",
-      createdAt: 1,
-      updatedAt: 1
-    });
+      await store.set(KEY.activeMeta, {
+        id: "dataset-3",
+        createdAt: 1,
+        updatedAt: 1
+      });
 
-    const loaded = await persistence.loadActiveDataset();
-    expect(loaded).toBeUndefined();
-    await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
-    await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
+      const loaded = await persistence.loadActiveDataset();
+      expect(loaded).toBeUndefined();
+      await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
+      await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
+    } finally {
+      await store.destroy();
+    }
   });
 });

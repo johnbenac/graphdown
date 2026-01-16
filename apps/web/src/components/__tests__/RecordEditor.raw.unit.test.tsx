@@ -21,7 +21,7 @@ const typeDef: RuntimeTypeViewV1 = {
 
 describe("RecordEditor schema-agnostic editing (UI-RAW-001)", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     mockUpdateRecord.mockResolvedValue({ ok: true });
     mockCreateRecord.mockResolvedValue({ ok: true, recordKey: "note:new-id" });
   });

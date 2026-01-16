@@ -1,11 +1,10 @@
 import "fake-indexeddb/auto";
+import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import { IndexedDbStore } from "../IndexedDbStore";
 import type { PersistStore } from "../PersistStore";
 
-async function runStoreContract(makeStore: () => PersistStore) {
-  const store = makeStore();
-
+async function runStoreContract(store: PersistStore) {
   await store.set("alpha", { value: 1 });
   await store.set("beta", { value: 2 });
 
@@ -25,6 +24,11 @@ async function runStoreContract(makeStore: () => PersistStore) {
 describe("PersistStore contract", () => {
   it("IndexedDbStore follows the contract", async () => {
     const dbName = `graphdown-test-${Math.random().toString(16).slice(2)}`;
-    await runStoreContract(() => new IndexedDbStore({ dbName }));
+    const store = new IndexedDbStore({ dbName });
+    try {
+      await runStoreContract(store);
+    } finally {
+      await store.destroy();
+    }
   });
 });

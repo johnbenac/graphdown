@@ -10,6 +10,41 @@ type StoreRecord = {
   value: unknown;
 };
 
+const trackedDbNames = new Set<string>();
+
+export function listTrackedDbNames(): string[] {
+  return [...trackedDbNames];
+}
+
+export function clearTrackedDbNames(): void {
+  trackedDbNames.clear();
+}
+
+export async function deleteTrackedDbNames(): Promise<void> {
+  const idb = typeof indexedDB === "undefined" ? undefined : indexedDB;
+  const names = [...trackedDbNames];
+  trackedDbNames.clear();
+  if (!idb || typeof idb.deleteDatabase !== "function" || names.length === 0) {
+    return;
+  }
+  await Promise.all(
+    names.map(
+      (name) =>
+        new Promise<void>((resolve) => {
+          const request = idb.deleteDatabase(name);
+          const timeoutId = setTimeout(resolve, 50);
+          const finish = () => {
+            clearTimeout(timeoutId);
+            resolve();
+          };
+          request.onsuccess = finish;
+          request.onerror = finish;
+          request.onblocked = finish;
+        })
+    )
+  );
+}
+
 export class IndexedDbStore implements PersistStore {
   private dbPromise: Promise<IDBDatabase> | null = null;
   private readonly dbName: string;
@@ -18,6 +53,7 @@ export class IndexedDbStore implements PersistStore {
   constructor(options?: IndexedDbStoreOptions) {
     this.dbName = options?.dbName ?? "graphdown";
     this.storeName = options?.storeName ?? "kv";
+    trackedDbNames.add(this.dbName);
   }
 
   private async openDatabase(): Promise<IDBDatabase> {
@@ -39,6 +75,46 @@ export class IndexedDbStore implements PersistStore {
       request.onerror = () => reject(request.error);
     });
     return this.dbPromise;
+  }
+
+  async close(): Promise<void> {
+    if (!this.dbPromise) {
+      return;
+    }
+    try {
+      const db = await this.dbPromise;
+      db.close();
+    } catch {
+    }
+    this.dbPromise = null;
+  }
+
+  async destroy(): Promise<void> {
+    const idb = typeof indexedDB === "undefined" ? undefined : indexedDB;
+    if (!idb || typeof idb.deleteDatabase !== "function") {
+      return;
+    }
+    if (this.dbPromise) {
+      try {
+        await this.clear();
+        const db = await this.dbPromise;
+        db.close();
+      } catch {
+      }
+    }
+    this.dbPromise = null;
+    trackedDbNames.delete(this.dbName);
+    await new Promise<void>((resolve) => {
+      const request = idb.deleteDatabase(this.dbName);
+      const timeoutId = setTimeout(resolve, 50);
+      const finish = () => {
+        clearTimeout(timeoutId);
+        resolve();
+      };
+      request.onsuccess = finish;
+      request.onerror = finish;
+      request.onblocked = finish;
+    });
   }
 
   private async withStore<T>(

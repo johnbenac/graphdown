@@ -69,7 +69,7 @@ describe("DatasetContext non-functional requirements", () => {
 
   afterEach(async () => {
     global.fetch = originalFetch;
-    await store?.clear();
+    await store?.destroy();
   });
 
   it("NFR-010: uses persisted dataset for read-only access when offline", async () => {

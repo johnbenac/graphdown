@@ -8,8 +8,11 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot", () => {
+  const originalFetch = globalThis.fetch;
+
   afterEach(() => {
-    vi.restoreAllMocks();
+    globalThis.fetch = originalFetch;
+    vi.clearAllMocks();
   });
 
   it("GH-008: does not send Authorization headers for public fetches", async () => {
