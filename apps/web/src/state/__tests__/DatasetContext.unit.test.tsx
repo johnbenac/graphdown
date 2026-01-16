@@ -16,7 +16,7 @@ function TestHarness({ onReady }: { onReady: (ctx: DatasetContextValue) => void 
 describe("DatasetContext GitHub import", () => {
   it("ERR-002: maps GitHub 404 repo responses to not_found", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "Not Found" }), {
         status: 404,
@@ -43,7 +43,7 @@ describe("DatasetContext GitHub import", () => {
 
   it("ERR-002: maps GitHub rate limits to rate_limited", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "API rate limit exceeded" }), {
         status: 403,
@@ -128,7 +128,7 @@ describe("DatasetContext GitHub import", () => {
 
       throw new Error(`Unexpected fetch: ${url.toString()}`);
     });
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     let ctx: DatasetContextValue | null = null;
     render(
@@ -189,25 +189,27 @@ describe("DatasetContext zip import", () => {
 
 describe("DatasetContext persistence requirements", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
   it("NFR-PERSIST-001: reports persistence_unavailable when IndexedDB is missing", async () => {
     vi.stubGlobal("indexedDB", undefined);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      let ctx: DatasetContextValue | null = null;
+      render(
+        <DatasetProvider>
+          <TestHarness onReady={(value) => (ctx = value)} />
+        </DatasetProvider>
+      );
 
-    let ctx: DatasetContextValue | null = null;
-    render(
-      <DatasetProvider>
-        <TestHarness onReady={(value) => (ctx = value)} />
-      </DatasetProvider>
-    );
-
-    await waitFor(() => {
-      expect(ctx?.status).toBe("error");
-      expect(ctx?.error?.category).toBe("persistence_unavailable");
-    });
-    expect(errorSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(ctx?.status).toBe("error");
+        expect(ctx?.error?.category).toBe("persistence_unavailable");
+      });
+      expect(errorSpy).toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 });

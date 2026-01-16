@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -8,13 +8,9 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("GH-008: does not send Authorization headers for public fetches", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     fetchMock
       // Repo metadata
@@ -52,7 +48,7 @@ describe("loadGitHubSnapshot", () => {
 
   it("GH-002: falls back to main when default_branch is missing", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     fetchMock
       // Repo metadata (no default_branch)
@@ -94,7 +90,7 @@ describe("loadGitHubSnapshot", () => {
 
   it("includes blocks under blocks and reports ignored files", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     const legacyBlobPath = `blobs/sha256/aa/${"a".repeat(64)}`;
 
     fetchMock
@@ -140,7 +136,7 @@ describe("loadGitHubSnapshot", () => {
 
   it("imports Graphdown markdown in non-canonical paths", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))

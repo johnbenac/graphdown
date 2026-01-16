@@ -1,19 +1,18 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createPersistStore } from "../createPersistStore";
 import { IndexedDbStore } from "../IndexedDbStore";
 
 describe("createPersistStore", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
-
   it("throws when IndexedDB is unavailable", () => {
     vi.stubGlobal("indexedDB", undefined);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    expect(() => createPersistStore({ logger: console })).toThrow(/requires IndexedDB/i);
-    expect(errorSpy).toHaveBeenCalled();
+    try {
+      expect(() => createPersistStore({ logger: console })).toThrow(/requires IndexedDB/i);
+      expect(errorSpy).toHaveBeenCalled();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 
   it("returns an IndexedDbStore when IndexedDB is available", async () => {
