@@ -5,11 +5,10 @@ import {
   buildRecordLinkGraphFromSnapshot,
   blockPathForCid,
   canonicalizeDatasetSnapshot,
-  cidFromRawBytes,
-  buildDatasetZipBytes,
-  loadDatasetSnapshotFromZipBytes
+  cidFromRawBytes
 } from "../../index";
 import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "../../index";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 
 const encoder = new TextEncoder();
 

@@ -1,5 +1,5 @@
 {
-  "name": "@graphdown/core",
+  "name": "@graphdown/io-zip",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,8 +8,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@noble/hashes": "^1.4.0",
-    "yaml": "^2.8.2"
+    "@graphdown/core": "0.0.0",
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",
