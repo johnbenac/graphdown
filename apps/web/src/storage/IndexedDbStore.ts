@@ -85,6 +85,7 @@ export class IndexedDbStore implements PersistStore {
       const db = await this.dbPromise;
       db.close();
     } catch {
+      // best effort; ignore close errors
     }
     this.dbPromise = null;
   }
@@ -100,6 +101,7 @@ export class IndexedDbStore implements PersistStore {
         const db = await this.dbPromise;
         db.close();
       } catch {
+        // best effort; ignore destroy errors
       }
     }
     this.dbPromise = null;
