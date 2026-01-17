@@ -1,11 +1,11 @@
 # Burndown: SPEC coverage snapshot
 
-Generated: 2026-01-17T18:37:45.620Z
+Generated: 2026-01-17T23:34:06.060Z
 Source: artifacts/spec-trace/matrix.json
 
 ## Enforced coverage (CI gate)
-- Requirements: 81
-- Covered: 81
+- Requirements: 82
+- Covered: 82
 - Missing: 0
 - Coverage: 100.0%
 
@@ -16,8 +16,8 @@ Source: artifacts/spec-trace/matrix.json
 - Coverage: 100.0%
 
 ## Overall (all testable requirements)
-- Requirements: 96
-- Covered: 96
+- Requirements: 97
+- Covered: 97
 - Missing: 0
 - Coverage: 100.0%
 
