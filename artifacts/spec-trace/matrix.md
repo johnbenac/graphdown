@@ -1,13 +1,14 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-17T18:37:45.620Z
+Generated: 2026-01-17T23:33:40.155Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
 - (none)
 
 ## GOV-002 — Verification matrix must match spec (testable=true)
-Tests (1):
+Tests (2):
+- packages/core/src/__tests__/governance/spec-trace-includes-iozip.governance.integration.test.ts — "GOV-002: spec-trace includes io-zip requirement-tagged tests"
 - packages/core/src/__tests__/governance/spec-trace-matrix.governance.integration.test.ts — "GOV-002: spec-trace output matches committed matrix"
 
 ## P-001 — Repository-first, record-canonical (testable=false)
@@ -430,8 +431,9 @@ Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
-Tests (1):
+Tests (2):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
+- packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
 
 ## EXP-003 — Canonical dataset export
 Tests (3):
