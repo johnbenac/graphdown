@@ -52,6 +52,8 @@ jobs:
               # --- Shared runtime code that can affect the bundle ---
               - "packages/core/src/**"
               - "packages/core/package.json"
+              - "packages/io-zip/src/**"
+              - "packages/io-zip/package.json"
               - "packages/runtime/src/**"
               - "packages/runtime/package.json"
 

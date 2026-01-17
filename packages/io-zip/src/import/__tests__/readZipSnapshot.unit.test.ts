@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { readZipSnapshot } from "../readZipSnapshot";
+import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
 describe("readZipSnapshot", () => {
   it("strips a single top-level folder in GitHub-style zips", async () => {
@@ -9,11 +9,7 @@ describe("readZipSnapshot", () => {
       "repo-main/records/note/record-1.md": new Uint8Array(strToU8("---\nid: record:1\n---"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
@@ -28,11 +24,7 @@ describe("readZipSnapshot", () => {
       "assets/logo.png": new Uint8Array([0, 1, 2])
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
@@ -51,11 +43,7 @@ describe("readZipSnapshot", () => {
       "docs/readme.md": new Uint8Array(strToU8("# not a graphdown record"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("random/type-location.md")).toBe(true);
     expect(snapshot.files.has("deep/nested/record-location.md")).toBe(true);
@@ -73,11 +61,7 @@ describe("readZipSnapshot", () => {
       "docs/readme.md": new Uint8Array(strToU8("# readme"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("assets/extra.bin")).toBe(false);
     expect(ignored.sort()).toEqual(["assets/extra.bin", "docs/readme.md"].sort());
