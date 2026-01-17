@@ -29,8 +29,8 @@ walk(srcRoot);
 testFiles.sort((a, b) => a.localeCompare(b));
 
 if (testFiles.length === 0) {
-  console.log("No test files found.");
-  process.exit(0);
+  console.error("No test files found. Check test conventions or discovery.");
+  process.exit(1);
 }
 
 for (const file of testFiles) {
