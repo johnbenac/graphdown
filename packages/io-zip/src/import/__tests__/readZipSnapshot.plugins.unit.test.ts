@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { readZipSnapshot } from "../readZipSnapshot";
+import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
-describe("readZipSnapshot plugin bundles", () => {
-  it("IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot", async () => {
+describe("readZipSnapshotFromBytes plugin bundles", () => {
+  it("IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot", () => {
     const entries: Record<string, Uint8Array> = {};
     const manifestText = [
       "---",
@@ -32,12 +32,7 @@ describe("readZipSnapshot plugin bundles", () => {
     entries["assets/logo.png"] = new Uint8Array([9, 8, 7]);
 
     const zipBytes = zipSync(entries);
-    const buffer = zipBytes.buffer.slice(zipBytes.byteOffset, zipBytes.byteOffset + zipBytes.byteLength);
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);

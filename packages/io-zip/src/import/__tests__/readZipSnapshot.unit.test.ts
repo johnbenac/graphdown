@@ -1,26 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { readZipSnapshot } from "../readZipSnapshot";
+import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
-describe("readZipSnapshot", () => {
-  it("strips a single top-level folder in GitHub-style zips", async () => {
+describe("readZipSnapshotFromBytes", () => {
+  it("strips a single top-level folder in GitHub-style zips", () => {
     const zipBytes = zipSync({
       "repo-main/types/note.md": new Uint8Array(strToU8("---\nid: type:note\n---")),
       "repo-main/records/note/record-1.md": new Uint8Array(strToU8("---\nid: record:1\n---"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
     expect(ignored).toEqual([]);
   });
 
-  it("drops non-dataset files and records them as ignored", async () => {
+  it("drops non-dataset files and records them as ignored", () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
       "records/note/record-1.md": new Uint8Array(strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")),
@@ -28,19 +24,15 @@ describe("readZipSnapshot", () => {
       "assets/logo.png": new Uint8Array([0, 1, 2])
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("types/note.md")).toBe(true);
     expect(snapshot.files.has("records/note/record-1.md")).toBe(true);
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
-    expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
+    expect(ignored).toEqual(["assets/logo.png", "docs/readme.md"]);
   });
 
-  it("imports Graphdown markdown files regardless of folder layout", async () => {
+  it("imports Graphdown markdown files regardless of folder layout", () => {
     const zipBytes = zipSync({
       "random/type-location.md": new Uint8Array(
         strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
@@ -51,19 +43,15 @@ describe("readZipSnapshot", () => {
       "docs/readme.md": new Uint8Array(strToU8("# not a graphdown record"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("random/type-location.md")).toBe(true);
     expect(snapshot.files.has("deep/nested/record-location.md")).toBe(true);
     expect(snapshot.files.has("docs/readme.md")).toBe(false);
-    expect(ignored).toContain("docs/readme.md");
+    expect(ignored).toEqual(["docs/readme.md"]);
   });
 
-  it("ignores non-semantic files that are not declared by plugins", async () => {
+  it("ignores non-semantic files that are not declared by plugins", () => {
     const zipBytes = zipSync({
       "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
       "records/note/one.md": new Uint8Array(
@@ -73,13 +61,9 @@ describe("readZipSnapshot", () => {
       "docs/readme.md": new Uint8Array(strToU8("# readme"))
     });
 
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
+    const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
     expect(snapshot.files.has("assets/extra.bin")).toBe(false);
-    expect(ignored.sort()).toEqual(["assets/extra.bin", "docs/readme.md"].sort());
+    expect(ignored).toEqual(["assets/extra.bin", "docs/readme.md"]);
   });
 });

@@ -3,11 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   blockPathForCid,
   canonicalizeDatasetSnapshot,
-  cidFromRawBytes,
-  buildDatasetZipBytes,
-  loadDatasetSnapshotFromZipBytes
+  cidFromRawBytes
 } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
