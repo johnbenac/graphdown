@@ -1,27 +1,25 @@
 # OOM Investigation Handoff (apps/web Vitest) — 2026-01-16
 
 ## Memo (state of play)
-- Symptom: Vitest worker OOMs during/after `apps/web` tests. Heap climbs to ~4.0–4.1GB, then `Worker exited unexpectedly` (tinypool) with V8 “heap out of memory”. Reproducible on full suite. Individual files/subsets are fine.
-- Hypothesis: Long-lived resource in jsdom/IndexedDB/runtime mocks staying alive after tests; memory accumulates when worker goes idle. Root cause still unknown.
-- Mitigation applied: `npm test` now runs a per-file sequential Vitest runner (see `apps/web/scripts/run-vitest-sequential.mjs`). This avoids the OOM because each test file runs in a fresh Node process.
-- Additional hardening:
-  - `IndexedDbStore` tracks DB names and exposes `deleteTrackedDbNames()`; `setupTests` now deletes tracked DBs after each test.
-  - `DatasetContext` adds loadActive run guards, cleans debug handle, and closes/destroys the store in test env.
-  - `DatasetRoute` unit test is **temporarily skipped** because running it alone still triggers the jsdom/worker OOM; a minimal stub runtime was added there.
-- Unknowns: The precise leak source; why jsdom/runtime/IndexedDB combo leaks when the DatasetRoute test runs.
-- Ask for outside team: find the real leak so we can re-enable `DatasetRoute.unit.test.tsx` and restore normal `vitest run`.
+- Previous symptom: Vitest worker OOM’d around 4.0–4.1GB heap with `Worker exited unexpectedly` (tinypool) when the suite ran together.
+- Status after fixes: No OOM observed. `npm test` (sequential runner) now passes with `DatasetRoute` re-enabled; running `npx vitest run src/routes/__tests__/DatasetRoute.unit.test.tsx --logHeapUsage` shows ~51 MB heap used.
+- Likely cause: The old DatasetRoute mock created fresh objects/functions each render and returned `getType: () => null`, which could drive effect/redirect loops in jsdom. The mock is now stable and returns the real “note” type.
+- Mitigations kept: `npm test` still uses the per-file sequential runner (`apps/web/scripts/run-vitest-sequential.mjs`) as a safety net; IndexedDbStore tracking + cleanup, DatasetContext unmount cleanup, and runtime mock resets remain.
+- Unknowns: Whether the suite still OOMs under a single `vitest run` worker pool; we have not re-tried the full concurrent run yet.
+- Next ask for outside team: Confirm the leak is gone under normal `vitest run` (no sequential wrapper). If stable, we can drop the sequential runner script; otherwise, investigate any remaining jsdom/IndexedDB/runtime handles.
 
 ## How to reproduce current behavior
 ```bash
 cd apps/web
 npm test
 ```
-- This uses the per-file sequential runner and **passes** (DatasetRoute test is skipped).
+- This uses the per-file sequential runner and **passes** (DatasetRoute test is included).
 
-To see the OOM (before the skip/runner), run:
+To probe DatasetRoute alone:
 ```bash
 cd apps/web
-npx vitest run src/state src/components src/routes src/__tests__   # OOMs around 70–80s
+npx vitest run src/routes/__tests__/DatasetRoute.unit.test.tsx --logHeapUsage
+# heap ~51 MB with current mock
 ```
 
 ## Recent OOM log excerpt
@@ -36,14 +34,14 @@ Error: Worker exited unexpectedly
 ```
 
 ## Passing run (after mitigation)
-`npm test` now iterates per file; sample output:
+`npm test` now iterates per file; sample output (no skips):
 ```
 > node ./scripts/run-vitest-sequential.mjs
 ...
 ✓ src/state/__tests__/DatasetContext.unit.test.tsx (5 tests)
 ✓ src/state/__tests__/DatasetContext.nfr.integration.test.tsx (3 tests)
 ...
-↓ src/routes/__tests__/DatasetRoute.unit.test.tsx (1 skipped)
+✓ src/routes/__tests__/DatasetRoute.unit.test.tsx (1 test)
 ...
 ✓ src/utils/__tests__/wikiRefStrings.unit.test.ts (3 tests)
 ```

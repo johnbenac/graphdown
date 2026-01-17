@@ -14,7 +14,7 @@ FILES INCLUDED (in order)
 4) apps/web/src/setupTests.ts       (test harness + runtime mock + teardown)
 5) apps/web/src/storage/IndexedDbStore.ts (fake-indexeddb helper + cleanup)
 6) apps/web/src/state/DatasetContext.tsx  (state provider tweaks for tests)
-7) apps/web/src/routes/__tests__/DatasetRoute.unit.test.tsx (skipped flake)
+7) apps/web/src/routes/__tests__/DatasetRoute.unit.test.tsx (stable mock; was the flake)
 8) apps/web/src/testUtils/runtimeApiV1Mock.ts (runtime mock)
 
 --------------------------------------------------------------------------------
@@ -23,27 +23,25 @@ FILE 1/8: docs/oom-handoff-2026-01-16.md
 # OOM Investigation Handoff (apps/web Vitest) — 2026-01-16
 
 ## Memo (state of play)
-- Symptom: Vitest worker OOMs during/after `apps/web` tests. Heap climbs to ~4.0–4.1GB, then `Worker exited unexpectedly` (tinypool) with V8 “heap out of memory”. Reproducible on full suite. Individual files/subsets are fine.
-- Hypothesis: Long-lived resource in jsdom/IndexedDB/runtime mocks staying alive after tests; memory accumulates when worker goes idle. Root cause still unknown.
-- Mitigation applied: `npm test` now runs a per-file sequential Vitest runner (see `apps/web/scripts/run-vitest-sequential.mjs`). This avoids the OOM because each test file runs in a fresh Node process.
-- Additional hardening:
-  - `IndexedDbStore` tracks DB names and exposes `deleteTrackedDbNames()`; `setupTests` now deletes tracked DBs after each test.
-  - `DatasetContext` adds loadActive run guards, cleans debug handle, and closes/destroys the store in test env.
-  - `DatasetRoute` unit test is **temporarily skipped** because running it alone still triggers the jsdom/worker OOM; a minimal stub runtime was added there.
-- Unknowns: The precise leak source; why jsdom/runtime/IndexedDB combo leaks when the DatasetRoute test runs.
-- Ask for outside team: find the real leak so we can re-enable `DatasetRoute.unit.test.tsx` and restore normal `vitest run`.
+- Previous symptom: Vitest worker OOM’d around 4.0–4.1GB heap with `Worker exited unexpectedly` (tinypool) when the suite ran together.
+- Status after fixes: No OOM observed. `npm test` (sequential runner) now passes with `DatasetRoute` re-enabled; running `npx vitest run src/routes/__tests__/DatasetRoute.unit.test.tsx --logHeapUsage` shows ~51 MB heap used.
+- Likely cause: The old DatasetRoute mock created fresh objects/functions each render and returned `getType: () => null`, which could drive effect/redirect loops in jsdom. The mock is now stable and returns the real “note” type.
+- Mitigations kept: `npm test` still uses the per-file sequential runner (`apps/web/scripts/run-vitest-sequential.mjs`) as a safety net; IndexedDbStore tracking + cleanup, DatasetContext unmount cleanup, and runtime mock resets remain.
+- Unknowns: Whether the suite still OOMs under a single `vitest run` worker pool; we have not re-tried the full concurrent run yet.
+- Next ask for outside team: Confirm the leak is gone under normal `vitest run` (no sequential wrapper). If stable, we can drop the sequential runner script; otherwise, investigate any remaining jsdom/IndexedDB/runtime handles.
 
 ## How to reproduce current behavior
 ```bash
 cd apps/web
 npm test
 ```
-- This uses the per-file sequential runner and **passes** (DatasetRoute test is skipped).
+- This uses the per-file sequential runner and **passes** (DatasetRoute test is included).
 
-To see the OOM (before the skip/runner), run:
+To probe DatasetRoute alone:
 ```bash
 cd apps/web
-npx vitest run src/state src/components src/routes src/__tests__   # OOMs around 70–80s
+npx vitest run src/routes/__tests__/DatasetRoute.unit.test.tsx --logHeapUsage
+# heap ~51 MB with current mock
 ```
 
 ## Recent OOM log excerpt
@@ -58,14 +56,14 @@ Error: Worker exited unexpectedly
 ```
 
 ## Passing run (after mitigation)
-`npm test` now iterates per file; sample output:
+`npm test` now iterates per file; sample output (no skips):
 ```
 > node ./scripts/run-vitest-sequential.mjs
 ...
 ✓ src/state/__tests__/DatasetContext.unit.test.tsx (5 tests)
 ✓ src/state/__tests__/DatasetContext.nfr.integration.test.tsx (3 tests)
 ...
-↓ src/routes/__tests__/DatasetRoute.unit.test.tsx (1 skipped)
+✓ src/routes/__tests__/DatasetRoute.unit.test.tsx (1 test)
 ...
 ✓ src/utils/__tests__/wikiRefStrings.unit.test.ts (3 tests)
 ```
@@ -79,7 +77,7 @@ Included below in full.
 - Goal: re-enable the DatasetRoute test and return `npm test` to `vitest run` (no sequential wrapper) without OOMs.
 
 ## How to rerun full suite quickly
-- Current passing path (with skip): `npm test`
+- Current passing path (sequential runner): `npm test`
 - To probe the problematic file: `npx vitest run src/routes/__tests__/DatasetRoute.unit.test.tsx --logHeapUsage`
 
 ## Repo pointers
@@ -1016,57 +1014,69 @@ const sampleSnapshot = {
   ])
 };
 
+const noteTypeView = {
+  typeId: "note",
+  fields: { name: "Note" },
+  body: "Type-level markdown lives here."
+};
+
+const runtimeApiV1 = {
+  apiVersion: 1,
+  capabilities: ["gd.api.read"],
+  listTypes: vi.fn(async () => [noteTypeView]),
+  listTypeIds: vi.fn(async () => ["note"]),
+  getType: vi.fn(async (typeId: string) => (typeId === "note" ? noteTypeView : null)),
+  getTypeMarkdownBytes: vi.fn(async (typeId: string) =>
+    typeId === "note" ? sampleSnapshot.files.get("types/note.md") ?? null : null
+  ),
+  listRecordKeysByType: vi.fn(async () => []),
+  listRecordsByType: vi.fn(async () => []),
+  getOutgoingRecordLinks: vi.fn(async () => []),
+  getIncomingRecordLinks: vi.fn(async () => []),
+  getTypeCompositionComponents: vi.fn(async () => []),
+  listTypeCompositionEdges: vi.fn(async () => []),
+  getParentRecordKey: vi.fn(async () => null),
+  listChildRecordKeys: vi.fn(async () => []),
+  listRootRecordKeysByType: vi.fn(async () => []),
+  getRecord: vi.fn(async () => null),
+  getRecordMarkdownBytes: vi.fn(async () => null),
+  getBlockBytes: vi.fn(async () => null),
+  hasBlock: vi.fn(async () => false),
+  listBlockCidsPresent: vi.fn(async () => []),
+  listBlockCidsReferencedByRecord: vi.fn(async () => []),
+  listReachableBlockCids: vi.fn(async () => [])
+} as unknown as RuntimeApiV1;
+
+const activeDataset = {
+  meta: {
+    id: "active",
+    createdAt: 0,
+    updatedAt: 0,
+    label: "Test dataset",
+    source: "import"
+  },
+  datasetSnapshot: sampleSnapshot,
+  runtimeApiV1,
+  index: {
+    typeFileById: new Map([["note", "types/note.md"]]),
+    recordFileByKey: new Map()
+  }
+};
+
+const datasetValue = {
+  status: "ready" as const,
+  progress: { phase: "done" as const },
+  activeDataset,
+  error: undefined,
+  importDatasetZip: vi.fn(),
+  importDatasetFromGitHub: vi.fn(),
+  clearPersistence: vi.fn(),
+  updateRecord: vi.fn(),
+  createRecord: vi.fn()
+};
+
 vi.mock("../../state/DatasetContext", () => ({
-  useDataset: () => ({
-    status: "ready",
-    progress: { phase: "done" as const },
-    activeDataset: {
-      meta: {
-        id: "active",
-        createdAt: 0,
-        updatedAt: 0,
-        label: "Test dataset",
-        source: "import"
-      },
-      datasetSnapshot: sampleSnapshot,
-      runtimeApiV1: {
-        apiVersion: 1,
-        capabilities: ["gd.api.read"],
-        listTypes: vi.fn(async () => [
-          { typeId: "note", fields: { name: "Note" }, body: "Type-level markdown lives here." }
-        ]),
-        listTypeIds: vi.fn(async () => ["note"]),
-        listRecordKeysByType: vi.fn(async () => []),
-        listRecordsByType: vi.fn(async () => []),
-        getOutgoingRecordLinks: vi.fn(async () => []),
-        getIncomingRecordLinks: vi.fn(async () => []),
-        getTypeCompositionComponents: vi.fn(async () => []),
-        listTypeCompositionEdges: vi.fn(async () => []),
-        getParentRecordKey: vi.fn(async () => null),
-        listChildRecordKeys: vi.fn(async () => []),
-        listRootRecordKeysByType: vi.fn(async () => []),
-        getType: vi.fn(async () => null),
-        getRecord: vi.fn(async () => null),
-        getTypeMarkdownBytes: vi.fn(async () => null),
-        getRecordMarkdownBytes: vi.fn(async () => null),
-        getBlockBytes: vi.fn(async () => null),
-        hasBlock: vi.fn(async () => false),
-        listBlockCidsPresent: vi.fn(async () => []),
-        listBlockCidsReferencedByRecord: vi.fn(async () => []),
-        listReachableBlockCids: vi.fn(async () => [])
-      } as unknown as RuntimeApiV1,
-      index: {
-        typeFileById: new Map([["note", "types/note.md"]]),
-        recordFileByKey: new Map()
-      }
-    },
-    error: undefined,
-    importDatasetZip: vi.fn(),
-    importDatasetFromGitHub: vi.fn(),
-    clearPersistence: vi.fn(),
-    updateRecord: vi.fn(),
-    createRecord: vi.fn()
-  })
+  useDataset: () => datasetValue
 }));
 
 function renderDatasetRoute(path = "/datasets/note") {
@@ -1080,11 +1090,11 @@ function renderDatasetRoute(path = "/datasets/note") {
   );
 }
 
-// TODO: Re-enable when the DatasetRoute render no longer hangs/leaks under Vitest/jsdom.
-describe.skip("DatasetRoute", () => {
+describe("DatasetRoute", () => {
   it("shows the selected type body content", async () => {
     renderDatasetRoute();
     expect(await screen.findByTestId("type-body")).toHaveTextContent("Type-level markdown lives here.");
+    expect(vi.mocked(runtimeApiV1.listTypes).mock.calls.length).toBeLessThan(5);
   });
 });
 
