@@ -72,8 +72,8 @@ const outgoing = await api.getOutgoingRecordLinks('SomeType:recordId');
 const incoming = await api.getIncomingRecordLinks('SomeType:recordId');
 
 // Access block files
-const blockBytes = await api.getBlockBytes('sha2-256:...');
-const hasBlock = await api.hasBlock('sha2-256:...');
+const blockBytes = await api.getBlockBytes('bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku');
+const hasBlock = await api.hasBlock('bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku');
 ```
 
 ## API Stability

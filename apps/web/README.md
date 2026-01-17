@@ -2,12 +2,12 @@
 
 This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets.
 
-It uses the shared `@graphdown/core` domain logic and persists the active dataset in the browser using IndexedDB (required).
+It uses `@graphdown/core` for parsing/validation and `@graphdown/runtime` as the read model, persisting the active dataset in the browser using IndexedDB (required).
 
 ## Run the app
 From the repo root:
 ```sh
-npm install
+npm ci
 npm run dev:web   # starts Vite on port 5173
 ```
 
@@ -22,11 +22,12 @@ npm --workspace apps/web run build
 ## Project layout
 
 * `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-* `@graphdown/core` shared, pure logic for dataset parsing/validation/link extraction (hashing, IDs, refs, markdown parsing, etc.).
+* `@graphdown/core` shared, pure logic for dataset parsing/validation/hash/export helpers.
+* `@graphdown/runtime` read model (Runtime API v1 sessions for querying types/records/links/blocks).
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
-* `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → Record Link Graph build → persistence.
-* `src/persistence/` serializes dataset snapshots, the Record Link Graph cache, and UI state.
+* `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → runtime session → persistence.
+* `src/persistence/` serializes dataset snapshots and UI state.
 * `src/storage/` IndexedDB-backed persistence.
 * `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 * `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
@@ -38,13 +39,13 @@ npm --workspace apps/web run build
 
 1. **Import (zip or GitHub)** → loaders build a raw `DatasetSnapshot` from bytes or GitHub files.
 2. **Validate** → `validateDatasetSnapshot` enforces Graphdown structural rules; errors bubble to the UI.
-3. **Canonicalize layout** → `canonicalizeDatasetSnapshot` rewrites paths into the canonical record-only layout and prunes unreachable blobs; `importReport` summarizes changes.
-4. **Build Record Link Graph** → `buildRecordLinkGraphFromSnapshot` builds the Record Link Graph index used by the UI (incoming/outgoing wiki-link relationships).
-5. **Persist** → `createPersistence` writes snapshot + Record Link Graph cache + UI state to storage.
+3. **Canonicalize layout** → `canonicalizeDatasetSnapshot` rewrites paths into the canonical record-only layout and prunes unreachable blocks; `importReport` summarizes changes.
+4. **Open runtime session** → `openRuntimeApiV1` builds the Runtime API v1 read model from the snapshot.
+5. **Persist** → `createPersistence` writes snapshot + UI state to storage.
 6. **View/Edit** → `DatasetRoute` renders record/type views using data from `DatasetContext`.
 7. **Export** → export helpers serialize the current snapshot back to a zip.
 
-> Note: Core record discovery is content-based (LAYOUT-001), but the web app importers may choose to only load a subset of repository files for UX/performance.
+> Note: Core record discovery is content-based (LAYOUT-001), but web app importers may load only a subset of repository files for UX/performance as long as they still include all semantic files (records, types, plugin manifests + bundles, and referenced blocks).
 
 ## Testing
 
@@ -66,6 +67,6 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.e2e.spec.js-snapsh
 
 ## Notes for contributors
 
-* Keep `@graphdown/core` pure and framework-agnostic; the UI should consume it, not reimplement logic.
+* Keep `@graphdown/core` pure and framework-agnostic; the UI should consume it through the runtime read model, not reimplement logic.
 * When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
 * The app requires IndexedDB for persistence; environments that block it are unsupported.

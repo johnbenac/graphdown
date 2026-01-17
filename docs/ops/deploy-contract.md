@@ -3,9 +3,10 @@
 This repository only deploys the production site when code or configs that affect the shipped bundle change. Deploys are gated in `.github/workflows/pages.yml` by a `dorny/paths-filter` check plus a manual override input.
 
 ## What triggers a deploy (production surface area)
-- `apps/web/src/**`, `apps/web/index.html`, `apps/web/styles.css`
+- `apps/web/src/**`, `apps/web/index.html`, `apps/web/src/styles.css`
 - `apps/web/vite.config.*`, `apps/web/tsconfig*.json`, `apps/web/package.json`
 - `packages/core/src/**`, `packages/core/package.json`
+- `packages/runtime/src/**`, `packages/runtime/package.json`
 - Root build inputs: `package.json`, `package-lock.json`, `tsconfig.json`
 
 ## What never triggers a deploy

@@ -6,6 +6,7 @@ import {
   buildRecordLinkGraphFromSnapshot,
   decodeDaslCidString,
   discoverGraphdownObjects,
+  discoverPluginObjects,
   extractCidRefs,
   IDENTIFIER_PATTERN,
   makeError,
@@ -161,7 +162,7 @@ function requireCid(
   }
 }
 
-function extractBlockCidsFromRecord(fields: unknown, body: string): { cids: string[] } {
+function extractBlockCidsFromContent(fields: unknown, body: string): { cids: string[] } {
   const strings = new Set<string>();
   collectStringValues(fields, strings);
   collectStringValues(body, strings);
@@ -273,7 +274,7 @@ export async function openRuntimeApiV1(input: {
     deepFreeze(view);
     recordsByKey.set(recordKey, view);
     recordFileByKey.set(recordKey, recordObj.file);
-    const { cids } = extractBlockCidsFromRecord(recordObj.fields, recordObj.body);
+    const { cids } = extractBlockCidsFromContent(recordObj.fields, recordObj.body);
     deepFreeze(cids);
     blockRefsByRecordKey.set(recordKey, cids);
     for (const cid of cids) {
@@ -294,6 +295,26 @@ export async function openRuntimeApiV1(input: {
         rootRecordKeysByTypeId.set(recordObj.typeId, []);
       }
       rootRecordKeysByTypeId.get(recordObj.typeId)?.push(recordKey);
+    }
+  }
+
+  for (const typeObj of parsed.typeObjects) {
+    const { cids } = extractBlockCidsFromContent(typeObj.fields, typeObj.body);
+    for (const cid of cids) {
+      reachableBlockCids.add(cid);
+    }
+  }
+
+  const pluginDiscovery = discoverPluginObjects(input.snapshot);
+  for (const plugin of pluginDiscovery.plugins) {
+    const blocks = plugin.manifest.yaml.blocks;
+    if (!Array.isArray(blocks)) {
+      continue;
+    }
+    for (const cid of blocks) {
+      if (typeof cid === 'string') {
+        reachableBlockCids.add(cid);
+      }
     }
   }
 

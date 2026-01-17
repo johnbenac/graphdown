@@ -13,7 +13,7 @@ describe("wikiRefStrings helpers", () => {
     expect(writeRefs([])).toBeUndefined();
   });
 
-  it("REL-007: readRef/readRefs return cleaned ids from legacy shapes", () => {
+  it("REL-007: readRef/readRefs normalize ids from object shapes", () => {
     expect(readRef({ ref: "[[record:1]]" })).toBe("record:1");
     expect(readRefs({ refs: ["[[record:1]]", "record:2"] })).toEqual(["record:1", "record:2"]);
   });

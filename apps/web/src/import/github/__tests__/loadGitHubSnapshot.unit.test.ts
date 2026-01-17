@@ -98,7 +98,6 @@ describe("loadGitHubSnapshot", () => {
   it("includes blocks under blocks and reports ignored files", async () => {
     const fetchMock = vi.fn();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
-    const legacyBlobPath = `blobs/sha256/aa/${"a".repeat(64)}`;
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
@@ -108,7 +107,6 @@ describe("loadGitHubSnapshot", () => {
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
             { path: "blocks/sha2-256/aa/aa00", type: "blob" },
-            { path: legacyBlobPath, type: "blob" },
             { path: "docs/readme.md", type: "blob" }
           ]
         })
@@ -138,7 +136,7 @@ describe("loadGitHubSnapshot", () => {
         "types/note.md"
       ].sort()
     );
-    expect(ignored.sort()).toEqual([legacyBlobPath, "docs/readme.md"].sort());
+    expect(ignored.sort()).toEqual(["docs/readme.md"].sort());
   });
 
   it("imports Graphdown markdown in non-canonical paths", async () => {
