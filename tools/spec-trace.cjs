@@ -148,20 +148,38 @@ function walkDir(rootDir, onFile) {
     });
 }
 
+function collectPackageSrcTargets() {
+  const packagesDir = path.join(REPO_ROOT, 'packages');
+  if (!fs.existsSync(packagesDir)) return [];
+
+  const pkgNames = fs
+    .readdirSync(packagesDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+
+  const targets = [];
+
+  for (const name of pkgNames) {
+    const srcDir = path.join(packagesDir, name, 'src');
+    if (!fs.existsSync(srcDir)) continue;
+
+    targets.push({
+      dir: srcDir,
+      match: (filePath) => /\.test\.tsx?$/.test(filePath),
+    });
+  }
+
+  return targets;
+}
+
 function collectTestFiles() {
   const targets = [
     {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'src'),
       match: (filePath) => /\.test\.tsx?$/.test(filePath),
     },
-    {
-      dir: path.join(REPO_ROOT, 'packages', 'core', 'src'),
-      match: (filePath) => /\.test\.tsx?$/.test(filePath),
-    },
-    {
-      dir: path.join(REPO_ROOT, 'packages', 'runtime', 'src'),
-      match: (filePath) => /\.test\.tsx?$/.test(filePath),
-    },
+    ...collectPackageSrcTargets(),
     {
       dir: path.join(REPO_ROOT, 'apps', 'web', 'e2e'),
       match: (filePath) => /\.e2e\.spec\.(js|ts)$/.test(filePath),
