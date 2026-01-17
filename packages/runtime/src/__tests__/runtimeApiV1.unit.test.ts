@@ -262,6 +262,21 @@ test('runtime api v1 exposes block read methods', async () => {
   assert.deepEqual(bytes, referencedBytes);
 });
 
+test('runtime api v1 includes type-level block refs in reachable set', async () => {
+  const typeBlockBytes = utf8('type-block');
+  const typeBlockCid = cidFromRawBytes(typeBlockBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note', `See [[${typeBlockCid}]].`),
+    [blockPathForCid(typeBlockCid)]: typeBlockBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  assert.deepEqual(await opened.value.listReachableBlockCids(), [typeBlockCid]);
+});
+
 test('runtime api v1 extracts block refs from nested field strings', async () => {
   const cidOne = cidFromRawBytes(utf8('nested-one'));
   const cidTwo = cidFromRawBytes(utf8('nested-two'));

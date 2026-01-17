@@ -7,6 +7,10 @@ test('REL-003: extracts record references from wiki-link tokens', () => {
   assert.deepEqual(extractRecordRefs('see [[note:one]] and [[note:two]]'), ['note:one', 'note:two']);
 });
 
+test('REL-001: record relationships use composite wiki-links', () => {
+  assert.deepEqual(extractRecordRefs('link [[typeA:recordB]]'), ['typeA:recordB']);
+});
+
 test('REL-003: ignores malformed record tokens and aliases', () => {
   assert.deepEqual(
     extractRecordRefs('[[ note:one ]] [[note:bad:extra]] [[note|alias]] [[note-1]]'),
@@ -27,8 +31,4 @@ test('CID-REF-002: ignores non-CID tokens', () => {
     extractCidRefs('[[ note:one ]] [[not-a-cid]]'),
     { cids: [], invalidCidTokens: [] }
   );
-});
-
-test('REL-001: legacy blob references are not treated as record relationships', () => {
-  assert.deepEqual(extractRecordRefs('see [[gdblob:sha256-' + 'a'.repeat(64) + ']]'), []);
 });

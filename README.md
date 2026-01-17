@@ -7,6 +7,7 @@ It ships:
 - the **standard** (`SPEC.md`) — the single source of truth (currently **Spec v0.5**)
 - a **web app** (`apps/web`) for importing/browsing/editing datasets
 - a **core domain library** (`packages/core/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
+- a **runtime API** (`packages/runtime`) for the session-based read model
 
 > If anything conflicts with `SPEC.md`, `SPEC.md` wins.
 
@@ -73,7 +74,7 @@ Blocks are **content-addressed byte blobs** stored in the canonical block store.
 
   where `<p>` is the first byte of the CID digest as two lowercase hex chars, and the filename is the CID string.
 
-- **Block references** inside records use CID wiki-link tokens (CID-REF-001):
+- **Block references** inside records and types use CID wiki-link tokens (CID-REF-001):
 
   `[[<cid>]]`
 
@@ -190,7 +191,7 @@ Install dependencies:
 
 ```sh
 npm ci
-````
+```
 
 Run the web app:
 
@@ -294,7 +295,7 @@ Parent pointers are structural. They are not “relationships” under REL-001.
 
 ### Block references (CID-REF-001)
 
-Records can reference blocks by CID wiki-links:
+Records and types can reference blocks by CID wiki-links:
 
 ```md
 ---
@@ -339,7 +340,7 @@ This codebase contains multiple graph-like structures. In docs, avoid saying “
 * **Record Link Graph**: wiki-link relationships extracted from record bodies and record field strings
 * **Record Hierarchy**: parent pointer structure (`parent:`)
 * **Type Composition Dependencies**: type → type requirements (`fields.composition`)
-* **Block Dependency Graph**: record → block CID references (`[[<cid>]]`) plus plugin manifest `blocks[]`
+* **Block Dependency Graph**: record + type → block CID references (`[[<cid>]]`) plus plugin manifest `blocks[]`
 * **Canonical Layout Tree**: deterministic export directory tree (EXP-HIER-001 / EXP-PLUG-001)
 
 See:
@@ -352,10 +353,10 @@ See:
 
 ## Example datasets
 
-Reference datasets used for compatibility checks:
+Reference fixtures used for compatibility checks and tests:
 
-* [https://github.com/johnbenac/product-tracker-dataset](https://github.com/johnbenac/product-tracker-dataset)
-* [https://github.com/johnbenac/research-lab-dataset](https://github.com/johnbenac/research-lab-dataset)
+* `packages/core/src/__fixtures__/plugin-valid-dataset`
+* `packages/core/src/__fixtures__/valid-dataset`
 
 ---
 
@@ -364,10 +365,10 @@ Reference datasets used for compatibility checks:
 * `SPEC.md` — Graphdown standard (normative)
 * `Graphdown_Dataset_Authoring_Guide.md` — authoring guidance (non-normative)
 * `apps/web/` — React/Vite web app (import, browse, edit, export)
-* `packages/core/src/` — core parsing/validation/hashing/canonicalization/runtime helpers
+* `packages/core/src/` — core parsing/validation/hashing/canonicalization/import/export helpers
+* `packages/runtime/` — runtime API v1 session read model
 * `docs/` — developer concept docs (glossary, graphs, snapshots/layout)
 * `artifacts/spec-trace/` — generated spec-to-test traceability artifacts
 * `tools/spec-trace.cjs` — spec-trace generator (matrix must match spec; GOV-002)
 
 ```
-

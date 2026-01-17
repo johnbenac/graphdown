@@ -10,7 +10,7 @@ describe("fixtureLoader", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("loads plugin-valid-dataset and validates OK (plugins ignored for now)", () => {
+  it("loads plugin-valid-dataset and validates OK (plugins are first-class)", () => {
     const snapshot = loadFixtureSnapshot("plugin-valid-dataset");
     const result = validateDatasetSnapshot(snapshot);
     expect(result.ok).toBe(true);

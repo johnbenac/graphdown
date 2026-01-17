@@ -55,7 +55,6 @@ export function createPersistence(options: CreatePersistenceOptions): Persistenc
     async clearActiveDataset() {
       await store.del(KEY.activeMeta);
       await store.del(KEY.activeSnapshot);
-      await store.del(KEY.activeRecordLinkGraphCache);
       await store.del(KEY.activeUiState);
     },
     async clearAll() {

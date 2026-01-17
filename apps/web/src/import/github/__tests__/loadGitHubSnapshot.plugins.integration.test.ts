@@ -39,6 +39,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
             { path: "extensions/demo/plugin.md", type: "blob" },
             { path: "extensions/demo/ui.md", type: "blob" },
             { path: "extensions/demo/entry.js", type: "blob" },
+            { path: "extensions/demo/assets/logo.bin", type: "blob" },
             { path: "docs/readme.md", type: "blob" },
             { path: "assets/logo.png", type: "blob" }
           ]
@@ -67,6 +68,9 @@ describe("loadGitHubSnapshot plugin bundles", () => {
         if (path === "extensions/demo/entry.js") {
           return new Response("console.log('demo');", { status: 200 });
         }
+        if (path === "extensions/demo/assets/logo.bin") {
+          return new Response(Uint8Array.of(0, 1, 2, 3), { status: 200 });
+        }
         if (path === "docs/readme.md") {
           return new Response("# readme", { status: 200 });
         }
@@ -82,6 +86,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("extensions/demo/assets/logo.bin")).toBe(true);
     expect(ignored).toEqual(expect.arrayContaining(["docs/readme.md", "assets/logo.png"]));
 
     const uiFetches = fetchMock.mock.calls.filter(

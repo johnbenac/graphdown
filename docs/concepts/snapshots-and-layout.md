@@ -58,9 +58,12 @@ Canonicalization preserves original file bytes. It changes file paths, not file 
 
 The Graphdown core can operate on any snapshot and discovers record files by content (LAYOUT-001).
 
-The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), such as:
-- `types/**/*.md`
-- `records/**/*.md`
-- `blocks/sha2-256/**`
+The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), as long as **all semantic files needed for validity, hashing, and export are included**.
 
-This is an application decision. It is not a rule of the Graphdown standard.
+For example, a valid minimal subset must still include:
+- record and type files (`types/**/*.md`, `records/**/*.md`, or any Markdown discovered by content)
+- block store files (`blocks/sha2-256/**`)
+- plugin manifests (Markdown with plugin front matter)
+- **all plugin bundle files referenced by manifests**, including non-Markdown files and binary bundle entries
+
+Filtering out plugin bundle files is not an option: importers must resolve manifests and include every declared bundle file to keep snapshots valid, hashable, and exportable (IMP-PLUG-001).

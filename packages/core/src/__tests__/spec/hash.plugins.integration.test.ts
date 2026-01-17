@@ -24,6 +24,7 @@ test(
     withoutPluginFiles.delete("extensions/demo/plugin.md");
     withoutPluginFiles.delete("extensions/demo/entry.js");
     withoutPluginFiles.delete("extensions/demo/ui.md");
+    withoutPluginFiles.delete("extensions/demo/assets/logo.bin");
     const digestWithout = digest(computeGdHashV1({ files: withoutPluginFiles }, "snapshot"));
     assert.notEqual(digestBase, digestWithout);
 

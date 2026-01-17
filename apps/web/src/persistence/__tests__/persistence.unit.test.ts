@@ -4,7 +4,6 @@ import type { DatasetSnapshot } from "@graphdown/core";
 import { IndexedDbStore } from "../../storage/IndexedDbStore";
 import { KEY } from "../keys";
 import { createPersistence } from "../persistence";
-import { serializeSnapshot } from "../serializeSnapshot";
 
 function makeDbName(prefix: string) {
   return `${prefix}-${Math.random().toString(16).slice(2)}`;
@@ -38,27 +37,6 @@ describe("persistence service", () => {
 
       const loaded = await persistence.loadActiveDataset();
       expect(loaded?.meta.id).toBe("dataset-1");
-      expect(loaded?.datasetSnapshot.files.size).toBe(1);
-    } finally {
-      await store.destroy();
-    }
-  });
-
-  it("loads datasets even when legacy graph cache entries exist", async () => {
-    const store = new IndexedDbStore({ dbName: makeDbName("persistence") });
-    try {
-      const persistence = createPersistence({ store });
-
-      await store.set(KEY.activeSnapshot, serializeSnapshot(sampleSnapshot));
-      await store.set(KEY.activeMeta, {
-        id: "dataset-2",
-        createdAt: 1,
-        updatedAt: 1
-      });
-      await store.set(KEY.activeRecordLinkGraphCache, { legacy: true });
-
-      const loaded = await persistence.loadActiveDataset();
-      expect(loaded?.meta.id).toBe("dataset-2");
       expect(loaded?.datasetSnapshot.files.size).toBe(1);
     } finally {
       await store.destroy();

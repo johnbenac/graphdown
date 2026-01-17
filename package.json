@@ -26,6 +26,7 @@
     "format:check": "prettier --check .",
     "check:core-scope": "node tools/check-tsc-build-scope.cjs",
     "check:no-emitted-js": "node tools/check-no-emitted-js.cjs",
+    "check:docs": "node tools/check-docs-removed.cjs",
     "test:core": "npm --workspace packages/core run typecheck && npm --workspace packages/core run test",
     "test:runtime": "npm --workspace packages/runtime run typecheck && npm --workspace packages/runtime run test",
     "test:web": "npm --workspace apps/web run test",

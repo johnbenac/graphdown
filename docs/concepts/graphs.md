@@ -66,14 +66,16 @@ This creates a “two-layer” relationship:
 - schema layer: type -> required component type
 - data layer: record -> record links
 
-## 4) Block Dependency Graph (record -> block CID)
+## 4) Block Dependency Graph (record/type -> block CID)
 
-**Definition:** A record references a block if it contains a CID wiki-link token:
+**Definition:** A record or type references a block if it contains a CID wiki-link token:
 `[[<cid>]]`
 
 **Where references are extracted from:**
 - record body
 - any string value anywhere inside record `fields`
+- type body
+- any string value anywhere inside type `fields`
 
 **Key modules:**
 - Extraction: `packages/core/src/parse/wikiRefs.ts`
@@ -83,6 +85,9 @@ This creates a “two-layer” relationship:
 **Validity constraints:**
 - referenced block must exist at canonical path
 - block bytes must hash to the referenced CID digest (VAL-BLOCK-001/002)
+
+**Additional inputs:**
+- plugin manifests can declare `blocks[]`, which are treated as block dependencies for reachability/export.
 
 ## 5) Canonical Layout Tree (filesystem paths)
 

@@ -41,8 +41,10 @@ describe("readZipSnapshot plugin bundles", () => {
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
+    expect(snapshot.files.has("extensions/demo/assets/logo.bin")).toBe(true);
     expect(ignored).toContain("assets/logo.png");
     expect(ignored).not.toContain("extensions/demo/entry.js");
     expect(ignored).not.toContain("extensions/demo/ui.md");
+    expect(ignored).not.toContain("extensions/demo/assets/logo.bin");
   });
 });

@@ -36,6 +36,7 @@ describe("plugins first-class behavior", () => {
     withoutPluginFiles.delete("extensions/demo/plugin.md");
     withoutPluginFiles.delete("extensions/demo/entry.js");
     withoutPluginFiles.delete("extensions/demo/ui.md");
+    withoutPluginFiles.delete("extensions/demo/assets/logo.bin");
     const digestWithout = digestSnapshot({ files: withoutPluginFiles });
 
     expect(digestBase).not.toBe(digestWithout);
@@ -48,10 +49,12 @@ describe("plugins first-class behavior", () => {
     expect(canonical.files.has("plugins/demo/manifest.md")).toBe(true);
     expect(canonical.files.has("plugins/demo/entry.js")).toBe(true);
     expect(canonical.files.has("plugins/demo/ui.md")).toBe(true);
+    expect(canonical.files.has("plugins/demo/assets/logo.bin")).toBe(true);
 
     expect(canonical.files.has("extensions/demo/plugin.md")).toBe(false);
     expect(canonical.files.has("extensions/demo/entry.js")).toBe(false);
     expect(canonical.files.has("extensions/demo/ui.md")).toBe(false);
+    expect(canonical.files.has("extensions/demo/assets/logo.bin")).toBe(false);
   });
 
   it("LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported", () => {

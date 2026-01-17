@@ -24,14 +24,16 @@ The routes themselves live in `routes/` and are rendered through the
 1. **Import**
    - Import screens call into `DatasetContext` actions to validate GitHub URLs or
      read zip files.
+   - Importers resolve plugin manifests and include all referenced bundle files
+     (including non-Markdown and binary bundles) in the snapshot.
 2. **Validation & canonicalization**
    - `@graphdown/core` utilities validate the dataset, normalize file layout, and prune
      unused blocks.
-3. **Graph building**
-   - The dataset snapshot becomes a graph of types/records and relationship
-     edges used by the UI.
+3. **Runtime session**
+   - The dataset snapshot is opened with `@graphdown/runtime` to provide the
+     session read model for types, records, hierarchy, and link adjacency.
 4. **Persistence**
-   - The snapshot and graph are serialized into storage and rehydrated on load.
+   - The snapshot is serialized into storage and rehydrated on load.
 5. **Editing**
    - Edits from the record editor update snapshot files and commit back through
      validation and persistence.
@@ -40,8 +42,9 @@ The routes themselves live in `routes/` and are rendered through the
 
 - `components/` - reusable UI components (navigation, record editor/viewer, UI
   wrappers).
-- `@graphdown/core` - dataset parsing, validation, graph building, hashing, zip handling,
-  and front matter parsing.
+- `@graphdown/core` - dataset parsing, validation, hashing, zip handling, and front
+  matter parsing.
+- `@graphdown/runtime` - session read model for types, records, relationships, and blocks.
 - `features/export/` - downloading dataset exports from the browser.
 - `import/` - zip parsing + GitHub import helpers.
 - `persistence/` - snapshot/graph serialization and persistence orchestration.

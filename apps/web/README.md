@@ -2,12 +2,12 @@
 
 This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets.
 
-It uses the shared `@graphdown/core` domain logic and persists the active dataset in the browser using IndexedDB (required).
+It uses `@graphdown/core` for pure dataset utilities and `@graphdown/runtime` as the session-based read model. The active dataset is persisted in the browser using IndexedDB (required).
 
 ## Run the app
 From the repo root:
 ```sh
-npm install
+npm ci
 npm run dev:web   # starts Vite on port 5173
 ```
 
@@ -22,11 +22,12 @@ npm --workspace apps/web run build
 ## Project layout
 
 * `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-* `@graphdown/core` shared, pure logic for dataset parsing/validation/link extraction (hashing, IDs, refs, markdown parsing, etc.).
+* `@graphdown/core` shared, pure logic for dataset parsing/validation/hashing/canonicalization (IDs, refs, markdown parsing, etc.).
+* `@graphdown/runtime` session-based read model for types, records, relationships, hierarchy, and blocks.
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
-* `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → Record Link Graph build → persistence.
-* `src/persistence/` serializes dataset snapshots, the Record Link Graph cache, and UI state.
+* `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → runtime session → persistence.
+* `src/persistence/` serializes dataset snapshots and UI state.
 * `src/storage/` IndexedDB-backed persistence.
 * `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 * `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
@@ -36,11 +37,11 @@ npm --workspace apps/web run build
 
 ## Data flow quick reference
 
-1. **Import (zip or GitHub)** → loaders build a raw `DatasetSnapshot` from bytes or GitHub files.
+1. **Import (zip or GitHub)** → loaders build a raw `DatasetSnapshot` from bytes or GitHub files, including plugin manifests and all resolved plugin bundle files.
 2. **Validate** → `validateDatasetSnapshot` enforces Graphdown structural rules; errors bubble to the UI.
 3. **Canonicalize layout** → `canonicalizeDatasetSnapshot` rewrites paths into the canonical record-only layout and prunes unreachable blobs; `importReport` summarizes changes.
-4. **Build Record Link Graph** → `buildRecordLinkGraphFromSnapshot` builds the Record Link Graph index used by the UI (incoming/outgoing wiki-link relationships).
-5. **Persist** → `createPersistence` writes snapshot + Record Link Graph cache + UI state to storage.
+4. **Open runtime session** → `openRuntimeApiV1` provides the read model for types, records, links, hierarchy, and blocks.
+5. **Persist** → `createPersistence` writes snapshot + UI state to storage.
 6. **View/Edit** → `DatasetRoute` renders record/type views using data from `DatasetContext`.
 7. **Export** → export helpers serialize the current snapshot back to a zip.
 

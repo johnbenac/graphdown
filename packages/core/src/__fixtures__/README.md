@@ -28,7 +28,7 @@ key requirements for types and records.
 ## Plugin fixtures (SPEC v0.5)
 
 - `plugin-valid-dataset/`
-  - Valid plugin manifest + UTF-8 bundle files.
+  - Valid plugin manifest + UTF-8 bundle files, plus a declared binary bundle path.
   - Includes an empty-bytes block file using CID-001 for later plugin block
     reachability/export tests.
 

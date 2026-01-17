@@ -63,24 +63,4 @@ describe("readZipSnapshot", () => {
     expect(ignored).toContain("docs/readme.md");
   });
 
-  it("ignores legacy blob paths entirely", async () => {
-    const legacyBlobPath = `blobs/sha256/aa/${"a".repeat(64)}`;
-    const zipBytes = zipSync({
-      "types/note.md": new Uint8Array(strToU8("---\ntypeId: note\nfields: {}\n---")),
-      "records/note/one.md": new Uint8Array(
-        strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---")
-      ),
-      [legacyBlobPath]: new Uint8Array([1, 2, 3]),
-      "docs/readme.md": new Uint8Array(strToU8("# readme"))
-    });
-
-    const buffer = Uint8Array.from(zipBytes).buffer;
-    const file = {
-      arrayBuffer: async () => buffer
-    } as File;
-    const { snapshot, ignored } = await readZipSnapshot(file);
-
-    expect(snapshot.files.has(legacyBlobPath)).toBe(false);
-    expect(ignored.sort()).toEqual([legacyBlobPath, "docs/readme.md"].sort());
-  });
 });
