@@ -24,7 +24,15 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       testDir,
       "../../../../../../packages/core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
     );
-    const manifestText = await readFile(fixturePath, "utf8");
+    const fixtureManifestText = await readFile(fixturePath, "utf8");
+    const manifestText = fixtureManifestText.replace(
+      "---",
+      [
+        "---",
+        "binaryFiles:",
+        "  - assets/logo.bin"
+      ].join("\n")
+    );
 
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlString = url.toString();
@@ -39,6 +47,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
             { path: "extensions/demo/plugin.md", type: "blob" },
             { path: "extensions/demo/ui.md", type: "blob" },
             { path: "extensions/demo/entry.js", type: "blob" },
+            { path: "extensions/demo/assets/logo.bin", type: "blob" },
             { path: "docs/readme.md", type: "blob" },
             { path: "assets/logo.png", type: "blob" }
           ]
@@ -67,6 +76,9 @@ describe("loadGitHubSnapshot plugin bundles", () => {
         if (path === "extensions/demo/entry.js") {
           return new Response("console.log('demo');", { status: 200 });
         }
+        if (path === "extensions/demo/assets/logo.bin") {
+          return new Response(Uint8Array.from([1, 2, 3]), { status: 200 });
+        }
         if (path === "docs/readme.md") {
           return new Response("# readme", { status: 200 });
         }
@@ -82,7 +94,9 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("extensions/demo/assets/logo.bin")).toBe(true);
     expect(ignored).toEqual(expect.arrayContaining(["docs/readme.md", "assets/logo.png"]));
+    expect(ignored).not.toEqual(expect.arrayContaining(["extensions/demo/assets/logo.bin"]));
 
     const uiFetches = fetchMock.mock.calls.filter(
       ([url]) => url.toString().includes("/extensions/demo/ui.md")
@@ -93,5 +107,10 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       ([url]) => url.toString().includes("/extensions/demo/entry.js")
     );
     expect(entryFetches.length).toBeGreaterThan(0);
+
+    const binaryFetches = fetchMock.mock.calls.filter(
+      ([url]) => url.toString().includes("/extensions/demo/assets/logo.bin")
+    );
+    expect(binaryFetches.length).toBeGreaterThan(0);
   });
 });

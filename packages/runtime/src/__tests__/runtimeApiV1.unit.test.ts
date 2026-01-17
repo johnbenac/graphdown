@@ -262,6 +262,43 @@ test('runtime api v1 exposes block read methods', async () => {
   assert.deepEqual(bytes, referencedBytes);
 });
 
+test('runtime api v1 includes type and plugin block references in reachable set', async () => {
+  const recordBytes = utf8('record-block');
+  const recordCid = cidFromRawBytes(recordBytes);
+  const typeBytes = utf8('type-block');
+  const typeCid = cidFromRawBytes(typeBytes);
+  const pluginBytes = utf8('plugin-block');
+  const pluginCid = cidFromRawBytes(pluginBytes);
+  const snapshot = makeSnapshot({
+    'types/note.md': typeFile('note', `See [[${typeCid}]].`),
+    'records/note-one.md': recordFile('note', 'one', `See [[${recordCid}]].`),
+    'extensions/demo/plugin.md': [
+      '---',
+      'pluginId: demo',
+      'gdApiVersion: 1',
+      'entry: entry.js',
+      'files:',
+      '  - entry.js',
+      'blocks:',
+      `  - ${pluginCid}`,
+      '---',
+      'Plugin manifest'
+    ].join('\n'),
+    'extensions/demo/entry.js': utf8('console.log("plugin");\n'),
+    [blockPathForCid(recordCid)]: recordBytes,
+    [blockPathForCid(typeCid)]: typeBytes,
+    [blockPathForCid(pluginCid)]: pluginBytes
+  });
+  const opened = await openRuntimeApiV1({ snapshot });
+  assert.equal(opened.ok, true);
+  if (!opened.ok) {
+    assert.fail('Expected ok result');
+  }
+  const reachable = await opened.value.listReachableBlockCids();
+  assert.deepEqual(reachable, [pluginCid, recordCid, typeCid].sort((a, b) => a.localeCompare(b)));
+  assert.deepEqual(await opened.value.listBlockCidsReferencedByRecord('note:one'), [recordCid]);
+});
+
 test('runtime api v1 extracts block refs from nested field strings', async () => {
   const cidOne = cidFromRawBytes(utf8('nested-one'));
   const cidTwo = cidFromRawBytes(utf8('nested-two'));

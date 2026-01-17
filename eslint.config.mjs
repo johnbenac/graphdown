@@ -99,7 +99,15 @@ export default [
               group: [
                 '@graphdown/core/*',
                 '@graphdown/core/src/*',
-                '@graphdown/core/src/**'
+                '@graphdown/core/src/**',
+                '../core/*',
+                '../core/**',
+                '../../core/*',
+                '../../core/**',
+                '../../../core/*',
+                '../../../core/**',
+                '../../../../core/**',
+                '**/packages/core/**'
               ],
               message: 'Import from @graphdown/core (package barrel) only.'
             }

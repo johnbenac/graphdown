@@ -65,6 +65,14 @@ function getDeclaredBundlePaths(manifest: { yaml: Record<string, unknown> }): Se
       }
     }
   }
+  const binaryFiles = manifest.yaml.binaryFiles;
+  if (Array.isArray(binaryFiles)) {
+    for (const file of binaryFiles) {
+      if (typeof file === "string") {
+        declared.add(file);
+      }
+    }
+  }
   return declared;
 }
 

@@ -40,7 +40,8 @@
     "burndown": "node tools/burndown.js",
     "spec:verify": "node tools/check-spec-coverage.js",
     "check:web:test-layout": "node tools/check-web-test-layout.js",
-    "check:test-conventions": "node tools/check-test-conventions.js"
+    "check:test-conventions": "node tools/check-test-conventions.js",
+    "check:guardrails": "node tools/check-guardrails.cjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",

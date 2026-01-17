@@ -18,6 +18,8 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Guardrails
+        run: npm run check:guardrails
       - name: Test
         run: npm test
       - name: Build web (typecheck + vite build)

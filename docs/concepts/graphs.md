@@ -66,14 +66,17 @@ This creates a “two-layer” relationship:
 - schema layer: type -> required component type
 - data layer: record -> record links
 
-## 4) Block Dependency Graph (record -> block CID)
+## 4) Block Dependency Graph (record/type -> block CID)
 
-**Definition:** A record references a block if it contains a CID wiki-link token:
+**Definition:** A record or type references a block if it contains a CID wiki-link token:
 `[[<cid>]]`
 
 **Where references are extracted from:**
 - record body
 - any string value anywhere inside record `fields`
+- type body
+- any string value anywhere inside type `fields`
+- plugin manifest `blocks[]` declarations (for reachability + export)
 
 **Key modules:**
 - Extraction: `packages/core/src/parse/wikiRefs.ts`
