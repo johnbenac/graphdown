@@ -8,7 +8,8 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
-- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, hashing, and export/import
+- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, and hashing
+- **packages/io-zip/src/** — Zip import/export helpers shared by core + web
 
 **Critical rule**: If anything conflicts with SPEC.md, SPEC.md wins.
 
@@ -20,7 +21,7 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 # Install dependencies
 npm ci
 
-# Lint core library (packages/core/src only)
+# Lint all packages and apps
 npm run lint
 
 # Format all files
@@ -33,6 +34,9 @@ npm test
 # Run core-only checks
 npm run check:core-scope
 npm run test:core
+
+# Run zip IO-only checks
+npm run test:io-zip
 
 # Run web-only tests
 npm run test:web
@@ -112,8 +116,11 @@ Key modules:
   - `canonicalizeDatasetSnapshot.ts` — Convert to canonical record-only layout
   - `hash.ts` — Compute deterministic schema/snapshot fingerprints (gdhash-v1)
 
-- **zip/** — Import/export helpers
-  - `zipSnapshot.ts` — Load/save snapshots as zip archives
+### Zip IO Library Structure (packages/io-zip/src/)
+
+- **import/** — Zip parsing + filtered snapshot import (including plugin bundles)
+- **zip/** — Load/save snapshots as zip archives
+- **internal/** — Zip path normalization helpers
 
 ### Record Identity Model (SPEC v0.4+)
 
@@ -203,7 +210,7 @@ Use these as golden compatibility references (read-only):
 
 - **No UI dependencies** — graphdown core cannot import React, react-router-dom, or app-level code
 - **Framework-agnostic** — Core must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `@graphdown/core` barrel, not deep paths
+- **Import from barrel** — App code must import from `@graphdown/core` or `@graphdown/io-zip` barrels, not deep paths
 
 ### Spec Conformance
 
