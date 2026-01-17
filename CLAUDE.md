@@ -112,8 +112,8 @@ Key modules:
   - `canonicalizeDatasetSnapshot.ts` — Convert to canonical record-only layout
   - `hash.ts` — Compute deterministic schema/snapshot fingerprints (gdhash-v1)
 
-- **zip/** — Import/export helpers
-  - `zipSnapshot.ts` — Load/save snapshots as zip archives
+- **zip IO** — Import/export helpers (moved to `@graphdown/io-zip`)
+  - `packages/io-zip/src/zip/zipSnapshot.ts` — Load/save snapshots as zip archives
 
 ### Record Identity Model (SPEC v0.4+)
 

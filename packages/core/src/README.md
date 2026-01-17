@@ -55,13 +55,14 @@ See `docs/terminology.md` and `docs/concepts/graphs.md`.
     - type + record lookups
     - incoming/outgoing record-link adjacency based on wiki-links in record body + record field strings
 
-## Zip + hashing helpers
+## Hashing helpers
 
-- `zip/zipSnapshot.ts`
-  - Loads snapshots from zip bytes with path normalization.
-  - Exports snapshots to zip with deterministic ordering.
 - `snapshot/hash.ts`
   - Computes deterministic hashes for schema-only or full snapshots.
+
+## Zip helpers (io-zip)
+
+Zip import/export now lives in `@graphdown/io-zip` (`packages/io-zip/src/`), which keeps core IO-free.
 
 ## Tests
 

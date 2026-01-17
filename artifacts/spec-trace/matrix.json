@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-17T04:03:04.665Z",
+  "generatedAt": "2026-01-17T18:26:28.523Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1451,11 +1451,6 @@
       "testable": true,
       "verify": "todo",
       "tests": [
-        {
-          "reqId": "IMP-PLUG-001",
-          "testTitle": "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot",
-          "filePath": "apps/web/src/import/__tests__/readZipSnapshot.plugins.integration.test.ts"
-        },
         {
           "reqId": "IMP-PLUG-001",
           "testTitle": "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files",

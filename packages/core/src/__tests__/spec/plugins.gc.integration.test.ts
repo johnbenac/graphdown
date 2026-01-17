@@ -3,13 +3,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   blockPathForCid,
-  buildDatasetZipBytes,
   canonicalizeDatasetSnapshot,
   cidFromRawBytes,
-  loadDatasetSnapshotFromZipBytes,
   validateDatasetSnapshot
 } from "../../index";
 import type { DatasetSnapshot } from "../../index";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 import { loadFixtureSnapshot } from "../fixtureLoader";
 
 const encoder = new TextEncoder();

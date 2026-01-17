@@ -1,49 +1,35 @@
 import { unzipSync, zipSync } from 'fflate';
 
-import type { DatasetSnapshot } from '../model/snapshotTypes';
+import type { DatasetSnapshot } from '@graphdown/core';
+
+import { normalizeZipEntryPath } from './normalizeZipEntryPath';
 
 export interface ZipBuildOptions {
   include?: (path: string) => boolean;
   excludeGit?: boolean;
 }
 
-function normalizeZipPath(entryPath: string): string {
-  let normalized = entryPath.replace(/\\/g, '/');
-  while (normalized.startsWith('./')) {
-    normalized = normalized.slice(2);
-  }
-
-  if (!normalized || normalized === '.') {
-    throw new Error('Invalid zip entry path');
-  }
-  if (normalized.startsWith('/')) {
-    throw new Error(`Invalid zip entry path: ${entryPath}`);
-  }
-  if (normalized.includes('\0')) {
-    throw new Error(`Invalid zip entry path: ${entryPath}`);
-  }
-
-  const segments = normalized.split('/');
-  if (segments.some((segment) => segment.length === 0)) {
-    throw new Error(`Invalid zip entry path: ${entryPath}`);
-  }
-  if (segments.some((segment) => segment === '..')) {
-    throw new Error(`Invalid zip entry path: ${entryPath}`);
-  }
-
-  return segments.join('/');
-}
-
 export function loadDatasetSnapshotFromZipBytes(zipBytes: Uint8Array): DatasetSnapshot {
   const entries = unzipSync(zipBytes);
   const files = new Map<string, Uint8Array>();
+  const seenPaths = new Map<string, string>();
 
-  for (const [entryPath, contents] of Object.entries(entries)) {
+  const entryPaths = Object.keys(entries).sort((a, b) => a.localeCompare(b));
+  for (const entryPath of entryPaths) {
     const normalizedEntryPath = entryPath.replace(/\\/g, '/');
-    if (normalizedEntryPath.endsWith('/')) {
+    const isDir = normalizedEntryPath.endsWith('/');
+    const normalizedPath = normalizeZipEntryPath(normalizedEntryPath);
+    const existing = seenPaths.get(normalizedPath);
+    if (existing) {
+      throw new Error(
+        `Zip entry path collision: ${existing} and ${entryPath} normalize to ${normalizedPath}`
+      );
+    }
+    seenPaths.set(normalizedPath, entryPath);
+    if (isDir) {
       continue;
     }
-    const normalizedPath = normalizeZipPath(normalizedEntryPath);
+    const contents = entries[entryPath];
     files.set(normalizedPath, contents);
   }
 
