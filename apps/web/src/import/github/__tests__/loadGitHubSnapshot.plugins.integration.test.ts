@@ -25,6 +25,10 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       "../../../../../../packages/core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
     );
     const manifestText = await readFile(fixturePath, "utf8");
+    const updatedManifest = manifestText.replace(
+      "files:\n  - entry.js\n  - ui.md",
+      "files:\n  - entry.js\n  - ui.md\n  - logo.png\nbinaryFiles:\n  - logo.png"
+    );
 
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlString = url.toString();
@@ -39,6 +43,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
             { path: "extensions/demo/plugin.md", type: "blob" },
             { path: "extensions/demo/ui.md", type: "blob" },
             { path: "extensions/demo/entry.js", type: "blob" },
+            { path: "extensions/demo/logo.png", type: "blob" },
             { path: "docs/readme.md", type: "blob" },
             { path: "assets/logo.png", type: "blob" }
           ]
@@ -59,13 +64,16 @@ describe("loadGitHubSnapshot plugin bundles", () => {
           });
         }
         if (path === "extensions/demo/plugin.md") {
-          return new Response(manifestText, { status: 200 });
+          return new Response(updatedManifest, { status: 200 });
         }
         if (path === "extensions/demo/ui.md") {
           return new Response("# demo ui", { status: 200 });
         }
         if (path === "extensions/demo/entry.js") {
           return new Response("console.log('demo');", { status: 200 });
+        }
+        if (path === "extensions/demo/logo.png") {
+          return new Response(new Uint8Array([0, 1, 2, 3]), { status: 200 });
         }
         if (path === "docs/readme.md") {
           return new Response("# readme", { status: 200 });
@@ -82,6 +90,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("extensions/demo/logo.png")).toBe(true);
     expect(ignored).toEqual(expect.arrayContaining(["docs/readme.md", "assets/logo.png"]));
 
     const uiFetches = fetchMock.mock.calls.filter(
@@ -93,5 +102,10 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       ([url]) => url.toString().includes("/extensions/demo/entry.js")
     );
     expect(entryFetches.length).toBeGreaterThan(0);
+
+    const binaryFetches = fetchMock.mock.calls.filter(
+      ([url]) => url.toString().includes("/extensions/demo/logo.png")
+    );
+    expect(binaryFetches.length).toBeGreaterThan(0);
   });
 });

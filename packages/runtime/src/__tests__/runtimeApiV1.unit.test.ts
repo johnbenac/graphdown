@@ -234,13 +234,36 @@ test('API-SESSION-002: raw bytes are returned as copies', async () => {
 test('runtime api v1 exposes block read methods', async () => {
   const referencedBytes = utf8('block-one');
   const referencedCid = cidFromRawBytes(referencedBytes);
+  const typeBytes = utf8('block-type');
+  const typeCid = cidFromRawBytes(typeBytes);
+  const pluginBytes = utf8('block-plugin');
+  const pluginCid = cidFromRawBytes(pluginBytes);
   const garbageBytes = utf8('block-two');
   const garbageCid = cidFromRawBytes(garbageBytes);
   const missingCid = cidFromRawBytes(utf8('block-missing'));
   const snapshot = makeSnapshot({
-    'types/note.md': typeFile('note'),
+    'types/note.md': typeFile('note', `Type body [[${typeCid}]].`),
     'records/note-one.md': recordFile('note', 'one', `See [[${referencedCid}]].`),
+    'extensions/demo/plugin.md': [
+      '---',
+      'pluginId: demo',
+      'gdApiVersion: 1',
+      'entry: entry.js',
+      'files:',
+      '  - entry.js',
+      '  - asset.bin',
+      'binaryFiles:',
+      '  - asset.bin',
+      'blocks:',
+      `  - ${pluginCid}`,
+      '---',
+      'Demo plugin'
+    ].join('\n'),
+    'extensions/demo/entry.js': utf8('console.log("demo");'),
+    'extensions/demo/asset.bin': Uint8Array.of(0, 255, 1),
     [blockPathForCid(referencedCid)]: referencedBytes,
+    [blockPathForCid(typeCid)]: typeBytes,
+    [blockPathForCid(pluginCid)]: pluginBytes,
     [blockPathForCid(garbageCid)]: garbageBytes
   });
   const opened = await openRuntimeApiV1({ snapshot });
@@ -248,9 +271,12 @@ test('runtime api v1 exposes block read methods', async () => {
   if (!opened.ok) {
     assert.fail('Expected ok result');
   }
-  const expectedPresent = [garbageCid, referencedCid].sort((a, b) => a.localeCompare(b));
+  const expectedPresent = [garbageCid, referencedCid, typeCid, pluginCid].sort((a, b) =>
+    a.localeCompare(b)
+  );
   assert.deepEqual(await opened.value.listBlockCidsPresent(), expectedPresent);
-  assert.deepEqual(await opened.value.listReachableBlockCids(), [referencedCid]);
+  const expectedReachable = [pluginCid, referencedCid, typeCid].sort((a, b) => a.localeCompare(b));
+  assert.deepEqual(await opened.value.listReachableBlockCids(), expectedReachable);
   assert.deepEqual(await opened.value.listBlockCidsReferencedByRecord('note:one'), [
     referencedCid
   ]);

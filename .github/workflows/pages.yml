@@ -44,7 +44,7 @@ jobs:
               # --- Web production inputs ---
               - "apps/web/src/**"
               - "apps/web/index.html"
-              - "apps/web/styles.css"
+              - "apps/web/src/styles.css"
               - "apps/web/vite.config.*"
               - "apps/web/tsconfig*.json"
               - "apps/web/package.json"
@@ -52,6 +52,8 @@ jobs:
               # --- Shared runtime code that can affect the bundle ---
               - "packages/core/src/**"
               - "packages/core/package.json"
+              - "packages/runtime/src/**"
+              - "packages/runtime/package.json"
 
               # --- Root build inputs that can affect output ---
               - "package.json"
