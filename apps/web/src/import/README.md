@@ -15,18 +15,8 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 - `readZipSnapshot.ts`
   - Reads a user-selected zip file via `File.arrayBuffer()`.
-  - Normalizes entry paths to prevent path traversal or invalid paths.
-  - Supports stripping a single root directory when the zip is packaged with a
-    top-level folder.
-  - Filters entries to files relevant to the web app import flow:
-    - `blocks/**`
-    - Markdown files anywhere that start with a YAML front matter delimiter at byte 0
-      (the same check used by `isRecordFileBytes`)
-    - plugin manifests (front-matter Markdown candidates)
-    - plugin bundle files referenced by manifests (including binary files)
-  - Ignores non-block files that do not match the Graphdown markdown/plugin sentinel
-    or are not declared by plugin manifests.
-  - Returns both the filtered snapshot and a list of ignored files.
+  - Delegates zip parsing and filtering to `@graphdown/io-zip` and returns the
+    filtered snapshot + ignored paths.
 
 ## GitHub imports (`import/github`)
 
@@ -50,8 +40,6 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 ## Tests
 
-- `readZipSnapshot.unit.test.ts`
-- `readZipSnapshot.plugins.integration.test.ts`
 - `github/loadGitHubSnapshot.unit.test.ts`
 - `github/loadGitHubSnapshot.plugins.integration.test.ts`
 - `github/parseGitHubUrl.unit.test.ts`

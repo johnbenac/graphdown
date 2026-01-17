@@ -8,7 +8,7 @@ zip archives.
 - `zipSnapshot.ts`
   - `loadDatasetSnapshotFromZipBytes` converts zip bytes into a
     `DatasetSnapshot` with normalized paths.
-  - `exportDatasetSnapshotToZipBytes` writes a snapshot to zip bytes with
+  - `buildZipBytesFromSnapshot` writes a snapshot to zip bytes with
     optional include filtering and `.git` exclusion.
 - `buildZip.ts`
   - Thin adapter that exports dataset zip bytes for the web app.

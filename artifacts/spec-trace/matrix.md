@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-17T04:03:04.665Z
+Generated: 2026-01-17T18:30:56.672Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -430,8 +430,7 @@ Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
-Tests (2):
-- apps/web/src/import/__tests__/readZipSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
+Tests (1):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
 
 ## EXP-003 — Canonical dataset export
