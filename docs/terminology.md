@@ -107,10 +107,10 @@ Composition constraints are validated using Record Links:
 required components must be satisfied by outgoing record links to existing records of the required type (VAL-COMP-002).
 
 ### Block Dependency Graph
-Record→block edges implied by block references extracted from record body/fields.
+Record/type → block edges implied by block references extracted from record and type objects.
 
-- Nodes: records + block CIDs
-- Edges: `recordKey -> cid`
+- Nodes: records + types + block CIDs
+- Edges: `recordKey -> cid` and `typeId -> cid`
 
 Validation requires referenced blocks exist and match digest (VAL-BLOCK-001/002).
 
@@ -121,11 +121,6 @@ The deterministic directory layout described by **EXP-HIER-001** and produced by
 - Record objects exported under `records/` with nesting derived solely from `parent` pointers
 
 This is a path/layout concept. It is not a “graph” of relationships; it is a deterministic filesystem representation derived from identities + hierarchy.
-
-### Graph Cache (Persisted Record Link Graph Cache)
-The serialized adjacency/index stored by the persistence layer (`persistence/serializeRecordLinkGraphCache.ts`).
-
-It exists for performance so the UI can rehydrate quickly without rebuilding the Record Link Graph from the snapshot every load.
 
 ## Writing rules
 

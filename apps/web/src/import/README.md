@@ -9,7 +9,7 @@ The import layer ingests datasets from zip files or GitHub repositories and retu
 
 The Graphdown core discovers record files by **content** (SPEC: LAYOUT-001) and ignores non-record/non-block-store files for semantics (BLOCK-LAYOUT-003).
 
-The **web app importer** may choose to load only a subset of repository files for UX/performance. This is an application choice, not a dataset validity rule.
+The **web app importer** may choose to load only a subset of repository files for UX/performance, but it must still include every semantic file required for validity, hashing, and export (records, types, blocks, plugin manifests, and resolved plugin bundle files).
 
 ## Zip imports
 
@@ -22,7 +22,10 @@ The **web app importer** may choose to load only a subset of repository files fo
     - `blocks/**`
     - Markdown files anywhere that start with a YAML front matter delimiter at byte 0
       (the same check used by `isRecordFileBytes`).
-  - Ignores non-block files that do not match the Graphdown markdown sentinel.
+  - Detects plugin manifests, resolves their bundle file paths, and includes the
+    bundle files (including binary) in the snapshot.
+  - Ignores non-block files that do not match the Graphdown markdown sentinel and
+    are not plugin bundle files.
   - Returns both the filtered snapshot and a list of ignored files.
 
 ## GitHub imports (`import/github`)
@@ -37,6 +40,8 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Streams progress updates through `ImportProgress` phases.
   - Downloads `blocks/**` and all Markdown files, retaining Markdown only when
     `isRecordFileBytes` confirms Graphdown front matter.
+  - Parses plugin manifests, resolves bundle file paths, and fetches any required
+    bundle files (including binary) that were not already downloaded.
 
 - `mapGitHubError.ts`
   - Normalizes GitHub API errors into displayable categories (not found,

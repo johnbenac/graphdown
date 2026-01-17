@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-15T19:45:19.976Z
+Generated: 2026-01-17T04:16:14.960Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -248,7 +248,7 @@ Tests (2):
 
 ## REL-001 — Record relationships use composite wiki-links (testable=true)
 Tests (1):
-- packages/core/src/parse/__tests__/wikiRefs.unit.test.ts — "REL-001: legacy blob references are not treated as record relationships"
+- packages/core/src/parse/__tests__/wikiRefs.unit.test.ts — "REL-001: record relationships use composite wiki-links"
 
 ## REL-002 — Where record relationships are extracted (testable=true)
 Tests (2):
@@ -271,7 +271,7 @@ Tests (2):
 
 ## REL-007 — Only composite wiki-links are relationships in core (testable=true)
 Tests (1):
-- apps/web/src/utils/__tests__/wikiRefStrings.unit.test.ts — "REL-007: readRef/readRefs return cleaned ids from legacy shapes"
+- apps/web/src/utils/__tests__/wikiRefStrings.unit.test.ts — "REL-007: readRef/readRefs normalize wiki-link inputs"
 
 ## CID-REF-001 — Block references use CID wiki-link tokens (testable=true)
 Tests (2):

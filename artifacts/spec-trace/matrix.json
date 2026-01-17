@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-15T19:45:19.976Z",
+  "generatedAt": "2026-01-17T04:16:14.960Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -824,7 +824,7 @@
       "tests": [
         {
           "reqId": "REL-001",
-          "testTitle": "REL-001: legacy blob references are not treated as record relationships",
+          "testTitle": "REL-001: record relationships use composite wiki-links",
           "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
         }
       ]
@@ -898,7 +898,7 @@
       "tests": [
         {
           "reqId": "REL-007",
-          "testTitle": "REL-007: readRef/readRefs return cleaned ids from legacy shapes",
+          "testTitle": "REL-007: readRef/readRefs normalize wiki-link inputs",
           "filePath": "apps/web/src/utils/__tests__/wikiRefStrings.unit.test.ts"
         }
       ]

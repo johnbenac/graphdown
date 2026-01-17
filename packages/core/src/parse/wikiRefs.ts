@@ -1,7 +1,6 @@
 import { decodeDaslCidString } from '../cid/daslCid';
 
 const RECORD_REF_PATTERN = /^([A-Za-z0-9][A-Za-z0-9_-]*):([A-Za-z0-9][A-Za-z0-9_-]*)$/;
-const LEGACY_BLOB_TOKEN_PATTERN = /^gdblob:sha256-[0-9a-f]{64}$/;
 const CID_SHAPE_PATTERN = /^b[a-z2-7]{58}$/;
 
 function extractTokens(text: string): string[] {
@@ -19,9 +18,6 @@ export function extractRecordRefs(text: string): string[] {
   const refs: string[] = [];
   for (const token of tokens) {
     const trimmed = token.trim();
-    if (LEGACY_BLOB_TOKEN_PATTERN.test(trimmed)) {
-      continue;
-    }
     const match = trimmed.match(RECORD_REF_PATTERN);
     if (!match) continue;
     refs.push(`${match[1]}:${match[2]}`);
@@ -40,9 +36,6 @@ export function extractCidRefs(text: string): ExtractCidRefsResult {
   const invalidCidTokens: string[] = [];
   for (const token of tokens) {
     const trimmed = token.trim();
-    if (LEGACY_BLOB_TOKEN_PATTERN.test(trimmed)) {
-      continue;
-    }
     if (!CID_SHAPE_PATTERN.test(trimmed)) {
       continue;
     }

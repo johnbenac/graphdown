@@ -7,6 +7,7 @@ It ships:
 - the **standard** (`SPEC.md`) — the single source of truth (currently **Spec v0.5**)
 - a **web app** (`apps/web`) for importing/browsing/editing datasets
 - a **core domain library** (`packages/core/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
+- a **runtime API** (`packages/runtime`) for the session-based read model (Runtime API v1)
 
 > If anything conflicts with `SPEC.md`, `SPEC.md` wins.
 
@@ -73,7 +74,7 @@ Blocks are **content-addressed byte blobs** stored in the canonical block store.
 
   where `<p>` is the first byte of the CID digest as two lowercase hex chars, and the filename is the CID string.
 
-- **Block references** inside records use CID wiki-link tokens (CID-REF-001):
+- **Block references** inside records and types use CID wiki-link tokens (CID-REF-001):
 
   `[[<cid>]]`
 
@@ -190,7 +191,7 @@ Install dependencies:
 
 ```sh
 npm ci
-````
+```
 
 Run the web app:
 
@@ -352,10 +353,12 @@ See:
 
 ## Example datasets
 
-Reference datasets used for compatibility checks:
+Repo-local fixtures you can import or validate against:
 
-* [https://github.com/johnbenac/product-tracker-dataset](https://github.com/johnbenac/product-tracker-dataset)
-* [https://github.com/johnbenac/research-lab-dataset](https://github.com/johnbenac/research-lab-dataset)
+* `packages/core/src/__fixtures__/valid-dataset`
+* `packages/core/src/__fixtures__/graph-dataset`
+* `packages/core/src/__fixtures__/plugin-valid-dataset`
+* `packages/core/src/__fixtures__/roundtrip-repo`
 
 ---
 
@@ -370,4 +373,3 @@ Reference datasets used for compatibility checks:
 * `tools/spec-trace.cjs` — spec-trace generator (matrix must match spec; GOV-002)
 
 ```
-

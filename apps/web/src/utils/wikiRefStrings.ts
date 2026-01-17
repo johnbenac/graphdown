@@ -1,24 +1,16 @@
 import { cleanId } from "@graphdown/core";
-import { isObject } from "@graphdown/core";
 
 function normalizeId(value: unknown): string | null {
   return cleanId(value);
 }
 
 export function readRef(value: unknown): string {
-  const normalized =
-    normalizeId(value) || (isObject(value) ? normalizeId(value.ref) : null);
-  return normalized ?? "";
+  return normalizeId(value) ?? "";
 }
 
 export function readRefs(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => normalizeId(item)).filter((item): item is string => Boolean(item));
-  }
-  if (isObject(value) && Array.isArray(value.refs)) {
-    return value.refs
-      .map((item) => normalizeId(item))
-      .filter((item): item is string => Boolean(item));
   }
   const single = normalizeId(value);
   return single ? [single] : [];

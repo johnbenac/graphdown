@@ -7,11 +7,13 @@ are placed in this directory.
 
 - `wikiRefStrings.ts`
   - `readRef` and `readRefs` normalize references from UI inputs, supporting
-    raw strings or `{ ref }` / `{ refs }` shapes.
-  - `writeRef` and `writeRefs` format IDs as wiki-link tokens (`[[id]]`) for
-    display or serialization.
-  - Uses `@graphdown/core` exports (`cleanId`, `isObject`) to keep normalization
-    behavior consistent with dataset parsing.
+    raw strings.
+  - `writeRef` and `writeRefs` format IDs as wiki-link tokens for display or
+    serialization.
+  - Record relationships use `[[typeId:recordId]]` (recordKey).
+  - Block references use `[[<cid>]]` (CIDv1 strings).
+  - Uses the `@graphdown/core` `cleanId` helper to keep normalization behavior
+    consistent with dataset parsing.
 
 ## Tests
 

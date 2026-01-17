@@ -58,9 +58,15 @@ Canonicalization preserves original file bytes. It changes file paths, not file 
 
 The Graphdown core can operate on any snapshot and discovers record files by content (LAYOUT-001).
 
-The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), such as:
-- `types/**/*.md`
-- `records/**/*.md`
-- `blocks/sha2-256/**`
+The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), but it MUST still include every semantic file required for validity, hashing, and export workflows.
+
+Required semantic files include:
+- record files (any path, content-discovered)
+- type files (any path, content-discovered)
+- block store files (`blocks/sha2-256/**`)
+- plugin manifests (Markdown + front matter candidates)
+- all **resolved plugin bundle files** referenced by manifests (including binary files)
+
+Filtering out plugin bundle files is not allowed (IMP-PLUG-001); they are part of the semantic dataset.
 
 This is an application decision. It is not a rule of the Graphdown standard.

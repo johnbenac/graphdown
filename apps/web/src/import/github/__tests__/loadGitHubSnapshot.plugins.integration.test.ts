@@ -1,7 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -19,12 +16,19 @@ describe("loadGitHubSnapshot plugin bundles", () => {
   });
 
   it("IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files", async () => {
-    const testDir = path.dirname(fileURLToPath(import.meta.url));
-    const fixturePath = path.resolve(
-      testDir,
-      "../../../../../../packages/core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
-    );
-    const manifestText = await readFile(fixturePath, "utf8");
+    const manifestText = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - ui.md",
+      "  - assets/logo.bin",
+      "binaryFiles:",
+      "  - assets/logo.bin",
+      "---"
+    ].join("\n");
 
     const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
       const urlString = url.toString();
@@ -39,6 +43,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
             { path: "extensions/demo/plugin.md", type: "blob" },
             { path: "extensions/demo/ui.md", type: "blob" },
             { path: "extensions/demo/entry.js", type: "blob" },
+            { path: "extensions/demo/assets/logo.bin", type: "blob" },
             { path: "docs/readme.md", type: "blob" },
             { path: "assets/logo.png", type: "blob" }
           ]
@@ -67,6 +72,9 @@ describe("loadGitHubSnapshot plugin bundles", () => {
         if (path === "extensions/demo/entry.js") {
           return new Response("console.log('demo');", { status: 200 });
         }
+        if (path === "extensions/demo/assets/logo.bin") {
+          return new Response(new Uint8Array([0, 1, 255, 2]), { status: 200 });
+        }
         if (path === "docs/readme.md") {
           return new Response("# readme", { status: 200 });
         }
@@ -82,6 +90,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("extensions/demo/assets/logo.bin")).toBe(true);
     expect(ignored).toEqual(expect.arrayContaining(["docs/readme.md", "assets/logo.png"]));
 
     const uiFetches = fetchMock.mock.calls.filter(
