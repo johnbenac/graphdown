@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-17T18:37:45.620Z",
+  "generatedAt": "2026-01-17T23:34:07.267Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -14,6 +14,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "GOV-002",
+          "testTitle": "GOV-002: spec-trace includes io-zip requirement-tagged tests",
+          "filePath": "packages/core/src/__tests__/governance/spec-trace-includes-iozip.governance.integration.test.ts"
+        },
         {
           "reqId": "GOV-002",
           "testTitle": "GOV-002: spec-trace output matches committed matrix",
@@ -1455,6 +1460,11 @@
           "reqId": "IMP-PLUG-001",
           "testTitle": "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files",
           "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts"
+        },
+        {
+          "reqId": "IMP-PLUG-001",
+          "testTitle": "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot",
+          "filePath": "packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts"
         }
       ]
     },
