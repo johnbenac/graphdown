@@ -1,6 +1,4 @@
-import { type DatasetSnapshot } from "@graphdown/core";
-import { selectSemanticSnapshotFiles } from "@graphdown/io";
-import type { GitHubImportProgress } from "./types";
+import { ImportError, type ImportProgress, type ImportResult, selectSemanticSnapshotFiles } from "@graphdown/io";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
@@ -55,10 +53,10 @@ export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
-  onProgress?: (progress: GitHubImportProgress) => void;
+  onProgress?: (progress: ImportProgress) => void;
   fetch?: typeof fetch;
   signal?: AbortSignal;
-}): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
+}): Promise<ImportResult> {
   const { owner, repo, ref, onProgress, signal } = input;
   const fetchFn = input.fetch ?? fetch;
 
@@ -132,7 +130,13 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  const pass1 = selectSemanticSnapshotFiles(entries);
+  let pass1;
+  try {
+    pass1 = selectSemanticSnapshotFiles(entries);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new ImportError({ source: "github", code: "invalid_input", message });
+  }
   for (const path of pass1.ignored) {
     ignored.add(path);
   }
@@ -148,7 +152,12 @@ export async function loadGitHubSnapshot(input: {
   }
 
   if (missingInTree.length > 0) {
-    throw new Error(`Missing plugin bundle files: ${missingInTree.join(", ")}`);
+    throw new ImportError({
+      source: "github",
+      code: "missing_files",
+      message: `Missing plugin bundle files: ${missingInTree.join(", ")}`,
+      missingPaths: missingInTree
+    });
   }
 
   if (stage2FetchList.length > 0) {
@@ -177,11 +186,20 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  const pass2 = selectSemanticSnapshotFiles(entries);
+  let pass2;
+  try {
+    pass2 = selectSemanticSnapshotFiles(entries);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new ImportError({ source: "github", code: "invalid_input", message });
+  }
   if (pass2.missingPluginBundlePaths.length > 0) {
-    throw new Error(
-      `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`
-    );
+    throw new ImportError({
+      source: "github",
+      code: "missing_files",
+      message: `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`,
+      missingPaths: pass2.missingPluginBundlePaths
+    });
   }
 
   for (const path of pass2.ignored) {
