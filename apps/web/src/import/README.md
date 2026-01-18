@@ -37,10 +37,10 @@ The **web app importer** may choose to load only a subset of repository files fo
     final semantic snapshot.
 
 - `mapGitHubError`
-  - Normalizes GitHub API errors into displayable categories (not found,
+  - Normalizes GitHub API errors into shared import error codes (not found,
     auth-required, rate-limited, unknown).
-  - Exports `GitHubImportError` so callers can distinguish network issues from
-    dataset validation errors.
+  - Exports `GitHubImportError` as a thin wrapper over the shared import error
+    class so callers can distinguish structured import failures.
 
 ## Tests
 

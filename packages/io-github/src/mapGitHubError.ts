@@ -1,10 +1,7 @@
-export type GitHubImportErrorInfo = {
-  category: "not_found" | "auth_required" | "rate_limited" | "unknown";
-  title: string;
-  message: string;
-  hint?: string;
-  status?: number;
-};
+import type { ImportErrorInfo } from "@graphdown/io";
+import { ImportError } from "@graphdown/io";
+
+export type GitHubImportErrorInfo = ImportErrorInfo & { source: "github" };
 
 function isRateLimit(response: Response, message?: string | null): boolean {
   if (response.status === 429) {
@@ -22,60 +19,55 @@ function isRateLimit(response: Response, message?: string | null): boolean {
 
 export function mapGitHubError(response: Response, bodyMessage?: string | null): GitHubImportErrorInfo {
   const status = response.status;
+  const message = bodyMessage || `GitHub returned status ${status}.`;
 
   if (status === 404) {
     return {
-      category: "not_found",
-      title: "Repository not found",
+      source: "github",
+      code: "not_found",
       message: bodyMessage || "GitHub could not find that repository.",
-      status
+      httpStatus: status
     };
   }
 
   if (status === 401) {
     return {
-      category: "auth_required",
-      title: "Authentication required",
+      source: "github",
+      code: "auth_required",
       message: bodyMessage || "GitHub requires authentication to access this repository.",
-      hint: "This repository may be private. Graphdown currently imports public repositories only.",
-      status
+      httpStatus: status
     };
   }
 
   if (isRateLimit(response, bodyMessage)) {
     return {
-      category: "rate_limited",
-      title: "GitHub rate limit exceeded",
+      source: "github",
+      code: "rate_limited",
       message: bodyMessage || "GitHub is rate limiting requests right now.",
-      hint: "Wait a few minutes and try again. Unauthenticated GitHub API imports have low rate limits.",
-      status
+      httpStatus: status
     };
   }
 
   if (status === 403) {
     return {
-      category: "auth_required",
-      title: "Authentication required",
+      source: "github",
+      code: "auth_required",
       message: bodyMessage || "GitHub denied access to this repository.",
-      hint: "This repository may be private. Graphdown currently imports public repositories only.",
-      status
+      httpStatus: status
     };
   }
 
   return {
-    category: "unknown",
-    title: "GitHub error",
-    message: bodyMessage || `GitHub returned status ${status}.`,
-    status
+    source: "github",
+    code: "unknown",
+    message,
+    httpStatus: status
   };
 }
 
-export class GitHubImportError extends Error {
-  info: GitHubImportErrorInfo;
-
+export class GitHubImportError extends ImportError {
   constructor(info: GitHubImportErrorInfo) {
-    super(info.message);
+    super(info);
     this.name = "GitHubImportError";
-    this.info = info;
   }
 }
