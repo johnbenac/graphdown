@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-17T23:34:07.267Z
+Generated: 2026-01-18T05:00:59.802Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -8,7 +8,7 @@ Tests (0):
 
 ## GOV-002 — Verification matrix must match spec (testable=true)
 Tests (2):
-- packages/core/src/__tests__/governance/spec-trace-includes-iozip.governance.integration.test.ts — "GOV-002: spec-trace includes io-zip requirement-tagged tests"
+- packages/core/src/__tests__/governance/spec-trace-includes-io.governance.integration.test.ts — "GOV-002: spec-trace includes io requirement-tagged tests"
 - packages/core/src/__tests__/governance/spec-trace-matrix.governance.integration.test.ts — "GOV-002: spec-trace output matches committed matrix"
 
 ## P-001 — Repository-first, record-canonical (testable=false)
@@ -433,7 +433,7 @@ Tests (1):
 ## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
 Tests (2):
 - apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
-- packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
+- packages/io/src/selection/__tests__/selectSemanticSnapshotFiles.plugins.unit.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
 
 ## EXP-003 — Canonical dataset export
 Tests (3):

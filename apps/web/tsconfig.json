@@ -1,14 +1,27 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@graphdown/core": ["../../packages/core/src/index.ts"],
-      "@graphdown/io-zip": ["../../packages/io-zip/src/index.ts"],
-      "@graphdown/runtime": ["../../packages/runtime/src/index.ts"]
+      "@graphdown/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@graphdown/io-zip": [
+        "../../packages/io-zip/src/index.ts"
+      ],
+      "@graphdown/runtime": [
+        "../../packages/runtime/src/index.ts"
+      ],
+      "@graphdown/io": [
+        "../../packages/io/src/index.ts"
+      ]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -16,7 +29,16 @@
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "types": ["vite/client", "vitest/globals", "node"]
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "node"
+    ]
   },
-  "include": ["src", "vite.config.ts", "playwright.config.ts", "e2e"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "e2e"
+  ]
 }

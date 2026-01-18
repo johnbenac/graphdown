@@ -1,5 +1,5 @@
 {
-  "name": "@graphdown/io-zip",
+  "name": "@graphdown/io",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,9 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/core": "0.0.0",
-    "fflate": "^0.8.2",
-    "@graphdown/io": "0.0.0"
+    "@graphdown/core": "0.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-17T23:34:07.267Z",
+  "generatedAt": "2026-01-18T05:00:59.802Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -16,8 +16,8 @@
       "tests": [
         {
           "reqId": "GOV-002",
-          "testTitle": "GOV-002: spec-trace includes io-zip requirement-tagged tests",
-          "filePath": "packages/core/src/__tests__/governance/spec-trace-includes-iozip.governance.integration.test.ts"
+          "testTitle": "GOV-002: spec-trace includes io requirement-tagged tests",
+          "filePath": "packages/core/src/__tests__/governance/spec-trace-includes-io.governance.integration.test.ts"
         },
         {
           "reqId": "GOV-002",
@@ -1464,7 +1464,7 @@
         {
           "reqId": "IMP-PLUG-001",
           "testTitle": "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot",
-          "filePath": "packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts"
+          "filePath": "packages/io/src/selection/__tests__/selectSemanticSnapshotFiles.plugins.unit.test.ts"
         }
       ]
     },

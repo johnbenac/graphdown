@@ -6,12 +6,15 @@ import { test } from "vitest";
 const require = createRequire(import.meta.url);
 const { generateSpecTrace } = require("../../../../../tools/spec-trace.cjs");
 
-const IO_ZIP_TEST_PATH =
-  "packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts";
+const IO_TEST_PATH =
+  "packages/io/src/selection/__tests__/selectSemanticSnapshotFiles.plugins.unit.test.ts";
 const GITHUB_TEST_PATH =
   "apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts";
 
-test("GOV-002: spec-trace includes io-zip requirement-tagged tests", () => {
+const IO_ZIP_TEST_PATH =
+  "packages/io-zip/src/import/__tests__/readZipSnapshot.plugins.unit.test.ts";
+
+test("GOV-002: spec-trace includes io requirement-tagged tests", () => {
   const { matrixData } = generateSpecTrace({ writeFiles: false });
   const requirement = matrixData.requirements.find((req: { id: string }) => req.id === "IMP-PLUG-001");
 
@@ -19,11 +22,15 @@ test("GOV-002: spec-trace includes io-zip requirement-tagged tests", () => {
 
   const testPaths = requirement.tests.map((testEntry: { filePath: string }) => testEntry.filePath);
   assert.ok(
-    testPaths.includes(IO_ZIP_TEST_PATH),
-    `Expected io-zip test path in IMP-PLUG-001 tests. Got: ${testPaths.join(", ")}`,
+    testPaths.includes(IO_TEST_PATH),
+    `Expected io test path in IMP-PLUG-001 tests. Got: ${testPaths.join(", ")}`
   );
   assert.ok(
     testPaths.includes(GITHUB_TEST_PATH),
-    `Expected GitHub test path in IMP-PLUG-001 tests. Got: ${testPaths.join(", ")}`,
+    `Expected GitHub test path in IMP-PLUG-001 tests. Got: ${testPaths.join(", ")}`
+  );
+  assert.ok(
+    !testPaths.includes(IO_ZIP_TEST_PATH),
+    `Expected io-zip test path to be non-canonical. Got: ${testPaths.join(", ")}`
   );
 });

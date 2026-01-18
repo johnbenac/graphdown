@@ -3,7 +3,7 @@ import { strToU8, zipSync } from "fflate";
 import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
 describe("readZipSnapshot plugin bundles", () => {
-  it("IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot", () => {
+  it("includes plugin manifest and bundle files via the shared selection engine", () => {
     const entries: Record<string, Uint8Array> = {};
     const manifestText = [
       "---",
