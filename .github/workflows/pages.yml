@@ -54,6 +54,8 @@ jobs:
               - "packages/core/package.json"
               - "packages/io/src/**"
               - "packages/io/package.json"
+              - "packages/io-github/src/**"
+              - "packages/io-github/package.json"
               - "packages/io-zip/src/**"
               - "packages/io-zip/package.json"
               - "packages/runtime/src/**"

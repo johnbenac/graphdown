@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
+import { loadGitHubSnapshot } from "../../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
   new Response(JSON.stringify(data), {
@@ -11,10 +11,7 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot plugin bundles", () => {
-  const originalFetch = globalThis.fetch;
-
   afterEach(() => {
-    globalThis.fetch = originalFetch;
     vi.clearAllMocks();
   });
 
@@ -22,7 +19,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     const testDir = path.dirname(fileURLToPath(import.meta.url));
     const fixturePath = path.resolve(
       testDir,
-      "../../../../../../packages/core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
+      "../../../../core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
     );
     const manifestText = await readFile(fixturePath, "utf8");
     const updatedManifest = manifestText.replace(
@@ -83,9 +80,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
       return new Response("Not found", { status: 404 });
     });
 
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
-
-    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
 
     expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
     expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
