@@ -1,6 +1,6 @@
 import { type DatasetSnapshot } from "@graphdown/core";
 import { selectSemanticSnapshotFiles } from "@graphdown/io";
-import type { ImportProgress } from "../types";
+import type { GitHubImportProgress } from "./types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
@@ -21,7 +21,7 @@ type GitHubTreeResponse = {
 
 async function readResponseMessage(response: Response): Promise<string | null> {
   try {
-    const data = await response.json();
+    const data = (await response.json()) as { message?: unknown } | null;
     if (data && typeof data.message === "string") {
       return data.message;
     }
@@ -31,9 +31,14 @@ async function readResponseMessage(response: Response): Promise<string | null> {
   return null;
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    headers: { Accept: "application/vnd.github+json" }
+async function fetchJson<T>(
+  url: string,
+  fetchFn: typeof fetch,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetchFn(url, {
+    headers: { Accept: "application/vnd.github+json" },
+    signal
   });
   if (!response.ok) {
     const message = await readResponseMessage(response);
@@ -50,17 +55,26 @@ export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
   ref?: string;
-  onProgress?: (progress: ImportProgress) => void;
+  onProgress?: (progress: GitHubImportProgress) => void;
+  fetch?: typeof fetch;
+  signal?: AbortSignal;
 }): Promise<{ snapshot: DatasetSnapshot; ignored: string[] }> {
-  const { owner, repo, ref, onProgress } = input;
+  const { owner, repo, ref, onProgress, signal } = input;
+  const fetchFn = input.fetch ?? fetch;
 
   onProgress?.({ phase: "fetching_repo" });
-  const repoMetadata = await fetchJson<GitHubRepoMetadata>(`${API_BASE}/repos/${owner}/${repo}`);
+  const repoMetadata = await fetchJson<GitHubRepoMetadata>(
+    `${API_BASE}/repos/${owner}/${repo}`,
+    fetchFn,
+    signal
+  );
   const resolvedRef = ref ?? repoMetadata.default_branch ?? "main";
 
   onProgress?.({ phase: "listing_files" });
   const treeResponse = await fetchJson<GitHubTreeResponse>(
-    `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`
+    `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`,
+    fetchFn,
+    signal
   );
 
   const treePaths = new Set<string>();
@@ -98,7 +112,10 @@ export async function loadGitHubSnapshot(input: {
 
   let completed = 0;
   for (const file of stage1Files) {
-    const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`);
+    const response = await fetchFn(
+      `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`,
+      { signal }
+    );
     if (!response.ok) {
       const message = await readResponseMessage(response);
       throw new GitHubImportError(mapGitHubError(response, message));
@@ -140,7 +157,10 @@ export async function loadGitHubSnapshot(input: {
   }
 
   for (const bundlePath of stage2FetchList) {
-    const response = await fetch(`${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${bundlePath}`);
+    const response = await fetchFn(
+      `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${bundlePath}`,
+      { signal }
+    );
     if (!response.ok) {
       const message = await readResponseMessage(response);
       throw new GitHubImportError(mapGitHubError(response, message));
