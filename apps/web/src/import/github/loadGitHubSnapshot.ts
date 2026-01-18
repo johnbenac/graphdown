@@ -1,10 +1,5 @@
-import {
-  isRecordFileBytes,
-  isPluginManifestCandidateBytes,
-  parsePluginManifest,
-  resolvePluginBundlePaths,
-  type DatasetSnapshot
-} from "@graphdown/core";
+import { type DatasetSnapshot } from "@graphdown/core";
+import { selectSemanticSnapshotFiles } from "@graphdown/io";
 import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -49,23 +44,6 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
-}
-
-function getDeclaredBundlePaths(manifest: { yaml: Record<string, unknown> }): Set<string> {
-  const declared = new Set<string>();
-  const entry = manifest.yaml.entry;
-  if (typeof entry === "string") {
-    declared.add(entry);
-  }
-  const files = manifest.yaml.files;
-  if (Array.isArray(files)) {
-    for (const file of files) {
-      if (typeof file === "string") {
-        declared.add(file);
-      }
-    }
-  }
-  return declared;
 }
 
 export async function loadGitHubSnapshot(input: {
@@ -113,9 +91,7 @@ export async function loadGitHubSnapshot(input: {
     }
     ignored.add(snapshotPath);
   }
-  const files = new Map<string, Uint8Array>();
-  const downloaded = new Map<string, Uint8Array>();
-  const manifestPaths: string[] = [];
+  const entries = new Map<string, Uint8Array>();
 
   let total = stage1Files.length;
   onProgress?.({ phase: "downloading_files", completed: 0, total });
@@ -129,21 +105,7 @@ export async function loadGitHubSnapshot(input: {
     }
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    downloaded.set(file.snapshotPath, bytes);
-    if (file.kind === "block") {
-      files.set(file.snapshotPath, bytes);
-    } else {
-      const isRecord = isRecordFileBytes(file.snapshotPath, bytes);
-      const isManifest = isPluginManifestCandidateBytes(file.snapshotPath, bytes);
-      if (isRecord || isManifest) {
-        files.set(file.snapshotPath, bytes);
-        if (isManifest) {
-          manifestPaths.push(file.snapshotPath);
-        }
-      } else {
-        ignored.add(file.snapshotPath);
-      }
-    }
+    entries.set(file.snapshotPath, bytes);
     completed += 1;
     onProgress?.({
       phase: "downloading_files",
@@ -153,46 +115,28 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  const requiredBundlePaths = new Set<string>();
-  const decoder = new TextDecoder("utf-8");
-  for (const manifestPath of manifestPaths) {
-    const manifestBytes = files.get(manifestPath) ?? downloaded.get(manifestPath);
-    if (!manifestBytes) {
-      continue;
-    }
-    const text = decoder.decode(manifestBytes);
-    const parsed = parsePluginManifest(text, manifestPath);
-    if (!parsed.ok) {
-      continue;
-    }
-    const declaredPaths = getDeclaredBundlePaths(parsed.manifest);
-    if (declaredPaths.size === 0) {
-      continue;
-    }
-    const resolved = resolvePluginBundlePaths(manifestPath, [...declaredPaths]);
-    for (const resolvedPath of resolved.values()) {
-      requiredBundlePaths.add(resolvedPath);
-    }
+  const pass1 = selectSemanticSnapshotFiles(entries);
+  for (const path of pass1.ignored) {
+    ignored.add(path);
   }
 
   const stage2FetchList: string[] = [];
-  for (const bundlePath of requiredBundlePaths) {
-    if (files.has(bundlePath)) {
-      continue;
-    }
-    const downloadedBytes = downloaded.get(bundlePath);
-    if (downloadedBytes) {
-      files.set(bundlePath, downloadedBytes);
-      ignored.delete(bundlePath);
-      continue;
-    }
+  const missingInTree: string[] = [];
+  for (const bundlePath of pass1.missingPluginBundlePaths) {
     if (treePaths.has(bundlePath)) {
       stage2FetchList.push(bundlePath);
+    } else {
+      missingInTree.push(bundlePath);
     }
+  }
+
+  if (missingInTree.length > 0) {
+    throw new Error(`Missing plugin bundle files: ${missingInTree.join(", ")}`);
   }
 
   if (stage2FetchList.length > 0) {
     total += stage2FetchList.length;
+    onProgress?.({ phase: "downloading_files", completed, total });
   }
 
   for (const bundlePath of stage2FetchList) {
@@ -202,7 +146,7 @@ export async function loadGitHubSnapshot(input: {
       throw new GitHubImportError(mapGitHubError(response, message));
     }
     const buffer = await response.arrayBuffer();
-    files.set(bundlePath, new Uint8Array(buffer));
+    entries.set(bundlePath, new Uint8Array(buffer));
     ignored.delete(bundlePath);
     completed += 1;
     onProgress?.({
@@ -213,5 +157,19 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { snapshot: { files }, ignored: [...ignored] };
+  const pass2 = selectSemanticSnapshotFiles(entries);
+  if (pass2.missingPluginBundlePaths.length > 0) {
+    throw new Error(
+      `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`
+    );
+  }
+
+  for (const path of pass2.ignored) {
+    ignored.add(path);
+  }
+  for (const path of pass2.snapshot.files.keys()) {
+    ignored.delete(path);
+  }
+
+  return { snapshot: pass2.snapshot, ignored: [...ignored].sort((a, b) => a.localeCompare(b)) };
 }
