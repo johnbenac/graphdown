@@ -18,13 +18,17 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Delegates bytes-only parsing and filtering to `@graphdown/io-zip`, which
     applies shared semantic selection from `@graphdown/io`.
 
-## GitHub imports (`import/github`)
+## GitHub imports (`@graphdown/io-github`)
 
-- `parseGitHubUrl.ts`
+GitHub imports live in `@graphdown/io-github`. The web app calls the package
+APIs and then continues with the session pipeline (validation, runtime open,
+persistence).
+
+- `parseGitHubUrl`
   - Validates GitHub repository URLs, allowing repo-root or `/tree/<ref>` URLs.
   - Rejects file, issue, or subdirectory URLs with helpful error messages.
 
-- `loadGitHubSnapshot.ts`
+- `loadGitHubSnapshot`
   - Uses the GitHub REST API to resolve the default branch, list repository
     files, and download selected files from the raw content endpoint.
   - Streams progress updates through `ImportProgress` phases.
@@ -33,7 +37,7 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Runs a second fetch pass for missing plugin bundles before returning the
     final semantic snapshot.
 
-- `mapGitHubError.ts`
+- `mapGitHubError`
   - Normalizes GitHub API errors into displayable categories (not found,
     auth-required, rate-limited, unknown).
   - Exports `GitHubImportError` so callers can distinguish network issues from
@@ -41,9 +45,9 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 ## Tests
 
-- `github/loadGitHubSnapshot.unit.test.ts`
-- `github/loadGitHubSnapshot.plugins.integration.test.ts`
-- `github/parseGitHubUrl.unit.test.ts`
+- `@graphdown/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts`
+- `@graphdown/io-github/src/__tests__/spec/loadGitHubSnapshot.plugins.integration.test.ts`
+- `@graphdown/io-github/src/__tests__/parseGitHubUrl.unit.test.ts`
 
 These tests cover URL validation and GitHub response handling. Zip parsing tests
 live in `packages/io-zip`.
