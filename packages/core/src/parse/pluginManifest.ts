@@ -52,6 +52,58 @@ export function isSafeRelativePath(p: string): boolean {
   return true;
 }
 
+export function collectDeclaredPluginBundleRelPaths(
+  yaml: Record<string, unknown>,
+  manifestPath: string
+): string[] {
+  const declared: string[] = [];
+  const seen = new Set<string>();
+
+  const add = (value: string, field: string) => {
+    if (!isSafeRelativePath(value)) {
+      throw new Error(
+        `Plugin manifest ${manifestPath} has invalid ${field}: expected safe relative path`
+      );
+    }
+    if (!seen.has(value)) {
+      seen.add(value);
+      declared.push(value);
+    }
+  };
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'entry')) {
+    const entry = yaml.entry;
+    if (typeof entry !== 'string') {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid entry: expected string`);
+    }
+    add(entry, 'entry');
+  }
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'files')) {
+    const files = yaml.files;
+    if (!Array.isArray(files) || files.some((value) => typeof value !== 'string')) {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid files: expected string[]`);
+    }
+    for (const value of files) {
+      add(value, 'files');
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'binaryFiles')) {
+    const binaryFiles = yaml.binaryFiles;
+    if (!Array.isArray(binaryFiles) || binaryFiles.some((value) => typeof value !== 'string')) {
+      throw new Error(
+        `Plugin manifest ${manifestPath} has invalid binaryFiles: expected string[]`
+      );
+    }
+    for (const value of binaryFiles) {
+      add(value, 'binaryFiles');
+    }
+  }
+
+  return declared;
+}
+
 export function resolvePluginBundlePaths(
   manifestPath: string,
   files: string[]

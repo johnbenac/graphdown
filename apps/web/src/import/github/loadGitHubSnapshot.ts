@@ -1,10 +1,5 @@
-import {
-  isRecordFileBytes,
-  isPluginManifestCandidateBytes,
-  parsePluginManifest,
-  resolvePluginBundlePaths,
-  type DatasetSnapshot
-} from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/core";
+import { selectSemanticSnapshotFiles } from "@graphdown/io";
 import type { ImportProgress } from "../types";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
@@ -51,23 +46,6 @@ function isMarkdownFile(path: string): boolean {
   return path.toLowerCase().endsWith(".md");
 }
 
-function getDeclaredBundlePaths(manifest: { yaml: Record<string, unknown> }): Set<string> {
-  const declared = new Set<string>();
-  const entry = manifest.yaml.entry;
-  if (typeof entry === "string") {
-    declared.add(entry);
-  }
-  const files = manifest.yaml.files;
-  if (Array.isArray(files)) {
-    for (const file of files) {
-      if (typeof file === "string") {
-        declared.add(file);
-      }
-    }
-  }
-  return declared;
-}
-
 export async function loadGitHubSnapshot(input: {
   owner: string;
   repo: string;
@@ -89,7 +67,6 @@ export async function loadGitHubSnapshot(input: {
   const stage1Files: Array<{
     repoPath: string;
     snapshotPath: string;
-    kind: "block" | "markdown";
   }> = [];
   const ignored = new Set<string>();
 
@@ -103,19 +80,17 @@ export async function loadGitHubSnapshot(input: {
     }
     treePaths.add(snapshotPath);
     if (snapshotPath.startsWith("blocks/")) {
-      stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "block" });
+      stage1Files.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
     if (isMarkdownFile(snapshotPath)) {
       // Might be Graphdown markdown; decide after download via isRecordFileBytes.
-      stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
+      stage1Files.push({ repoPath: entry.path, snapshotPath });
       continue;
     }
     ignored.add(snapshotPath);
   }
-  const files = new Map<string, Uint8Array>();
-  const downloaded = new Map<string, Uint8Array>();
-  const manifestPaths: string[] = [];
+  const entries = new Map<string, Uint8Array>();
 
   let total = stage1Files.length;
   onProgress?.({ phase: "downloading_files", completed: 0, total });
@@ -129,21 +104,8 @@ export async function loadGitHubSnapshot(input: {
     }
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    downloaded.set(file.snapshotPath, bytes);
-    if (file.kind === "block") {
-      files.set(file.snapshotPath, bytes);
-    } else {
-      const isRecord = isRecordFileBytes(file.snapshotPath, bytes);
-      const isManifest = isPluginManifestCandidateBytes(file.snapshotPath, bytes);
-      if (isRecord || isManifest) {
-        files.set(file.snapshotPath, bytes);
-        if (isManifest) {
-          manifestPaths.push(file.snapshotPath);
-        }
-      } else {
-        ignored.add(file.snapshotPath);
-      }
-    }
+    entries.set(file.snapshotPath, bytes);
+
     completed += 1;
     onProgress?.({
       phase: "downloading_files",
@@ -153,44 +115,21 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  const requiredBundlePaths = new Set<string>();
-  const decoder = new TextDecoder("utf-8");
-  for (const manifestPath of manifestPaths) {
-    const manifestBytes = files.get(manifestPath) ?? downloaded.get(manifestPath);
-    if (!manifestBytes) {
-      continue;
-    }
-    const text = decoder.decode(manifestBytes);
-    const parsed = parsePluginManifest(text, manifestPath);
-    if (!parsed.ok) {
-      continue;
-    }
-    const declaredPaths = getDeclaredBundlePaths(parsed.manifest);
-    if (declaredPaths.size === 0) {
-      continue;
-    }
-    const resolved = resolvePluginBundlePaths(manifestPath, [...declaredPaths]);
-    for (const resolvedPath of resolved.values()) {
-      requiredBundlePaths.add(resolvedPath);
-    }
+  const pass1 = selectSemanticSnapshotFiles(entries);
+  for (const ignoredPath of pass1.ignored) {
+    ignored.add(ignoredPath);
   }
 
-  const stage2FetchList: string[] = [];
-  for (const bundlePath of requiredBundlePaths) {
-    if (files.has(bundlePath)) {
-      continue;
-    }
-    const downloadedBytes = downloaded.get(bundlePath);
-    if (downloadedBytes) {
-      files.set(bundlePath, downloadedBytes);
-      ignored.delete(bundlePath);
-      continue;
-    }
-    if (treePaths.has(bundlePath)) {
-      stage2FetchList.push(bundlePath);
-    }
+  const missingInTree = pass1.missingPluginBundlePaths.filter(
+    (bundlePath) => !treePaths.has(bundlePath)
+  );
+  if (missingInTree.length > 0) {
+    throw new Error(`Missing plugin bundle files: ${missingInTree.join(", ")}`);
   }
 
+  const stage2FetchList = pass1.missingPluginBundlePaths.filter((bundlePath) =>
+    treePaths.has(bundlePath)
+  );
   if (stage2FetchList.length > 0) {
     total += stage2FetchList.length;
   }
@@ -202,7 +141,7 @@ export async function loadGitHubSnapshot(input: {
       throw new GitHubImportError(mapGitHubError(response, message));
     }
     const buffer = await response.arrayBuffer();
-    files.set(bundlePath, new Uint8Array(buffer));
+    entries.set(bundlePath, new Uint8Array(buffer));
     ignored.delete(bundlePath);
     completed += 1;
     onProgress?.({
@@ -213,5 +152,19 @@ export async function loadGitHubSnapshot(input: {
     });
   }
 
-  return { snapshot: { files }, ignored: [...ignored] };
+  const pass2 = selectSemanticSnapshotFiles(entries);
+  if (pass2.missingPluginBundlePaths.length > 0) {
+    throw new Error(
+      `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`
+    );
+  }
+
+  for (const ignoredPath of pass2.ignored) {
+    ignored.add(ignoredPath);
+  }
+
+  return {
+    snapshot: pass2.snapshot,
+    ignored: [...ignored].sort((a, b) => a.localeCompare(b))
+  };
 }
