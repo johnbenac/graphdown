@@ -8,6 +8,7 @@ This repository only deploys the production site when code or configs that affec
 - `packages/core/src/**`, `packages/core/package.json`
 - `packages/io/src/**`, `packages/io/package.json`
 - `packages/io-zip/src/**`, `packages/io-zip/package.json`
+- `packages/io-github/src/**`, `packages/io-github/package.json`
 - `packages/runtime/src/**`, `packages/runtime/package.json`
 - Root build inputs: `package.json`, `package-lock.json`, `tsconfig.json`
 

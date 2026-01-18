@@ -2,12 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ValidationError } from "@graphdown/core";
 import { canonicalizeDatasetSnapshot, makeError, parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
+import { GitHubImportError, loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
-import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
-import { GitHubImportError } from "../import/github/mapGitHubError";
-import { parseGitHubUrl } from "../import/github/parseGitHubUrl";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";

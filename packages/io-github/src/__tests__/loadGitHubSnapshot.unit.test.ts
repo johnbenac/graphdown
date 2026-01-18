@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -8,16 +8,12 @@ const jsonResponse = (data: unknown) =>
   });
 
 describe("loadGitHubSnapshot", () => {
-  const originalFetch = globalThis.fetch;
-
   afterEach(() => {
-    globalThis.fetch = originalFetch;
     vi.clearAllMocks();
   });
 
   it("GH-008: does not send Authorization headers for public fetches", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     fetchMock
       // Repo metadata
@@ -42,7 +38,7 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
-    await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock as typeof fetch });
 
     // All fetch calls should omit Authorization headers
     for (const [, options] of fetchMock.mock.calls) {
@@ -55,7 +51,6 @@ describe("loadGitHubSnapshot", () => {
 
   it("GH-002: falls back to main when default_branch is missing", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     fetchMock
       // Repo metadata (no default_branch)
@@ -80,7 +75,11 @@ describe("loadGitHubSnapshot", () => {
         new Response(["---", "id: record:1", "typeId: note", "---"].join("\n"), { status: 200 })
       );
 
-    const { snapshot } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot } = await loadGitHubSnapshot({
+      owner: "owner",
+      repo: "repo",
+      fetch: fetchMock as typeof fetch
+    });
 
     expect([...snapshot.files.keys()].sort()).toEqual(["records/note/record-1.md", "types/note.md"]);
 
@@ -97,7 +96,6 @@ describe("loadGitHubSnapshot", () => {
 
   it("includes blocks under blocks and reports ignored files", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
@@ -127,7 +125,11 @@ describe("loadGitHubSnapshot", () => {
       // docs/readme.md (downloaded, then ignored)
       .mockResolvedValueOnce(new Response("# readme", { status: 200 }));
 
-    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({
+      owner: "owner",
+      repo: "repo",
+      fetch: fetchMock as typeof fetch
+    });
 
     expect([...snapshot.files.keys()].sort()).toEqual(
       [
@@ -141,7 +143,6 @@ describe("loadGitHubSnapshot", () => {
 
   it("imports Graphdown markdown in non-canonical paths", async () => {
     const fetchMock = vi.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
@@ -169,7 +170,11 @@ describe("loadGitHubSnapshot", () => {
       // docs/readme.md
       .mockResolvedValueOnce(new Response("# readme", { status: 200 }));
 
-    const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo" });
+    const { snapshot, ignored } = await loadGitHubSnapshot({
+      owner: "owner",
+      repo: "repo",
+      fetch: fetchMock as typeof fetch
+    });
 
     expect([...snapshot.files.keys()].sort()).toEqual(["somewhere/record.md", "weird/type.md"].sort());
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());

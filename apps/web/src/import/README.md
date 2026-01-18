@@ -18,32 +18,23 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Delegates bytes-only parsing and filtering to `@graphdown/io-zip`, which
     applies shared semantic selection from `@graphdown/io`.
 
-## GitHub imports (`import/github`)
+## GitHub imports (`@graphdown/io-github`)
 
-- `parseGitHubUrl.ts`
-  - Validates GitHub repository URLs, allowing repo-root or `/tree/<ref>` URLs.
-  - Rejects file, issue, or subdirectory URLs with helpful error messages.
+GitHub transport logic lives in `@graphdown/io-github`. The web app calls it
+and then continues with the session/persistence pipeline.
 
-- `loadGitHubSnapshot.ts`
-  - Uses the GitHub REST API to resolve the default branch, list repository
-    files, and download selected files from the raw content endpoint.
-  - Streams progress updates through `ImportProgress` phases.
-  - Downloads `blocks/**` and all Markdown files, then delegates semantic
-    selection (records, plugin manifests, bundle files) to `@graphdown/io`.
-  - Runs a second fetch pass for missing plugin bundles before returning the
-    final semantic snapshot.
+The package covers:
 
-- `mapGitHubError.ts`
-  - Normalizes GitHub API errors into displayable categories (not found,
-    auth-required, rate-limited, unknown).
-  - Exports `GitHubImportError` so callers can distinguish network issues from
-    dataset validation errors.
+- GitHub URL validation (repo-root or `/tree/<ref>` URLs only).
+- GitHub REST API + raw content fetching for the allowed file candidates.
+- Delegated semantic selection via `@graphdown/io`.
+- Normalized GitHub API error mapping for UI display.
 
 ## Tests
 
-- `github/loadGitHubSnapshot.unit.test.ts`
-- `github/loadGitHubSnapshot.plugins.integration.test.ts`
-- `github/parseGitHubUrl.unit.test.ts`
+- `packages/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts`
+- `packages/io-github/src/__tests__/spec/loadGitHubSnapshot.plugins.integration.test.ts`
+- `packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts`
 
 These tests cover URL validation and GitHub response handling. Zip parsing tests
 live in `packages/io-zip`.

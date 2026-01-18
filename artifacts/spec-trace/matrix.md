@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-18T04:59:34.487Z
+Generated: 2026-01-18T06:08:02.749Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -407,15 +407,15 @@ Tests (3):
 
 ## GH-001 — Supported URL forms
 Tests (5):
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts /tree/<ref> URLs"
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts https repo URLs"
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts repo URLs with trailing slash and .git"
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts scheme-less repo URLs"
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: rejects malformed, non-github, or unsupported URLs"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts /tree/<ref> URLs"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts https repo URLs"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts repo URLs with trailing slash and .git"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: accepts scheme-less repo URLs"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-001: rejects malformed, non-github, or unsupported URLs"
 
 ## GH-002 — Default ref resolution
 Tests (1):
-- apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-002: falls back to main when default_branch is missing"
+- packages/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-002: falls back to main when default_branch is missing"
 
 ## GH-003 — Recursive listing + raw fetch
 Tests (2):
@@ -424,15 +424,15 @@ Tests (2):
 
 ## GH-005 — Reject subdirectory URLs
 Tests (1):
-- apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts — "GH-005: rejects /tree/<ref>/<subdir> URLs"
+- packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts — "GH-005: rejects /tree/<ref>/<subdir> URLs"
 
 ## GH-008 — Public repo import requires no auth
 Tests (1):
-- apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-008: does not send Authorization headers for public fetches"
+- packages/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts — "GH-008: does not send Authorization headers for public fetches"
 
 ## IMP-PLUG-001 — Importers must include plugin manifests and bundles (testable=true, verify=todo)
 Tests (2):
-- apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
+- packages/io-github/src/__tests__/spec/loadGitHubSnapshot.plugins.integration.test.ts — "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files"
 - packages/io/src/selection/__tests__/selectSemanticSnapshotFiles.plugins.unit.test.ts — "IMP-PLUG-001: includes plugin manifest and bundle files in the snapshot"
 
 ## EXP-003 — Canonical dataset export
