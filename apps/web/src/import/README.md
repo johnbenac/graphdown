@@ -15,7 +15,8 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 - `readZipSnapshot.ts`
   - Reads a user-selected zip file via `File.arrayBuffer()`.
-  - Delegates bytes-only parsing and filtering to `@graphdown/io-zip`.
+  - Delegates zip parsing/normalization to `@graphdown/io-zip`, which uses
+    `@graphdown/io` to select semantic files.
 
 ## GitHub imports (`import/github`)
 
@@ -27,9 +28,10 @@ The **web app importer** may choose to load only a subset of repository files fo
   - Uses the GitHub REST API to resolve the default branch, list repository
     files, and download selected files from the raw content endpoint.
   - Streams progress updates through `ImportProgress` phases.
-  - Downloads `blocks/**` and all Markdown files, retaining Markdown only when
-    `isRecordFileBytes` confirms Graphdown front matter or the file is a plugin manifest.
-  - Resolves plugin manifests and fetches all referenced bundle files (including binary files).
+  - Downloads `blocks/**` and all Markdown files, then delegates semantic
+    selection (records, plugin manifests, and bundles) to `@graphdown/io`.
+  - Performs a second fetch pass to retrieve missing plugin bundle files
+    reported by the selector when they exist in the repository tree.
 
 - `mapGitHubError.ts`
   - Normalizes GitHub API errors into displayable categories (not found,

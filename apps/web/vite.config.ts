@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
 const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
+const ioIndex = path.resolve(__dirname, "../../packages/io/src/index.ts");
 const ioZipIndex = path.resolve(__dirname, "../../packages/io-zip/src/index.ts");
 const runtimeIndex = path.resolve(__dirname, "../../packages/runtime/src/index.ts");
 
@@ -27,6 +28,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^@graphdown\/core$/, replacement: coreIndex },
+      { find: /^@graphdown\/io$/, replacement: ioIndex },
       { find: /^@graphdown\/io-zip$/, replacement: ioZipIndex },
       { find: /^@graphdown\/runtime$/, replacement: runtimeIndex }
     ]

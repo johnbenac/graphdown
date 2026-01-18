@@ -68,6 +68,61 @@ export function resolvePluginBundlePaths(
   return resolved;
 }
 
+export function collectDeclaredPluginBundleRelPaths(
+  yaml: Record<string, unknown>,
+  manifestPath: string
+): string[] {
+  const declared: string[] = [];
+  const seen = new Set<string>();
+
+  const addPath = (value: string, field: string) => {
+    if (!isSafeRelativePath(value)) {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid ${field} path: ${value}`);
+    }
+    if (seen.has(value)) {
+      return;
+    }
+    seen.add(value);
+    declared.push(value);
+  };
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'entry')) {
+    const entry = yaml.entry;
+    if (typeof entry !== 'string') {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid entry: expected string`);
+    }
+    addPath(entry, 'entry');
+  }
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'files')) {
+    const files = yaml.files;
+    if (!Array.isArray(files)) {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid files: expected string[]`);
+    }
+    for (const file of files) {
+      if (typeof file !== 'string') {
+        throw new Error(`Plugin manifest ${manifestPath} has invalid files: expected string[]`);
+      }
+      addPath(file, 'files');
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(yaml, 'binaryFiles')) {
+    const binaryFiles = yaml.binaryFiles;
+    if (!Array.isArray(binaryFiles)) {
+      throw new Error(`Plugin manifest ${manifestPath} has invalid binaryFiles: expected string[]`);
+    }
+    for (const file of binaryFiles) {
+      if (typeof file !== 'string') {
+        throw new Error(`Plugin manifest ${manifestPath} has invalid binaryFiles: expected string[]`);
+      }
+      addPath(file, 'binaryFiles');
+    }
+  }
+
+  return declared;
+}
+
 export function isPluginManifestCandidateBytes(path: string, bytes: Uint8Array): boolean {
   if (!isRecordFileBytes(path, bytes)) return false;
 
