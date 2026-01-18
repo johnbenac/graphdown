@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
+import { isImportError } from "@graphdown/io";
 import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
 describe("readZipSnapshot plugin bundles", () => {
@@ -42,5 +43,41 @@ describe("readZipSnapshot plugin bundles", () => {
     expect(ignored).not.toContain("extensions/demo/entry.js");
     expect(ignored).not.toContain("extensions/demo/ui.md");
     expect(ignored).not.toContain("extensions/demo/logo.png");
+  });
+
+  it("throws a structured error when plugin bundles are missing", () => {
+    const entries: Record<string, Uint8Array> = {};
+    const manifestText = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "  - ui.md",
+      "---",
+      "Demo plugin"
+    ].join("\n");
+    entries["extensions/demo/plugin.md"] = new Uint8Array(strToU8(manifestText));
+    entries["extensions/demo/entry.js"] = new Uint8Array(strToU8("console.log('demo');"));
+    entries["types/note.md"] = new Uint8Array(
+      strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
+    );
+
+    const zipBytes = zipSync(entries);
+
+    let caught: unknown;
+    try {
+      readZipSnapshotFromBytes(zipBytes);
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("zip");
+      expect(caught.info.code).toBe("missing_files");
+      expect(caught.info.missingPaths).toEqual(expect.arrayContaining(["extensions/demo/ui.md"]));
+    }
   });
 });

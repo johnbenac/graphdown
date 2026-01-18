@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { isImportError } from "@graphdown/io";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -170,5 +171,63 @@ describe("loadGitHubSnapshot", () => {
 
     expect([...snapshot.files.keys()].sort()).toEqual(["somewhere/record.md", "weird/type.md"].sort());
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
+  });
+
+  it("throws a structured error when plugin bundles are missing from the repo tree", async () => {
+    const fetchMock = vi.fn();
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [
+            { path: "types/note.md", type: "blob" },
+            { path: "records/note/record-1.md", type: "blob" },
+            { path: "extensions/demo/plugin.md", type: "blob" }
+          ]
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          ["---", "typeId: note", "fields:", "  title:", "    required: true", "---"].join("\n"),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"), {
+          status: 200
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          [
+            "---",
+            "pluginId: demo",
+            "gdApiVersion: 1",
+            "entry: entry.js",
+            "files:",
+            "  - entry.js",
+            "  - ui.md",
+            "---"
+          ].join("\n"),
+          { status: 200 }
+        )
+      );
+
+    let caught: unknown;
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("github");
+      expect(caught.info.code).toBe("missing_files");
+      expect(caught.info.missingPaths).toEqual(
+        expect.arrayContaining(["extensions/demo/entry.js", "extensions/demo/ui.md"])
+      );
+    }
   });
 });
