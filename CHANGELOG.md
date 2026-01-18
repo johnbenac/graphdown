@@ -5,6 +5,13 @@
 
 * standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
+# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-18)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
 ## [0.12.6](https://github.com/johnbenac/graphdown/compare/v0.12.5...v0.12.6) (2026-01-14)
 
 
