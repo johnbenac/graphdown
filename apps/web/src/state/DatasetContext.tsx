@@ -5,7 +5,9 @@ import type { DatasetSnapshot } from "@graphdown/core";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
-import { GitHubImportError, loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
+import { isImportError } from "@graphdown/io";
+import type { ImportErrorInfo } from "@graphdown/io";
+import { loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
@@ -18,6 +20,8 @@ export type ImportErrorCategory =
   | "not_found"
   | "auth_required"
   | "rate_limited"
+  | "missing_files"
+  | "invalid_input"
   | "dataset_invalid"
   | "persistence_unavailable"
   | "network"
@@ -127,6 +131,66 @@ function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
       "The dataset could not be opened by the runtime session. Your dataset is still saved offline in this browser. Update/reload and try again, or clear offline storage if you want to start over.",
     errors
   };
+}
+
+const MAX_MISSING_PATHS = 5;
+
+function formatMissingPaths(paths: string[] | undefined): string {
+  if (!paths || paths.length === 0) {
+    return "Missing required plugin bundle files.";
+  }
+  const visible = paths.slice(0, MAX_MISSING_PATHS);
+  const remaining = paths.length - visible.length;
+  const suffix = remaining > 0 ? `, and ${remaining} more` : "";
+  return `Missing plugin bundle files: ${visible.join(", ")}${suffix}`;
+}
+
+function mapImportError(info: ImportErrorInfo): ImportErrorState {
+  switch (info.code) {
+    case "not_found":
+      return {
+        category: "not_found",
+        title: "Repository not found",
+        message: info.message,
+        status: info.httpStatus
+      };
+    case "auth_required":
+      return {
+        category: "auth_required",
+        title: "Authentication required",
+        message: info.message,
+        hint: "This repository may be private. Graphdown currently imports public repositories only.",
+        status: info.httpStatus
+      };
+    case "rate_limited":
+      return {
+        category: "rate_limited",
+        title: "GitHub rate limit exceeded",
+        message: info.message,
+        hint: "Wait a few minutes and try again. Unauthenticated GitHub API imports have low rate limits.",
+        status: info.httpStatus
+      };
+    case "missing_files":
+      return {
+        category: "missing_files",
+        title: "Missing plugin bundle files",
+        message: formatMissingPaths(info.missingPaths)
+      };
+    case "invalid_input":
+      return {
+        category: "invalid_input",
+        title: "Invalid import input",
+        message: info.message
+      };
+    case "unknown":
+    default:
+      return {
+        category: "unknown",
+        title: "Import failed",
+        message: info.message,
+        status: info.httpStatus
+      };
+  }
 }
 
 export function DatasetProvider({ children }: { children: React.ReactNode }) {
@@ -308,6 +372,10 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
         console.warn("Failed to import dataset.", err);
         setStatus("error");
+        if (isImportError(err)) {
+          setError(mapImportError(err.info));
+          return;
+        }
         setError({
           category: "unknown",
           title: "Import failed",
@@ -380,14 +448,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         }
         console.warn("Failed to import dataset from GitHub.", err);
         setStatus("error");
-        if (err instanceof GitHubImportError) {
-          setError({
-            category: err.info.category,
-            title: err.info.title,
-            message: err.info.message,
-            hint: err.info.hint,
-            status: err.info.status
-          });
+        if (isImportError(err)) {
+          setError(mapImportError(err.info));
           return;
         }
         if (err instanceof TypeError) {

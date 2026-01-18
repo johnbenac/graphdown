@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { isImportError } from "@graphdown/io";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -170,5 +171,46 @@ describe("loadGitHubSnapshot", () => {
 
     expect([...snapshot.files.keys()].sort()).toEqual(["somewhere/record.md", "weird/type.md"].sort());
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
+  });
+
+  it("throws missing_files when plugin bundles are missing from the repo tree", async () => {
+    const fetchMock = vi.fn();
+    const manifestText = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "---",
+      "Demo plugin"
+    ].join("\n");
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [
+            { path: "plugins/demo/plugin.md", type: "blob" },
+            { path: "types/note.md", type: "blob" }
+          ]
+        })
+      )
+      .mockResolvedValueOnce(new Response(manifestText, { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(["---", "typeId: note", "fields: {}", "---"].join("\n"), { status: 200 })
+      );
+
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+      throw new Error("Expected loadGitHubSnapshot to throw.");
+    } catch (err) {
+      expect(isImportError(err)).toBe(true);
+      if (isImportError(err)) {
+        expect(err.info.source).toBe("github");
+        expect(err.info.code).toBe("missing_files");
+        expect(err.info.missingPaths).toContain("plugins/demo/entry.js");
+      }
+    }
   });
 });
