@@ -1,9 +1,10 @@
-export type GitHubImportErrorInfo = {
-  category: "not_found" | "auth_required" | "rate_limited" | "unknown";
-  title: string;
-  message: string;
+import type { ImportErrorInfo } from "@graphdown/io";
+import { ImportError } from "@graphdown/io";
+
+export type GitHubImportErrorInfo = ImportErrorInfo & {
+  source: "github";
+  title?: string;
   hint?: string;
-  status?: number;
 };
 
 function isRateLimit(response: Response, message?: string | null): boolean {
@@ -25,57 +26,48 @@ export function mapGitHubError(response: Response, bodyMessage?: string | null):
 
   if (status === 404) {
     return {
-      category: "not_found",
+      source: "github",
+      code: "not_found",
       title: "Repository not found",
       message: bodyMessage || "GitHub could not find that repository.",
-      status
+      httpStatus: status
     };
   }
 
   if (status === 401) {
     return {
-      category: "auth_required",
+      source: "github",
+      code: "auth_required",
       title: "Authentication required",
       message: bodyMessage || "GitHub requires authentication to access this repository.",
       hint: "This repository may be private. Graphdown currently imports public repositories only.",
-      status
+      httpStatus: status
     };
   }
 
   if (isRateLimit(response, bodyMessage)) {
     return {
-      category: "rate_limited",
+      source: "github",
+      code: "rate_limited",
       title: "GitHub rate limit exceeded",
       message: bodyMessage || "GitHub is rate limiting requests right now.",
       hint: "Wait a few minutes and try again. Unauthenticated GitHub API imports have low rate limits.",
-      status
-    };
-  }
-
-  if (status === 403) {
-    return {
-      category: "auth_required",
-      title: "Authentication required",
-      message: bodyMessage || "GitHub denied access to this repository.",
-      hint: "This repository may be private. Graphdown currently imports public repositories only.",
-      status
+      httpStatus: status
     };
   }
 
   return {
-    category: "unknown",
+    source: "github",
+    code: "unknown",
     title: "GitHub error",
     message: bodyMessage || `GitHub returned status ${status}.`,
-    status
+    httpStatus: status
   };
 }
 
-export class GitHubImportError extends Error {
-  info: GitHubImportErrorInfo;
-
+export class GitHubImportError extends ImportError {
   constructor(info: GitHubImportErrorInfo) {
-    super(info.message);
+    super(info);
     this.name = "GitHubImportError";
-    this.info = info;
   }
 }

@@ -1,6 +1,5 @@
 import { unzipSync } from "fflate";
-import { type DatasetSnapshot } from "@graphdown/core";
-import { selectSemanticSnapshotFiles } from "@graphdown/io";
+import { ImportError, selectSemanticSnapshotFiles, type ImportResult } from "@graphdown/io";
 
 import { normalizeZipEntryPath } from "../internal/zipPath";
 
@@ -62,17 +61,36 @@ function stripRootDirectory(entries: ZipEntry[]): Map<string, Uint8Array> {
 
 export function readZipSnapshotFromBytes(
   zipBytes: Uint8Array
-): { snapshot: DatasetSnapshot; ignored: string[] } {
-  const entries = unzipSync(zipBytes);
+): ImportResult {
+  let entries: Record<string, Uint8Array>;
+  try {
+    entries = unzipSync(zipBytes);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new ImportError({
+      source: "zip",
+      code: "invalid_input",
+      message: `Invalid zip file: ${message}`
+    });
+  }
   const normalizedEntries = normalizeZipEntries(entries);
   const allEntries = stripRootDirectory(normalizedEntries);
 
-  const selection = selectSemanticSnapshotFiles(allEntries);
+  let selection;
+  try {
+    selection = selectSemanticSnapshotFiles(allEntries);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new ImportError({ source: "zip", code: "invalid_input", message });
+  }
 
   if (selection.missingPluginBundlePaths.length > 0) {
-    throw new Error(
-      `Missing plugin bundle files: ${selection.missingPluginBundlePaths.join(", ")}`
-    );
+    throw new ImportError({
+      source: "zip",
+      code: "missing_files",
+      message: `Missing plugin bundle files: ${selection.missingPluginBundlePaths.join(", ")}`,
+      missingPaths: selection.missingPluginBundlePaths
+    });
   }
 
   return { snapshot: selection.snapshot, ignored: selection.ignored };

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
 
+import { isImportError } from "@graphdown/io";
 import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
 const bytes = (text: string) => new Uint8Array(strToU8(text));
@@ -23,7 +24,17 @@ describe("readZipSnapshotFromBytes fail-fast rules", () => {
       "types/note.md": bytes("---\ntypeId: note\nfields: {}\n---\n")
     });
 
-    expect(() => readZipSnapshotFromBytes(zipBytes)).toThrow(/Missing plugin bundle files/);
+    try {
+      readZipSnapshotFromBytes(zipBytes);
+      throw new Error("Expected missing bundle error to be thrown.");
+    } catch (err) {
+      expect(isImportError(err)).toBe(true);
+      if (isImportError(err)) {
+        expect(err.info.source).toBe("zip");
+        expect(err.info.code).toBe("missing_files");
+        expect(err.info.missingPaths).toEqual(["plugins/demo/entry.js"]);
+      }
+    }
   });
 
   it("throws on zip path normalization collisions", () => {

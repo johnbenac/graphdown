@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { isImportError } from "@graphdown/io";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -133,6 +134,41 @@ describe("loadGitHubSnapshot", () => {
       ].sort()
     );
     expect(ignored.sort()).toEqual(["docs/readme.md"].sort());
+  });
+
+  it("throws structured errors when plugin bundles are missing from the repo tree", async () => {
+    const fetchMock = vi.fn();
+    const manifestText = [
+      "---",
+      "pluginId: demo",
+      "gdApiVersion: 1",
+      "entry: entry.js",
+      "files:",
+      "  - entry.js",
+      "---",
+      "Demo plugin"
+    ].join("\n");
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tree: [{ path: "extensions/demo/plugin.md", type: "blob" }]
+        })
+      )
+      .mockResolvedValueOnce(new Response(manifestText, { status: 200 }));
+
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+      throw new Error("Expected missing bundle error to be thrown.");
+    } catch (err) {
+      expect(isImportError(err)).toBe(true);
+      if (isImportError(err)) {
+        expect(err.info.source).toBe("github");
+        expect(err.info.code).toBe("missing_files");
+        expect(err.info.missingPaths).toContain("extensions/demo/entry.js");
+      }
+    }
   });
 
   it("imports Graphdown markdown in non-canonical paths", async () => {
