@@ -5,9 +5,7 @@ import type { DatasetSnapshot } from "@graphdown/core";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
-import { loadGitHubSnapshot } from "../import/github/loadGitHubSnapshot";
-import { GitHubImportError } from "../import/github/mapGitHubError";
-import { parseGitHubUrl } from "../import/github/parseGitHubUrl";
+import { GitHubImportError, loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
 import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "../persistence/persistence";
 import type { ImportReport, LoadedDataset } from "../persistence/types";
@@ -327,6 +325,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       setStatus("loading");
       setError(undefined);
       setProgress({ phase: "validating_url" });
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       const parsed = parseGitHubUrl(url);
       if (!parsed.ok) {

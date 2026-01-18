@@ -8,6 +8,7 @@
     "paths": {
       "@graphdown/core": ["../../packages/core/src/index.ts"],
       "@graphdown/io": ["../../packages/io/src/index.ts"],
+      "@graphdown/io-github": ["../../packages/io-github/src/index.ts"],
       "@graphdown/io-zip": ["../../packages/io-zip/src/index.ts"],
       "@graphdown/runtime": ["../../packages/runtime/src/index.ts"]
     },

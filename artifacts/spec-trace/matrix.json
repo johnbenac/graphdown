@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-18T04:59:34.487Z",
+  "generatedAt": "2026-01-18T06:25:33.037Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -1369,27 +1369,27 @@
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts /tree/<ref> URLs",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts https repo URLs",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts repo URLs with trailing slash and .git",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: accepts scheme-less repo URLs",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         },
         {
           "reqId": "GH-001",
           "testTitle": "GH-001: rejects malformed, non-github, or unsupported URLs",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         }
       ]
     },
@@ -1402,7 +1402,7 @@
         {
           "reqId": "GH-002",
           "testTitle": "GH-002: falls back to main when default_branch is missing",
-          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts"
         }
       ]
     },
@@ -1433,7 +1433,7 @@
         {
           "reqId": "GH-005",
           "testTitle": "GH-005: rejects /tree/<ref>/<subdir> URLs",
-          "filePath": "apps/web/src/import/github/__tests__/parseGitHubUrl.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/parseGitHubUrl.unit.test.ts"
         }
       ]
     },
@@ -1446,7 +1446,7 @@
         {
           "reqId": "GH-008",
           "testTitle": "GH-008: does not send Authorization headers for public fetches",
-          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.unit.test.ts"
+          "filePath": "packages/io-github/src/__tests__/loadGitHubSnapshot.unit.test.ts"
         }
       ]
     },
@@ -1459,7 +1459,7 @@
         {
           "reqId": "IMP-PLUG-001",
           "testTitle": "IMP-PLUG-001: fetches plugin bundles (including non-md) and includes them in snapshot.files",
-          "filePath": "apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts"
+          "filePath": "packages/io-github/src/__tests__/spec/loadGitHubSnapshot.plugins.integration.test.ts"
         },
         {
           "reqId": "IMP-PLUG-001",

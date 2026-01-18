@@ -9,7 +9,7 @@ const { generateSpecTrace } = require("../../../../../tools/spec-trace.cjs");
 const IO_TEST_PATH =
   "packages/io/src/selection/__tests__/selectSemanticSnapshotFiles.plugins.unit.test.ts";
 const GITHUB_TEST_PATH =
-  "apps/web/src/import/github/__tests__/loadGitHubSnapshot.plugins.integration.test.ts";
+  "packages/io-github/src/__tests__/spec/loadGitHubSnapshot.plugins.integration.test.ts";
 
 test("GOV-002: spec-trace includes io requirement-tagged tests", () => {
   const { matrixData } = generateSpecTrace({ writeFiles: false });

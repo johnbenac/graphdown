@@ -52,7 +52,7 @@ export default function ImportRoute() {
     });
   }, [progress.phase]);
 
-  const hasProgress = progress.phase !== "idle" && status === "loading";
+  const hasProgress = shouldNavigate && status !== "error";
 
   return (
     <AppShell

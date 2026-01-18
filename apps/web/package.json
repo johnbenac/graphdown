@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@graphdown/core": "0.0.0",
-    "@graphdown/io": "0.0.0",
+    "@graphdown/io-github": "0.0.0",
     "@graphdown/io-zip": "0.0.0",
     "@graphdown/runtime": "0.0.0",
     "@noble/hashes": "^1.4.0",
