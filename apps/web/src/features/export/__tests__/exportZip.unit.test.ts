@@ -11,7 +11,7 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
     files: new Map(
       entries.map(([path, contents]) => [
         path,
-        contents instanceof Uint8Array ? contents : toBytes(contents)
+        typeof contents === "string" ? toBytes(contents) : contents
       ])
     )
   };
@@ -92,7 +92,8 @@ describe("buildDatasetZipBytes", () => {
     const imported = exportAndLoad(snapshot);
     const roundTrip = imported.files.get("records/note.one/one.md");
     expect(roundTrip).toBeDefined();
-    expect(roundTrip).toEqual(original);
+    // Compare byte contents (not Uint8Array instances) to handle cross-realm Uint8Array issues
+    expect(Array.from(roundTrip!)).toEqual(Array.from(original));
   });
 
   it("EXP-006: includes only referenced blocks alongside canonical records/types", () => {

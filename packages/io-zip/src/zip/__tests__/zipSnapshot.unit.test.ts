@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 import { zipSync } from "fflate";
+import vm from "node:vm";
 
 import { buildZipBytesFromSnapshot, loadDatasetSnapshotFromZipBytes } from "../zipSnapshot";
 
@@ -47,4 +48,20 @@ test("loadDatasetSnapshotFromZipBytes normalizes backslashes", () => {
 test("loadDatasetSnapshotFromZipBytes rejects .. paths", () => {
   const zipBytes = zipSync({ "../evil.txt": bytes("no") }, { level: 0 });
   assert.throws(() => loadDatasetSnapshotFromZipBytes(zipBytes), /Invalid zip entry path/);
+});
+
+test("buildZipBytesFromSnapshot handles cross-realm Uint8Array values", () => {
+  const otherRealmBytes = vm.runInNewContext("new Uint8Array([104, 101, 108, 108, 111])") as unknown as Uint8Array;
+
+  // Make sure the test is real: cross-realm typed arrays should fail instanceof checks.
+  assert.equal(otherRealmBytes instanceof Uint8Array, false);
+
+  const snapshot = {
+    files: new Map<string, Uint8Array>([["types/note.md", otherRealmBytes]])
+  };
+
+  const zipBytes = buildZipBytesFromSnapshot(snapshot);
+  const loaded = loadDatasetSnapshotFromZipBytes(zipBytes);
+
+  assert.deepEqual(Array.from(loaded.files.get("types/note.md") ?? []), [104, 101, 108, 108, 111]);
 });

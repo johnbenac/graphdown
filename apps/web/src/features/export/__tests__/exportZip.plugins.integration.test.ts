@@ -15,7 +15,7 @@ function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): Dat
     files: new Map(
       entries.map(([path, contents]) => [
         path,
-        contents instanceof Uint8Array ? contents : toBytes(contents)
+        typeof contents === "string" ? toBytes(contents) : contents
       ])
     )
   };
@@ -75,9 +75,10 @@ describe("buildDatasetZipBytes plugin export", () => {
     expect(imported.files.has("extensions/demo/ui.md")).toBe(false);
     expect(imported.files.has("docs/readme.md")).toBe(false);
 
-    expect(imported.files.get("plugins/demo/manifest.md")).toEqual(snapshot.files.get("extensions/demo/plugin.md"));
-    expect(imported.files.get("plugins/demo/entry.js")).toEqual(snapshot.files.get("extensions/demo/entry.js"));
-    expect(imported.files.get("plugins/demo/ui.md")).toEqual(snapshot.files.get("extensions/demo/ui.md"));
+    // Compare byte contents (not Uint8Array instances) to handle cross-realm Uint8Array issues
+    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/plugin.md")!));
+    expect(Array.from(imported.files.get("plugins/demo/entry.js")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/entry.js")!));
+    expect(Array.from(imported.files.get("plugins/demo/ui.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/ui.md")!));
 
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(
@@ -158,7 +159,7 @@ describe("buildDatasetZipBytes plugin export", () => {
 
     const imported = exportAndLoad(snapshot);
 
-    expect(imported.files.get("plugins/demo/assets/logo.bin")).toEqual(logoBytes);
-    expect(imported.files.get("plugins/demo/manifest.md")).toEqual(snapshot.files.get("extensions/demo/plugin.md"));
+    expect(Array.from(imported.files.get("plugins/demo/assets/logo.bin")!)).toEqual(Array.from(logoBytes));
+    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/plugin.md")!));
   });
 });

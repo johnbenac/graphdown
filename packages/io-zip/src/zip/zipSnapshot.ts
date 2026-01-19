@@ -8,6 +8,17 @@ export interface ZipBuildOptions {
   excludeGit?: boolean;
 }
 
+/**
+ * fflate.zipSync detects "is this a Uint8Array?" using realm-sensitive checks.
+ * In vitest/jsdom, you can get Uint8Arrays from a different realm (window),
+ * which fflate then misinterprets as a nested directory object.
+ *
+ * Fix: if bytes are not a native Uint8Array in THIS realm, copy into one.
+ */
+function ensureNativeUint8Array(bytes: Uint8Array): Uint8Array {
+  return bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+}
+
 export function loadDatasetSnapshotFromZipBytes(zipBytes: Uint8Array): DatasetSnapshot {
   const entries = unzipSync(zipBytes);
   const files = new Map<string, Uint8Array>();
@@ -16,13 +27,16 @@ export function loadDatasetSnapshotFromZipBytes(zipBytes: Uint8Array): DatasetSn
   const sortedEntries = Object.entries(entries).sort(([a], [b]) => a.localeCompare(b));
   for (const [entryPath, contents] of sortedEntries) {
     const normalizedPath = normalizeZipEntryPath(entryPath);
+
     if (seenPaths.has(normalizedPath)) {
       throw new Error(`Zip entry path collision: ${normalizedPath}`);
     }
     seenPaths.add(normalizedPath);
+
     if (entryPath.replace(/\\/g, "/").endsWith("/")) {
       continue;
     }
+
     files.set(normalizedPath, contents);
   }
 
@@ -39,7 +53,7 @@ export function buildZipBytesFromSnapshot(
 
   const paths = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
   for (const filePath of paths) {
-    if (excludeGit && (filePath === '.git' || filePath.startsWith('.git/'))) {
+    if (excludeGit && (filePath === ".git" || filePath.startsWith(".git/"))) {
       continue;
     }
     if (!include(filePath)) {
@@ -49,7 +63,8 @@ export function buildZipBytesFromSnapshot(
     if (!contents) {
       continue;
     }
-    entries[filePath] = contents;
+
+    entries[filePath] = ensureNativeUint8Array(contents);
   }
 
   return zipSync(entries, { level: 0 });
