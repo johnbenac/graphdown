@@ -86,6 +86,8 @@ describe("DatasetContext non-functional requirements", () => {
       </DatasetProvider>
     );
 
+    await waitFor(() => expect(ctx).not.toBeNull());
+
     await waitFor(() => expect(ctx?.status).toBe("ready"));
     expect(ctx).not.toBeNull();
     expect(ctx!.activeDataset?.snapshot.files.size).toBeGreaterThan(0);
@@ -106,6 +108,8 @@ describe("DatasetContext non-functional requirements", () => {
         <Harness onReady={(value) => (ctx = value)} />
       </DatasetProvider>
     );
+
+    await waitFor(() => expect(ctx).not.toBeNull());
 
     await waitFor(() => expect(ctx?.status).toBe("ready"));
     expect(loadSpy).toHaveBeenCalledTimes(1);
@@ -141,6 +145,8 @@ describe("DatasetContext non-functional requirements", () => {
         <Harness onReady={(value) => (ctx = value)} />
       </DatasetProvider>
     );
+
+    await waitFor(() => expect(ctx).not.toBeNull());
 
     await waitFor(() => expect(ctx?.status).toBe("error"));
 
