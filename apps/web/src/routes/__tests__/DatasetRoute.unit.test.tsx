@@ -56,7 +56,7 @@ const activeDataset = {
     label: "Test dataset",
     source: "import"
   },
-  datasetSnapshot: sampleSnapshot,
+  snapshot: sampleSnapshot,
   runtimeApiV1,
   index: {
     typeFileById: new Map([["note", "types/note.md"]]),

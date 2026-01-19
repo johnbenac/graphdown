@@ -1,0 +1,23 @@
+{
+  "name": "@graphdown/persistence",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@graphdown/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.10",
+    "fake-indexeddb": "^6.2.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

@@ -17,7 +17,7 @@ export type PersistedUiState = Record<string, unknown>;
 
 export type LoadedDataset = {
   meta: DatasetMeta;
-  datasetSnapshot: DatasetSnapshot;
+  snapshot: DatasetSnapshot;
   uiState?: PersistedUiState;
 };
 

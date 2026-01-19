@@ -1,7 +1,6 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPersistStore } from "../createPersistStore";
-import { IndexedDbStore } from "../IndexedDbStore";
+import { createPersistStore, IndexedDbStore } from "@graphdown/persistence";
 
 describe("createPersistStore", () => {
   afterEach(() => {
@@ -24,7 +23,7 @@ describe("createPersistStore", () => {
 
     expect(store).toBeInstanceOf(IndexedDbStore);
     await store.set("alpha", { value: 1 });
-    await expect(store.get<{ value: number }>("alpha")).resolves.toEqual({ value: 1 });
+    await expect(store.get("alpha")).resolves.toEqual({ value: 1 });
     if (store instanceof IndexedDbStore) {
       await store.destroy();
     }

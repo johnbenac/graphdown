@@ -1,9 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
-import { IndexedDbStore } from "../../storage/IndexedDbStore";
-import { KEY } from "../keys";
-import { createPersistence } from "../persistence";
+import { createPersistence, IndexedDbStore, KEY } from "@graphdown/persistence";
 
 function makeDbName(prefix: string) {
   return `${prefix}-${Math.random().toString(16).slice(2)}`;
@@ -26,18 +24,18 @@ describe("persistence service", () => {
     try {
       const persistence = createPersistence({ store });
 
-      await persistence.saveActiveDataset({
+      await persistence.saveActive({
         meta: {
           id: "dataset-1",
           createdAt: 1,
           updatedAt: 1
         },
-        datasetSnapshot: sampleSnapshot
+        snapshot: sampleSnapshot
       });
 
-      const loaded = await persistence.loadActiveDataset();
+      const loaded = await persistence.loadActive();
       expect(loaded?.meta.id).toBe("dataset-1");
-      expect(loaded?.datasetSnapshot.files.size).toBe(1);
+      expect(loaded?.snapshot.files.size).toBe(1);
     } finally {
       await store.destroy();
     }
@@ -54,8 +52,8 @@ describe("persistence service", () => {
         updatedAt: 1
       });
 
-      const loaded = await persistence.loadActiveDataset();
-      expect(loaded).toBeUndefined();
+      const loaded = await persistence.loadActive();
+      expect(loaded).toBeNull();
       await expect(store.get(KEY.activeMeta)).resolves.toBeUndefined();
       await expect(store.get(KEY.activeSnapshot)).resolves.toBeUndefined();
     } finally {
