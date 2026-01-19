@@ -13,6 +13,18 @@
 # [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
+### Bug Fixes
+
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+
+
 ### Features
 
 * standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
