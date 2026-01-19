@@ -59,7 +59,7 @@ export default function ExportRoute() {
                     if (!activeDataset) {
                       return;
                     }
-                    const bytes = buildDatasetZipBytes(activeDataset.datasetSnapshot);
+                    const bytes = buildDatasetZipBytes(activeDataset.snapshot);
                     downloadZipBytes(bytes, `graphdown-export--${safeLabel}.zip`);
                   }}
                 >

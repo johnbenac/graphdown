@@ -8,9 +8,8 @@ import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
 import { loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
 import { readZipSnapshot } from "../import/readZipSnapshot";
-import { createPersistence } from "../persistence/persistence";
-import type { ImportReport, LoadedDataset } from "../persistence/types";
-import { createPersistStore } from "../storage/createPersistStore";
+import { createPersistence, createPersistStore } from "@graphdown/persistence";
+import type { ImportReport, LoadedDataset } from "@graphdown/persistence";
 import { buildImportReport } from "./importReport";
 import { openDatasetSession, type SnapshotIndex } from "./openDatasetSession";
 
@@ -241,7 +240,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     setError(undefined);
     setProgress({ phase: "idle" });
     try {
-      const dataset = await persistence.loadActiveDataset();
+      const dataset = await persistence.loadActive();
       if (loadActiveId.current !== runId) {
         return;
       }
@@ -250,7 +249,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         setStatus((prev) => (prev === "loading" ? "ready" : prev));
         return;
       }
-      const opened = await openDatasetSession(dataset.datasetSnapshot);
+      const opened = await openDatasetSession(dataset.snapshot);
       if (loadActiveId.current !== runId) {
         return;
       }
@@ -282,7 +281,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     }
     const debugHandle = {
       clearPersistence: async () => {
-        await persistence.clearActiveDataset();
+        await persistence.clearActive();
         setActiveDataset(undefined);
         setError(undefined);
         setStatus("ready");
@@ -337,8 +336,8 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         source: "import",
         importReport
       };
-      await persistence.saveActiveDataset({ meta, datasetSnapshot });
-      setActiveDataset({ meta, datasetSnapshot, runtimeApiV1, index });
+      await persistence.saveActive({ meta, snapshot: datasetSnapshot });
+      setActiveDataset({ meta, snapshot: datasetSnapshot, runtimeApiV1, index });
     },
     [persistence]
   );
@@ -481,7 +480,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     if (!persistence) {
       return;
     }
-    await persistence.clearActiveDataset();
+    await persistence.clearActive();
     setActiveDataset(undefined);
     setError(undefined);
     setStatus("ready");
@@ -509,13 +508,13 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         } as const;
       }
       const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
-      await persistence.saveActiveDataset({
+      await persistence.saveActive({
         meta: nextMeta,
-        datasetSnapshot: nextSnapshot
+        snapshot: nextSnapshot
       });
       setActiveDataset({
         meta: nextMeta,
-        datasetSnapshot: nextSnapshot,
+        snapshot: nextSnapshot,
         runtimeApiV1: opened.runtimeApiV1,
         index: opened.index
       });
@@ -537,7 +536,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       if (!filePath) {
         return { ok: false, errors: [makeError("E_INTERNAL", "Record not found.")] } as const;
       }
-      const currentBytes = activeDataset.datasetSnapshot.files.get(filePath);
+      const currentBytes = activeDataset.snapshot.files.get(filePath);
       if (!currentBytes) {
         return {
           ok: false,
@@ -563,9 +562,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         fields: nextFields
       };
       const nextText = serializeMarkdownRecord({ yaml: nextYaml, body: input.nextBody ?? "" });
-      const nextFiles = new Map(activeDataset.datasetSnapshot.files);
+      const nextFiles = new Map(activeDataset.snapshot.files);
       nextFiles.set(filePath, encodeText(nextText));
-      const nextSnapshot = { ...activeDataset.datasetSnapshot, files: nextFiles };
+      const nextSnapshot = { ...activeDataset.snapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
         return { ok: false, errors: commitResult.errors } as const;
@@ -602,7 +601,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       const safeId = trimmedRecordId.replace(/[^A-Za-z0-9_-]+/g, "-");
       let counter = 0;
       let filePath = `records/${input.typeId}.${safeId}/${safeId}.md`;
-      while (activeDataset.datasetSnapshot.files.has(filePath)) {
+      while (activeDataset.snapshot.files.has(filePath)) {
         counter += 1;
         const suffixedId = `${safeId}-${counter}`;
         filePath = `records/${input.typeId}.${suffixedId}/${suffixedId}.md`;
@@ -619,9 +618,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         fields
       };
       const text = serializeMarkdownRecord({ yaml, body: input.body ?? "" });
-      const nextFiles = new Map(activeDataset.datasetSnapshot.files);
+      const nextFiles = new Map(activeDataset.snapshot.files);
       nextFiles.set(filePath, encodeText(text));
-      const nextSnapshot = { ...activeDataset.datasetSnapshot, files: nextFiles };
+      const nextSnapshot = { ...activeDataset.snapshot, files: nextFiles };
       const commitResult = await commitSnapshot(nextSnapshot);
       if (!commitResult.ok) {
         return { ok: false, errors: commitResult.errors } as const;

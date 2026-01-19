@@ -7,15 +7,17 @@ import { makeError } from "@graphdown/core";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { IndexedDbStore } from "../../storage/IndexedDbStore";
-import { createPersistence } from "../../persistence/persistence";
-import { createPersistStore } from "../../storage/createPersistStore";
+import { createPersistence, createPersistStore, IndexedDbStore } from "@graphdown/persistence";
 
 let store: IndexedDbStore;
 
-vi.mock("../../storage/createPersistStore", () => ({
-  createPersistStore: () => store
-}));
+vi.mock("@graphdown/persistence", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@graphdown/persistence")>();
+  return {
+    ...actual,
+    createPersistStore: () => store
+  };
+});
 
 const encoder = new TextEncoder();
 
@@ -46,9 +48,9 @@ async function seedActiveDataset() {
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
-  await persistence.saveActiveDataset({
+  await persistence.saveActive({
     meta,
-    datasetSnapshot: snapshot
+    snapshot
   });
 }
 
@@ -86,7 +88,7 @@ describe("DatasetContext non-functional requirements", () => {
 
     await waitFor(() => expect(ctx?.status).toBe("ready"));
     expect(ctx).not.toBeNull();
-    expect(ctx!.activeDataset?.datasetSnapshot.files.size).toBeGreaterThan(0);
+    expect(ctx!.activeDataset?.snapshot.files.size).toBeGreaterThan(0);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(ctx!.activeDataset?.runtimeApiV1).toBeDefined();
     await expect(ctx!.activeDataset!.runtimeApiV1.listTypeIds()).resolves.toContain("note");
@@ -144,9 +146,9 @@ describe("DatasetContext non-functional requirements", () => {
 
     const freshStore = createPersistStore({ logger: console });
     const persistence = createPersistence({ store: freshStore });
-    const stillThere = await persistence.loadActiveDataset();
+    const stillThere = await persistence.loadActive();
 
     expect(stillThere).toBeTruthy();
-    expect(stillThere?.datasetSnapshot.files.size).toBeGreaterThan(0);
+    expect(stillThere?.snapshot.files.size).toBeGreaterThan(0);
   });
 });
