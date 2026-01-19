@@ -1,15 +1,17 @@
-import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
 import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes } from "@graphdown/core";
 import type { DatasetSnapshot } from "@graphdown/core";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
+
+const enc = new TextEncoder();
+const toBytes = (text: string) => enc.encode(text);
 
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
     files: new Map(
       entries.map(([path, contents]) => [
         path,
-        contents instanceof Uint8Array ? contents : new Uint8Array(strToU8(contents))
+        contents instanceof Uint8Array ? contents : toBytes(contents)
       ])
     )
   };
@@ -36,7 +38,7 @@ describe("buildDatasetZipBytes", () => {
   });
 
   it("GC-001: reachable block set includes references from fields", () => {
-    const blobBytes = new Uint8Array(strToU8("orchid"));
+    const blobBytes = toBytes("orchid");
     const cid = cidFromRawBytes(blobBytes);
     const blockPath = blockPathForCid(cid);
 
@@ -79,8 +81,8 @@ describe("buildDatasetZipBytes", () => {
   });
 
   it("EXP-005: export preserves bytes exactly", () => {
-    const original = new Uint8Array(
-      strToU8(["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body with \r\ntrailing  ", "Emoji: 😊"].join("\n"))
+    const original = toBytes(
+      ["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body with \r\ntrailing  ", "Emoji: 😊"].join("\n")
     );
     const snapshot = snapshotFromEntries([
       ["types/note.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
@@ -94,10 +96,10 @@ describe("buildDatasetZipBytes", () => {
   });
 
   it("EXP-006: includes only referenced blocks alongside canonical records/types", () => {
-    const blobBytes = new Uint8Array(strToU8("flower"));
+    const blobBytes = toBytes("flower");
     const cid = cidFromRawBytes(blobBytes);
     const blockPath = blockPathForCid(cid);
-    const garbageBytes = new Uint8Array(strToU8("garbage"));
+    const garbageBytes = toBytes("garbage");
     const garbageCid = cidFromRawBytes(garbageBytes);
     const garbagePath = blockPathForCid(garbageCid);
 

@@ -1,4 +1,3 @@
-import { strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
 import {
   blockPathForCid,
@@ -8,12 +7,15 @@ import {
 import type { DatasetSnapshot } from "@graphdown/core";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 
+const enc = new TextEncoder();
+const toBytes = (text: string) => enc.encode(text);
+
 function snapshotFromEntries(entries: Array<[string, string | Uint8Array]>): DatasetSnapshot {
   return {
     files: new Map(
       entries.map(([path, contents]) => [
         path,
-        contents instanceof Uint8Array ? contents : new Uint8Array(strToU8(contents))
+        contents instanceof Uint8Array ? contents : toBytes(contents)
       ])
     )
   };
@@ -27,7 +29,7 @@ function exportAndLoad(rawSnapshot: DatasetSnapshot) {
 
 describe("buildDatasetZipBytes plugin export", () => {
   it("EXP-PLUG-001: exports plugin bundles in canonical layout with exact bytes", () => {
-    const pluginBlockBytes = new Uint8Array(strToU8("plugin-block"));
+    const pluginBlockBytes = toBytes("plugin-block");
     const pluginCid = cidFromRawBytes(pluginBlockBytes);
     const pluginBlockPath = blockPathForCid(pluginCid);
 
@@ -46,8 +48,8 @@ describe("buildDatasetZipBytes plugin export", () => {
       "Plugin manifest."
     ].join("\n");
 
-    const entryBytes = new Uint8Array(strToU8("console.log('entry');"));
-    const uiBytes = new Uint8Array(strToU8("# UI"));
+    const entryBytes = toBytes("console.log('entry');");
+    const uiBytes = toBytes("# UI");
 
     const snapshot = snapshotFromEntries([
       ["weird/type-location.md", ["---", "typeId: note", "fields: {}", "---"].join("\n")],
@@ -91,7 +93,7 @@ describe("buildDatasetZipBytes plugin export", () => {
   });
 
   it("EXP-006: includes plugin-declared blocks even when records do not reference them", () => {
-    const pluginBlockBytes = new Uint8Array(strToU8("plugin-only-block"));
+    const pluginBlockBytes = toBytes("plugin-only-block");
     const pluginCid = cidFromRawBytes(pluginBlockBytes);
     const pluginBlockPath = blockPathForCid(pluginCid);
 
@@ -140,7 +142,7 @@ describe("buildDatasetZipBytes plugin export", () => {
       "Plugin manifest."
     ].join("\n");
 
-    const entryBytes = new Uint8Array(strToU8("console.log('entry');"));
+    const entryBytes = toBytes("console.log('entry');");
     const logoBytes = new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80]);
 
     const snapshot = snapshotFromEntries([
