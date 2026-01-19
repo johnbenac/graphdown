@@ -75,6 +75,11 @@ const isTestEnv =
   (typeof import.meta !== "undefined" &&
     typeof import.meta.env !== "undefined" &&
     import.meta.env.MODE === "test");
+let testDbCounter = 0;
+function makeTestDbName(prefix = "graphdown-test") {
+  testDbCounter += 1;
+  return `${prefix}-${testDbCounter}-${Math.random().toString(16).slice(2)}`;
+}
 
 function decodeBytes(raw: Uint8Array): string {
   if (textDecoder) {
@@ -208,7 +213,12 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
 
   const { store, storeError } = useMemo(() => {
     try {
-      return { store: createPersistStore({ logger: console }) };
+      return {
+        store: createPersistStore({
+          logger: console,
+          ...(isTestEnv ? { dbName: makeTestDbName() } : {})
+        })
+      };
     } catch (err) {
       return { storeError: err as Error };
     }
