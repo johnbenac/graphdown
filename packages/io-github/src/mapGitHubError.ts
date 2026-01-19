@@ -17,6 +17,35 @@ function isRateLimit(response: Response, message?: string | null): boolean {
   return Boolean(message && message.toLowerCase().includes("rate limit"));
 }
 
+function parseRetryAfterSeconds(response: Response): number | undefined {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter) {
+    const asInt = Number.parseInt(retryAfter, 10);
+    if (Number.isFinite(asInt) && asInt > 0) {
+      return asInt;
+    }
+
+    const asDateMs = Date.parse(retryAfter);
+    if (!Number.isNaN(asDateMs)) {
+      const deltaMs = asDateMs - Date.now();
+      const seconds = Math.ceil(deltaMs / 1000);
+      return seconds > 0 ? seconds : undefined;
+    }
+  }
+
+  const reset = response.headers.get("x-ratelimit-reset");
+  if (reset) {
+    const resetSec = Number.parseInt(reset, 10);
+    if (Number.isFinite(resetSec) && resetSec > 0) {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const seconds = resetSec - nowSec;
+      return seconds > 0 ? seconds : undefined;
+    }
+  }
+
+  return undefined;
+}
+
 export function mapGitHubError(response: Response, bodyMessage?: string | null): GitHubImportErrorInfo {
   const status = response.status;
   const message = bodyMessage || `GitHub returned status ${status}.`;
@@ -40,11 +69,14 @@ export function mapGitHubError(response: Response, bodyMessage?: string | null):
   }
 
   if (isRateLimit(response, bodyMessage)) {
+    const retryAfterSeconds = parseRetryAfterSeconds(response);
+
     return {
       source: "github",
       code: "rate_limited",
       message: bodyMessage || "GitHub is rate limiting requests right now.",
-      httpStatus: status
+      httpStatus: status,
+      ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {})
     };
   }
 
