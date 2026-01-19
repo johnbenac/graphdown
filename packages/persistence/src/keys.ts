@@ -1,5 +1,6 @@
 export const KEY = {
   activeMeta: "active:meta",
   activeSnapshot: "active:snapshot",
-  activeUiState: "active:uiState"
+  activeUiState: "active:uiState",
+  activeDataset: "active:dataset"
 } as const;

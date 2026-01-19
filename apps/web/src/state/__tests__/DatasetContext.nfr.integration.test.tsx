@@ -7,15 +7,17 @@ import { makeError } from "@graphdown/core";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { IndexedDbStore } from "../../storage/IndexedDbStore";
-import { createPersistence } from "../../persistence/persistence";
-import { createPersistStore } from "../../storage/createPersistStore";
+import { IndexedDbPersistStore, createPersistStore, createPersistence } from "@graphdown/persistence";
 
-let store: IndexedDbStore;
+let store: IndexedDbPersistStore;
 
-vi.mock("../../storage/createPersistStore", () => ({
-  createPersistStore: () => store
-}));
+vi.mock("@graphdown/persistence", async (importOriginal) => {
+  const actual = (await importOriginal()) as typeof import("@graphdown/persistence");
+  return {
+    ...actual,
+    createPersistStore: () => store
+  };
+});
 
 const encoder = new TextEncoder();
 
@@ -46,9 +48,9 @@ async function seedActiveDataset() {
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
-  await persistence.saveActiveDataset({
+  await persistence.saveActive({
     meta,
-    datasetSnapshot: snapshot
+    snapshot
   });
 }
 
@@ -64,7 +66,7 @@ describe("DatasetContext non-functional requirements", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
-    store = new IndexedDbStore({ dbName: makeDbName("dataset-context") });
+    store = new IndexedDbPersistStore({ dbName: makeDbName("dataset-context") });
   });
 
   afterEach(async () => {
@@ -144,7 +146,7 @@ describe("DatasetContext non-functional requirements", () => {
 
     const freshStore = createPersistStore({ logger: console });
     const persistence = createPersistence({ store: freshStore });
-    const stillThere = await persistence.loadActiveDataset();
+    const stillThere = await persistence.loadActive();
 
     expect(stillThere).toBeTruthy();
     expect(stillThere?.datasetSnapshot.files.size).toBeGreaterThan(0);

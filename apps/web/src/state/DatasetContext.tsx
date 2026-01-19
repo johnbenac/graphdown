@@ -8,9 +8,8 @@ import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
 import { loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
 import { readZipSnapshot } from "../import/readZipSnapshot";
-import { createPersistence } from "../persistence/persistence";
-import type { ImportReport, LoadedDataset } from "../persistence/types";
-import { createPersistStore } from "../storage/createPersistStore";
+import { createPersistence, createPersistStore } from "@graphdown/persistence";
+import type { ImportReport, LoadedDataset } from "@graphdown/persistence";
 import { buildImportReport } from "./importReport";
 import { openDatasetSession, type SnapshotIndex } from "./openDatasetSession";
 
@@ -241,7 +240,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     setError(undefined);
     setProgress({ phase: "idle" });
     try {
-      const dataset = await persistence.loadActiveDataset();
+      const dataset = await persistence.loadActive();
       if (loadActiveId.current !== runId) {
         return;
       }
@@ -282,7 +281,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     }
     const debugHandle = {
       clearPersistence: async () => {
-        await persistence.clearActiveDataset();
+        await persistence.clearActive();
         setActiveDataset(undefined);
         setError(undefined);
         setStatus("ready");
@@ -337,7 +336,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         source: "import",
         importReport
       };
-      await persistence.saveActiveDataset({ meta, datasetSnapshot });
+      await persistence.saveActive({ meta, snapshot: datasetSnapshot });
       setActiveDataset({ meta, datasetSnapshot, runtimeApiV1, index });
     },
     [persistence]
@@ -481,7 +480,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
     if (!persistence) {
       return;
     }
-    await persistence.clearActiveDataset();
+    await persistence.clearActive();
     setActiveDataset(undefined);
     setError(undefined);
     setStatus("ready");
@@ -509,9 +508,9 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
         } as const;
       }
       const nextMeta = { ...activeDataset.meta, updatedAt: Date.now() };
-      await persistence.saveActiveDataset({
+      await persistence.saveActive({
         meta: nextMeta,
-        datasetSnapshot: nextSnapshot
+        snapshot: nextSnapshot
       });
       setActiveDataset({
         meta: nextMeta,

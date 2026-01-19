@@ -1,8 +1,17 @@
 import "fake-indexeddb/auto";
 import { render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
+import { vi } from "vitest";
 import { appRoutes } from "../App";
 import { DatasetProvider } from "../state/DatasetContext";
+
+vi.mock("@graphdown/persistence", async (importOriginal) => {
+  const actual = (await importOriginal()) as typeof import("@graphdown/persistence");
+  return {
+    ...actual,
+    createPersistStore: () => new actual.MemoryPersistStore()
+  };
+});
 
 describe("App routes", () => {
   it("renders navigation links", async () => {

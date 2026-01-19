@@ -1,4 +1,4 @@
-import { IndexedDbStore } from "./IndexedDbStore";
+import { createIndexedDbPersistStore } from "./indexedDbStore";
 import type { PersistStore } from "./PersistStore";
 
 type Logger = {
@@ -26,7 +26,7 @@ export function createPersistStore(options?: CreatePersistStoreOptions): Persist
     throw err;
   }
 
-  return new IndexedDbStore({
+  return createIndexedDbPersistStore({
     dbName: options?.dbName,
     storeName: options?.storeName
   });
