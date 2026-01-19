@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { strToU8, zipSync } from "fflate";
+import { isImportError } from "@graphdown/io";
 
 vi.mock("@graphdown/core", async () => {
   const actual = await vi.importActual<typeof import("@graphdown/core")>("@graphdown/core");
@@ -25,6 +26,18 @@ describe("readZipSnapshotFromBytes plugin parse failures", () => {
       "plugins/demo/plugin.md": bytes(manifestText)
     });
 
-    expect(() => readZipSnapshotFromBytes(zipBytes)).toThrow(/Plugin manifest parse failed/);
+    let caught: unknown;
+    try {
+      readZipSnapshotFromBytes(zipBytes);
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("zip");
+      expect(caught.info.code).toBe("invalid_input");
+      expect(caught.info.message).toMatch(/Plugin manifest parse failed/i);
+    }
   });
 });

@@ -91,6 +91,25 @@ describe("loadGitHubSnapshot", () => {
     expect(rawCall?.[0]).toContain("/main/types/note.md");
   });
 
+  it("wraps network failures in a structured ImportError", async () => {
+    const fetchMock = vi.fn();
+    fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+    let caught: unknown;
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("github");
+      expect(caught.info.code).toBe("unknown");
+      expect(caught.info.message).toContain("Failed to fetch");
+    }
+  });
+
   it("includes blocks under blocks and reports ignored files", async () => {
     const fetchMock = vi.fn();
 

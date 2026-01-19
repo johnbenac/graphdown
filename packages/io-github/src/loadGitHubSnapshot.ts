@@ -1,4 +1,10 @@
-import { ImportError, selectSemanticSnapshotFiles, type ImportProgress, type ImportResult } from "@graphdown/io";
+import {
+  ImportError,
+  isImportError,
+  selectSemanticSnapshotFiles,
+  type ImportProgress,
+  type ImportResult
+} from "@graphdown/io";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
@@ -57,157 +63,169 @@ export async function loadGitHubSnapshot(input: {
   fetch?: typeof fetch;
   signal?: AbortSignal;
 }): Promise<ImportResult> {
-  const { owner, repo, ref, onProgress, signal } = input;
-  const fetchFn = input.fetch ?? fetch;
-
-  onProgress?.({ phase: "fetching_repo" });
-  const repoMetadata = await fetchJson<GitHubRepoMetadata>(
-    `${API_BASE}/repos/${owner}/${repo}`,
-    fetchFn,
-    signal
-  );
-  const resolvedRef = ref ?? repoMetadata.default_branch ?? "main";
-
-  onProgress?.({ phase: "listing_files" });
-  const treeResponse = await fetchJson<GitHubTreeResponse>(
-    `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`,
-    fetchFn,
-    signal
-  );
-
-  const treePaths = new Set<string>();
-  const stage1Files: Array<{
-    repoPath: string;
-    snapshotPath: string;
-    kind: "block" | "markdown";
-  }> = [];
-  const ignored = new Set<string>();
-
-  for (const entry of treeResponse.tree) {
-    if (entry.type !== "blob") {
-      continue;
-    }
-    const snapshotPath = entry.path;
-    if (!snapshotPath) {
-      continue;
-    }
-    treePaths.add(snapshotPath);
-    if (snapshotPath.startsWith("blocks/")) {
-      stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "block" });
-      continue;
-    }
-    if (isMarkdownFile(snapshotPath)) {
-      // Might be Graphdown markdown; decide after download via isRecordFileBytes.
-      stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
-      continue;
-    }
-    ignored.add(snapshotPath);
-  }
-  const entries = new Map<string, Uint8Array>();
-
-  let total = stage1Files.length;
-  onProgress?.({ phase: "downloading_files", completed: 0, total });
-
-  let completed = 0;
-  for (const file of stage1Files) {
-    const response = await fetchFn(
-      `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`,
-      { signal }
-    );
-    if (!response.ok) {
-      const message = await readResponseMessage(response);
-      throw new GitHubImportError(mapGitHubError(response, message));
-    }
-    const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    entries.set(file.snapshotPath, bytes);
-    completed += 1;
-    onProgress?.({
-      phase: "downloading_files",
-      completed,
-      total,
-      detail: file.snapshotPath
-    });
-  }
-
-  let pass1;
   try {
-    pass1 = selectSemanticSnapshotFiles(entries);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new ImportError({ source: "github", code: "invalid_input", message });
-  }
-  for (const path of pass1.ignored) {
-    ignored.add(path);
-  }
+    const { owner, repo, ref, onProgress, signal } = input;
+    const fetchFn = input.fetch ?? fetch;
 
-  const stage2FetchList: string[] = [];
-  const missingInTree: string[] = [];
-  for (const bundlePath of pass1.missingPluginBundlePaths) {
-    if (treePaths.has(bundlePath)) {
-      stage2FetchList.push(bundlePath);
-    } else {
-      missingInTree.push(bundlePath);
+    onProgress?.({ phase: "fetching_repo" });
+    const repoMetadata = await fetchJson<GitHubRepoMetadata>(
+      `${API_BASE}/repos/${owner}/${repo}`,
+      fetchFn,
+      signal
+    );
+    const resolvedRef = ref ?? repoMetadata.default_branch ?? "main";
+
+    onProgress?.({ phase: "listing_files" });
+    const treeResponse = await fetchJson<GitHubTreeResponse>(
+      `${API_BASE}/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`,
+      fetchFn,
+      signal
+    );
+
+    const treePaths = new Set<string>();
+    const stage1Files: Array<{
+      repoPath: string;
+      snapshotPath: string;
+      kind: "block" | "markdown";
+    }> = [];
+    const ignored = new Set<string>();
+
+    for (const entry of treeResponse.tree) {
+      if (entry.type !== "blob") {
+        continue;
+      }
+      const snapshotPath = entry.path;
+      if (!snapshotPath) {
+        continue;
+      }
+      treePaths.add(snapshotPath);
+      if (snapshotPath.startsWith("blocks/")) {
+        stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "block" });
+        continue;
+      }
+      if (isMarkdownFile(snapshotPath)) {
+        // Might be Graphdown markdown; decide after download via isRecordFileBytes.
+        stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
+        continue;
+      }
+      ignored.add(snapshotPath);
     }
-  }
+    const entries = new Map<string, Uint8Array>();
 
-  if (missingInTree.length > 0) {
+    let total = stage1Files.length;
+    onProgress?.({ phase: "downloading_files", completed: 0, total });
+
+    let completed = 0;
+    for (const file of stage1Files) {
+      const response = await fetchFn(
+        `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${file.repoPath}`,
+        { signal }
+      );
+      if (!response.ok) {
+        const message = await readResponseMessage(response);
+        throw new GitHubImportError(mapGitHubError(response, message));
+      }
+      const buffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      entries.set(file.snapshotPath, bytes);
+      completed += 1;
+      onProgress?.({
+        phase: "downloading_files",
+        completed,
+        total,
+        detail: file.snapshotPath
+      });
+    }
+
+    let pass1;
+    try {
+      pass1 = selectSemanticSnapshotFiles(entries);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new ImportError({ source: "github", code: "invalid_input", message });
+    }
+    for (const path of pass1.ignored) {
+      ignored.add(path);
+    }
+
+    const stage2FetchList: string[] = [];
+    const missingInTree: string[] = [];
+    for (const bundlePath of pass1.missingPluginBundlePaths) {
+      if (treePaths.has(bundlePath)) {
+        stage2FetchList.push(bundlePath);
+      } else {
+        missingInTree.push(bundlePath);
+      }
+    }
+
+    if (missingInTree.length > 0) {
+      throw new ImportError({
+        source: "github",
+        code: "missing_files",
+        message: `Missing plugin bundle files: ${missingInTree.join(", ")}`,
+        missingPaths: missingInTree
+      });
+    }
+
+    if (stage2FetchList.length > 0) {
+      total += stage2FetchList.length;
+      onProgress?.({ phase: "downloading_files", completed, total });
+    }
+
+    for (const bundlePath of stage2FetchList) {
+      const response = await fetchFn(
+        `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${bundlePath}`,
+        { signal }
+      );
+      if (!response.ok) {
+        const message = await readResponseMessage(response);
+        throw new GitHubImportError(mapGitHubError(response, message));
+      }
+      const buffer = await response.arrayBuffer();
+      entries.set(bundlePath, new Uint8Array(buffer));
+      ignored.delete(bundlePath);
+      completed += 1;
+      onProgress?.({
+        phase: "downloading_files",
+        completed,
+        total,
+        detail: bundlePath
+      });
+    }
+
+    let pass2;
+    try {
+      pass2 = selectSemanticSnapshotFiles(entries);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new ImportError({ source: "github", code: "invalid_input", message });
+    }
+    if (pass2.missingPluginBundlePaths.length > 0) {
+      throw new ImportError({
+        source: "github",
+        code: "missing_files",
+        message: `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`,
+        missingPaths: pass2.missingPluginBundlePaths
+      });
+    }
+
+    for (const path of pass2.ignored) {
+      ignored.add(path);
+    }
+    for (const path of pass2.snapshot.files.keys()) {
+      ignored.delete(path);
+    }
+
+    return { snapshot: pass2.snapshot, ignored: [...ignored].sort((a, b) => a.localeCompare(b)) };
+  } catch (err) {
+    if (isImportError(err)) {
+      throw err;
+    }
+    const message = err instanceof Error ? err.message : String(err);
     throw new ImportError({
       source: "github",
-      code: "missing_files",
-      message: `Missing plugin bundle files: ${missingInTree.join(", ")}`,
-      missingPaths: missingInTree
+      code: "unknown",
+      message
     });
   }
-
-  if (stage2FetchList.length > 0) {
-    total += stage2FetchList.length;
-    onProgress?.({ phase: "downloading_files", completed, total });
-  }
-
-  for (const bundlePath of stage2FetchList) {
-    const response = await fetchFn(
-      `${RAW_BASE}/${owner}/${repo}/${resolvedRef}/${bundlePath}`,
-      { signal }
-    );
-    if (!response.ok) {
-      const message = await readResponseMessage(response);
-      throw new GitHubImportError(mapGitHubError(response, message));
-    }
-    const buffer = await response.arrayBuffer();
-    entries.set(bundlePath, new Uint8Array(buffer));
-    ignored.delete(bundlePath);
-    completed += 1;
-    onProgress?.({
-      phase: "downloading_files",
-      completed,
-      total,
-      detail: bundlePath
-    });
-  }
-
-  let pass2;
-  try {
-    pass2 = selectSemanticSnapshotFiles(entries);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new ImportError({ source: "github", code: "invalid_input", message });
-  }
-  if (pass2.missingPluginBundlePaths.length > 0) {
-    throw new ImportError({
-      source: "github",
-      code: "missing_files",
-      message: `Missing plugin bundle files: ${pass2.missingPluginBundlePaths.join(", ")}`,
-      missingPaths: pass2.missingPluginBundlePaths
-    });
-  }
-
-  for (const path of pass2.ignored) {
-    ignored.add(path);
-  }
-  for (const path of pass2.snapshot.files.keys()) {
-    ignored.delete(path);
-  }
-
-  return { snapshot: pass2.snapshot, ignored: [...ignored].sort((a, b) => a.localeCompare(b)) };
 }
