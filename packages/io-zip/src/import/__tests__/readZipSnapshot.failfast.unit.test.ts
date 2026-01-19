@@ -43,7 +43,19 @@ describe("readZipSnapshotFromBytes fail-fast rules", () => {
       "a\\b.txt": bytes("two")
     });
 
-    expect(() => readZipSnapshotFromBytes(zipBytes)).toThrow(/collision/i);
+    let caught: unknown;
+    try {
+      readZipSnapshotFromBytes(zipBytes);
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("zip");
+      expect(caught.info.code).toBe("invalid_input");
+      expect(caught.info.message).toMatch(/collision/i);
+    }
   });
 
   it("returns ignored paths in deterministic order", () => {
