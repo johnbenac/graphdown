@@ -4,13 +4,16 @@ import {
   encodePersistedActiveDatasetV1,
   PERSISTED_ACTIVE_DATASET_VERSION
 } from "../persistedActiveDataset";
-import { serializeDatasetSnapshotV1 } from "../../codec/snapshotCodec";
+
+type SerializedDatasetSnapshotV1 = {
+  files: Array<[string, Uint8Array]>;
+};
 
 describe("persisted active dataset schema", () => {
   it("encodes and decodes the same value", () => {
-    const snapshot = serializeDatasetSnapshotV1({
-      files: new Map([["types/note.md", Uint8Array.from([1, 2, 3])]])
-    });
+    const snapshot: SerializedDatasetSnapshotV1 = {
+      files: [["types/note.md", Uint8Array.from([1, 2, 3])]]
+    };
     const meta = { id: "dataset-1", createdAt: 1, updatedAt: 2 };
 
     const encoded = encodePersistedActiveDatasetV1({ snapshot, meta });
