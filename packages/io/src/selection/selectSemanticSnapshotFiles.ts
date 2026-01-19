@@ -1,5 +1,3 @@
-import type { TextDecoder as UtilTextDecoder } from "node:util";
-
 import {
   collectDeclaredPluginBundleRelPaths,
   isPluginManifestCandidateBytes,
@@ -9,7 +7,16 @@ import {
   type DatasetSnapshot
 } from "@graphdown/core";
 
-declare const TextDecoder: typeof UtilTextDecoder;
+// Keep @graphdown/io portable: do not import node:util types.
+// Type-only node imports can leak into consumer type environments / generated .d.ts.
+type TextDecoderCtor = new (
+  label?: string,
+  options?: { fatal?: boolean; ignoreBOM?: boolean }
+) => { decode(input?: Uint8Array): string };
+
+function getTextDecoderCtor(): TextDecoderCtor | undefined {
+  return (globalThis as unknown as { TextDecoder?: TextDecoderCtor }).TextDecoder;
+}
 
 export type SemanticSelectionResult = {
   snapshot: DatasetSnapshot;
@@ -20,10 +27,11 @@ export type SemanticSelectionResult = {
 };
 
 function decodeUtf8Strict(bytes: Uint8Array, filePath: string): string {
-  if (typeof TextDecoder === "undefined") {
+  const TextDecoderImpl = getTextDecoderCtor();
+  if (!TextDecoderImpl) {
     throw new Error(`TextDecoder is not available for plugin manifest ${filePath}`);
   }
-  const decoder = new TextDecoder("utf-8", { fatal: true });
+  const decoder = new TextDecoderImpl("utf-8", { fatal: true });
   try {
     return decoder.decode(bytes);
   } catch (error) {
