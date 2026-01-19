@@ -131,6 +131,9 @@ function isAllowedTestName(fileName) {
 function checkGeneralTestNaming() {
   walk(repoRoot, (fullPath) => {
     const fileName = path.basename(fullPath);
+    if (fileName === "tsconfig.test.json") {
+      return;
+    }
     if (!/\.test\./.test(fileName)) {
       return;
     }
