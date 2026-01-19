@@ -1,9 +1,10 @@
 import type { CommitPlan } from "./commitPlan";
-import { DuplicateCommitPathError, VcsApplyNotImplementedError } from "./errors";
+import { VcsApplyNotImplementedError } from "./errors";
 
 export type { CommitFileOp, CommitPlan, RelPath } from "./commitPlan";
 export { planGraphdownCommit } from "./commitPlan";
-export { DuplicateCommitPathError, VcsApplyNotImplementedError } from "./errors";
+export { VcsApplyNotImplementedError };
+export { DuplicateCommitPathError } from "./errors";
 
 export type VcsAdapter = Record<string, never>;
 
