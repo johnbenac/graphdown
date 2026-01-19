@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const root = process.cwd();
 
@@ -89,6 +90,37 @@ for (const importRoot of importRoots) {
         errors.push(`Forbidden deep import in ${path.relative(root, file)}: ${entry.spec}`);
       }
     }
+  }
+}
+
+function listTrackedSourceFiles() {
+  const output = execSync('git ls-files', { encoding: 'utf8' }).trim();
+  if (!output) {
+    return [];
+  }
+  return output
+    .split('\n')
+    .filter((file) => file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.cjs'))
+    .filter((file) => !file.startsWith('packages/io-zip/'));
+}
+
+const zipModuleName = ['ff', 'late'].join('');
+const zipModuleImportRegexes = [
+  new RegExp(`from\\s+['"]${zipModuleName}['"]`),
+  new RegExp(`require\\(\\s*['"]${zipModuleName}['"]\\s*\\)`)
+];
+const zipModuleViolations = [];
+for (const file of listTrackedSourceFiles()) {
+  const fullPath = path.join(root, file);
+  const text = fs.readFileSync(fullPath, 'utf8');
+  if (zipModuleImportRegexes.some((regex) => regex.test(text))) {
+    zipModuleViolations.push(file);
+  }
+}
+
+if (zipModuleViolations.length > 0) {
+  for (const file of zipModuleViolations) {
+    errors.push(`Forbidden ${zipModuleName} import outside packages/io-zip: ${file}`);
   }
 }
 
