@@ -30,7 +30,7 @@ afterEach(async () => {
   dbName = "";
 });
 
-describe("IndexedDbStore integration", () => {
+describe("IndexedDbStore", () => {
   it("round-trips values", async () => {
     dbName = makeDbName("indexeddb-store");
     const store = new IndexedDbStore({ dbName });
