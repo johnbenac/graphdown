@@ -1,5 +1,6 @@
 import type { DatasetSnapshot } from "@graphdown/core";
 import { toBytes } from "./bytes";
+import { DuplicateCommitPathError } from "./errors";
 import { normalizeRelPath } from "./path";
 
 export type RelPath = string & { readonly __brand: "RelPath" };
@@ -29,14 +30,40 @@ export function planGraphdownCommit(renderResult: {
 export function planGraphdownCommit(renderResult: {
   files: Map<string, Uint8Array | string>;
 }): CommitPlan {
-  const ops: CommitFileOp[] = [];
+  const grouped = new Map<
+    string,
+    { rawPath: string; bytes: Uint8Array }[]
+  >();
 
-  for (const [path, contents] of renderResult.files.entries()) {
-    const normalized = normalizeRelPath(path);
+  for (const [rawPath, contents] of renderResult.files.entries()) {
+    const normalized = normalizeRelPath(rawPath);
+    const key = normalized as string;
+    const entry = { rawPath, bytes: toBytes(contents) };
+    const existing = grouped.get(key);
+    if (existing) {
+      existing.push(entry);
+    } else {
+      grouped.set(key, [entry]);
+    }
+  }
+
+  const duplicateKeys = [...grouped.entries()]
+    .filter(([, entries]) => entries.length > 1)
+    .map(([key]) => key)
+    .sort();
+
+  if (duplicateKeys.length > 0) {
+    const duplicateKey = duplicateKeys[0]!;
+    const rawPaths = grouped.get(duplicateKey)!.map((entry) => entry.rawPath);
+    throw new DuplicateCommitPathError(duplicateKey as RelPath, rawPaths);
+  }
+
+  const ops: CommitFileOp[] = [];
+  for (const [path, entries] of grouped.entries()) {
     ops.push({
       kind: "write",
-      path: normalized,
-      bytes: toBytes(contents)
+      path: path as RelPath,
+      bytes: entries[0]!.bytes
     });
   }
 
