@@ -69,6 +69,35 @@ describe("loadGitHubSnapshot", () => {
     }
   });
 
+  it("throws a structured error when the GitHub tree listing is truncated", async () => {
+    const fetchMock = vi.fn();
+
+    fetchMock
+      // Repo metadata
+      .mockResolvedValueOnce(jsonResponse({ default_branch: "main" }))
+      // Tree listing (truncated)
+      .mockResolvedValueOnce(
+        jsonResponse({
+          truncated: true,
+          tree: []
+        })
+      );
+
+    let caught: unknown;
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("github");
+      expect(caught.info.code).toBe("unknown");
+      expect(caught.info.message).toMatch(/truncated/i);
+    }
+  });
+
   it("GH-002: falls back to main when default_branch is missing", async () => {
     const fetchMock = vi.fn();
 
