@@ -3,6 +3,20 @@
 
 ### Bug Fixes
 
+* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphdown/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
+* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphdown/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+
+
+### Bug Fixes
+
 * change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphdown/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
 * normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
