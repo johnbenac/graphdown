@@ -35,6 +35,8 @@ describe("DatasetContext GitHub import", () => {
       </DatasetProvider>
     );
 
+    await waitFor(() => expect(ctx).not.toBeNull());
+
     await act(async () => {
       await ctx?.importDatasetFromGitHub("https://github.com/owner/repo");
     });
@@ -64,6 +66,8 @@ describe("DatasetContext GitHub import", () => {
         <TestHarness onReady={(value) => (ctx = value)} />
       </DatasetProvider>
     );
+
+    await waitFor(() => expect(ctx).not.toBeNull());
 
     await act(async () => {
       await ctx?.importDatasetFromGitHub("https://github.com/owner/repo");
@@ -141,6 +145,8 @@ describe("DatasetContext GitHub import", () => {
       </DatasetProvider>
     );
 
+    await waitFor(() => expect(ctx).not.toBeNull());
+
     await act(async () => {
       await ctx?.importDatasetFromGitHub("https://github.com/owner/repo");
     });
@@ -178,6 +184,8 @@ describe("DatasetContext zip import", () => {
       </DatasetProvider>
     );
 
+    await waitFor(() => expect(ctx).not.toBeNull());
+
     await act(async () => {
       await ctx?.importDatasetZip(file);
     });
@@ -209,6 +217,8 @@ describe("DatasetContext persistence requirements", () => {
         <TestHarness onReady={(value) => (ctx = value)} />
       </DatasetProvider>
     );
+
+    await waitFor(() => expect(ctx).not.toBeNull());
 
     await waitFor(() => {
       expect(ctx?.status).toBe("error");
