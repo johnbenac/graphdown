@@ -2,7 +2,21 @@ import { describe, expect, it } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
 import { createPersistence } from "../createPersistence";
 import { KEY } from "../keys";
-import { MemoryPersistStore } from "../store/memoryStore";
+
+function createTestStore() {
+  const data = new Map<string, unknown>();
+  return {
+    async get(key: string): Promise<unknown | undefined> {
+      return data.get(key);
+    },
+    async set(key: string, value: unknown): Promise<void> {
+      data.set(key, value);
+    },
+    async delete(key: string): Promise<void> {
+      data.delete(key);
+    }
+  };
+}
 
 const sampleSnapshot: DatasetSnapshot = {
   files: new Map([
@@ -13,14 +27,14 @@ const sampleSnapshot: DatasetSnapshot = {
 
 describe("createPersistence", () => {
   it("returns null when no active dataset exists", async () => {
-    const store = new MemoryPersistStore();
+    const store = createTestStore();
     const persistence = createPersistence({ store });
 
     await expect(persistence.loadActive()).resolves.toBeNull();
   });
 
   it("saves and loads the active dataset", async () => {
-    const store = new MemoryPersistStore();
+    const store = createTestStore();
     const persistence = createPersistence({ store });
 
     await persistence.saveActive({
@@ -34,7 +48,7 @@ describe("createPersistence", () => {
   });
 
   it("clears the active dataset", async () => {
-    const store = new MemoryPersistStore();
+    const store = createTestStore();
     const persistence = createPersistence({ store });
 
     await persistence.saveActive({
@@ -48,7 +62,7 @@ describe("createPersistence", () => {
   });
 
   it("clears corrupt data when loading", async () => {
-    const store = new MemoryPersistStore();
+    const store = createTestStore();
     const persistence = createPersistence({ store });
 
     await store.set(KEY.activeMeta, { id: "dataset-1", createdAt: 1, updatedAt: 2 });
