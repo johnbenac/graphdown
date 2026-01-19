@@ -10,6 +10,7 @@ const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
 const ioIndex = path.resolve(__dirname, "../../packages/io/src/index.ts");
 const ioGitHubIndex = path.resolve(__dirname, "../../packages/io-github/src/index.ts");
 const ioZipIndex = path.resolve(__dirname, "../../packages/io-zip/src/index.ts");
+const persistenceIndex = path.resolve(__dirname, "../../packages/persistence/src/index.ts");
 const runtimeIndex = path.resolve(__dirname, "../../packages/runtime/src/index.ts");
 
 function normalizeBase(base: string | undefined): string {
@@ -32,6 +33,7 @@ export default defineConfig({
       { find: /^@graphdown\/io$/, replacement: ioIndex },
       { find: /^@graphdown\/io-github$/, replacement: ioGitHubIndex },
       { find: /^@graphdown\/io-zip$/, replacement: ioZipIndex },
+      { find: /^@graphdown\/persistence$/, replacement: persistenceIndex },
       { find: /^@graphdown\/runtime$/, replacement: runtimeIndex }
     ]
   },

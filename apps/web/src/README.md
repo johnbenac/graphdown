@@ -44,10 +44,10 @@ The routes themselves live in `routes/` and are rendered through the
 - `@graphdown/runtime` - runtime session API (read model).
 - `features/export/` - downloading dataset exports from the browser.
 - `import/` - zip parsing + GitHub import helpers.
-- `persistence/` - snapshot serialization and persistence orchestration.
+- `@graphdown/persistence` - snapshot serialization and persistence orchestration.
 - `routes/` - route-level screens and navigation flows.
 - `state/` - dataset context, import progress, and import reports.
-- `storage/` - IndexedDB-backed persistence plus the test-only memory store.
+- `@graphdown/persistence` - IndexedDB-backed persistence plus the test-only memory store.
 - `utils/` - small UI-friendly helpers (ex: wiki link helpers for refs).
 
 ## Testing entry points

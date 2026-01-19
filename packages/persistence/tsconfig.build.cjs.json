@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+    "outDir": "../../.ci/persistence-dist-cjs",
+    "tsBuildInfoFile": "../../.ci/persistence-dist-cjs/.tsbuildinfo",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": false,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/__fixtures__/**",
+    "src/tests/**",
+    "src/fixtures/**",
+    "src/runtime/tests/**",
+    "src/**/*.test.*",
+    "src/**/*.spec.*"
+  ]
+}

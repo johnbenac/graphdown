@@ -10,6 +10,16 @@ type StoreRecord = {
   value: unknown;
 };
 
+type Logger = {
+  error: (message: string, error?: unknown) => void;
+};
+
+type CreateIndexedDbPersistStoreOptions = {
+  logger?: Logger;
+  dbName?: string;
+  storeName?: string;
+};
+
 const trackedDbNames = new Set<string>();
 
 export function listTrackedDbNames(): string[] {
@@ -43,6 +53,29 @@ export async function deleteTrackedDbNames(): Promise<void> {
         })
     )
   );
+}
+
+export function createIndexedDbPersistStore(
+  options?: CreateIndexedDbPersistStoreOptions
+): PersistStore {
+  const logger = options?.logger ?? console;
+
+  if (typeof indexedDB === "undefined") {
+    const err = new Error(
+      [
+        "Graphdown Web requires IndexedDB for persistence, but IndexedDB is unavailable.",
+        "",
+        "This environment is not supported (e.g. restricted webview, storage disabled, or non-browser runtime)."
+      ].join("\n")
+    );
+    logger.error(err.message, err);
+    throw err;
+  }
+
+  return new IndexedDbStore({
+    dbName: options?.dbName,
+    storeName: options?.storeName
+  });
 }
 
 export class IndexedDbStore implements PersistStore {
@@ -127,25 +160,30 @@ export class IndexedDbStore implements PersistStore {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(this.storeName, mode);
       const store = transaction.objectStore(this.storeName);
+      let result: T;
       const request = fn(store);
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => {
+        result = request.result;
+      };
       request.onerror = () => reject(request.error);
+      transaction.oncomplete = () => resolve(result);
       transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 
-  async get<T>(key: string): Promise<T | undefined> {
+  async get(key: string): Promise<unknown | undefined> {
     const record = await this.withStore<StoreRecord | undefined>("readonly", (store) =>
       store.get(key)
     );
-    return record?.value as T | undefined;
+    return record?.value;
   }
 
-  async set<T>(key: string, value: T): Promise<void> {
+  async set(key: string, value: unknown): Promise<void> {
     await this.withStore("readwrite", (store) => store.put({ key, value }));
   }
 
-  async del(key: string): Promise<void> {
+  async delete(key: string): Promise<void> {
     await this.withStore("readwrite", (store) => store.delete(key));
   }
 
