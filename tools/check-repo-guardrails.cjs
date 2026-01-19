@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const root = process.cwd();
 
@@ -73,6 +74,38 @@ function isForbiddenImport(spec) {
     return true;
   }
   return false;
+}
+
+function collectTrackedFiles() {
+  const output = execSync('git ls-files', { encoding: 'utf8' });
+  return output.split('\n').filter(Boolean);
+}
+
+const forbiddenLibName = 'ff' + 'late';
+const forbiddenImportDouble = `from "${forbiddenLibName}"`;
+const forbiddenImportSingle = `from '${forbiddenLibName}'`;
+const forbiddenRequireDouble = `require("${forbiddenLibName}")`;
+const forbiddenRequireSingle = `require('${forbiddenLibName}')`;
+
+function hasForbiddenZipLibImport(text) {
+  return (
+    text.includes(forbiddenImportDouble) ||
+    text.includes(forbiddenImportSingle) ||
+    text.includes(forbiddenRequireDouble) ||
+    text.includes(forbiddenRequireSingle)
+  );
+}
+
+const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.cjs']);
+const trackedFiles = collectTrackedFiles().filter((file) => sourceExtensions.has(path.extname(file)));
+for (const file of trackedFiles) {
+  if (file.startsWith('packages/io-zip/')) {
+    continue;
+  }
+  const contents = fs.readFileSync(path.join(root, file), 'utf8');
+  if (hasForbiddenZipLibImport(contents)) {
+    errors.push(`Forbidden ${forbiddenLibName} import outside io-zip: ${file}`);
+  }
 }
 
 const importRoots = ['apps/web/src', 'packages/runtime/src'];

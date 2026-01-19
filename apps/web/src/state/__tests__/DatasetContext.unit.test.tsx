@@ -1,10 +1,14 @@
 import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
-import { strToU8, zipSync } from "fflate";
 import { useEffect } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { DatasetSnapshot } from "@graphdown/core";
+import { buildDatasetZipBytes } from "@graphdown/io-zip";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
+
+const enc = new TextEncoder();
+const toBytes = (text: string) => enc.encode(text);
 
 function TestHarness({ onReady }: { onReady: (ctx: DatasetContextValue) => void }) {
   const ctx = useDataset();
@@ -159,11 +163,12 @@ describe("DatasetContext GitHub import", () => {
 
 describe("DatasetContext zip import", () => {
   it("VAL-001: invalid datasets are reported as dataset_invalid", async () => {
-    const zipBytes = zipSync({
-      "records/note/one.md": new Uint8Array(
-        strToU8("---\ntypeId: note\nrecordId: one\nfields: {}\n---\nBody")
-      )
-    });
+    const snapshot: DatasetSnapshot = {
+      files: new Map([
+        ["records/note/one.md", toBytes("---\ntypeId: note\nrecordId: one\nfields: {}\n---\nBody")]
+      ])
+    };
+    const zipBytes = buildDatasetZipBytes(snapshot);
     const file = {
       name: "demo.zip",
       arrayBuffer: async () => Uint8Array.from(zipBytes).buffer
