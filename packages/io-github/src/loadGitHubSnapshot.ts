@@ -21,6 +21,7 @@ type GitHubTreeEntry = {
 
 type GitHubTreeResponse = {
   tree: GitHubTreeEntry[];
+  truncated?: boolean;
 };
 
 async function readResponseMessage(response: Response): Promise<string | null> {
@@ -81,6 +82,14 @@ export async function loadGitHubSnapshot(input: {
       fetchFn,
       signal
     );
+    if (treeResponse.truncated) {
+      throw new ImportError({
+        source: "github",
+        code: "unknown",
+        message:
+          "GitHub repository file listing was truncated (repo too large to import via the Trees API)."
+      });
+    }
 
     const treePaths = new Set<string>();
     const stage1Files: Array<{
