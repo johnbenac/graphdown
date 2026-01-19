@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const root = process.cwd();
 
@@ -89,6 +90,31 @@ for (const importRoot of importRoots) {
         errors.push(`Forbidden deep import in ${path.relative(root, file)}: ${entry.spec}`);
       }
     }
+  }
+}
+
+function getTrackedFiles() {
+  try {
+    return execSync('git ls-files', { encoding: 'utf8' })
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+  } catch (error) {
+    errors.push(`Failed to list tracked files for guardrails: ${error.message}`);
+    return [];
+  }
+}
+
+const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.cjs']);
+const fflateRegex = /(?:from\s+['"]fflate['"]|require\(\s*['"]fflate['"]\s*\))/;
+const trackedFiles = getTrackedFiles()
+  .filter((file) => sourceExtensions.has(path.extname(file)))
+  .filter((file) => !file.startsWith('packages/io-zip/'));
+
+for (const file of trackedFiles) {
+  const text = fs.readFileSync(path.join(root, file), 'utf8');
+  if (fflateRegex.test(text)) {
+    errors.push(`Forbidden fflate import outside packages/io-zip: ${file}`);
   }
 }
 
