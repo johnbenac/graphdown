@@ -230,4 +230,23 @@ describe("loadGitHubSnapshot", () => {
       );
     }
   });
+
+  it("wraps network failures as structured errors", async () => {
+    const fetchMock = vi.fn();
+    fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+    let caught: unknown;
+    try {
+      await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
+    } catch (err) {
+      caught = err;
+    }
+
+    expect(isImportError(caught)).toBe(true);
+    if (isImportError(caught)) {
+      expect(caught.info.source).toBe("github");
+      expect(caught.info.code).toBe("unknown");
+      expect(caught.info.message).toMatch(/Failed to fetch/i);
+    }
+  });
 });
