@@ -1,6 +1,6 @@
 import type { PersistStore } from "./PersistStore";
 
-type IndexedDbStoreOptions = {
+type IndexedDbPersistStoreOptions = {
   dbName?: string;
   storeName?: string;
 };
@@ -45,12 +45,12 @@ export async function deleteTrackedDbNames(): Promise<void> {
   );
 }
 
-export class IndexedDbStore implements PersistStore {
+export class IndexedDbPersistStore implements PersistStore {
   private dbPromise: Promise<IDBDatabase> | null = null;
   private readonly dbName: string;
   private readonly storeName: string;
 
-  constructor(options?: IndexedDbStoreOptions) {
+  constructor(options?: IndexedDbPersistStoreOptions) {
     this.dbName = options?.dbName ?? "graphdown";
     this.storeName = options?.storeName ?? "kv";
     trackedDbNames.add(this.dbName);
@@ -134,18 +134,18 @@ export class IndexedDbStore implements PersistStore {
     });
   }
 
-  async get<T>(key: string): Promise<T | undefined> {
+  async get(key: string): Promise<unknown | undefined> {
     const record = await this.withStore<StoreRecord | undefined>("readonly", (store) =>
       store.get(key)
     );
-    return record?.value as T | undefined;
+    return record?.value as unknown | undefined;
   }
 
-  async set<T>(key: string, value: T): Promise<void> {
+  async set(key: string, value: unknown): Promise<void> {
     await this.withStore("readwrite", (store) => store.put({ key, value }));
   }
 
-  async del(key: string): Promise<void> {
+  async delete(key: string): Promise<void> {
     await this.withStore("readwrite", (store) => store.delete(key));
   }
 
@@ -161,4 +161,13 @@ export class IndexedDbStore implements PersistStore {
     }
     return stringKeys.filter((key) => key.startsWith(prefix));
   }
+}
+
+export function createIndexedDbPersistStore(
+  options?: IndexedDbPersistStoreOptions
+): PersistStore {
+  if (typeof indexedDB === "undefined") {
+    throw new Error("IndexedDB is unavailable in this environment.");
+  }
+  return new IndexedDbPersistStore(options);
 }

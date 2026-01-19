@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { createRuntimeApiV1Mock } from "./testUtils/runtimeApiV1Mock";
-import { deleteTrackedDbNames } from "./storage/IndexedDbStore";
+import { deleteTrackedDbNames } from "@graphdown/persistence";
 
 let consoleWarnSpy: ReturnType<typeof vi.spyOn> | null = null;
 let consoleErrorSpy: ReturnType<typeof vi.spyOn> | null = null;

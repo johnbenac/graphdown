@@ -1,4 +1,4 @@
-import type { ImportReport } from "../persistence/types";
+import type { ImportReport } from "@graphdown/persistence";
 
 function WarningList({ title, sample }: { title: string; sample: string[] }) {
   if (!sample.length) {

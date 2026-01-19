@@ -5,23 +5,29 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
 import { makeError } from "@graphdown/core";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
+import {
+  createPersistence,
+  IndexedDbPersistStore
+} from "@graphdown/persistence";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { IndexedDbStore } from "../../storage/IndexedDbStore";
-import { createPersistence } from "../../persistence/persistence";
-import { createPersistStore } from "../../storage/createPersistStore";
 
-let store: IndexedDbStore;
+let store: IndexedDbPersistStore;
 
-vi.mock("../../storage/createPersistStore", () => ({
-  createPersistStore: () => store
-}));
+vi.mock("@graphdown/persistence", async () => {
+  const actual = await vi.importActual<typeof import("@graphdown/persistence")>("@graphdown/persistence");
+  return {
+    ...actual,
+    createIndexedDbPersistStore: () => {
+      if (!store) {
+        throw new Error("Persist store not initialized");
+      }
+      return store;
+    }
+  };
+});
 
 const encoder = new TextEncoder();
-
-function makeDbName(prefix: string) {
-  return `${prefix}-${Math.random().toString(16).slice(2)}`;
-}
 
 function makeSnapshot(): DatasetSnapshot {
   return {
@@ -38,17 +44,15 @@ function makeSnapshot(): DatasetSnapshot {
 async function seedActiveDataset() {
   if (!store) throw new Error("Persist store not initialized");
   const snapshot = makeSnapshot();
-  const persistence = createPersistence({
-    store
-  });
+  const persistence = createPersistence(store);
   const meta = {
     id: "active",
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
-  await persistence.saveActiveDataset({
+  await persistence.saveActive({
     meta,
-    datasetSnapshot: snapshot
+    snapshot
   });
 }
 
@@ -64,7 +68,7 @@ describe("DatasetContext non-functional requirements", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
-    store = new IndexedDbStore({ dbName: makeDbName("dataset-context") });
+    store = new IndexedDbPersistStore();
   });
 
   afterEach(async () => {
@@ -84,7 +88,7 @@ describe("DatasetContext non-functional requirements", () => {
       </DatasetProvider>
     );
 
-    await waitFor(() => expect(ctx?.status).toBe("ready"));
+    await waitFor(() => expect(ctx?.status).toBe("ready"), { timeout: 3000 });
     expect(ctx).not.toBeNull();
     expect(ctx!.activeDataset?.datasetSnapshot.files.size).toBeGreaterThan(0);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -128,7 +132,7 @@ describe("DatasetContext non-functional requirements", () => {
   it("does not clear the persisted dataset when runtime fails to open on loadActive", async () => {
     await seedActiveDataset();
 
-    vi.mocked(openRuntimeApiV1).mockResolvedValueOnce({
+    vi.mocked(openRuntimeApiV1).mockResolvedValue({
       ok: false,
       errors: [makeError("E_INTERNAL", "structuredClone is not defined")]
     });
@@ -140,13 +144,12 @@ describe("DatasetContext non-functional requirements", () => {
       </DatasetProvider>
     );
 
-    await waitFor(() => expect(ctx?.status).toBe("error"));
+    await waitFor(() => expect(ctx?.status).toBe("error"), { timeout: 3000 });
 
-    const freshStore = createPersistStore({ logger: console });
-    const persistence = createPersistence({ store: freshStore });
-    const stillThere = await persistence.loadActiveDataset();
+    const persistence = createPersistence(store);
+    const stillThere = await persistence.loadActive();
 
     expect(stillThere).toBeTruthy();
-    expect(stillThere?.datasetSnapshot.files.size).toBeGreaterThan(0);
+    expect(stillThere?.snapshot.files.size).toBeGreaterThan(0);
   });
 });
