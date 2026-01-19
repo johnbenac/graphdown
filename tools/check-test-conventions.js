@@ -134,6 +134,9 @@ function checkGeneralTestNaming() {
     if (!/\.test\./.test(fileName)) {
       return;
     }
+    if (!/\.(ts|tsx|js|jsx)$/.test(fileName)) {
+      return;
+    }
     if (!isAllowedTestName(fileName)) {
       violations.push({
         path: toPosix(path.relative(repoRoot, fullPath)),

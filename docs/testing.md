@@ -24,6 +24,14 @@ validity, plugin behavior across modules, roundtrips, etc.).
 
 **Naming:** `*.integration.test.ts`
 
+## Cross-package integration tests
+
+Cross-package integration tests that do not clearly “belong” to a single package/app live in:
+
+- `packages/integration-tests/src/__tests__/spec/`
+
+These tests must be named `*.integration.test.ts`.
+
 ## Governance tests
 
 **Purpose:** Spec traceability and policy/meta tests.
