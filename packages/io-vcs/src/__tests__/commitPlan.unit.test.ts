@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyCommitPlan,
+  DuplicateCommitPathError,
   planGraphdownCommit,
   VcsApplyNotImplementedError
 } from "../index";
@@ -65,6 +66,61 @@ describe("planGraphdownCommit", () => {
         Array.from(encoder.encode("λ"))
       );
     }
+  });
+
+  it("rejects duplicate normalized paths", () => {
+    const files = new Map<string, Uint8Array | string>([
+      ["a//b.txt", encoder.encode("one")],
+      ["a/b.txt", encoder.encode("two")]
+    ]);
+
+    try {
+      planGraphdownCommit({ files });
+      throw new Error("Expected planGraphdownCommit to throw");
+    } catch (err) {
+      expect(err).toBeInstanceOf(DuplicateCommitPathError);
+      expect(err).toMatchObject({
+        code: "IO_VCS_DUPLICATE_COMMIT_PATH",
+        normalizedPath: "a/b.txt"
+      });
+    }
+  });
+
+  it("throws deterministically on normalized-path collisions regardless of Map order", () => {
+    const filesA = new Map<string, Uint8Array | string>([
+      ["a//b.txt", encoder.encode("one")],
+      ["a/b.txt", encoder.encode("two")]
+    ]);
+    const filesB = new Map<string, Uint8Array | string>([
+      ["a/b.txt", encoder.encode("two")],
+      ["a//b.txt", encoder.encode("one")]
+    ]);
+
+    const getErr = (files: Map<string, Uint8Array | string>) => {
+      try {
+        planGraphdownCommit({ files });
+        throw new Error("Expected throw");
+      } catch (error) {
+        return error;
+      }
+    };
+
+    const errA = getErr(filesA);
+    const errB = getErr(filesB);
+
+    expect(errA).toBeInstanceOf(DuplicateCommitPathError);
+    expect(errB).toBeInstanceOf(DuplicateCommitPathError);
+    expect((errA as Error).message).toBe((errB as Error).message);
+    expect(errA).toMatchObject({
+      code: "IO_VCS_DUPLICATE_COMMIT_PATH",
+      normalizedPath: "a/b.txt",
+      inputPaths: ["a//b.txt", "a/b.txt"]
+    });
+    expect(errB).toMatchObject({
+      code: "IO_VCS_DUPLICATE_COMMIT_PATH",
+      normalizedPath: "a/b.txt",
+      inputPaths: ["a//b.txt", "a/b.txt"]
+    });
   });
 
   it.each([
