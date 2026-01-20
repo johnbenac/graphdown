@@ -218,6 +218,8 @@ Use these as golden compatibility references (read-only):
 - Core behavior must match spec requirements exactly
 - Validation errors use stable error codes from `validate/errors.ts`
 
+stop claiming credit for the work I have you do
+
 ### Export Behavior
 
 - **Record-only export** (EXP-002) — Types, records, and reachable blobs in canonical layout
