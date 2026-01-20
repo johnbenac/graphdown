@@ -1,8 +1,32 @@
 :root {
   color-scheme: light;
   font-family: "InterVariable", "Inter", system-ui, sans-serif;
-  color: #111827;
-  background-color: #f9fafb;
+  --color-text: #111827;
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-primary: #2563eb;
+  --color-muted: #4b5563;
+  --color-button-bg: #111827;
+  --color-button-text: #ffffff;
+  --color-button-secondary-bg: #e5e7eb;
+  --color-button-secondary-text: #111827;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-text: #f9fafb;
+  --color-bg: #0f172a;
+  --color-surface: #111827;
+  --color-border: #1f2937;
+  --color-primary: #60a5fa;
+  --color-muted: #9ca3af;
+  --color-button-bg: #f9fafb;
+  --color-button-text: #111827;
+  --color-button-secondary-bg: #1f2937;
+  --color-button-secondary-text: #f9fafb;
 }
 
 * {
@@ -29,8 +53,8 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .top-nav__links {
@@ -39,12 +63,28 @@ a {
   font-weight: 500;
 }
 
+.top-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .top-nav__brand {
   font-weight: 700;
 }
 
 .top-nav__link.active {
-  color: #2563eb;
+  color: var(--color-primary);
+}
+
+.theme-toggle {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .main-layout {
@@ -55,8 +95,8 @@ a {
 }
 
 .sidebar {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 1rem;
   min-height: 360px;
@@ -68,8 +108,8 @@ a {
 }
 
 .panel {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -82,8 +122,8 @@ a {
 
 .button {
   border: none;
-  background: #111827;
-  color: white;
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
   padding: 0.65rem 1.25rem;
   border-radius: 999px;
   font-weight: 600;
@@ -96,14 +136,14 @@ a {
 }
 
 .button.secondary {
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
 }
 
 .empty-state {
   display: grid;
   gap: 0.75rem;
-  color: #4b5563;
+  color: var(--color-muted);
 }
 
 .import-stack {
@@ -120,16 +160,20 @@ a {
 .input-field input {
   padding: 0.65rem 0.75rem;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   font-size: 1rem;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .input-field select,
 .input-field textarea {
   padding: 0.65rem 0.75rem;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   font-size: 1rem;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .import-actions {
