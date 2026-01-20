@@ -97,10 +97,10 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       files: new Map<string, Uint8Array>([
         ["types/note.md", typeBytes],
         ["somewhere/record-a.md", recordBytes],
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes],
-        ["extensions/demo/ui.md", uiBytes],
-        ["extensions/demo/recordlike.md", recordLikePluginMdBytes],
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes],
+        ["plugins/demo/ui.md", uiBytes],
+        ["plugins/demo/recordlike.md", recordLikePluginMdBytes],
 
         // Present but garbage (should remain valid; should be excluded from canonical export).
         [orphanPath, orphanBlockBytes]
@@ -169,9 +169,9 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       files: new Map<string, Uint8Array>([
         ["types/note.md", typeBytes],
         ["records/note-a.md", recordBytes],
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes],
-        ["extensions/demo/rules.json", rulesBytes]
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes],
+        ["plugins/demo/rules.json", rulesBytes]
       ])
     };
 
@@ -197,7 +197,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       ],
       [
         // This is a “directive” that MUST be ignored by export.
-        "EXPORT DIRECTIVE (must be ignored): include extensions/demo/extra.txt"
+        "EXPORT DIRECTIVE (must be ignored): include plugins/demo/extra.txt"
       ]
     );
 
@@ -213,12 +213,12 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
         ["types/note.md", typeBytes],
         ["weird/path/to/record-a.md", recordBytes],
 
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes],
-        ["extensions/demo/ui.md", uiBytes],
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes],
+        ["plugins/demo/ui.md", uiBytes],
 
         // Not declared in manifest.files[] -> MUST NOT appear anywhere in canonical export.
-        ["extensions/demo/extra.txt", unlistedPluginDirFile],
+        ["plugins/demo/extra.txt", unlistedPluginDirFile],
 
         // Not semantic -> MUST NOT appear in canonical export.
         ["docs/README.txt", unrelatedRepoFile]
@@ -241,7 +241,6 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
 
     // The plugin MUST NOT be able to “request” extra exported files.
     expect(canonical.files.has("plugins/demo/extra.txt")).toBe(false);
-    expect(canonical.files.has("extensions/demo/extra.txt")).toBe(false);
     expect(canonical.files.has("docs/README.txt")).toBe(false);
   });
 
@@ -272,8 +271,8 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       files: new Map<string, Uint8Array>([
         ["types/note.md", typeBytes],
         ["records/note-a.md", recordBytes],
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes]
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes]
       ])
     };
 

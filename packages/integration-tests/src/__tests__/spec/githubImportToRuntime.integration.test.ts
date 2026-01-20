@@ -89,12 +89,12 @@ describe("integration: io-github -> selection -> core validation -> runtime open
             { path: "types/note.md", type: "blob" },
             { path: "records/note/one.md", type: "blob" },
 
-            { path: "extensions/demo/plugin.md", type: "blob" },
-            { path: "extensions/demo/ui.md", type: "blob" },
+            { path: "plugins/demo/manifest.md", type: "blob" },
+            { path: "plugins/demo/ui.md", type: "blob" },
 
             // Non-md plugin bundle files (must be fetched in stage 2)
-            { path: "extensions/demo/entry.js", type: "blob" },
-            { path: "extensions/demo/logo.png", type: "blob" },
+            { path: "plugins/demo/entry.js", type: "blob" },
+            { path: "plugins/demo/logo.png", type: "blob" },
 
             // Block file
             { path: EMPTY_BLOCK_PATH, type: "blob" },
@@ -114,12 +114,12 @@ describe("integration: io-github -> selection -> core validation -> runtime open
         if (path === "types/note.md") return new Response(typeNoteMd, { status: 200 });
         if (path === "records/note/one.md") return new Response(recordOneMd, { status: 200 });
 
-        if (path === "extensions/demo/plugin.md") return new Response(pluginManifestMd, { status: 200 });
-        if (path === "extensions/demo/ui.md") return new Response(pluginUiMd, { status: 200 });
+        if (path === "plugins/demo/manifest.md") return new Response(pluginManifestMd, { status: 200 });
+        if (path === "plugins/demo/ui.md") return new Response(pluginUiMd, { status: 200 });
 
         // stage 2 fetches (non-md bundles)
-        if (path === "extensions/demo/entry.js") return new Response(pluginEntryJs, { status: 200 });
-        if (path === "extensions/demo/logo.png") return new Response(pluginLogoPngBytes, { status: 200 });
+        if (path === "plugins/demo/entry.js") return new Response(pluginEntryJs, { status: 200 });
+        if (path === "plugins/demo/logo.png") return new Response(pluginLogoPngBytes, { status: 200 });
 
         if (path === EMPTY_BLOCK_PATH) return new Response(new Uint8Array(), { status: 200 });
 
@@ -142,10 +142,10 @@ describe("integration: io-github -> selection -> core validation -> runtime open
     expect(snapshotPaths).toEqual(
       [
         EMPTY_BLOCK_PATH,
-        "extensions/demo/entry.js",
-        "extensions/demo/logo.png",
-        "extensions/demo/plugin.md",
-        "extensions/demo/ui.md",
+        "plugins/demo/entry.js",
+        "plugins/demo/logo.png",
+        "plugins/demo/manifest.md",
+        "plugins/demo/ui.md",
         "records/note/one.md",
         "types/note.md"
       ].sort((a, b) => a.localeCompare(b))

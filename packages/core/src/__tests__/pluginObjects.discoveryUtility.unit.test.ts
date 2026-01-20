@@ -14,17 +14,17 @@ describe('plugin object discovery utility', () => {
     const snap: DatasetSnapshot = {
       files: new Map<string, Uint8Array>([
         [
-          'extensions/b/plugin.md',
+          'plugins/b/manifest.md',
           manifest(['pluginId: b', 'gdApiVersion: 1', 'entry: entry.js', 'files:', '  - entry.js']),
         ],
-        ['extensions/b/entry.js', encoder.encode("console.log('b');\n")],
+        ['plugins/b/entry.js', encoder.encode("console.log('b');\n")],
 
         [
-          'extensions/a/plugin.md',
+          'plugins/a/manifest.md',
           manifest(['pluginId: a', 'gdApiVersion: 1', 'entry: entry.js', 'files:', '  - entry.js', '  - ui.md']),
         ],
-        ['extensions/a/entry.js', encoder.encode("console.log('a');\n")],
-        ['extensions/a/ui.md', encoder.encode('# ui\n')],
+        ['plugins/a/entry.js', encoder.encode("console.log('a');\n")],
+        ['plugins/a/ui.md', encoder.encode('# ui\n')],
       ]),
     };
 
@@ -32,23 +32,23 @@ describe('plugin object discovery utility', () => {
 
     // Deterministic list, sorted by manifest path.
     expect(result.plugins.map((p) => p.manifest.file)).toEqual([
-      'extensions/a/plugin.md',
-      'extensions/b/plugin.md',
+      'plugins/a/manifest.md',
+      'plugins/b/manifest.md',
     ]);
 
     // Manifest paths set includes both.
-    expect([...result.pluginManifestPaths].sort()).toEqual(['extensions/a/plugin.md', 'extensions/b/plugin.md']);
+    expect([...result.pluginManifestPaths].sort()).toEqual(['plugins/a/manifest.md', 'plugins/b/manifest.md']);
 
     // Bundle resolution includes expected resolved paths.
     expect([...result.pluginBundlePaths].sort()).toEqual([
-      'extensions/a/entry.js',
-      'extensions/a/ui.md',
-      'extensions/b/entry.js',
+      'plugins/a/entry.js',
+      'plugins/a/ui.md',
+      'plugins/b/entry.js',
     ]);
 
     // Resolved mapping preserves declared relpath → resolved path.
     const a = result.plugins[0];
-    expect(a.resolvedFiles.get('entry.js')).toBe('extensions/a/entry.js');
-    expect(a.resolvedFiles.get('ui.md')).toBe('extensions/a/ui.md');
+    expect(a.resolvedFiles.get('entry.js')).toBe('plugins/a/entry.js');
+    expect(a.resolvedFiles.get('ui.md')).toBe('plugins/a/ui.md');
   });
 });

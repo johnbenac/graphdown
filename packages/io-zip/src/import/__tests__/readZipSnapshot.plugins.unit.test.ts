@@ -20,10 +20,10 @@ describe("readZipSnapshot plugin bundles", () => {
       "---",
       "Demo plugin"
     ].join("\n");
-    entries["extensions/demo/plugin.md"] = new Uint8Array(strToU8(manifestText));
-    entries["extensions/demo/entry.js"] = new Uint8Array(strToU8("console.log('demo');"));
-    entries["extensions/demo/ui.md"] = new Uint8Array(strToU8("# demo ui"));
-    entries["extensions/demo/logo.png"] = new Uint8Array([0, 1, 2, 3]);
+    entries["plugins/demo/manifest.md"] = new Uint8Array(strToU8(manifestText));
+    entries["plugins/demo/entry.js"] = new Uint8Array(strToU8("console.log('demo');"));
+    entries["plugins/demo/ui.md"] = new Uint8Array(strToU8("# demo ui"));
+    entries["plugins/demo/logo.png"] = new Uint8Array([0, 1, 2, 3]);
     entries["types/note.md"] = new Uint8Array(
       strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
     );
@@ -35,14 +35,14 @@ describe("readZipSnapshot plugin bundles", () => {
     const zipBytes = zipSync(entries);
     const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);
 
-    expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/logo.png")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/manifest.md")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/ui.md")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/logo.png")).toBe(true);
     expect(ignored).toContain("assets/logo.png");
-    expect(ignored).not.toContain("extensions/demo/entry.js");
-    expect(ignored).not.toContain("extensions/demo/ui.md");
-    expect(ignored).not.toContain("extensions/demo/logo.png");
+    expect(ignored).not.toContain("plugins/demo/entry.js");
+    expect(ignored).not.toContain("plugins/demo/ui.md");
+    expect(ignored).not.toContain("plugins/demo/logo.png");
   });
 
   it("throws a structured error when plugin bundles are missing", () => {
@@ -58,8 +58,8 @@ describe("readZipSnapshot plugin bundles", () => {
       "---",
       "Demo plugin"
     ].join("\n");
-    entries["extensions/demo/plugin.md"] = new Uint8Array(strToU8(manifestText));
-    entries["extensions/demo/entry.js"] = new Uint8Array(strToU8("console.log('demo');"));
+    entries["plugins/demo/manifest.md"] = new Uint8Array(strToU8(manifestText));
+    entries["plugins/demo/entry.js"] = new Uint8Array(strToU8("console.log('demo');"));
     entries["types/note.md"] = new Uint8Array(
       strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
     );
@@ -77,7 +77,7 @@ describe("readZipSnapshot plugin bundles", () => {
     if (isImportError(caught)) {
       expect(caught.info.source).toBe("zip");
       expect(caught.info.code).toBe("missing_files");
-      expect(caught.info.missingPaths).toEqual(expect.arrayContaining(["extensions/demo/ui.md"]));
+      expect(caught.info.missingPaths).toEqual(expect.arrayContaining(["plugins/demo/ui.md"]));
     }
   });
 });
