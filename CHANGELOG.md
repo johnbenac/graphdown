@@ -12,6 +12,13 @@
 
 * split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
+# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
 # [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
