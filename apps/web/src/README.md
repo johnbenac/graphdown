@@ -46,7 +46,8 @@ The routes themselves live in `routes/` and are rendered through the
 - `import/` - zip parsing + GitHub import helpers.
 - `routes/` - route-level screens and navigation flows.
 - `state/` - dataset context, import progress, and import reports.
-- `@graphdown/persistence` - snapshot serialization, persistence orchestration, and IndexedDB-backed store.
+- `@graphdown/persistence` - snapshot serialization and persistence orchestration.
+- `@graphdown/storage-idb` - IndexedDB-backed persistence store.
 - `utils/` - small UI-friendly helpers (ex: wiki link helpers for refs).
 
 ## Testing entry points

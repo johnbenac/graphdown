@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import { IndexedDbStore } from "@graphdown/persistence";
+import { IndexedDbStore } from "@graphdown/storage-idb";
 import type { PersistStore } from "@graphdown/persistence";
 
 async function runStoreContract(store: PersistStore) {
