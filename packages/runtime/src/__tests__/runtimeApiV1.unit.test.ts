@@ -244,7 +244,7 @@ test('runtime api v1 exposes block read methods', async () => {
   const snapshot = makeSnapshot({
     'types/note.md': typeFile('note', `Type body [[${typeCid}]].`),
     'records/note-one.md': recordFile('note', 'one', `See [[${referencedCid}]].`),
-    'extensions/demo/plugin.md': [
+    'plugins/demo/manifest.md': [
       '---',
       'pluginId: demo',
       'gdApiVersion: 1',
@@ -259,8 +259,8 @@ test('runtime api v1 exposes block read methods', async () => {
       '---',
       'Demo plugin'
     ].join('\n'),
-    'extensions/demo/entry.js': utf8('console.log("demo");'),
-    'extensions/demo/asset.bin': Uint8Array.of(0, 255, 1),
+    'plugins/demo/entry.js': utf8('console.log("demo");'),
+    'plugins/demo/asset.bin': Uint8Array.of(0, 255, 1),
     [blockPathForCid(referencedCid)]: referencedBytes,
     [blockPathForCid(typeCid)]: typeBytes,
     [blockPathForCid(pluginCid)]: pluginBytes,

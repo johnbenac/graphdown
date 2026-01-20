@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { parsePluginManifest } from "../pluginManifest";
 
-const manifestPath = "extensions/demo/plugin.md";
+const manifestPath = "plugins/demo/manifest.md";
 
 describe("plugin manifest front matter parsing", () => {
   it("PLUG-FR-001: missing opening delimiter yields E_FRONT_MATTER_MISSING", () => {

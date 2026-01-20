@@ -57,9 +57,9 @@ describe("buildDatasetZipBytes plugin export", () => {
         "deep/nested/record.md",
         ["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body"].join("\n")
       ],
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", entryBytes],
-      ["extensions/demo/ui.md", uiBytes],
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", entryBytes],
+      ["plugins/demo/ui.md", uiBytes],
       ["docs/readme.md", "ignored"],
       [pluginBlockPath, pluginBlockBytes]
     ]);
@@ -70,15 +70,12 @@ describe("buildDatasetZipBytes plugin export", () => {
     expect(imported.files.has("plugins/demo/entry.js")).toBe(true);
     expect(imported.files.has("plugins/demo/ui.md")).toBe(true);
 
-    expect(imported.files.has("extensions/demo/plugin.md")).toBe(false);
-    expect(imported.files.has("extensions/demo/entry.js")).toBe(false);
-    expect(imported.files.has("extensions/demo/ui.md")).toBe(false);
     expect(imported.files.has("docs/readme.md")).toBe(false);
 
     // Compare byte contents (not Uint8Array instances) to handle cross-realm Uint8Array issues
-    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/plugin.md")!));
-    expect(Array.from(imported.files.get("plugins/demo/entry.js")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/entry.js")!));
-    expect(Array.from(imported.files.get("plugins/demo/ui.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/ui.md")!));
+    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("plugins/demo/manifest.md")!));
+    expect(Array.from(imported.files.get("plugins/demo/entry.js")!)).toEqual(Array.from(snapshot.files.get("plugins/demo/entry.js")!));
+    expect(Array.from(imported.files.get("plugins/demo/ui.md")!)).toEqual(Array.from(snapshot.files.get("plugins/demo/ui.md")!));
 
     const paths = [...imported.files.keys()].sort();
     expect(paths).toEqual(
@@ -118,8 +115,8 @@ describe("buildDatasetZipBytes plugin export", () => {
         "records/note/record.md",
         ["---", "typeId: note", "recordId: one", "fields: {}", "---", "No refs"].join("\n")
       ],
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", "console.log('entry');"],
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", "console.log('entry');"],
       [pluginBlockPath, pluginBlockBytes]
     ]);
 
@@ -152,14 +149,14 @@ describe("buildDatasetZipBytes plugin export", () => {
         "records/note/record.md",
         ["---", "typeId: note", "recordId: one", "fields: {}", "---", "No refs"].join("\n")
       ],
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", entryBytes],
-      ["extensions/demo/assets/logo.bin", logoBytes]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", entryBytes],
+      ["plugins/demo/assets/logo.bin", logoBytes]
     ]);
 
     const imported = exportAndLoad(snapshot);
 
     expect(Array.from(imported.files.get("plugins/demo/assets/logo.bin")!)).toEqual(Array.from(logoBytes));
-    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("extensions/demo/plugin.md")!));
+    expect(Array.from(imported.files.get("plugins/demo/manifest.md")!)).toEqual(Array.from(snapshot.files.get("plugins/demo/manifest.md")!));
   });
 });
