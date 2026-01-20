@@ -76,7 +76,7 @@ describe("integration: core record link graph", () => {
       // That file MUST be ignored by graphdown record discovery (plugin bundles are excluded),
       // so it MUST NOT create nodes/edges in the Record Link Graph.
       [
-        "extensions/demo/plugin.md",
+        "plugins/demo/manifest.md",
         [
           "---",
           "pluginId: demo",
@@ -91,9 +91,9 @@ describe("integration: core record link graph", () => {
           ""
         ].join("\n")
       ],
-      ["extensions/demo/entry.js", "export function activate() { return {}; }\n"],
+      ["plugins/demo/entry.js", "export function activate() { return {}; }\n"],
       [
-        "extensions/demo/recordlike.md",
+        "plugins/demo/recordlike.md",
         [
           "---",
           "typeId: note",

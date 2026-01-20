@@ -33,9 +33,9 @@ describe("plugins first-class behavior", () => {
     const digestBase = digestSnapshot(snapshot);
 
     const withoutPluginFiles = new Map(snapshot.files);
-    withoutPluginFiles.delete("extensions/demo/plugin.md");
-    withoutPluginFiles.delete("extensions/demo/entry.js");
-    withoutPluginFiles.delete("extensions/demo/ui.md");
+    withoutPluginFiles.delete("plugins/demo/manifest.md");
+    withoutPluginFiles.delete("plugins/demo/entry.js");
+    withoutPluginFiles.delete("plugins/demo/ui.md");
     const digestWithout = digestSnapshot({ files: withoutPluginFiles });
 
     expect(digestBase).not.toBe(digestWithout);
@@ -48,10 +48,6 @@ describe("plugins first-class behavior", () => {
     expect(canonical.files.has("plugins/demo/manifest.md")).toBe(true);
     expect(canonical.files.has("plugins/demo/entry.js")).toBe(true);
     expect(canonical.files.has("plugins/demo/ui.md")).toBe(true);
-
-    expect(canonical.files.has("extensions/demo/plugin.md")).toBe(false);
-    expect(canonical.files.has("extensions/demo/entry.js")).toBe(false);
-    expect(canonical.files.has("extensions/demo/ui.md")).toBe(false);
   });
 
   it("LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported", () => {
@@ -73,9 +69,9 @@ describe("plugins first-class behavior", () => {
 
     const snapshot: DatasetSnapshot = {
       files: new Map<string, Uint8Array>([
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes],
-        ["extensions/demo/DEVLOG.md", devlogBytes]
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes],
+        ["plugins/demo/DEVLOG.md", devlogBytes]
       ])
     };
 
@@ -112,9 +108,9 @@ describe("plugins first-class behavior", () => {
 
     const snapshot: DatasetSnapshot = {
       files: new Map<string, Uint8Array>([
-        ["extensions/demo/plugin.md", manifestBytes],
-        ["extensions/demo/entry.js", entryBytes],
-        ["extensions/demo/assets/logo.bin", logoBytes]
+        ["plugins/demo/manifest.md", manifestBytes],
+        ["plugins/demo/entry.js", entryBytes],
+        ["plugins/demo/assets/logo.bin", logoBytes]
       ])
     };
 
