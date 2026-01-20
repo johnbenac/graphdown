@@ -10,7 +10,7 @@ describe("collectDeclaredPluginBundleRelPaths", () => {
         files: ["entry.js", "ui.md", "logo.png"],
         binaryFiles: ["logo.png", "bundle.bin"]
       },
-      "extensions/demo/plugin.md"
+      "plugins/demo/manifest.md"
     );
 
     expect(declared).toEqual(["entry.js", "ui.md", "logo.png", "bundle.bin"]);
@@ -18,13 +18,13 @@ describe("collectDeclaredPluginBundleRelPaths", () => {
 
   it("throws when entry is not a string", () => {
     expect(() =>
-      collectDeclaredPluginBundleRelPaths({ entry: 42 }, "extensions/demo/plugin.md")
+      collectDeclaredPluginBundleRelPaths({ entry: 42 }, "plugins/demo/manifest.md")
     ).toThrow(/entry/);
   });
 
   it("throws when files is not a string array", () => {
     expect(() =>
-      collectDeclaredPluginBundleRelPaths({ files: "entry.js" }, "extensions/demo/plugin.md")
+      collectDeclaredPluginBundleRelPaths({ files: "entry.js" }, "plugins/demo/manifest.md")
     ).toThrow(/files/);
   });
 
@@ -32,28 +32,28 @@ describe("collectDeclaredPluginBundleRelPaths", () => {
     expect(() =>
       collectDeclaredPluginBundleRelPaths(
         { binaryFiles: { entry: "logo.png" } },
-        "extensions/demo/plugin.md"
+        "plugins/demo/manifest.md"
       )
     ).toThrow(/binaryFiles/);
   });
 
   it("throws when declared paths are not safe relative paths", () => {
     expect(() =>
-      collectDeclaredPluginBundleRelPaths({ entry: "../entry.js" }, "extensions/demo/plugin.md")
+      collectDeclaredPluginBundleRelPaths({ entry: "../entry.js" }, "plugins/demo/manifest.md")
     ).toThrow(/entry/);
     expect(() =>
-      collectDeclaredPluginBundleRelPaths({ files: ["/abs.js"] }, "extensions/demo/plugin.md")
+      collectDeclaredPluginBundleRelPaths({ files: ["/abs.js"] }, "plugins/demo/manifest.md")
     ).toThrow(/files/);
     expect(() =>
       collectDeclaredPluginBundleRelPaths(
         { binaryFiles: ["./logo.png"] },
-        "extensions/demo/plugin.md"
+        "plugins/demo/manifest.md"
       )
     ).toThrow(/binaryFiles/);
     expect(() =>
       collectDeclaredPluginBundleRelPaths(
         { files: ["a\\b.png"] },
-        "extensions/demo/plugin.md"
+        "plugins/demo/manifest.md"
       )
     ).toThrow(/files/);
   });

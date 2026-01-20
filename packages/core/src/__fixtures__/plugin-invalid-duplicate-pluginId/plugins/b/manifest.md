@@ -1,5 +1,5 @@
 ---
-pluginId: dup
+pluginId: b
 gdApiVersion: 1
 entry: entry.js
 files:

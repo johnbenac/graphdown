@@ -21,10 +21,10 @@ describe("selectSemanticSnapshotFiles plugin bundles", () => {
     ].join("\n");
 
     const entries = new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifestText)],
-      ["extensions/demo/entry.js", encoder.encode("console.log('demo');")],
-      ["extensions/demo/ui.md", encoder.encode("# demo ui")],
-      ["extensions/demo/logo.png", new Uint8Array([0, 1, 2, 3])],
+      ["plugins/demo/manifest.md", encoder.encode(manifestText)],
+      ["plugins/demo/entry.js", encoder.encode("console.log('demo');")],
+      ["plugins/demo/ui.md", encoder.encode("# demo ui")],
+      ["plugins/demo/logo.png", new Uint8Array([0, 1, 2, 3])],
       [
         "types/note.md",
         encoder.encode(["---", "typeId: note", "fields: {}", "---"].join("\n"))
@@ -38,10 +38,10 @@ describe("selectSemanticSnapshotFiles plugin bundles", () => {
 
     const result = selectSemanticSnapshotFiles(entries);
 
-    expect(result.snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
-    expect(result.snapshot.files.has("extensions/demo/entry.js")).toBe(true);
-    expect(result.snapshot.files.has("extensions/demo/ui.md")).toBe(true);
-    expect(result.snapshot.files.has("extensions/demo/logo.png")).toBe(true);
+    expect(result.snapshot.files.has("plugins/demo/manifest.md")).toBe(true);
+    expect(result.snapshot.files.has("plugins/demo/entry.js")).toBe(true);
+    expect(result.snapshot.files.has("plugins/demo/ui.md")).toBe(true);
+    expect(result.snapshot.files.has("plugins/demo/logo.png")).toBe(true);
     expect(result.missingPluginBundlePaths).toEqual([]);
     expect(result.ignored).toContain("assets/other.bin");
   });
@@ -59,7 +59,7 @@ describe("selectSemanticSnapshotFiles plugin bundles", () => {
     ].join("\n");
 
     const entries = new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifestText)],
+      ["plugins/demo/manifest.md", encoder.encode(manifestText)],
       [
         "types/note.md",
         encoder.encode(["---", "typeId: note", "fields: {}", "---"].join("\n"))
@@ -68,9 +68,9 @@ describe("selectSemanticSnapshotFiles plugin bundles", () => {
 
     const result = selectSemanticSnapshotFiles(entries);
 
-    expect(result.snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
-    expect(result.snapshot.files.has("extensions/demo/entry.js")).toBe(false);
-    expect(result.requiredPluginBundlePaths).toEqual(["extensions/demo/entry.js"]);
-    expect(result.missingPluginBundlePaths).toEqual(["extensions/demo/entry.js"]);
+    expect(result.snapshot.files.has("plugins/demo/manifest.md")).toBe(true);
+    expect(result.snapshot.files.has("plugins/demo/entry.js")).toBe(false);
+    expect(result.requiredPluginBundlePaths).toEqual(["plugins/demo/entry.js"]);
+    expect(result.missingPluginBundlePaths).toEqual(["plugins/demo/entry.js"]);
   });
 });

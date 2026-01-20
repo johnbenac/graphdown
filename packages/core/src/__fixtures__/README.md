@@ -33,8 +33,8 @@ key requirements for types and records.
     reachability/export tests.
 
 - `plugin-invalid-duplicate-pluginId/`
-  - Two manifests share the same `pluginId` (to exercise PLUG-ID-002 /
-    VAL-PLUG-002 later).
+  - Two manifests with distinct pluginIds (`a`, `b`) for multi-plugin layout
+    coverage. Duplicate-id checks build in-memory snapshots during tests.
 
 - `plugin-invalid-entry-not-in-files/`
   - `entry` exists but is not listed in `files[]` (VAL-PLUG-003 later).

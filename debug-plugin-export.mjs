@@ -37,9 +37,9 @@ const snapshot = snapshotFromEntries([
     "deep/nested/record.md",
     ["---", "typeId: note", "recordId: one", "fields: {}", "---", "Body"].join("\n")
   ],
-  ["extensions/demo/plugin.md", manifest],
-  ["extensions/demo/entry.js", toBytes("console.log('entry');")],
-  ["extensions/demo/ui.md", toBytes("# UI")]
+  ["plugins/demo/manifest.md", manifest],
+  ["plugins/demo/entry.js", toBytes("console.log('entry');")],
+  ["plugins/demo/ui.md", toBytes("# UI")]
 ]);
 
 console.log("Input snapshot files:");

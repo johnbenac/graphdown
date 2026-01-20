@@ -20,7 +20,7 @@ describe("readZipSnapshotFromBytes fail-fast rules", () => {
     ].join("\n");
 
     const zipBytes = zipSync({
-      "plugins/demo/plugin.md": bytes(manifestText),
+      "plugins/demo/manifest.md": bytes(manifestText),
       "types/note.md": bytes("---\ntypeId: note\nfields: {}\n---\n")
     });
 

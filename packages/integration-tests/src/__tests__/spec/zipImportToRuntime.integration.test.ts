@@ -73,10 +73,10 @@ describe("integration: io-zip -> selection -> core validation -> runtime open", 
         ["types/note.md", u8(typeNoteMd)],
         ["records/note/one.md", u8(recordOneMd)],
 
-        ["extensions/demo/plugin.md", u8(pluginManifestMd)],
-        ["extensions/demo/ui.md", u8(pluginUiMd)],
-        ["extensions/demo/entry.js", u8(pluginEntryJs)],
-        ["extensions/demo/logo.png", pluginLogoPngBytes],
+        ["plugins/demo/manifest.md", u8(pluginManifestMd)],
+        ["plugins/demo/ui.md", u8(pluginUiMd)],
+        ["plugins/demo/entry.js", u8(pluginEntryJs)],
+        ["plugins/demo/logo.png", pluginLogoPngBytes],
 
         [EMPTY_BLOCK_PATH, new Uint8Array()], // zero-byte block must survive zip
 
@@ -101,11 +101,11 @@ describe("integration: io-zip -> selection -> core validation -> runtime open", 
     const selection = selectSemanticSnapshotFiles(extractedSnapshot.files);
 
     expect(selection.missingPluginBundlePaths).toEqual([]);
-    expect(selection.pluginManifestPaths).toEqual(["extensions/demo/plugin.md"]);
+    expect(selection.pluginManifestPaths).toEqual(["plugins/demo/manifest.md"]);
 
     // Required bundle paths (resolved relative to manifest dir)
     expect(selection.requiredPluginBundlePaths).toEqual(
-      ["extensions/demo/entry.js", "extensions/demo/logo.png", "extensions/demo/ui.md"].sort(
+      ["plugins/demo/entry.js", "plugins/demo/logo.png", "plugins/demo/ui.md"].sort(
         (a, b) => a.localeCompare(b)
       )
     );
@@ -118,10 +118,10 @@ describe("integration: io-zip -> selection -> core validation -> runtime open", 
     expect(selectedPaths).toEqual(
       [
         EMPTY_BLOCK_PATH,
-        "extensions/demo/entry.js",
-        "extensions/demo/logo.png",
-        "extensions/demo/plugin.md",
-        "extensions/demo/ui.md",
+        "plugins/demo/entry.js",
+        "plugins/demo/logo.png",
+        "plugins/demo/manifest.md",
+        "plugins/demo/ui.md",
         "records/note/one.md",
         "types/note.md"
       ].sort((a, b) => a.localeCompare(b))

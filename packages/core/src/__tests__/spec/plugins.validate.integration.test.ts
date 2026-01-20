@@ -21,7 +21,19 @@ function getErrorCodes(snapshot: DatasetSnapshot): string[] {
 }
 
 function expectDuplicatePluginIdFails() {
-  const snapshot = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
+  const manifest = manifestContent([
+    "pluginId: dup",
+    "gdApiVersion: 1",
+    "entry: entry.js",
+    "files:",
+    "  - entry.js"
+  ]);
+  const snapshot = snapshotFromEntries([
+    ["plugins/dup-one/manifest.md", manifest],
+    ["plugins/dup-one/entry.js", encoder.encode("console.log('one');")],
+    ["plugins/dup-two/manifest.md", manifest],
+    ["plugins/dup-two/entry.js", encoder.encode("console.log('two');")]
+  ]);
   expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_DUPLICATE_ID");
 }
 
@@ -67,9 +79,9 @@ describe("plugins validation", () => {
       "  - bad.bin"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")],
-      ["extensions/demo/bad.bin", new Uint8Array([0xff, 0xfe, 0xff])]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")],
+      ["plugins/demo/bad.bin", new Uint8Array([0xff, 0xfe, 0xff])]
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_UTF8_INVALID");
@@ -87,9 +99,9 @@ describe("plugins validation", () => {
       "  - assets/logo.bin"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")],
-      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80])]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")],
+      ["plugins/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80])]
     ]);
 
     const result = validateDatasetSnapshot(snapshot);
@@ -108,8 +120,8 @@ describe("plugins validation", () => {
       "  - assets/logo.bin"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")]
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_KEYS_INVALID");
@@ -126,8 +138,8 @@ describe("plugins validation", () => {
       "  - not-a-cid"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")]
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_BLOCK_CID_INVALID");
@@ -145,8 +157,8 @@ describe("plugins validation", () => {
       `  - ${cid}`
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")]
     ]);
 
     expect(getErrorCodes(snapshot)).toContain("E_PLUGIN_BLOCK_MISSING_OR_INVALID");
@@ -160,7 +172,7 @@ describe("plugins validation", () => {
 
   it("PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID", () => {
     const manifest = manifestContent(["pluginId: demo", "gdApiVersion: 1"]);
-    const snapshot = snapshotFromEntries([["extensions/demo/plugin.md", manifest]]);
+    const snapshot = snapshotFromEntries([["plugins/demo/manifest.md", manifest]]);
 
     const result = validateDatasetSnapshot(snapshot);
     expect(result.ok).toBe(false);
@@ -180,9 +192,9 @@ describe("plugins validation", () => {
       "extra: true"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")],
-      ["extensions/demo/ui.md", encoder.encode("ok")]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")],
+      ["plugins/demo/ui.md", encoder.encode("ok")]
     ]);
 
     const result = validateDatasetSnapshot(snapshot);
@@ -203,9 +215,9 @@ describe("plugins validation", () => {
       "fields: {}"
     ]);
     const snapshot = snapshotFromEntries([
-      ["extensions/demo/plugin.md", manifest],
-      ["extensions/demo/entry.js", encoder.encode("console.log('ok');")],
-      ["extensions/demo/ui.md", encoder.encode("ok")]
+      ["plugins/demo/manifest.md", manifest],
+      ["plugins/demo/entry.js", encoder.encode("console.log('ok');")],
+      ["plugins/demo/ui.md", encoder.encode("ok")]
     ]);
 
     const result = validateDatasetSnapshot(snapshot);

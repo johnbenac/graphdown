@@ -4,13 +4,13 @@ import { isSafeRelativePath, resolvePluginBundlePaths } from "../pluginManifest"
 
 describe("plugin manifest paths", () => {
   it("PLUG-LAYOUT-002: resolves bundle files relative to the manifest directory", () => {
-    const resolved = resolvePluginBundlePaths("extensions/demo/plugin.md", ["entry.js", "ui.md"]);
-    expect(resolved.get("entry.js")).toBe("extensions/demo/entry.js");
-    expect(resolved.get("ui.md")).toBe("extensions/demo/ui.md");
+    const resolved = resolvePluginBundlePaths("plugins/demo/manifest.md", ["entry.js", "ui.md"]);
+    expect(resolved.get("entry.js")).toBe("plugins/demo/entry.js");
+    expect(resolved.get("ui.md")).toBe("plugins/demo/ui.md");
   });
 
   it("PLUG-LAYOUT-002: root manifest resolves bundle files without a directory prefix", () => {
-    const resolved = resolvePluginBundlePaths("plugin.md", ["entry.js"]);
+    const resolved = resolvePluginBundlePaths("manifest.md", ["entry.js"]);
     expect(resolved.get("entry.js")).toBe("entry.js");
   });
 

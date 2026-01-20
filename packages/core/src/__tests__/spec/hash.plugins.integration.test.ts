@@ -21,16 +21,16 @@ test(
     const digestBase = digest(computeGdHashV1(base, "snapshot"));
 
     const withoutPluginFiles = new Map(base.files);
-    withoutPluginFiles.delete("extensions/demo/plugin.md");
-    withoutPluginFiles.delete("extensions/demo/entry.js");
-    withoutPluginFiles.delete("extensions/demo/ui.md");
+    withoutPluginFiles.delete("plugins/demo/manifest.md");
+    withoutPluginFiles.delete("plugins/demo/entry.js");
+    withoutPluginFiles.delete("plugins/demo/ui.md");
     const digestWithout = digest(computeGdHashV1({ files: withoutPluginFiles }, "snapshot"));
     assert.notEqual(digestBase, digestWithout);
 
     const movedFiles = new Map<string, Uint8Array>();
     for (const [path, bytes] of base.files) {
-      const newPath = path.startsWith("extensions/demo/")
-        ? path.replace("extensions/demo/", "relocated/demo/")
+      const newPath = path.startsWith("plugins/demo/")
+        ? path.replace("plugins/demo/", "relocated/demo/")
         : path;
       movedFiles.set(newPath, bytes);
     }
@@ -44,7 +44,7 @@ test("HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
   const digestBase = digest(computeGdHashV1(base, "snapshot"));
 
   const updatedFiles = new Map(base.files);
-  updatedFiles.set("extensions/demo/entry.js", encoder.encode("console.log('updated');\n"));
+  updatedFiles.set("plugins/demo/entry.js", encoder.encode("console.log('updated');\n"));
   const digestUpdated = digest(computeGdHashV1({ files: updatedFiles }, "snapshot"));
 
   assert.notEqual(digestUpdated, digestBase);
@@ -63,14 +63,14 @@ test("HASH-001: plugin text bundle files normalize line endings", () => {
   ].join("\n");
   const lfSnapshot: DatasetSnapshot = {
     files: new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifest)],
-      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\n")]
+      ["plugins/demo/manifest.md", encoder.encode(manifest)],
+      ["plugins/demo/entry.js", encoder.encode("console.log('hi');\n")]
     ])
   };
   const crlfSnapshot: DatasetSnapshot = {
     files: new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifest)],
-      ["extensions/demo/entry.js", encoder.encode("console.log('hi');\r\n")]
+      ["plugins/demo/manifest.md", encoder.encode(manifest)],
+      ["plugins/demo/entry.js", encoder.encode("console.log('hi');\r\n")]
     ])
   };
 
@@ -96,16 +96,16 @@ test("HASH-001: binary plugin bundle files hash raw bytes", () => {
   ].join("\n");
   const base: DatasetSnapshot = {
     files: new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifest)],
-      ["extensions/demo/entry.js", encoder.encode("console.log('entry');\n")],
-      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80])]
+      ["plugins/demo/manifest.md", encoder.encode(manifest)],
+      ["plugins/demo/entry.js", encoder.encode("console.log('entry');\n")],
+      ["plugins/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x80])]
     ])
   };
   const changed: DatasetSnapshot = {
     files: new Map<string, Uint8Array>([
-      ["extensions/demo/plugin.md", encoder.encode(manifest)],
-      ["extensions/demo/entry.js", encoder.encode("console.log('entry');\n")],
-      ["extensions/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x81])]
+      ["plugins/demo/manifest.md", encoder.encode(manifest)],
+      ["plugins/demo/entry.js", encoder.encode("console.log('entry');\n")],
+      ["plugins/demo/assets/logo.bin", new Uint8Array([0xff, 0xd8, 0xff, 0x00, 0x81])]
     ])
   };
 
@@ -116,8 +116,25 @@ test("HASH-001: binary plugin bundle files hash raw bytes", () => {
 });
 
 test("HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID", () => {
-  const snap = loadFixtureSnapshot("plugin-invalid-duplicate-pluginId");
-  const result = computeGdHashV1(snap, "snapshot");
+  const manifest = [
+    "---",
+    "pluginId: dup",
+    "gdApiVersion: 1",
+    "entry: entry.js",
+    "files:",
+    "  - entry.js",
+    "---",
+    ""
+  ].join("\n");
+  const snapshot: DatasetSnapshot = {
+    files: new Map<string, Uint8Array>([
+      ["plugins/dup-one/manifest.md", encoder.encode(manifest)],
+      ["plugins/dup-one/entry.js", encoder.encode("console.log('one');\n")],
+      ["plugins/dup-two/manifest.md", encoder.encode(manifest)],
+      ["plugins/dup-two/entry.js", encoder.encode("console.log('two');\n")]
+    ])
+  };
+  const result = computeGdHashV1(snapshot, "snapshot");
   if (result.ok) {
     assert.fail("Expected duplicate pluginId error");
   }
@@ -138,7 +155,7 @@ test("HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE
   ].join("\n");
   const snapshot: DatasetSnapshot = {
     files: new Map<string, Uint8Array>([
-      ["plugin.md", encoder.encode(manifest)],
+      ["manifest.md", encoder.encode(manifest)],
       ["entry.js", encoder.encode("console.log('entry');\n")]
     ])
   };
