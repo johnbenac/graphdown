@@ -1,5 +1,3 @@
-import type { PersistStore } from "./PersistStore";
-
 type IndexedDbStoreOptions = {
   dbName?: string;
   storeName?: string;
@@ -59,7 +57,7 @@ export function createIndexedDbPersistStore(options?: IndexedDbStoreOptions): In
   return new IndexedDbStore(options);
 }
 
-export class IndexedDbStore implements PersistStore {
+export class IndexedDbStore {
   private dbPromise: Promise<IDBDatabase> | null = null;
   private readonly dbName: string;
   private readonly storeName: string;

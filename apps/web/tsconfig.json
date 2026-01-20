@@ -10,6 +10,7 @@
       "@graphdown/io": ["../../packages/io/src/index.ts"],
       "@graphdown/io-github": ["../../packages/io-github/src/index.ts"],
       "@graphdown/io-zip": ["../../packages/io-zip/src/index.ts"],
+      "@graphdown/storage-idb": ["../../packages/storage-idb/src/index.ts"],
       "@graphdown/runtime": ["../../packages/runtime/src/index.ts"]
     },
     "resolveJsonModule": true,

@@ -27,7 +27,8 @@ npm --workspace apps/web run build
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
 * `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → runtime session → persistence.
-* `@graphdown/persistence` serializes dataset snapshots and UI state, plus the IndexedDB-backed store.
+* `@graphdown/persistence` serializes dataset snapshots and UI state.
+* `@graphdown/storage-idb` provides the IndexedDB-backed store used by the web app.
 * `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 * `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
 * `src/utils/` small UI-friendly helpers (e.g., wiki-link parsing/formatting).

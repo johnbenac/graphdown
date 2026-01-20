@@ -7,12 +7,13 @@ import { makeError } from "@graphdown/core";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { createPersistence, createPersistStore, IndexedDbStore } from "@graphdown/persistence";
+import { createPersistence } from "@graphdown/persistence";
+import { createPersistStore, IndexedDbStore } from "@graphdown/storage-idb";
 
 let store: IndexedDbStore;
 
-vi.mock("@graphdown/persistence", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@graphdown/persistence")>();
+vi.mock("@graphdown/storage-idb", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@graphdown/storage-idb")>();
   return {
     ...actual,
     createPersistStore: () => store

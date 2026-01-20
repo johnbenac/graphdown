@@ -1,5 +1,4 @@
 import { createIndexedDbPersistStore } from "./indexedDbStore";
-import type { PersistStore } from "./PersistStore";
 
 type Logger = {
   error: (message: string, error?: unknown) => void;
@@ -11,7 +10,7 @@ type CreatePersistStoreOptions = {
   storeName?: string;
 };
 
-export function createPersistStore(options?: CreatePersistStoreOptions): PersistStore {
+export function createPersistStore(options?: CreatePersistStoreOptions) {
   const logger = options?.logger ?? console;
   try {
     return createIndexedDbPersistStore({
