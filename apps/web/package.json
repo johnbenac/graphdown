@@ -16,6 +16,7 @@
     "verify": "npm run test && npm run test:e2e"
   },
   "dependencies": {
+    "@graphdown/app-kit": "0.0.0",
     "@graphdown/core": "0.0.0",
     "@graphdown/io": "0.0.0",
     "@graphdown/io-github": "0.0.0",
