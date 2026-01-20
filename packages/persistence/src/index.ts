@@ -21,11 +21,3 @@ export {
 export type { PersistedActiveDatasetV1 } from "./schema/persistedActiveDataset";
 export type { PersistStore } from "./store/PersistStore";
 export { MemoryPersistStore } from "./store/memoryStore";
-export {
-  clearTrackedDbNames,
-  createIndexedDbPersistStore,
-  deleteTrackedDbNames,
-  IndexedDbStore,
-  listTrackedDbNames
-} from "./store/indexedDbStore";
-export { createPersistStore } from "./store/createPersistStore";

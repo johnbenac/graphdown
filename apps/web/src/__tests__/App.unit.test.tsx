@@ -6,13 +6,9 @@ import { MemoryPersistStore } from "@graphdown/persistence";
 import { appRoutes } from "../App";
 import { DatasetProvider } from "../state/DatasetContext";
 
-vi.mock("@graphdown/persistence", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@graphdown/persistence")>();
-  return {
-    ...actual,
-    createPersistStore: () => new MemoryPersistStore()
-  };
-});
+vi.mock("@graphdown/storage-idb", () => ({
+  createPersistStore: () => new MemoryPersistStore()
+}));
 
 describe("App routes", () => {
   it("renders navigation links", async () => {
