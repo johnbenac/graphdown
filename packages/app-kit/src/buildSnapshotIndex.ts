@@ -9,6 +9,25 @@ export type SnapshotIndex = {
 const textDecoder =
   typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8", { fatal: true }) : null;
 
+function dirNamePosix(filePath: string): string {
+  const lastSlash = filePath.lastIndexOf("/");
+  if (lastSlash <= 0) {
+    return "";
+  }
+  return filePath.slice(0, lastSlash);
+}
+
+function joinPosix(dir: string, rel: string): string {
+  if (!dir) {
+    return rel;
+  }
+  return `${dir}/${rel}`;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
 function decodeBytes(
   bytes: Uint8Array,
   filePath: string
@@ -27,16 +46,53 @@ function decodeBytes(
   return { ok: false, error: makeError("E_INTERNAL", "TextDecoder not available", filePath) };
 }
 
+function listPluginFilesToSkip(snapshot: DatasetSnapshot): Set<string> {
+  const skipped = new Set<string>();
+
+  for (const [filePath, bytes] of snapshot.files.entries()) {
+    const decoded = decodeBytes(bytes, filePath);
+    if (!decoded.ok) {
+      continue;
+    }
+    const parsed = parseMarkdownRecord(decoded.text, filePath);
+    if (!parsed.ok) {
+      continue;
+    }
+    if (typeof parsed.yaml.pluginId !== "string") {
+      continue;
+    }
+
+    skipped.add(filePath);
+
+    const files = isStringArray(parsed.yaml.files) ? parsed.yaml.files : [];
+    const binaryFiles = isStringArray(parsed.yaml.binaryFiles) ? parsed.yaml.binaryFiles : [];
+    const baseDir = dirNamePosix(filePath);
+
+    for (const relPath of [...files, ...binaryFiles]) {
+      if (relPath.startsWith("/") || relPath.includes("..")) {
+        continue;
+      }
+      skipped.add(joinPosix(baseDir, relPath));
+    }
+  }
+
+  return skipped;
+}
+
 export function buildSnapshotIndex(
   snapshot: DatasetSnapshot
 ): { ok: true; index: SnapshotIndex } | { ok: false; errors: ValidationError[] } {
   const typeFileById = new Map<string, string>();
   const recordFileByKey = new Map<string, string>();
   const errors: ValidationError[] = [];
+  const pluginSkip = listPluginFilesToSkip(snapshot);
 
   const entries = [...snapshot.files.entries()].sort(([a], [b]) => a.localeCompare(b));
 
   for (const [filePath, bytes] of entries) {
+    if (pluginSkip.has(filePath)) {
+      continue;
+    }
     const decoded = decodeBytes(bytes, filePath);
     if (!decoded.ok) {
       errors.push(decoded.error);

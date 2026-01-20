@@ -11,8 +11,7 @@ import { readZipSnapshot } from "../import/readZipSnapshot";
 import { createPersistence } from "@graphdown/persistence";
 import { createPersistStore } from "@graphdown/storage-idb";
 import type { ImportReport, LoadedDataset } from "@graphdown/persistence";
-import { buildImportReport } from "./importReport";
-import { openDatasetSession, type SnapshotIndex } from "./openDatasetSession";
+import { buildImportReport, openDatasetSession, type SnapshotIndex } from "@graphdown/app-kit";
 
 export type ImportErrorCategory =
   | "invalid_url"

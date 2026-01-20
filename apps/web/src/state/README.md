@@ -7,10 +7,11 @@ components to load, edit, and persist datasets.
 
 - `DatasetContext.tsx`
   - Exposes `DatasetProvider` and `useDataset`.
+  - DatasetContext delegates session opening + snapshot indexing + import report building to `@graphdown/app-kit`.
   - Orchestrates:
     1) import (zip or GitHub)
     2) canonical record-only layout (`canonicalizeDatasetSnapshot`, import only)
-    3) openDatasetSession:
+    3) `@graphdown/app-kit`:
        - validate snapshot (`validateDatasetSnapshot`)
        - open Runtime API v1 session (`openRuntimeApiV1`)
        - build snapshot index (`buildSnapshotIndex`)
@@ -31,7 +32,7 @@ components to load, edit, and persist datasets.
 
 ## Import reports
 
-- `importReport.ts`
+- `@graphdown/app-kit`
   - Compares raw vs canonical snapshots to report ignored files and dropped
     unreferenced blocks.
   - Limits report samples to keep UI payloads small.
@@ -40,4 +41,4 @@ components to load, edit, and persist datasets.
 
 - `DatasetContext.unit.test.tsx` and `DatasetContext.nfr.integration.test.tsx` cover import and
   update workflows.
-- `importReport.unit.test.ts` verifies report counting and sample limits.
+- `importReport.unit.test.ts` lives in `@graphdown/app-kit` to verify report counting and sample limits.
