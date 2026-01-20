@@ -9,6 +9,29 @@ export type SnapshotIndex = {
 const textDecoder =
   typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8", { fatal: true }) : null;
 
+function dirNamePosix(filePath: string): string {
+  const normalized = filePath.replace(/\\/g, "/");
+  const lastSlash = normalized.lastIndexOf("/");
+  if (lastSlash === -1) {
+    return "";
+  }
+  return normalized.slice(0, lastSlash);
+}
+
+function joinPosix(dir: string, rel: string): string {
+  if (!dir) {
+    return rel;
+  }
+  if (!rel) {
+    return dir;
+  }
+  return `${dir}/${rel}`;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === "string");
+}
+
 function decodeBytes(
   bytes: Uint8Array,
   filePath: string
@@ -27,16 +50,62 @@ function decodeBytes(
   return { ok: false, error: makeError("E_INTERNAL", "TextDecoder not available", filePath) };
 }
 
+function listPluginFilesToSkip(snapshot: DatasetSnapshot): Set<string> {
+  const skip = new Set<string>();
+
+  for (const [filePath, bytes] of snapshot.files.entries()) {
+    const decoded = decodeBytes(bytes, filePath);
+    if (!decoded.ok) {
+      continue;
+    }
+    const parsed = parseMarkdownRecord(decoded.text, filePath);
+    if (!parsed.ok) {
+      continue;
+    }
+    const pluginId = parsed.yaml.pluginId;
+    if (typeof pluginId !== "string") {
+      continue;
+    }
+
+    skip.add(filePath);
+
+    const manifestDir = dirNamePosix(filePath);
+    const declaredFiles: string[] = [];
+
+    if (isStringArray(parsed.yaml.files)) {
+      declaredFiles.push(...parsed.yaml.files);
+    }
+
+    if (isStringArray(parsed.yaml.binaryFiles)) {
+      declaredFiles.push(...parsed.yaml.binaryFiles);
+    }
+
+    for (const entry of declaredFiles) {
+      if (entry.startsWith("/") || entry.includes("..")) {
+        continue;
+      }
+      const resolved = joinPosix(manifestDir, entry);
+      skip.add(resolved);
+    }
+  }
+
+  return skip;
+}
+
 export function buildSnapshotIndex(
   snapshot: DatasetSnapshot
 ): { ok: true; index: SnapshotIndex } | { ok: false; errors: ValidationError[] } {
   const typeFileById = new Map<string, string>();
   const recordFileByKey = new Map<string, string>();
   const errors: ValidationError[] = [];
+  const pluginSkip = listPluginFilesToSkip(snapshot);
 
   const entries = [...snapshot.files.entries()].sort(([a], [b]) => a.localeCompare(b));
 
   for (const [filePath, bytes] of entries) {
+    if (pluginSkip.has(filePath)) {
+      continue;
+    }
     const decoded = decodeBytes(bytes, filePath);
     if (!decoded.ok) {
       errors.push(decoded.error);
