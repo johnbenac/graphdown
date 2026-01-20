@@ -71,7 +71,7 @@ describe("integration: io-github -> selection -> core validation -> runtime open
     const repo = "repo";
     const branch = "main";
 
-    const fetchMock = vi.fn(async (input: string | URL | Request, _init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const urlString = input instanceof Request ? input.url : input.toString();
 
       // 1) Repo metadata
