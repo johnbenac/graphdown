@@ -10,10 +10,8 @@ components to load, edit, and persist datasets.
   - Orchestrates:
     1) import (zip or GitHub)
     2) canonical record-only layout (`canonicalizeDatasetSnapshot`, import only)
-    3) openDatasetSession:
-       - validate snapshot (`validateDatasetSnapshot`)
-       - open Runtime API v1 session (`openRuntimeApiV1`)
-       - build snapshot index (`buildSnapshotIndex`)
+    3) DatasetContext delegates session opening + snapshot indexing + import report
+       building to `@graphdown/app-kit`.
     4) persistence (IndexedDB; required)
 
   - Runtime sessions are derived from snapshots, rebuilt on load and every
@@ -31,9 +29,8 @@ components to load, edit, and persist datasets.
 
 ## Import reports
 
-- `importReport.ts`
-  - Compares raw vs canonical snapshots to report ignored files and dropped
-    unreferenced blocks.
+- Import reports are built in `@graphdown/app-kit` to compare raw vs canonical
+  snapshots for ignored files and dropped unreferenced blocks.
   - Limits report samples to keep UI payloads small.
 
 ## Tests
