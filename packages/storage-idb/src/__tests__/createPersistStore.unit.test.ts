@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPersistStore, IndexedDbStore } from "@graphdown/persistence";
+import { createPersistStore, IndexedDbStore } from "@graphdown/storage-idb";
 
 describe("createPersistStore", () => {
   afterEach(() => {

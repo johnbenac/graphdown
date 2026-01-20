@@ -1,7 +1,8 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import type { DatasetSnapshot } from "@graphdown/core";
-import { createPersistence, IndexedDbStore, KEY } from "@graphdown/persistence";
+import { createPersistence, KEY } from "@graphdown/persistence";
+import { IndexedDbStore } from "@graphdown/storage-idb";
 
 function makeDbName(prefix: string) {
   return `${prefix}-${Math.random().toString(16).slice(2)}`;
