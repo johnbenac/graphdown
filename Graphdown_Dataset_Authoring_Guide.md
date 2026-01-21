@@ -34,7 +34,7 @@ my-dataset/
 ```
 
 > Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
-> Plugins are authored under `plugins/` and exported in the same canonical layout.
+> Plugins should be authored under `plugins/<pluginId>/` (recommended), and canonical exports always emit the same layout.
 
 ### 1) Define a type: `types/task.md`
 
@@ -536,9 +536,9 @@ plugins/<pluginId>/
     logo.bin           # example binary asset
 ```
 
-When Graphdown exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
-placing the manifest at `plugins/<pluginId>/manifest.md`). Don’t panic if you see `plugins/` in exports — it’s the same plugin,
-just in canonical shape.
+When Graphdown exports a **canonical** dataset zip/snapshot, plugins are always emitted in canonical layout (manifest at
+`plugins/<pluginId>/manifest.md`). Core hashing is path-independent, but for portability (zip/GitHub import + humans),
+author plugins under `plugins/<pluginId>/`.
 
 ### Plugin manifest (what you must write)
 
@@ -616,6 +616,9 @@ This matters for determinism and “why did my dataset hash change?” debugging
 
 - Validation complaining about **reserved export paths** (for example: you listed `manifest.md` in `files[]`)  
   → Rename the bundle file and update `files[]`. `manifest.md` is reserved for canonical export (`plugins/<pluginId>/manifest.md`).
+
+- `ImportError (missing_files)` when a manifest lists bundle files that aren’t present  
+  → Ensure every path in `files[]` exists relative to the manifest directory, and that `entry` is listed in `files[]`.
 
 ---
 
