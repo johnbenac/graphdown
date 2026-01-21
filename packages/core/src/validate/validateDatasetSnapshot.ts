@@ -26,6 +26,8 @@ export type ValidateDatasetResult =
 
 type CompositionComponent = { typeId: string; required: boolean };
 
+const UNKNOWN_TYPE_SAMPLE_LIMIT = 10;
+
 function enforceFieldDefs(
   typeObj: ParsedTypeObject,
   records: ParsedRecordObject[],
@@ -731,6 +733,35 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     recordsByTypeId.set(record.typeId, list);
   }
 
+  const definedTypeIds = new Set(parsed.typeObjects.map((typeObj) => typeObj.typeId));
+  const missingTypeRefs = new Map<string, string[]>();
+  for (const record of parsed.recordObjects) {
+    if (!definedTypeIds.has(record.typeId)) {
+      const list = missingTypeRefs.get(record.typeId) ?? [];
+      list.push(`${record.identity} (${record.file})`);
+      missingTypeRefs.set(record.typeId, list);
+    }
+  }
+  for (const [typeId, records] of missingTypeRefs) {
+    const sample = records.slice(0, UNKNOWN_TYPE_SAMPLE_LIMIT);
+    const extra = records.length - sample.length;
+    const extraSuffix = extra > 0 ? ` (+${extra} more)` : '';
+    errors.push(
+      makeError(
+        'E_UNKNOWN_TYPE',
+        `Unknown record type "${typeId}". No type definition found at types/${typeId}.md.`,
+        undefined,
+        [
+          `This type is referenced by ${records.length} record(s).`,
+          sample.length ? `Sample: ${sample.join(', ')}${extraSuffix}.` : null,
+          `Fix: create types/${typeId}.md, or change those records' typeId to an existing type.`,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      )
+    );
+  }
+
   for (const record of parsed.recordObjects) {
     if (typeof record.parent === 'string' && !recordsByKey.has(record.parent)) {
       errors.push(
@@ -779,18 +810,6 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
   for (const record of parsed.recordObjects) {
     if ((parentState.get(record.identity) ?? 0) === 0) {
       visitParent(record.identity, []);
-    }
-  }
-
-  for (const record of parsed.recordObjects) {
-    if (!typesById.has(record.typeId)) {
-      errors.push(
-        makeError(
-          'E_TYPEID_MISMATCH',
-          `Record ${record.identity} references missing typeId ${record.typeId}`,
-          record.file
-        )
-      );
     }
   }
 

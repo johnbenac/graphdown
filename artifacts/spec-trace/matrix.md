@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-21T01:03:53.217Z
+Generated: 2026-01-21T20:40:42.308Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -297,7 +297,9 @@ Tests (2):
 - packages/core/src/graph/__tests__/graph.unit.test.ts — "VAL-002: duplicate record identity fails Record Link Graph build"
 
 ## VAL-003 — Record objects must reference an existing type (testable=true)
-Tests (1):
+Tests (3):
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: ignored files do not fail validation"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: record referencing known type passes validation"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: record referencing missing type fails validation"
 
 ## VAL-005 — Required fields (schema-driven)

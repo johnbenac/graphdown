@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-21T01:03:53.217Z",
+  "generatedAt": "2026-01-21T20:40:42.308Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -989,6 +989,16 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "VAL-003",
+          "testTitle": "VAL-003: ignored files do not fail validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-003",
+          "testTitle": "VAL-003: record referencing known type passes validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
         {
           "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing missing type fails validation",

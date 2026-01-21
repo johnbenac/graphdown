@@ -145,7 +145,31 @@ describe("validateDatasetSnapshot", () => {
 
   it("VAL-003: record referencing missing type fails validation", () => {
     const snapshot = snapshotFromEntries([rec("r.md", ["typeId: missing", "recordId: one", "fields: {}"])]);
-    expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.map((error) => error.code)).toContain("E_UNKNOWN_TYPE");
+      const message = result.errors.find((error) => error.code === "E_UNKNOWN_TYPE")?.message ?? "";
+      expect(message).toContain("types/missing.md");
+    }
+  });
+
+  it("VAL-003: record referencing known type passes validation", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/menu.md", ["typeId: menu", "fields: {}"]),
+      rec("records/menu/foo.md", ["typeId: menu", "recordId: foo", "fields: {}"])
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("VAL-003: ignored files do not fail validation", () => {
+    const snapshot = snapshotFromEntries([
+      [".gitignore", "node_modules\n.DS_Store\n"],
+      ["README.md", "# Graphdown\nJust a readme.\n"]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
   it("VAL-005: required fields enforced when fieldDefs.required = true", () => {
