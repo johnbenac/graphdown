@@ -33,7 +33,7 @@ export type ParsedGraphdownObject =
   | ParsedTypeObject
   | ParsedRecordObject
   | { kind: 'ignored' }
-  | { kind: 'error'; error: ValidationError };
+  | { kind: 'error'; error: ValidationError; declaredTypeId?: string; declaredKind?: 'type' | 'record' };
 
 function decodeUtf8(bytes: Uint8Array, file: string): { ok: true; text: string } | { ok: false; error: ValidationError } {
   const result = decodeUtf8Strict(bytes);
@@ -107,41 +107,43 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
 
     const topLevelKeys = Object.keys(yamlObject);
     const hasRecordId = Object.prototype.hasOwnProperty.call(yamlObject, 'recordId');
+    const declaredKind: 'type' | 'record' = hasRecordId ? 'record' : 'type';
+    const makeDeclaredError = (error: ValidationError): ParsedGraphdownObject => ({
+      kind: 'error',
+      error,
+      declaredTypeId: typeId,
+      declaredKind
+    });
 
     if (hasRecordId) {
       const allowed = new Set(['typeId', 'recordId', 'fields', 'parent']);
       for (const key of topLevelKeys) {
         if (!allowed.has(key)) {
-          return {
-            kind: 'error',
-            error: makeError('E_FORBIDDEN_TOP_LEVEL_KEY', `Top-level key "${key}" is not allowed in record objects`, path),
-          };
+          return makeDeclaredError(
+            makeError('E_FORBIDDEN_TOP_LEVEL_KEY', `Top-level key "${key}" is not allowed in record objects`, path)
+          );
         }
       }
     } else {
       const allowed = new Set(['typeId', 'fields']);
       for (const key of topLevelKeys) {
         if (!allowed.has(key)) {
-          return {
-            kind: 'error',
-            error: makeError('E_FORBIDDEN_TOP_LEVEL_KEY', `Top-level key "${key}" is not allowed in type objects`, path),
-          };
+          return makeDeclaredError(
+            makeError('E_FORBIDDEN_TOP_LEVEL_KEY', `Top-level key "${key}" is not allowed in type objects`, path)
+          );
         }
       }
     }
 
     const fields = yamlObject.fields;
     if (!isObject(fields)) {
-      return {
-        kind: 'error',
-        error: makeError('E_REQUIRED_FIELD_MISSING', 'fields must be an object', path),
-      };
+      return makeDeclaredError(makeError('E_REQUIRED_FIELD_MISSING', 'fields must be an object', path));
     }
 
     if (hasRecordId) {
       const recordIdCheck = validateIdentifier(yamlObject.recordId, 'recordId', path);
       if (!recordIdCheck.ok) {
-        return { kind: 'error', error: recordIdCheck.error };
+        return makeDeclaredError(recordIdCheck.error);
       }
       const recordId = recordIdCheck.value;
       let parent: string | null | undefined;
@@ -151,21 +153,17 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
           parent = null;
         } else if (typeof parentValue === 'string') {
           if (!RECORD_KEY_PATTERN.test(parentValue)) {
-            return {
-              kind: 'error',
-              error: makeError(
+            return makeDeclaredError(
+              makeError(
                 'E_PARENT_INVALID',
                 `parent must match ${RECORD_KEY_PATTERN.source}`,
-                path,
-              ),
-            };
+                path
+              )
+            );
           }
           parent = parentValue;
         } else {
-          return {
-            kind: 'error',
-            error: makeError('E_PARENT_INVALID', 'parent must be null or a record key string', path),
-          };
+          return makeDeclaredError(makeError('E_PARENT_INVALID', 'parent must be null or a record key string', path));
         }
       }
       return {
@@ -210,11 +208,13 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
   recordObjects: ParsedRecordObject[];
   ignored: string[];
   errors: ValidationError[];
+  declaredTypeIds: string[];
 } {
   const typeObjects: ParsedTypeObject[] = [];
   const recordObjects: ParsedRecordObject[] = [];
   const ignored: string[] = [];
   const errors: ValidationError[] = [];
+  const declaredTypeIds: string[] = [];
 
   const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
 
@@ -235,6 +235,9 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
     }
     if (parsed.kind === 'error') {
       errors.push(parsed.error);
+      if (parsed.declaredKind === 'type' && parsed.declaredTypeId) {
+        declaredTypeIds.push(parsed.declaredTypeId);
+      }
       continue;
     }
     if (parsed.kind === 'type') {
@@ -244,5 +247,5 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
     }
   }
 
-  return { typeObjects, recordObjects, ignored, errors };
+  return { typeObjects, recordObjects, ignored, errors, declaredTypeIds };
 }

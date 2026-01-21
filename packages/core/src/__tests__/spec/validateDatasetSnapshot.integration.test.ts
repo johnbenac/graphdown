@@ -144,8 +144,31 @@ describe("validateDatasetSnapshot", () => {
   });
 
   it("VAL-003: record referencing missing type fails validation", () => {
-    const snapshot = snapshotFromEntries([rec("r.md", ["typeId: missing", "recordId: one", "fields: {}"])]);
-    expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
+    const snapshot = snapshotFromEntries([
+      rec("records/menu.foo/foo.md", ["typeId: menu", "recordId: foo", "fields: {}"])
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const unknownType = result.errors.find((error) => error.code === "E_UNKNOWN_TYPE");
+      expect(unknownType).toBeDefined();
+      expect(unknownType?.message).toContain("types/menu.md");
+    }
+  });
+
+  it("VAL-003: record referencing declared type passes validation", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/menu.md", ["typeId: menu", "fields: {}"]),
+      rec("records/menu.foo/foo.md", ["typeId: menu", "recordId: foo", "fields: {}"])
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("LAYOUT-003: non-dataset files remain ignored", () => {
+    const snapshot = snapshotFromEntries([["README.md", "# Notes"]]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
   it("VAL-005: required fields enforced when fieldDefs.required = true", () => {
