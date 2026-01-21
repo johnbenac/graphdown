@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-21T01:03:53.217Z
+Generated: 2026-01-21T20:41:21.056Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -130,11 +130,12 @@ Tests (1):
 - packages/core/src/__tests__/spec/layout.integration.test.ts — "LAYOUT-002: only first front matter block defines a record object"
 
 ## LAYOUT-003 — Malformed YAML front matter in non-semantic Markdown is ignored (testable=true)
-Tests (7):
+Tests (8):
 - packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: invalid YAML front matter is ignored for discovery and validation"
 - packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: malformed YAML front matter is ignored for hashing"
 - packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts — "LAYOUT-003: valid YAML without reserved keys is ignored for hashing"
 - packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts — "LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: ignored files do not trigger unknown type validation"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: invalid YAML in non-semantic markdown is ignored"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: unterminated YAML front matter in non-semantic markdown is ignored"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "LAYOUT-003: valid YAML without reserved keys is ignored"
@@ -297,7 +298,9 @@ Tests (2):
 - packages/core/src/graph/__tests__/graph.unit.test.ts — "VAL-002: duplicate record identity fails Record Link Graph build"
 
 ## VAL-003 — Record objects must reference an existing type (testable=true)
-Tests (1):
+Tests (3):
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: missing type errors are grouped and include expected copy"
+- packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: missing type passes when definition exists"
 - packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts — "VAL-003: record referencing missing type fails validation"
 
 ## VAL-005 — Required fields (schema-driven)

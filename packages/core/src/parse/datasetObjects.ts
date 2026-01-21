@@ -246,3 +246,57 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
 
   return { typeObjects, recordObjects, ignored, errors };
 }
+
+export function discoverDeclaredTypeIds(snapshot: { files: Map<string, Uint8Array> }): Set<string> {
+  const declaredTypeIds = new Set<string>();
+  const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
+
+  // Collect plugin bundle paths so they can be excluded from record/type discovery.
+  const { pluginManifestPaths, pluginBundlePaths } = discoverPluginObjects(snapshot);
+
+  for (const file of files) {
+    if (pluginBundlePaths.has(file) || pluginManifestPaths.has(file)) {
+      continue;
+    }
+    const bytes = snapshot.files.get(file);
+    if (!bytes || !isRecordFileBytes(file, bytes)) {
+      continue;
+    }
+
+    const decoded = decodeUtf8Strict(bytes);
+    if (!decoded.ok) {
+      continue;
+    }
+
+    let yamlSection: string;
+    try {
+      ({ yaml: yamlSection } = extractFrontMatter(normalizeLineEndings(decoded.text)));
+    } catch {
+      continue;
+    }
+
+    let yamlObject: Record<string, unknown>;
+    try {
+      yamlObject = parseYamlObject(yamlSection);
+    } catch {
+      continue;
+    }
+
+    if (yamlObject.typeId === undefined) {
+      continue;
+    }
+
+    const typeIdCheck = validateIdentifier(yamlObject.typeId, 'typeId', file);
+    if (!typeIdCheck.ok) {
+      continue;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(yamlObject, 'recordId')) {
+      continue;
+    }
+
+    declaredTypeIds.add(typeIdCheck.value);
+  }
+
+  return declaredTypeIds;
+}

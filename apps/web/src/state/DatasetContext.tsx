@@ -122,7 +122,7 @@ function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
       message: internal.message,
       hint: [
         internal.hint,
-        "Your dataset is still saved offline in this browser. Update/reload and try again, or clear offline storage if you want to start over."
+        "Update/reload and try again, or clear offline storage if you want to start over."
       ]
         .filter(Boolean)
         .join(" ")
@@ -132,7 +132,7 @@ function mapRuntimeOpenFailure(errors: ValidationError[]): ImportErrorState {
     category: "dataset_invalid",
     title: "Dataset invalid",
     message:
-      "The dataset could not be opened by the runtime session. Your dataset is still saved offline in this browser. Update/reload and try again, or clear offline storage if you want to start over.",
+      "The dataset could not be opened by the runtime session. Fix the errors and try again.",
     errors
   };
 }

@@ -145,7 +145,40 @@ describe("validateDatasetSnapshot", () => {
 
   it("VAL-003: record referencing missing type fails validation", () => {
     const snapshot = snapshotFromEntries([rec("r.md", ["typeId: missing", "recordId: one", "fields: {}"])]);
-    expect(getErrorCodes(snapshot)).toContain("E_TYPEID_MISMATCH");
+    expect(getErrorCodes(snapshot)).toContain("E_UNKNOWN_TYPE");
+  });
+
+  it("VAL-003: missing type errors are grouped and include expected copy", () => {
+    const snapshot = snapshotFromEntries([
+      rec("records/menu.foo/foo.md", ["typeId: menu", "recordId: foo", "fields: {}"])
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const error = result.errors.find((entry) => entry.code === "E_UNKNOWN_TYPE");
+      expect(error).toBeTruthy();
+      expect(error?.file).toBeUndefined();
+      expect(error?.message).toContain("types/menu.md");
+      expect(error?.hint).toContain("records/menu.foo/foo.md");
+    }
+  });
+
+  it("VAL-003: missing type passes when definition exists", () => {
+    const snapshot = snapshotFromEntries([
+      rec("types/menu.md", ["typeId: menu", "fields: {}"]),
+      rec("records/menu.foo/foo.md", ["typeId: menu", "recordId: foo", "fields: {}"])
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
+  });
+
+  it("LAYOUT-003: ignored files do not trigger unknown type validation", () => {
+    const snapshot = snapshotFromEntries([
+      [".gitignore", "node_modules/"],
+      ["README.md", "# Graphdown dataset"]
+    ]);
+    const result = validateDatasetSnapshot(snapshot);
+    expect(result.ok).toBe(true);
   });
 
   it("VAL-005: required fields enforced when fieldDefs.required = true", () => {

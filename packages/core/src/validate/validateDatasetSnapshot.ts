@@ -1,5 +1,6 @@
 import {
   discoverGraphdownObjects,
+  discoverDeclaredTypeIds,
   IDENTIFIER_PATTERN,
   type ParsedRecordObject,
   type ParsedTypeObject,
@@ -25,6 +26,8 @@ export type ValidateDatasetResult =
   | { ok: false; errors: ValidationError[] };
 
 type CompositionComponent = { typeId: string; required: boolean };
+
+const UNKNOWN_TYPE_SAMPLE_LIMIT = 10;
 
 function enforceFieldDefs(
   typeObj: ParsedTypeObject,
@@ -293,12 +296,10 @@ function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
 }
 
 export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateDatasetResult {
-  const errors: ValidationError[] = [];
-
   const parsed = discoverGraphdownObjects(snapshot);
-  if (parsed.errors.length) {
-    return { ok: false, errors: parsed.errors };
-  }
+  const errors: ValidationError[] = [...parsed.errors];
+
+  const declaredTypeIds = discoverDeclaredTypeIds(snapshot);
 
   const discovered = discoverPluginObjects(snapshot);
   const pluginManifests: ParsedPluginManifest[] = discovered.plugins.map((p) => p.manifest);
@@ -731,6 +732,39 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
     recordsByTypeId.set(record.typeId, list);
   }
 
+  const missingTypeRefs = new Map<string, string[]>();
+  for (const record of parsed.recordObjects) {
+    if (!declaredTypeIds.has(record.typeId)) {
+      const list = missingTypeRefs.get(record.typeId) ?? [];
+      list.push(record.file);
+      missingTypeRefs.set(record.typeId, list);
+    }
+  }
+
+  for (const [typeId, files] of missingTypeRefs) {
+    const sample = files.slice(0, UNKNOWN_TYPE_SAMPLE_LIMIT);
+    const extra = files.length - sample.length;
+    const sampleText = sample.length
+      ? `Sample: ${sample.join(', ')}${extra > 0 ? ` (+${extra} more)` : ''}.`
+      : '';
+    const hint = [
+      `This type is referenced by ${files.length} record(s).`,
+      sampleText,
+      `Fix: create types/${typeId}.md, or change those records' typeId to an existing type.`,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    errors.push(
+      makeError(
+        'E_UNKNOWN_TYPE',
+        `Unknown record type "${typeId}". No type definition found at types/${typeId}.md.`,
+        undefined,
+        hint
+      )
+    );
+  }
+
   for (const record of parsed.recordObjects) {
     if (typeof record.parent === 'string' && !recordsByKey.has(record.parent)) {
       errors.push(
@@ -779,18 +813,6 @@ export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateData
   for (const record of parsed.recordObjects) {
     if ((parentState.get(record.identity) ?? 0) === 0) {
       visitParent(record.identity, []);
-    }
-  }
-
-  for (const record of parsed.recordObjects) {
-    if (!typesById.has(record.typeId)) {
-      errors.push(
-        makeError(
-          'E_TYPEID_MISMATCH',
-          `Record ${record.identity} references missing typeId ${record.typeId}`,
-          record.file
-        )
-      );
     }
   }
 
