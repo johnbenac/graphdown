@@ -241,7 +241,6 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
 
     // The plugin MUST NOT be able to “request” extra exported files.
     expect(canonical.files.has("plugins/demo/extra.txt")).toBe(false);
-    expect(canonical.files.has("plugins/demo/extra.txt")).toBe(false);
     expect(canonical.files.has("docs/README.txt")).toBe(false);
   });
 
