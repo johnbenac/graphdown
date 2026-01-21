@@ -210,11 +210,13 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
   recordObjects: ParsedRecordObject[];
   ignored: string[];
   errors: ValidationError[];
+  declaredTypeIds: Set<string>;
 } {
   const typeObjects: ParsedTypeObject[] = [];
   const recordObjects: ParsedRecordObject[] = [];
   const ignored: string[] = [];
   const errors: ValidationError[] = [];
+  const declaredTypeIds = new Set<string>();
 
   const files = [...snapshot.files.keys()].sort((a, b) => a.localeCompare(b));
 
@@ -234,15 +236,45 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
       continue;
     }
     if (parsed.kind === 'error') {
+      const declaredTypeId = extractDeclaredTypeId(file, bytes);
+      if (declaredTypeId) {
+        declaredTypeIds.add(declaredTypeId);
+      }
       errors.push(parsed.error);
       continue;
     }
     if (parsed.kind === 'type') {
+      declaredTypeIds.add(parsed.typeId);
       typeObjects.push(parsed);
     } else if (parsed.kind === 'record') {
       recordObjects.push(parsed);
     }
   }
 
-  return { typeObjects, recordObjects, ignored, errors };
+  return { typeObjects, recordObjects, ignored, errors, declaredTypeIds };
+}
+
+function extractDeclaredTypeId(file: string, bytes: Uint8Array): string | null {
+  const decoded = decodeUtf8Strict(bytes);
+  if (!decoded.ok) {
+    return null;
+  }
+  try {
+    const normalized = normalizeLineEndings(decoded.text);
+    const { yaml } = extractFrontMatter(normalized);
+    const yamlObject = parseYamlObject(yaml);
+    if (!isObject(yamlObject)) {
+      return null;
+    }
+    if (Object.prototype.hasOwnProperty.call(yamlObject, 'recordId')) {
+      return null;
+    }
+    const typeIdCheck = validateIdentifier(yamlObject.typeId, 'typeId', file);
+    if (!typeIdCheck.ok) {
+      return null;
+    }
+    return typeIdCheck.value;
+  } catch {
+    return null;
+  }
 }

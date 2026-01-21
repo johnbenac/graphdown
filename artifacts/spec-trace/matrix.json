@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-21T01:03:53.217Z",
+  "generatedAt": "2026-01-21T20:42:54.235Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -422,6 +422,11 @@
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported",
           "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: ignored files do not fail validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
@@ -991,7 +996,17 @@
       "tests": [
         {
           "reqId": "VAL-003",
+          "testTitle": "VAL-003: missing record type is reported as unknown type with path hint",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing missing type fails validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "VAL-003",
+          "testTitle": "VAL-003: unknown type passes once type definition exists",
           "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
