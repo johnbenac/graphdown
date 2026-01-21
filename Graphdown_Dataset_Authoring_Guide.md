@@ -1,8 +1,9 @@
 # Graphdown Dataset Authoring Guide
-*Practical guidance for writing and maintaining Graphdown datasets (Markdown + YAML front matter).*  
+
+*Practical guidance for writing and maintaining Graphdown datasets (Markdown + YAML front matter).*
 Based on **Graphdown Standard v0.5 (Draft)** (last updated 2026-01-14).
 
-> This guide is intentionally **author-focused**: how to structure content, write files, and avoid common pitfalls.  
+> This guide is intentionally **author-focused**: how to structure content, write files, and avoid common pitfalls.
 > For the exact normative rules, see `SPEC.md` in the Graphdown repo.
 >
 > Note: Graphdown plugins are now first-class dataset objects. This guide includes a practical, minimal “how to bundle a plugin”
@@ -14,7 +15,9 @@ Based on **Graphdown Standard v0.5 (Draft)** (last updated 2026-01-14).
 
 Here’s a minimal dataset with **two types** and a few records. If you understand this example, you understand 80% of Graphdown authoring.
 
-### Repository layout (recommended)
+### Repository layout
+
+Recommended layout:
 
 ```text
 my-dataset/
@@ -27,14 +30,21 @@ my-dataset/
   blocks/
     sha2-256/
       (optional attachments live here)
-  plugins/            (optional: plugin bundles; see “Plugins” below)
+  plugins/
     <pluginId>/
       manifest.md
       (bundle files live alongside)
 ```
 
 > Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
-> Plugins should be authored under `plugins/<pluginId>/` (recommended), and canonical exports always emit the same layout.
+> Plugins are authored under `plugins/` and exported in the same canonical layout.
+
+**Important implication (authoring vs export):**
+
+* While authoring, you *can* place record files anywhere (as long as they’re valid Graphdown objects).
+* On export, Graphdown will rewrite into the canonical `types/` + `records/` layout, and will **nest records according to `parent`**.
+
+If you internalize that, you’ll stop fighting the filesystem and start using `parent` intentionally.
 
 ### 1) Define a type: `types/task.md`
 
@@ -58,9 +68,10 @@ fields:
 ```
 
 This says:
-- There is a type named `task`.
-- Every task record must have a non-empty `fields.title`.
-- Every task record must contain at least one outgoing link to a `project` record (more on that soon).
+
+* There is a type named `task`.
+* Every task record must have a non-empty `fields.title`.
+* Every task record must contain at least one outgoing link to a `project` record (more on that soon).
 
 ### 2) Define another type: `types/project.md`
 
@@ -106,15 +117,116 @@ That `[[project:alpha]]` is a **relationship link**. It’s also what satisfies 
 
 Graphdown’s dataset format has a few strong opinions—mostly in service of long-term maintainability:
 
-- **Markdown-first, repo-first.** Your dataset is a folder of `.md` files that work well in Git.
-- **Schema-as-data.** Types are authored as data *inside* the dataset. No “per-dataset code” required for basic CRUD.
-- **Stable identities.** Records have stable IDs that are safe to reference (`typeId:recordId`). Paths don’t matter.
-- **Minimal core semantics.** Core validation is intentionally lightweight:
-  - it checks structure, required fields, composition constraints, hierarchy, and block integrity
-  - it does **not** enforce rich data types (dates, enums, money, etc.) — that’s plugin territory
-- **Human-authored text stays human-authored.** Graphdown avoids rewriting your content just to “normalize” it.
+* **Markdown-first, repo-first.** Your dataset is a folder of `.md` files that work well in Git.
+* **Schema-as-data.** Types are authored as data *inside* the dataset. No “per-dataset code” required for basic CRUD.
+* **Stable identities.** Records have stable IDs that are safe to reference (`typeId:recordId`). Paths don’t matter.
+* **Minimal core semantics.** Core validation is intentionally lightweight:
+
+  * it checks structure, required fields, composition constraints, hierarchy, and block integrity
+  * it does **not** enforce rich data types (dates, enums, money, etc.) — that’s plugin territory
+* **Human-authored text stays human-authored.** Graphdown avoids rewriting your content just to “normalize” it.
 
 If you keep those in mind, the format tends to feel… pleasantly unsurprising.
+
+---
+
+## Modeling: how to structure a dataset that stays sane
+
+Graphdown is a generic system. You can use it for:
+
+* creative works (books, films, scripts, story worlds)
+* software and engineering specs (SRS → subsystem specs → component specs → tests)
+* organizations and programs (clubs, troops, teams, rank systems, rosters)
+* product and manufacturing (product lines, catalogs, assemblies, parts)
+* research libraries, knowledge bases, and more
+
+So this section stays **domain-neutral**. The point is to help you choose types, hierarchy, and relationships in a way that makes round-trips and long-term edits easy.
+
+### Ownership vs references
+
+Graphdown has **two core ways** to connect records:
+
+* **`parent`** (top-level YAML key)
+  Structural containment: *where the record lives in the exported tree*.
+* **Wiki-link relationships** `[[typeId:recordId]]`
+  Semantic references: *what the record points to / uses / mentions / depends on*.
+
+> **Rule of thumb:**
+>
+> * Use `parent` to answer: *“Where does this record live in the exported tree?”*
+> * Use wiki-links to answer: *“What does this record refer to?”*
+>
+> A record has **at most one parent**. That means each record has **exactly one canonical place** in the exported folder tree.
+> Wiki-links can point anywhere (including across roots), and they don’t affect export layout.
+
+**The “don’t duplicate” principle:**
+
+> If something needs to “show up” under multiple things, do **not** duplicate it as a child in multiple places.
+> Keep a single canonical record and reference it via wiki-links.
+
+This is the single fastest way to avoid datasets that become impossible to refactor later.
+
+### Trees and forests
+
+A dataset is not required to be one tree. It can be a **forest**:
+
+* many root records of many types
+* multiple independent hierarchies living side by side
+* shared libraries referenced across those hierarchies by wiki-links
+
+Graphdown core does **not** enforce “singleton” records. If you want one top record, you can do that by convention—but Graphdown won’t force it.
+
+### Choose meaningful types and avoid generic buckets
+
+It’s tempting to create `node`, `thing`, `item`, `misc`, etc., and shove everything into it. That usually backfires.
+
+> Avoid catch-all types like `node`, `thing`, or `misc` unless you genuinely mean “free-form notes.”
+> If two kinds of records have different fields or different semantics, they should be different `typeId`s.
+
+This matters because:
+
+* you’ll want **type-specific fields** later
+* you’ll want different composition rules later
+* you’ll want different views and filters later
+
+#### Quick checklist: should this be a type?
+
+Create a new type when:
+
+* it needs **different fields** than other records
+* it participates in a different part of hierarchy (different parent/child expectations)
+* you want to query, filter, or present it differently
+
+#### Quick checklist: should this be a record or a field?
+
+Model something as a **field** when:
+
+* it’s just an attribute/value (e.g., `sku`, `revision`, `capacityGB`, `status`, `rankLevel`)
+* it doesn’t need its own children, relationships, or lifecycle
+* you don’t need to link to it from many places
+
+Model something as a **record** when:
+
+* other things need to link to it as a first-class entity
+* it has its own fields and long-lived identity
+* it has children (via `parent`) or relationships worth traversing
+
+This is how you avoid “SKU as a type” when what you really wanted was `fields.sku: "..."`.
+
+### Prefer the simplest representation that meets your needs
+
+Graphdown gives you freedom—use it to stay light.
+
+A common modeling trap is making “every row is a record” structures too early. Example patterns where you have options:
+
+* A reading list: do you need `reading_list_item` records, or just a list of `[[book:...]]` links inside a `reading_list` record?
+* A requirements spec: do you need `requirement` records for every line, or can you start with sections and inline `[[term:...]]` links?
+* An assembly/parts list: do you need per-line-item records, or can you start with a `fields.items[]` list of wiki-links?
+
+A good default:
+
+> Start with the minimal number of record types that preserve identity and reuse.
+> Add “line item records” later only if line items need their own lifecycle.
 
 ---
 
@@ -132,43 +244,47 @@ Every type and record is a **Markdown file with YAML front matter**.
 ```
 
 Rules-of-thumb that save pain:
-- The file must start with `---` at **byte 0** (no leading spaces, no BOM).
-- YAML must be a **map/object**, not a list.
-- The closing `---` matters. If you forget it, the file won’t parse.
+
+* The file must start with `---` at **byte 0** (no leading spaces, no BOM).
+* YAML must be a **map/object**, not a list.
+* The closing `---` matters. If you forget it, the file won’t parse.
 
 ---
 
 ## IDs: the “naming rules” that make everything composable
 
-### ✅ Allowed identifiers
+### Allowed identifiers
 
 Both `typeId` and `recordId` are:
-- strings
-- trimmed (no all-whitespace)
-- matching:
+
+* strings
+* trimmed (no all-whitespace)
+* matching:
 
 ```text
 ^[A-Za-z0-9][A-Za-z0-9_-]*$
 ```
 
 So:
-- start with a letter or number
-- then letters/numbers/underscore/hyphen
+
+* start with a letter or number
+* then letters/numbers/underscore/hyphen
 
 Examples that work:
-- `person`
-- `task`
-- `t-001`
-- `NASA_payload`
-- `2026_goals`
 
-### 🚫 Not allowed
+* `person`
+* `task`
+* `t-001`
+* `NASA_payload`
+* `2026_goals`
 
-- `:` (colon) is reserved for `typeId:recordId`
-- spaces (`"my record"`)
-- dots in IDs (`alpha.v2` — use `alpha-v2`)
-- leading hyphen (`-bad`)
-- empty strings
+### Not allowed
+
+* `:` (colon) is reserved for `typeId:recordId`
+* spaces (`"my record"`)
+* dots in IDs (`alpha.v2` — use `alpha-v2`)
+* leading hyphen (`-bad`)
+* empty strings
 
 Dots are fine in folder names; the common `records/<typeId>.<recordId>/` convention uses a dot as a separator, but the IDs themselves can’t contain dots.
 
@@ -176,11 +292,12 @@ Dots are fine in folder names; the common `records/<typeId>.<recordId>/` convent
 
 ---
 
-## Types: defining your model (without over-designing it)
+## Types: defining your model without over-designing it
 
 A **type object** is any record file whose YAML contains:
-- `typeId`
-- `fields` (a YAML map)
+
+* `typeId`
+* `fields` (a YAML map)
 
 …and **does not** contain `recordId`.
 
@@ -220,10 +337,11 @@ This is one of the core extensibility patterns: **top-level is fixed; `fields` i
 ## Records: instances of types
 
 A **record object** is any record file whose YAML contains:
-- `typeId`
-- `recordId`
-- `fields` (a YAML map)
-- optional `parent`
+
+* `typeId`
+* `recordId`
+* `fields` (a YAML map)
+* optional `parent`
 
 ### Minimal record example
 
@@ -277,8 +395,9 @@ If you want Graphdown core to recognize a relationship, use that exact bracket f
 ### Where relationships are extracted from
 
 Graphdown extracts relationship targets from:
-- the record **body**
-- **any string value** anywhere inside the record `fields` map (even nested)
+
+* the record **body**
+* **any string value** anywhere inside the record `fields` map (even nested)
 
 Note: relationships are extracted from **record objects only**. Type files are not scanned for relationships.
 
@@ -297,11 +416,12 @@ fields:
 ```
 
 That produces outgoing relationships to:
-- `person:johnny`
-- `task:t-001`
-- `task:t-003`
 
-### What does *not* create a core relationship
+* `person:johnny`
+* `task:t-001`
+* `task:t-003`
+
+### What does not create a core relationship
 
 These won’t be treated as relationships by core:
 
@@ -319,12 +439,13 @@ This is a feature: plugins can invent richer shapes without forcing everyone to 
 ### Unresolved links are usually okay
 
 If you write `[[project:does-not-exist]]`, core treats it like an “uncreated note” link:
-- it’s not a dataset-invalid error by itself
-- **but** unresolved links do **not** satisfy composition requirements (more below)
+
+* it’s not a dataset-invalid error by itself
+* **but** unresolved links do **not** satisfy composition requirements (more below)
 
 ---
 
-## Hierarchy: nesting records with `parent`
+## Hierarchy: nesting records with parent
 
 You can organize records into a tree using a single top-level key: `parent`.
 
@@ -342,23 +463,26 @@ This task belongs to [[project:alpha]].
 ```
 
 Notes:
-- `parent` must be either:
-  - missing (root)
-  - `null` (root)
-  - a string exactly like `typeId:recordId`
-- `parent` **must point to an existing record**
-- parent pointers must not create cycles
 
-### Important gotcha: `parent` is not a relationship link
+* `parent` must be either:
+
+  * missing (root)
+  * `null` (root)
+  * a string exactly like `typeId:recordId`
+* `parent` **must point to an existing record**
+* parent pointers must not create cycles
+
+### Important gotcha: parent is not a relationship link
 
 Core treats hierarchy separately from relationships. So:
 
-- `parent: project:alpha` does **not** count as “linking to a project” for composition constraints.
-- If your type requires a relationship link (composition), include an explicit `[[project:alpha]]` somewhere in body/fields.
+* `parent: project:alpha` does **not** count as “linking to a project” for composition constraints.
+* If your type requires a relationship link (composition), include an explicit `[[project:alpha]]` somewhere in body/fields.
 
 That separation is deliberate:
-- `parent` is structural navigation (“where this record lives in the tree”)
-- wiki-links are semantic relationships (“what this record references”)
+
+* `parent` is structural navigation (“where this record lives in the tree”)
+* wiki-links are semantic relationships (“what this record references”)
 
 ---
 
@@ -375,9 +499,9 @@ fields:
 
 …then every record of that type must include:
 
-- `fields.title` present
-- not `null`
-- not an all-whitespace string
+* `fields.title` present
+* not `null`
+* not an all-whitespace string
 
 Examples:
 
@@ -416,7 +540,7 @@ fields:
 
 Composition is a simple way to enforce that certain records aren’t “floating” without key connections.
 
-### Example: every `task` must link to a `project`
+### Example: every task must link to a project
 
 Type definition:
 
@@ -453,12 +577,14 @@ No links here.
 ```
 
 What counts:
-- Any outgoing relationship link `[[project:<something>]]` found in body/fields
-- The referenced record must actually exist (unresolved links don’t count)
+
+* Any outgoing relationship link `[[project:<something>]]` found in body/fields
+* The referenced record must actually exist (unresolved links don’t count)
 
 What doesn’t count:
-- `parent: project:alpha`
-- structured YAML relationship shapes (unless they’re strings containing wiki-links)
+
+* `parent: project:alpha`
+* structured YAML relationship shapes (unless they’re strings containing wiki-links)
 
 **Design intention:** composition is a small, reliable constraint you can use for “minimum completeness” without locking you into heavy schema systems.
 
@@ -485,8 +611,9 @@ blocks/sha2-256/<prefix>/<cid>
 ```
 
 Where:
-- `<cid>` is the exact CID string
-- `<prefix>` is the first byte of the block’s SHA-256 digest, as two lowercase hex characters
+
+* `<cid>` is the exact CID string
+* `<prefix>` is the first byte of the block’s SHA-256 digest, as two lowercase hex characters
 
 Example (for the CID above):
 
@@ -496,22 +623,24 @@ blocks/sha2-256/2c/bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq
 
 ### What validation enforces
 
-- Every block reference `[[<cid>]]` must resolve to a matching block file.
-- Every block file under `blocks/` must have bytes matching its CID digest.
-- Unreferenced block files are allowed (they’re considered “garbage,” but not invalid).
+* Every block reference `[[<cid>]]` must resolve to a matching block file.
+* Every block file under `blocks/` must have bytes matching its CID digest.
+* Unreferenced block files are allowed (they’re considered “garbage,” but not invalid).
 
 ### Practical workflow advice
 
-- Prefer adding attachments through Graphdown tooling/UI when available (so CIDs and paths are handled for you).
-- If you generate blocks yourself, build a tiny helper script in your plugin/tooling that:
-  1) hashes bytes
-  2) builds the CID
-  3) writes the file to the canonical path
-  4) inserts `[[<cid>]]` into the record
+* Prefer adding attachments through Graphdown tooling/UI when available (so CIDs and paths are handled for you).
+* If you generate blocks yourself, build a tiny helper script in your plugin/tooling that:
+
+  1. hashes bytes
+  2. builds the CID
+  3. writes the file to the canonical path
+  4. inserts `[[<cid>]]` into the record
 
 One more nuance:
-- **Dataset attachments** (images/PDFs/audio that are part of the dataset’s content) should generally be **blocks**.
-- **Plugin-local assets** (icons/fonts/wasm/zips used by the plugin itself) may be shipped as **plugin bundle files**.
+
+* **Dataset attachments** (images/PDFs/audio that are part of the dataset’s content) should generally be **blocks**.
+* **Plugin-local assets** (icons/fonts/wasm/zips used by the plugin itself) may be shipped as **plugin bundle files**.
   If a plugin bundle file is binary, it must be declared in the plugin manifest’s `binaryFiles[]` list (see next section).
 
 ---
@@ -523,24 +652,24 @@ Plugins let you ship **behavior + UI + supporting files** alongside a dataset.
 This authoring guide focuses on the **packaging rules** (what files go where, what the manifest looks like, and what’s valid).
 The details of *what plugin code can do at runtime* are evolving and should be treated as “check the current app/runtime docs.”
 
-### Plugin bundle layout (authoring)
+### Plugin bundle layout
 
 In a repo you author directly, a plugin typically lives under:
 
 ```text
 plugins/<pluginId>/
-  manifest.md            # plugin manifest (Markdown + YAML front matter)
+  manifest.md          # plugin manifest (Markdown + YAML front matter)
   entry.js             # entrypoint JS (must be listed in files[])
   ui.md                # optional docs/metadata the plugin uses
   assets/
     logo.bin           # example binary asset
 ```
 
-When Graphdown exports a **canonical** dataset zip/snapshot, plugins are always emitted in canonical layout (manifest at
-`plugins/<pluginId>/manifest.md`). Core hashing is path-independent, but for portability (zip/GitHub import + humans),
-author plugins under `plugins/<pluginId>/`.
+When Graphdown exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
+placing the manifest at `plugins/<pluginId>/manifest.md`). Don’t panic if you see `plugins/` in exports — it’s the same plugin,
+just in canonical shape.
 
-### Plugin manifest (what you must write)
+### Plugin manifest
 
 The plugin manifest is a Markdown file with YAML front matter.
 
@@ -572,15 +701,17 @@ Plugin manifest body text (optional).
 
 Key rules you should internalize:
 
-- `files[]` is the list of **bundle files** (relative paths) that are part of the plugin.
-- `entry` **must appear** in `files[]`.
-- `binaryFiles[]` is optional. If present:
-  - it must be a list of strings,
-  - every entry must be a **safe relative path**,
-  - every entry must also appear in `files[]` (exact string match).
-- For each file in `files[]`:
-  - if the path is **not** in `binaryFiles[]`, the file must be **UTF-8 decodable**
-  - if the path **is** in `binaryFiles[]`, it may be **any bytes**
+* `files[]` is the list of **bundle files** (relative paths) that are part of the plugin.
+* `entry` **must appear** in `files[]`.
+* `binaryFiles[]` is optional. If present:
+
+  * it must be a list of strings,
+  * every entry must be a **safe relative path**,
+  * every entry must also appear in `files[]` (exact string match).
+* For each file in `files[]`:
+
+  * if the path is **not** in `binaryFiles[]`, the file must be **UTF-8 decodable**
+  * if the path **is** in `binaryFiles[]`, it may be **any bytes**
 
 Practical takeaway: keep your JS/MD/etc as UTF-8 text; put images/fonts/wasm/zips in `binaryFiles`.
 
@@ -601,24 +732,23 @@ This ensures they’re considered reachable for validation/export/GC workflows.
 
 This matters for determinism and “why did my dataset hash change?” debugging:
 
-- **Text plugin bundle files** (not in `binaryFiles[]`) are hashed as UTF-8 text with line ending normalization.
-  - `\n` vs `\r\n` does *not* change the hash.
-- **Binary plugin bundle files** (listed in `binaryFiles[]`) are hashed as **raw bytes**.
-  - any byte change changes the dataset hash.
+* **Text plugin bundle files** (not in `binaryFiles[]`) are hashed as UTF-8 text with line ending normalization.
 
-### Common plugin authoring errors (and fixes)
+  * `\n` vs `\r\n` does *not* change the hash.
+* **Binary plugin bundle files** (listed in `binaryFiles[]`) are hashed as **raw bytes**.
 
-- `E_PLUGIN_UTF8_INVALID` for a plugin file like `logo.png` / `font.ttf` / `plugin.wasm`  
+  * any byte change changes the dataset hash.
+
+### Common plugin authoring errors and fixes
+
+* `E_PLUGIN_UTF8_INVALID` for a plugin file like `logo.png` / `font.ttf` / `plugin.wasm`
   → Add that path to `binaryFiles[]` in the manifest (and ensure it is also listed in `files[]`).
 
-- `E_PLUGIN_KEYS_INVALID` complaining that a `binaryFiles` entry “must be listed in files”  
+* `E_PLUGIN_KEYS_INVALID` complaining that a `binaryFiles` entry “must be listed in files”
   → Add the missing file path to `files[]` or remove it from `binaryFiles[]`.
 
-- Validation complaining about **reserved export paths** (for example: you listed `manifest.md` in `files[]`)  
+* Validation complaining about **reserved export paths** (for example: you listed `manifest.md` in `files[]`)
   → Rename the bundle file and update `files[]`. `manifest.md` is reserved for canonical export (`plugins/<pluginId>/manifest.md`).
-
-- `ImportError (missing_files)` when a manifest lists bundle files that aren’t present  
-  → Ensure every path in `files[]` exists relative to the manifest directory, and that `entry` is listed in `files[]`.
 
 ---
 
@@ -642,7 +772,7 @@ blocks/
     <prefix>/
       <cid>
 
-plugins/                      (optional plugins, authoring layout)
+plugins/
   <pluginId>/
     manifest.md
     (bundle files listed in files[])
@@ -650,29 +780,30 @@ plugins/                      (optional plugins, authoring layout)
 
 ### Naming conventions that age well
 
-- **typeId:** singular noun (`person`, `project`, `invoice`)
-- **recordId:** stable slug (`johnny`, `alpha`, `2026-q1`, `t-001`)
-- Avoid encoding volatile state in IDs (`task-done`, `project-old`)—put that in fields.
+* **typeId:** singular noun (`person`, `project`, `invoice`)
+* **recordId:** stable slug (`johnny`, `alpha`, `2026-q1`, `t-001`)
+* Avoid encoding volatile state in IDs (`task-done`, `project-old`)—put that in fields.
 
 ---
 
+## Real-world dataset patterns
 
-## Real-world dataset patterns (with mini examples)
+These patterns show up a lot in “content-rich” datasets. Treat them as starting points, not rules.
 
-These are a few patterns that show up a lot in “content-rich” datasets.
+### Pattern: a research library
 
-### Pattern: a research library (papers + authors + attached PDFs)
+* Types: `paper`, `author`, `tag`
+* Records: one file per paper/author/tag
+* Relationships:
 
-- Types: `paper`, `author`, `tag`
-- Records: one file per paper/author/tag
-- Relationships:
-  - `paper` links to its `author`(s) using `[[author:...]]`
-  - `paper` links to `tag` records using `[[tag:...]]`
-- Attachments:
-  - store the PDF bytes as a block file under `blocks/sha2-256/...`
-  - reference it from the paper body with `[[<cid>]]`
+  * `paper` links to its `author`(s) using `[[author:...]]`
+  * `paper` links to `tag` records using `[[tag:...]]`
+* Attachments:
 
-Example (paper record):
+  * store the PDF bytes as a block file under `blocks/sha2-256/...`
+  * reference it from the paper body with `[[<cid>]]`
+
+Example paper record:
 
 ```md
 ---
@@ -691,9 +822,9 @@ Notes:
 - Key idea: ...
 ```
 
-### Pattern: “chapters in a book” hierarchy
+### Pattern: chapters in a book
 
-Use `parent` when you want a clean navigation tree.
+Use `parent` when you want clean navigation.
 
 ```md
 ---
@@ -715,30 +846,124 @@ fields:
 (Body content here.)
 ```
 
-### Pattern: product/parts catalogs with completeness constraints
+You can also use wiki-links for cross-references:
 
-Composition is great when you want “every X must include at least one Y”.
+* recurring characters `[[character:...]]`
+* locations `[[place:...]]`
+* glossary terms `[[term:...]]`
 
-Example: every `car` record must link to an `engine` record.
+### Pattern: requirements and specifications
 
-```yaml
+A common engineering structure is a hierarchy of documents, plus cross-links to shared concepts.
+
+* Types: `spec`, `requirement`, `test`, `term`
+* Hierarchy: `spec` records can be nested via `parent` (SRS → subsystem spec → component spec)
+* Relationships:
+
+  * requirements link to terms, related requirements, tests
+  * specs link to other specs for traceability
+
+Example:
+
+```md
+---
+typeId: spec
+recordId: srs
 fields:
-  composition:
-    engine:
-      typeId: engine
-      required: true
+  title: "System Requirements Specification"
+---
+See [[spec:component-a]] for details on the sensor subsystem.
 ```
 
-Then, inside each `car` record, include at least one `[[engine:...]]` link.
+```md
+---
+typeId: requirement
+recordId: req-001
+parent: spec:srs
+fields:
+  text: "The system shall support offline mode."
+  rationale: "Field operation requires intermittent connectivity."
+---
+Verified by [[test:t-001]].
+```
+
+### Pattern: organizations and programs
+
+Think “Boy Scout troop” / “club” / “team”:
+
+* Types: `troop`, `patrol`, `person`, `rank`, `badge`
+* Hierarchy: people can be children of patrols, patrols children of troop
+* Relationships: `[[rank:...]]`, `[[badge:...]]`, mentorship links, etc.
+
+Example:
+
+```md
+---
+typeId: person
+recordId: alex
+parent: patrol:ravens
+fields:
+  name: "Alex"
+  currentRank: "Scout"
+---
+Working toward [[rank:star]] and [[badge:first-aid]].
+```
+
+### Pattern: catalogs, libraries, and assemblies
+
+This is intentionally generic. It covers:
+
+* product families and form factors
+* parts catalogs and categories
+* course catalogs and syllabi
+* asset libraries and bundles
+* any situation where you have a **library of reusable things** and **compositions that reference them**
+
+#### Library side
+
+Use `parent` to make the library browsable:
+
+* `catalog` → `category` → `item`
+
+#### Composition side
+
+Represent the composition as a record that links to library items.
+
+**Option 1: simplest**
+
+* store a list of wiki-link strings in `fields.items[]` or the Markdown body
+
+Example:
+
+```md
+---
+typeId: assembly
+recordId: desk-unit
+fields:
+  items:
+    - "[[item:motherboard-x]]"
+    - "[[item:ram-32gb]]"
+    - "[[item:nvme-2tb]]"
+---
+Notes: this configuration is for the desk unit prototype.
+```
+
+**Option 2: line-item records**
+
+* use `line_item` records only if each line needs its own lifecycle, attachments, children, or approvals
+
+Example pattern:
+
+* `assembly` has children `line_item:*` via `parent`
+* each `line_item` links to `[[item:...]]` and has quantity, notes, etc.
 
 ---
-
 
 ## Plugin-friendly authoring patterns
 
 Graphdown core is deliberately conservative about semantics. That’s good news for plugin authors: you can define rich conventions without breaking core compatibility.
 
-### 1) Put plugin metadata under `fields` (never top-level)
+### Put plugin metadata under fields
 
 Top-level YAML is reserved. So instead of:
 
@@ -756,7 +981,7 @@ fields:
     widget: select
 ```
 
-### 2) Consider namespacing plugin data
+### Consider namespacing plugin data
 
 If multiple plugins might touch the same dataset, a simple convention prevents collisions:
 
@@ -771,16 +996,17 @@ fields:
 
 Core ignores it. Your plugin can evolve it.
 
-### 3) Avoid “accidental relationships” in plugin strings
+### Avoid accidental relationships in plugin strings
 
 Core scans **all record field strings** for wiki-links.
 
 That’s usually what you want… until you store display text that happens to contain `[[typeId:recordId]]`.
 
 If you *don’t* want core relationships:
-- store references as structured objects (core ignores non-strings), or
-- store `typeId:recordId` as a plain string **without** `[[...]]`, or
-- put the value in a non-string shape (e.g. `{ key: "project:alpha" }`)
+
+* store references as structured objects (core ignores non-strings), or
+* store `typeId:recordId` as a plain string **without** `[[...]]`, or
+* put the value in a non-string shape (e.g. `{ key: "project:alpha" }`)
 
 If you *do* want core relationships *and* extra metadata, an easy pattern is:
 
@@ -792,13 +1018,14 @@ fields:
 
 Your plugin can parse the string; core still sees the relationship.
 
-### 4) Keep core constraints minimal; enforce richer rules in the plugin
+### Keep core constraints minimal and enforce richer rules in the plugin
 
 Core supports:
-- required fields (presence/blank checks)
-- composition (must link to at least one record of a type)
-- hierarchy integrity
-- block integrity
+
+* required fields
+* composition
+* hierarchy integrity
+* block integrity
 
 Everything else (date formats, enums, ranges, “status must be one of…”) belongs in the plugin or author tooling.
 
@@ -806,14 +1033,38 @@ That tends to produce datasets that stay usable even when plugins change.
 
 ---
 
+## Modeling worksheet: plan your hierarchy before you write files
+
+This is optional, but it saves time.
+
+Answer these quickly:
+
+1. **What are the roots of my forest?**
+   Examples: top-level projects, top-level books, top-level catalogs, top-level specs.
+
+2. **What types are trunks?**
+   Records that exist mainly to organize: programs, catalogs, chapters, major subsystems.
+
+3. **What types are leaves?**
+   Records that rarely have children: parts, people, requirements, scenes, glossary terms.
+
+4. **What are my libraries?**
+   Sets of reusable things that multiple roots will reference via wiki-links.
+
+5. **What should be a record vs a field?**
+   If it doesn’t need identity/reuse, make it a field.
+
+---
+
 ## Common mistakes and quick fixes
 
-### “Why is my file ignored?”
+### Why is my file ignored
 
 Usually one of these:
-- file doesn’t end in `.md`
-- file doesn’t start with `---` at byte 0
-- YAML doesn’t contain `typeId`
+
+* file doesn’t end in `.md`
+* file doesn’t start with `---` at byte 0
+* YAML doesn’t contain `typeId`
 
 Fix: ensure the very first characters of the file are:
 
@@ -824,7 +1075,7 @@ fields: {}
 ---
 ```
 
-### “Top-level key \"title\" is not allowed”
+### Top-level key "title" is not allowed
 
 Fix: move it under `fields`:
 
@@ -833,7 +1084,7 @@ fields:
   title: "My title"
 ```
 
-### “fields must be an object”
+### fields must be an object
 
 Fix: `fields` must be a YAML map, not a string/list:
 
@@ -849,39 +1100,74 @@ fields: {}
 fields: []
 ```
 
-### “Record references missing typeId …”
+### Record references missing typeId
 
 Fix: you created records before defining the type. Add a type object with that `typeId`.
 
-### “Parent … does not exist” / “Parent pointer cycle detected”
+### Parent does not exist or Parent pointer cycle detected
 
 Fix:
-- parent must point to an existing record identity (`typeId:recordId`)
-- no self-parenting
-- no loops (A → B → A)
 
-### “Block … referenced from … is missing”
+* parent must point to an existing record identity (`typeId:recordId`)
+* no self-parenting
+* no loops (A → B → A)
+
+### Block referenced from record is missing
 
 Fix: the block file must exist at the canonical path under `blocks/sha2-256/...`
 
-### “Invalid CID reference …”
+### Invalid CID reference
 
 Fix: avoid CID-shaped tokens that aren’t real CIDs. If you meant a record link, it should be `[[typeId:recordId]]` not a base32 CID.
 
-### “E_PLUGIN_UTF8_INVALID” for a plugin asset
+### E_PLUGIN_UTF8_INVALID for a plugin asset
 
 Fix: if the plugin bundle includes non-text bytes (png/ttf/wasm/zip/etc), list that path under `binaryFiles:` in the plugin manifest.
 If it’s *not* in `binaryFiles`, Graphdown treats it as text and requires valid UTF-8.
 
-### “binaryFiles entry … must be listed in files”
+### binaryFiles entry must be listed in files
 
 Fix: every path listed in `binaryFiles:` must also appear in `files:` by exact string equality.
 
 ---
 
+## Anti-patterns to avoid
+
+These aren’t “illegal,” but they routinely create pain.
+
+### Anti-pattern: generic container type
+
+* Symptom: `node`, `thing`, `folder` used for everything
+* Cost: type-specific fields become impossible; intent gets muddy; queries get worse
+
+Prefer: define the real type (`chapter`, `spec`, `category`, `person`, `part`, `scene`, etc.).
+
+### Anti-pattern: everything is a record
+
+* Symptom: turning attributes into records (`sku`, `revision`, `status`, `capacityGB`) without needing identity/reuse
+* Cost: unnecessary hierarchy and overhead; harder editing and browsing
+
+Prefer: keep attributes in `fields`, and promote to records only when you need it.
+
+### Anti-pattern: relationships encoded as structured YAML
+
+* Symptom: `{ typeId: part, recordId: x }`
+* Cost: core won’t treat it as a relationship; composition checks won’t see it
+
+Prefer: put `[[part:x]]` in record body or inside a string field.
+
+### Anti-pattern: duplicating “shared” things under multiple parents
+
+* Symptom: copies of the same concept scattered through the tree
+* Cost: drift; broken references; hard refactors
+
+Prefer: one canonical record + wiki-links.
+
+---
+
 ## FAQ
 
-### Can I store UI hints, widget definitions, or plugin config in the dataset?
+### Can I store UI hints, widget definitions, or plugin config in the dataset
 
 Yes—put them under `fields`, typically inside type objects.
 
@@ -902,40 +1188,42 @@ fields:
 
 Core will ignore `ui` entirely; your plugin can interpret it.
 
-### Why are top-level keys restricted?
+### Why are top-level keys restricted
 
-So the ecosystem doesn’t fragment into “everyone invents their own top-level schema.”  
+So the ecosystem doesn’t fragment into “everyone invents their own top-level schema.”
 Keeping top-level small makes datasets more portable and tooling simpler.
 
-### Should I put long prose in `fields`?
+### Should I put long prose in fields
 
 Usually no. Put long text in the Markdown body. Use `fields` for structured metadata.
 
-### Do I have to keep records in `records/` and types in `types/`?
+### Do I have to keep records in records and types in types
 
 Graphdown’s core model doesn’t care about paths for identity, but this layout is the canonical export shape and is the most compatible choice with current tooling and human expectations.
 
-### Can my dataset live in a GitHub subfolder?
+### Can my dataset live in a GitHub subfolder
 
-If you plan to import via a GitHub URL in Graphdown, assume “dataset = repo root”.  
+If you plan to import via a GitHub URL in Graphdown, assume “dataset = repo root”.
 Subdirectory GitHub URLs (like `/tree/main/some/subdir`) are rejected by design.
 
 Practical workaround: put the dataset at the repo root, or use a dedicated repo per dataset.
 
-### Can I link to a record that doesn’t exist yet?
+### Can I link to a record that does not exist yet
 
-Yes. Unresolved relationship links are allowed.  
+Yes. Unresolved relationship links are allowed.
 But:
-- they won’t satisfy composition requirements
-- `parent` pointers must resolve (those are structural)
 
-### How do I rename a typeId or recordId?
+* they won’t satisfy composition requirements
+* `parent` pointers must resolve (those are structural)
+
+### How do I rename a typeId or recordId
 
 Treat it like a migration:
-- change the ID in the file
-- update every `[[typeId:recordId]]` reference that should point to the new identity
-- update any `parent` pointers
-- re-validate
+
+* change the ID in the file
+* update every `[[typeId:recordId]]` reference that should point to the new identity
+* update any `parent` pointers
+* re-validate
 
 If you want stable long-lived links, prefer leaving IDs alone and changing display names in `fields`.
 
@@ -945,8 +1233,8 @@ If you want stable long-lived links, prefer leaving IDs alone and changing displ
 
 To make this easier to adopt, here are two small resources:
 
-- **Starter template repository (zip)** — a ready-to-import dataset you can extend.
-- **Cheat sheet (PDF)** — quick reference for file templates, IDs, links, and common errors.
+* **Starter template repository zip** — a ready-to-import dataset you can extend.
+* **Cheat sheet PDF** — quick reference for file templates, IDs, links, and common errors.
 
 You should find download links for both alongside this guide.
 
