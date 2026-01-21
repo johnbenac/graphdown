@@ -34,7 +34,7 @@ my-dataset/
 ```
 
 > Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
-> Plugins are authored under `plugins/` and exported in the same canonical layout.
+> For portability (zip/GitHub import + humans), author plugins under `plugins/<pluginId>/`. Canonical export always emits plugins in that layout; core hashing is path-independent.
 
 ### 1) Define a type: `types/task.md`
 
@@ -525,7 +525,7 @@ The details of *what plugin code can do at runtime* are evolving and should be t
 
 ### Plugin bundle layout (authoring)
 
-In a repo you author directly, a plugin typically lives under:
+Recommended authoring layout is canonical: a plugin lives under:
 
 ```text
 plugins/<pluginId>/
@@ -536,9 +536,8 @@ plugins/<pluginId>/
     logo.bin           # example binary asset
 ```
 
-When Graphdown exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
-placing the manifest at `plugins/<pluginId>/manifest.md`). Don’t panic if you see `plugins/` in exports — it’s the same plugin,
-just in canonical shape.
+Canonical export always emits plugins in the canonical layout, placing the manifest at
+`plugins/<pluginId>/manifest.md` with bundle files alongside it (as declared in `files[]`).
 
 ### Plugin manifest (what you must write)
 
@@ -616,6 +615,9 @@ This matters for determinism and “why did my dataset hash change?” debugging
 
 - Validation complaining about **reserved export paths** (for example: you listed `manifest.md` in `files[]`)  
   → Rename the bundle file and update `files[]`. `manifest.md` is reserved for canonical export (`plugins/<pluginId>/manifest.md`).
+
+- `ImportError (missing_files)` when a manifest lists bundle files that aren’t present  
+  → Ensure every path in `files[]` exists relative to the manifest directory, and `entry` is included in `files[]`.
 
 ---
 
