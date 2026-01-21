@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-21T01:03:53.217Z",
+  "generatedAt": "2026-01-21T20:42:27.250Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -426,6 +426,11 @@
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: invalid YAML in non-semantic markdown is ignored",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
+        {
+          "reqId": "LAYOUT-003",
+          "testTitle": "LAYOUT-003: non-dataset files remain ignored",
           "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
@@ -989,6 +994,11 @@
       "testable": true,
       "verify": null,
       "tests": [
+        {
+          "reqId": "VAL-003",
+          "testTitle": "VAL-003: record referencing declared type passes validation",
+          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+        },
         {
           "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing missing type fails validation",
