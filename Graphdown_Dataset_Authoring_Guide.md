@@ -27,14 +27,14 @@ my-dataset/
   blocks/
     sha2-256/
       (optional attachments live here)
-  extensions/            (optional: plugin bundles; see “Plugins” below)
+  plugins/            (optional: plugin bundles; see “Plugins” below)
     <pluginId>/
-      plugin.md
+      manifest.md
       (bundle files live alongside)
 ```
 
 > Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
-> Plugins are typically authored under `extensions/`, but exported in canonical form under `plugins/`.
+> Plugins are authored under `plugins/` and exported in the same canonical layout.
 
 ### 1) Define a type: `types/task.md`
 
@@ -528,8 +528,8 @@ The details of *what plugin code can do at runtime* are evolving and should be t
 In a repo you author directly, a plugin typically lives under:
 
 ```text
-extensions/<pluginId>/
-  plugin.md            # plugin manifest (Markdown + YAML front matter)
+plugins/<pluginId>/
+  manifest.md            # plugin manifest (Markdown + YAML front matter)
   entry.js             # entrypoint JS (must be listed in files[])
   ui.md                # optional docs/metadata the plugin uses
   assets/
@@ -544,7 +544,7 @@ just in canonical shape.
 
 The plugin manifest is a Markdown file with YAML front matter.
 
-Example: `extensions/demo/plugin.md`
+Example: `plugins/demo/manifest.md`
 
 ```md
 ---
@@ -639,9 +639,9 @@ blocks/
     <prefix>/
       <cid>
 
-extensions/                      (optional plugins, authoring layout)
+plugins/                      (optional plugins, authoring layout)
   <pluginId>/
-    plugin.md
+    manifest.md
     (bundle files listed in files[])
 ```
 

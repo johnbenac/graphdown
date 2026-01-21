@@ -17,10 +17,10 @@ describe("buildSnapshotIndex", () => {
         ["types/note.md", "---\ntypeId: note\n---\n"],
         ["records/note/one.md", "---\ntypeId: note\nrecordId: one\n---\n"],
         [
-          "extensions/demo/plugin.md",
+          "plugins/demo/manifest.md",
           "---\npluginId: demo\nfiles:\n  - recordlike.md\n---\n"
         ],
-        ["extensions/demo/recordlike.md", "---\ntypeId: note\nrecordId: one\n---\n"]
+        ["plugins/demo/recordlike.md", "---\ntypeId: note\nrecordId: one\n---\n"]
       ])
     );
 

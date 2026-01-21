@@ -23,7 +23,7 @@ describe("readZipSnapshotFromBytes plugin parse failures", () => {
     const manifestText = ["---", "pluginId: demo", "gdApiVersion: 1", "---"].join("\n");
 
     const zipBytes = zipSync({
-      "plugins/demo/plugin.md": bytes(manifestText)
+      "plugins/demo/manifest.md": bytes(manifestText)
     });
 
     let caught: unknown;

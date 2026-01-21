@@ -19,7 +19,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     const testDir = path.dirname(fileURLToPath(import.meta.url));
     const fixturePath = path.resolve(
       testDir,
-      "../../../../core/src/__fixtures__/plugin-valid-dataset/extensions/demo/plugin.md"
+      "../../../../core/src/__fixtures__/plugin-valid-dataset/plugins/demo/manifest.md"
     );
     const manifestText = await readFile(fixturePath, "utf8");
     const updatedManifest = manifestText.replace(
@@ -37,10 +37,10 @@ describe("loadGitHubSnapshot plugin bundles", () => {
           tree: [
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
-            { path: "extensions/demo/plugin.md", type: "blob" },
-            { path: "extensions/demo/ui.md", type: "blob" },
-            { path: "extensions/demo/entry.js", type: "blob" },
-            { path: "extensions/demo/logo.png", type: "blob" },
+            { path: "plugins/demo/manifest.md", type: "blob" },
+            { path: "plugins/demo/ui.md", type: "blob" },
+            { path: "plugins/demo/entry.js", type: "blob" },
+            { path: "plugins/demo/logo.png", type: "blob" },
             { path: "docs/readme.md", type: "blob" },
             { path: "assets/logo.png", type: "blob" }
           ]
@@ -60,16 +60,16 @@ describe("loadGitHubSnapshot plugin bundles", () => {
             status: 200
           });
         }
-        if (path === "extensions/demo/plugin.md") {
+        if (path === "plugins/demo/manifest.md") {
           return new Response(updatedManifest, { status: 200 });
         }
-        if (path === "extensions/demo/ui.md") {
+        if (path === "plugins/demo/ui.md") {
           return new Response("# demo ui", { status: 200 });
         }
-        if (path === "extensions/demo/entry.js") {
+        if (path === "plugins/demo/entry.js") {
           return new Response("console.log('demo');", { status: 200 });
         }
-        if (path === "extensions/demo/logo.png") {
+        if (path === "plugins/demo/logo.png") {
           return new Response(new Uint8Array([0, 1, 2, 3]), { status: 200 });
         }
         if (path === "docs/readme.md") {
@@ -82,24 +82,24 @@ describe("loadGitHubSnapshot plugin bundles", () => {
 
     const { snapshot, ignored } = await loadGitHubSnapshot({ owner: "owner", repo: "repo", fetch: fetchMock });
 
-    expect(snapshot.files.has("extensions/demo/plugin.md")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/ui.md")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/entry.js")).toBe(true);
-    expect(snapshot.files.has("extensions/demo/logo.png")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/manifest.md")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/ui.md")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/entry.js")).toBe(true);
+    expect(snapshot.files.has("plugins/demo/logo.png")).toBe(true);
     expect(ignored).toEqual(expect.arrayContaining(["docs/readme.md", "assets/logo.png"]));
 
     const uiFetches = fetchMock.mock.calls.filter(
-      ([url]) => url.toString().includes("/extensions/demo/ui.md")
+      ([url]) => url.toString().includes("/plugins/demo/ui.md")
     );
     expect(uiFetches).toHaveLength(1);
 
     const entryFetches = fetchMock.mock.calls.filter(
-      ([url]) => url.toString().includes("/extensions/demo/entry.js")
+      ([url]) => url.toString().includes("/plugins/demo/entry.js")
     );
     expect(entryFetches.length).toBeGreaterThan(0);
 
     const binaryFetches = fetchMock.mock.calls.filter(
-      ([url]) => url.toString().includes("/extensions/demo/logo.png")
+      ([url]) => url.toString().includes("/plugins/demo/logo.png")
     );
     expect(binaryFetches.length).toBeGreaterThan(0);
   });

@@ -231,7 +231,7 @@ describe("loadGitHubSnapshot", () => {
           tree: [
             { path: "types/note.md", type: "blob" },
             { path: "records/note/record-1.md", type: "blob" },
-            { path: "extensions/demo/plugin.md", type: "blob" }
+            { path: "plugins/demo/manifest.md", type: "blob" }
           ]
         })
       )
@@ -274,7 +274,7 @@ describe("loadGitHubSnapshot", () => {
       expect(caught.info.source).toBe("github");
       expect(caught.info.code).toBe("missing_files");
       expect(caught.info.missingPaths).toEqual(
-        expect.arrayContaining(["extensions/demo/entry.js", "extensions/demo/ui.md"])
+        expect.arrayContaining(["plugins/demo/entry.js", "plugins/demo/ui.md"])
       );
     }
   });
