@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 import { selectSemanticSnapshotFiles } from "@graphdown/io";
-import { validateDatasetSnapshot } from "@graphdown/core";
+import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 
 const encoder = new TextEncoder();

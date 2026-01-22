@@ -1,6 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
 
-import type { DatasetSnapshot, ValidationError } from '@graphdown/core';
+import type { DatasetSnapshot, ValidationError } from '@graphdown/dataset';
 import {
   blockPathForCid,
   buildRecordLinkGraphFromSnapshot,
@@ -12,7 +12,7 @@ import {
   makeError,
   RECORD_KEY_PATTERN,
   validateDatasetSnapshot
-} from '@graphdown/core';
+} from '@graphdown/dataset';
 import { fail } from './errors';
 import { collectStringValues } from './internal/collectStringValues';
 

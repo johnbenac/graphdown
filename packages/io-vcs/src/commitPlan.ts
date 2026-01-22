@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { toBytes } from "./bytes";
 import { DuplicateCommitPathError } from "./errors";
 import { normalizeRelPath } from "./path";

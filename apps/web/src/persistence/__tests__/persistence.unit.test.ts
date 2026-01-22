@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { createPersistence, KEY } from "@graphdown/persistence";
 import { IndexedDbStore } from "@graphdown/storage-idb";
 
