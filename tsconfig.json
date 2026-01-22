@@ -3,14 +3,13 @@
     "target": "ES2022",
     "module": "CommonJS",
     "outDir": "dist",
-    "rootDir": "packages/core/src",
+    "rootDir": "packages/dataset/src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@graphdown/dataset": ["./packages/dataset/src/index.ts"],
-      "@graphdown/core": ["./packages/core/src/index.ts"],
       "@graphdown/persistence": ["./packages/persistence/src/index.ts"],
       "@graphdown/io": ["./packages/io/src/index.ts"],
       "@graphdown/io-zip": ["./packages/io-zip/src/index.ts"],
@@ -21,13 +20,13 @@
       "@graphdown/storage-idb": ["./packages/storage-idb/src/index.ts"]
     }
   },
-  "include": ["packages/core/src/**/*.ts"],
+  "include": ["packages/dataset/src/**/*.ts"],
   "exclude": [
-    "packages/core/src/**/__tests__/**",
-    "packages/core/src/**/__fixtures__/**",
-    "packages/core/src/**/*.test.ts",
-    "packages/core/src/**/*.spec.ts",
-    "packages/core/src/**/*.test.tsx",
-    "packages/core/src/**/*.spec.tsx"
+    "packages/dataset/src/**/__tests__/**",
+    "packages/dataset/src/**/__fixtures__/**",
+    "packages/dataset/src/**/*.test.ts",
+    "packages/dataset/src/**/*.spec.ts",
+    "packages/dataset/src/**/*.test.tsx",
+    "packages/dataset/src/**/*.spec.tsx"
   ]
 }

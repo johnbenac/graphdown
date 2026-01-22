@@ -8,8 +8,8 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
-- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, and hashing
-- **packages/io-zip/src/** — Zip import/export helpers shared by core + web
+- **packages/dataset/src/** — Framework-agnostic dataset library for parsing, validation, and hashing
+- **packages/io-zip/src/** — Zip import/export helpers
 
 **Critical rule**: If anything conflicts with SPEC.md, SPEC.md wins.
 
@@ -31,9 +31,8 @@ npm run format:check
 # Run all Node.js tests
 npm test
 
-# Run core-only checks
-npm run check:core-scope
-npm run test:core
+# Run dataset-only checks
+npm run test:dataset
 
 # Run zip IO-only checks
 npm run test:io-zip
@@ -88,9 +87,9 @@ npm --workspace apps/web run playwright:install
 
 ## Code Architecture
 
-### Core Library Structure (packages/core/src/)
+### Dataset Library Structure (packages/dataset/src/)
 
-The graphdown domain library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
+The graphdown dataset library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
 
 Key modules:
 
@@ -206,11 +205,11 @@ Use these as golden compatibility references (read-only):
 
 ## Development Guidelines
 
-### Core Library Constraints
+### Dataset Library Constraints
 
-- **No UI dependencies** — graphdown core cannot import React, react-router-dom, or app-level code
-- **Framework-agnostic** — Core must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `@graphdown/core` or `@graphdown/io-zip` barrels, not deep paths
+- **No UI dependencies** — graphdown dataset cannot import React, react-router-dom, or app-level code
+- **Framework-agnostic** — Dataset library must work in any environment (enforced by ESLint)
+- **Import from barrel** — App code must import from `@graphdown/dataset` or other package barrels, not deep paths
 
 ### Spec Conformance
 

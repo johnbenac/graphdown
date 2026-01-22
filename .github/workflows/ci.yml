@@ -69,7 +69,7 @@ jobs:
   validate-example-datasets:
     runs-on: ubuntu-latest
     env:
-      CORE_DIST: ${{ github.workspace }}/.ci/core-dist-cjs
+      DATASET_DIST: ${{ github.workspace }}/.ci/dataset-dist-cjs
     steps:
       - name: Checkout graphdown
         uses: actions/checkout@v4
@@ -80,18 +80,18 @@ jobs:
           cache: 'npm'
       - name: Install
         run: npm ci
-      - name: Build core for dataset validation (CommonJS)
+      - name: Build dataset for validation (CommonJS)
         run: |
           set -euo pipefail
-          rm -rf "$CORE_DIST"
-          mkdir -p "$CORE_DIST"
-          npx tsc -p packages/core/tsconfig.build.cjs.json --outDir "$CORE_DIST"
+          rm -rf "$DATASET_DIST"
+          mkdir -p "$DATASET_DIST"
+          npx tsc -p packages/dataset/tsconfig.build.cjs.json --outDir "$DATASET_DIST"
 
           node -e "
-            const coreDist = process.env.CORE_DIST;
-            if (!coreDist) throw new Error('CORE_DIST not set');
-            require('fs').accessSync(coreDist + '/index.js');
-            console.log('core build ok');
+            const datasetDist = process.env.DATASET_DIST;
+            if (!datasetDist) throw new Error('DATASET_DIST not set');
+            require('fs').accessSync(datasetDist + '/index.js');
+            console.log('dataset build ok');
           "
       - name: Validate research-lab-dataset (JSON)
         run: |
@@ -103,13 +103,13 @@ jobs:
           const fs = require('node:fs');
           const path = require('node:path');
 
-          const coreDist = process.env.CORE_DIST;
-          if (!coreDist) {
-            console.error('CORE_DIST env var not set');
+          const datasetDist = process.env.DATASET_DIST;
+          if (!datasetDist) {
+            console.error('DATASET_DIST env var not set');
             process.exit(1);
           }
 
-          const { validateDatasetSnapshot } = require(coreDist + '/index.js');
+          const { validateDatasetSnapshot } = require(datasetDist + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
@@ -146,13 +146,13 @@ jobs:
           const fs = require('node:fs');
           const path = require('node:path');
 
-          const coreDist = process.env.CORE_DIST;
-          if (!coreDist) {
-            console.error('CORE_DIST env var not set');
+          const datasetDist = process.env.DATASET_DIST;
+          if (!datasetDist) {
+            console.error('DATASET_DIST env var not set');
             process.exit(1);
           }
 
-          const { validateDatasetSnapshot } = require(coreDist + '/index.js');
+          const { validateDatasetSnapshot } = require(datasetDist + '/index.js');
 
           function loadRepoSnapshotFromFs(root) {
             const files = new Map();
