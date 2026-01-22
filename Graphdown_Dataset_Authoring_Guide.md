@@ -178,9 +178,9 @@ Graphdown core does **not** enforce “singleton” records. If you want one top
 
 ### Choose meaningful types and avoid generic buckets
 
-It’s tempting to create `node`, `thing`, `item`, `misc`, etc., and shove everything into it. That usually backfires.
+It’s tempting to create `node`, `thing`, `item`, `misc`, `category`, etc., and shove everything into it. That usually backfires.
 
-> Avoid catch-all types like `node`, `thing`, or `misc` unless you genuinely mean “free-form notes.”
+> Avoid catch-all types like `node`, `thing`, `item`, `misc`, `category`.
 > If two kinds of records have different fields or different semantics, they should be different `typeId`s.
 
 This matters because:
