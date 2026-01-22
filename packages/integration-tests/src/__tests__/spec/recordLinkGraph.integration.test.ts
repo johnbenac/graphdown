@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildRecordLinkGraphFromSnapshot, validateDatasetSnapshot } from "@graphdown/dataset";
 import { snapshotFromTextFiles } from "../../harness";
 
-describe("integration: core record link graph", () => {
+describe("integration: dataset record link graph", () => {
   it("indexes outgoing/incoming links from record body + fields, and ignores plugin bundle files", () => {
     const snapshot = snapshotFromTextFiles([
       [

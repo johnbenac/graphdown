@@ -16,6 +16,8 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Dataset package smoke test (Node import/require)
+        run: node tools/check-dataset-package-smoke.cjs
       - name: Repo guardrails
         run: npm run check:repo-guardrails
       - name: Lint

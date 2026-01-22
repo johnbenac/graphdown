@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "../../index";
-import type { DatasetSnapshot } from "../../index";
+import { validateDatasetSnapshot } from "../../index.js";
+import type { DatasetSnapshot } from "../../index.js";
 
 const encoder = new TextEncoder();
 

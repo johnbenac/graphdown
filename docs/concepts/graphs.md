@@ -17,8 +17,8 @@ This document names each one precisely and points at the code that builds or val
 - type objects are not scanned for relationships
 
 **Key modules:**
-- Extraction: `packages/core/src/parse/wikiRefs.ts`
-- Graph build/index: `packages/core/src/graph/graph.ts`
+- Extraction: `packages/dataset/src/parse/wikiRefs.ts`
+- Graph build/index: `packages/dataset/src/graph/graph.ts`
 
 **Important properties:**
 - May contain cycles.
@@ -40,11 +40,11 @@ This document names each one precisely and points at the code that builds or val
 - The structure must be acyclic (VAL-PARENT-003).
 
 **Key module:**
-- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
+- Validation: `packages/dataset/src/validate/validateDatasetSnapshot.ts`
 
 **Usage:**
 - Canonical export/import layout uses this hierarchy to nest record directories:
-  `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
+  `packages/dataset/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Important separation:**
 - `parent` pointers are *not* record relationships under REL-001/REL-002.
@@ -56,7 +56,7 @@ This document names each one precisely and points at the code that builds or val
 `fields.composition.<name> = { typeId: <otherType>, required: boolean }`
 
 **Key modules:**
-- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
+- Validation: `packages/dataset/src/validate/validateDatasetSnapshot.ts`
 
 **How it is enforced:**
 - It is not satisfied by hierarchy parent pointers.
@@ -80,9 +80,9 @@ This creates a “two-layer” relationship:
 Plugin manifests may also declare block dependencies explicitly via `blocks[]`.
 
 **Key modules:**
-- Extraction: `packages/core/src/parse/wikiRefs.ts`
-- Validation: `packages/core/src/validate/validateDatasetSnapshot.ts`
-- Reachable block pruning: `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
+- Extraction: `packages/dataset/src/parse/wikiRefs.ts`
+- Validation: `packages/dataset/src/validate/validateDatasetSnapshot.ts`
+- Reachable block pruning: `packages/dataset/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Validity constraints:**
 - referenced block must exist at canonical path
@@ -95,7 +95,7 @@ Plugin manifests may also declare block dependencies explicitly via `blocks[]`.
 This is not a semantic “relationship graph.” It is a derived directory tree used for stable exports.
 
 **Key module:**
-- `packages/core/src/snapshot/canonicalizeDatasetSnapshot.ts`
+- `packages/dataset/src/snapshot/canonicalizeDatasetSnapshot.ts`
 
 **Inputs:**
 - type identities (`typeId`)

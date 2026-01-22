@@ -1,7 +1,7 @@
-import { parseMarkdownRecord } from './markdownRecord';
-import type { ValidationError } from '../validate/errors';
-import { decodeUtf8Strict } from '../internal/text';
-import { isRecordFileBytes } from './recordFile';
+import { parseMarkdownRecord } from './markdownRecord.js';
+import type { ValidationError } from '../validate/errors.js';
+import { decodeUtf8Strict } from '../internal/text.js';
+import { isRecordFileBytes } from './recordFile.js';
 
 export type ParsedPluginManifest = {
   file: string;

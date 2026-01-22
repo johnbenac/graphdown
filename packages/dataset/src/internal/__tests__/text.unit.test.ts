@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { decodeUtf8Strict, decodeUtf8StrictOrThrow, normalizeLineEndings } from "../text";
+import { decodeUtf8Strict, decodeUtf8StrictOrThrow, normalizeLineEndings } from "../text.js";
 
 test("normalizeLineEndings normalizes CRLF and CR to LF", () => {
   assert.equal(normalizeLineEndings("a\r\nb\rc"), "a\nb\nc");

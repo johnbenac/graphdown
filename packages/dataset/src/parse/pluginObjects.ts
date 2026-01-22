@@ -1,11 +1,11 @@
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { decodeUtf8Strict } from '../internal/text';
-import type { ParsedPluginManifest } from './pluginManifest';
+import type { DatasetSnapshot } from '../model/snapshotTypes.js';
+import { decodeUtf8Strict } from '../internal/text.js';
+import type { ParsedPluginManifest } from './pluginManifest.js';
 import {
   isPluginManifestCandidateBytes,
   parsePluginManifest,
   resolvePluginBundlePaths,
-} from './pluginManifest';
+} from './pluginManifest.js';
 
 export type DiscoveredPluginObject = {
   manifest: ParsedPluginManifest;

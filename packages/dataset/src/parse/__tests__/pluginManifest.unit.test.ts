@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { collectDeclaredPluginBundleRelPaths } from "../pluginManifest";
+import { collectDeclaredPluginBundleRelPaths } from "../pluginManifest.js";
 
 describe("collectDeclaredPluginBundleRelPaths", () => {
   it("includes entry, files, and binaryFiles with deterministic dedupe order", () => {

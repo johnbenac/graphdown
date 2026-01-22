@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { parseGraphdownText } from "../../parse/datasetObjects";
-import { validateDatasetSnapshot } from "../../validate/validateDatasetSnapshot";
-import type { DatasetSnapshot } from "../../model/snapshotTypes";
-import type { ValidateDatasetResult } from "../../validate/validateDatasetSnapshot";
-import type { ValidationError } from "../../validate/errors";
+import { parseGraphdownText } from "../../parse/datasetObjects.js";
+import { validateDatasetSnapshot } from "../../validate/validateDatasetSnapshot.js";
+import type { DatasetSnapshot } from "../../model/snapshotTypes.js";
+import type { ValidateDatasetResult } from "../../validate/validateDatasetSnapshot.js";
+import type { ValidationError } from "../../validate/errors.js";
 
 const encoder = new TextEncoder();
 

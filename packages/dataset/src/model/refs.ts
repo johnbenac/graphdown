@@ -1,4 +1,4 @@
-import { cleanId } from './ids';
+import { cleanId } from './ids.js';
 
 export function normalizeRef(value: unknown): string | null {
   return cleanId(value);
