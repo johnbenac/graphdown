@@ -6,6 +6,78 @@
 - Before finishing any change, verify that relevant GitHub Actions workflows still pass or would pass: run the appropriate local checks that map to CI to avoid breaking the action matrix, and call out any CI gaps or limitations explicitly.
 - Treat CI stability as a first-class requirement: our actions cover many scenarios, so changes should be validated against the same checks to protect the repository from CI regressions.
 
+## Workspace Dependency Format
+
+**CRITICAL**: This repository uses npm (not pnpm). Workspace dependencies MUST use version format, not protocol format.
+
+### Correct Format
+
+```json
+{
+  "dependencies": {
+    "@graphdown/package-name": "0.0.0"
+  },
+  "devDependencies": {
+    "@graphdown/other-package": "0.0.0"
+  }
+}
+```
+
+### Incorrect Format (DO NOT USE)
+
+```json
+{
+  "dependencies": {
+    "@graphdown/package-name": "workspace:*"  // ❌ WRONG - pnpm only
+  }
+}
+```
+
+### Why This Matters
+
+- The `workspace:*` protocol is **pnpm-specific** and not supported by npm
+- Using it causes `npm ci` to fail with: `npm error code EUNSUPPORTEDPROTOCOL`
+- This breaks all CI builds immediately
+
+### Before Adding Any Workspace Dependency
+
+1. Check existing packages for the pattern:
+```bash
+# See how other packages declare workspace deps
+cat packages/persistence/package.json | grep "@graphdown"
+cat packages/io/package.json | grep "@graphdown"
+cat packages/app-kit/package.json | grep "@graphdown"
+```
+
+2. Always use `"0.0.0"` as the version string
+
+3. Verify before committing:
+```bash
+# This MUST return nothing
+grep -r "workspace:" packages/*/package.json apps/*/package.json
+
+# If it finds "workspace:", fix it before proceeding
+```
+
+### Quick Reference
+
+**Adding a new workspace package dependency:**
+```bash
+# In the consuming package's package.json, add:
+"@graphdown/new-package": "0.0.0"
+
+# Then from repo root:
+npm install
+```
+
+**Verification that dependencies are correct:**
+```bash
+# Must succeed without EUNSUPPORTEDPROTOCOL
+npm ci
+```
+
+See `package-lock.json` lockfileVersion (currently v3) which confirms npm usage.
+
 ## GitHub URL usage + reference repositories
 
 - GitHub URLs are accepted when importing datasets in the web app: we parse repo-root or `/tree/<ref>` URLs, then fetch Markdown files from `datasets/`, `types/`, and `records/` via the GitHub API. URLs pointing at files, issues, or subdirectories are intentionally rejected.
