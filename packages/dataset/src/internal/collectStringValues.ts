@@ -1,4 +1,4 @@
-import { isObject } from '../model/types';
+import { isObject } from '../model/types.js';
 
 export function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {

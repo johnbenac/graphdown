@@ -5,8 +5,8 @@ import {
   computeGdHashV1,
   discoverGraphdownObjects,
   validateDatasetSnapshot
-} from "../../index";
-import type { DatasetSnapshot } from "../../index";
+} from "../../index.js";
+import type { DatasetSnapshot } from "../../index.js";
 
 const encoder = new TextEncoder();
 

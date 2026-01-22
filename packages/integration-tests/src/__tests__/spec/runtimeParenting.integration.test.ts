@@ -3,7 +3,7 @@ import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { snapshotFromTextFiles } from "../../harness";
 
-describe("integration: core validation -> runtime hierarchy", () => {
+describe("integration: dataset validation -> runtime hierarchy", () => {
   it("indexes parent/child/root relationships correctly", async () => {
     const snapshot = snapshotFromTextFiles([
       [
@@ -70,7 +70,7 @@ describe("integration: core validation -> runtime hierarchy", () => {
     expect(recTwo?.fields).toEqual({ title: "Two" });
   });
 
-  it("rejects parent cycles (core + runtime both surface E_PARENT_CYCLE)", async () => {
+  it("rejects parent cycles (dataset + runtime both surface E_PARENT_CYCLE)", async () => {
     const snapshot = snapshotFromTextFiles([
       [
         "types/note.md",

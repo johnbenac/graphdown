@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import * as core from "..";
+import * as dataset from "../index.js";
 
-describe("core exports", () => {
+describe("dataset exports", () => {
   it("does not expose persistence helpers", () => {
-    const surface = core as Record<string, unknown>;
+    const surface = dataset as Record<string, unknown>;
     expect(surface.createPersistence).toBeUndefined();
     expect(surface.createIndexedDbPersistStore).toBeUndefined();
     expect(surface.createPersistStore).toBeUndefined();

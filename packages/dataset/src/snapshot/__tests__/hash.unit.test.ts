@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { computeGdHashV1 } from "../hash";
-import type { HashScope } from "../hash";
-import type { DatasetSnapshot } from "../../model/snapshotTypes";
+import { computeGdHashV1 } from "../hash.js";
+import type { HashScope } from "../hash.js";
+import type { DatasetSnapshot } from "../../model/snapshotTypes.js";
 
 const encoder = new TextEncoder();
 const BLOCK_CID = "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";

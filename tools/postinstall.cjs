@@ -3,6 +3,8 @@ const { execSync } = require("node:child_process");
 
 const isCI = Boolean(process.env.CI) || Boolean(process.env.GITHUB_ACTIONS);
 
+execSync("npm --workspace packages/dataset run build", { stdio: "inherit" });
+
 if (isCI) {
   console.log("[postinstall] CI detected: skipping Playwright browser install (CI installs browsers explicitly in the E2E job).");
   process.exit(0);

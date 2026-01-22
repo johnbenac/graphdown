@@ -5,7 +5,7 @@ This repository only deploys the production site when code or configs that affec
 ## What triggers a deploy (production surface area)
 - `apps/web/src/**`, `apps/web/index.html`, `apps/web/src/styles.css`
 - `apps/web/vite.config.*`, `apps/web/tsconfig*.json`, `apps/web/package.json`
-- `packages/core/src/**`, `packages/core/package.json`
+- `packages/dataset/src/**`, `packages/dataset/package.json`
 - `packages/io/src/**`, `packages/io/package.json`
 - `packages/io-github/src/**`, `packages/io-github/package.json`
 - `packages/io-zip/src/**`, `packages/io-zip/package.json`
@@ -13,7 +13,7 @@ This repository only deploys the production site when code or configs that affec
 - Root build inputs: `package.json`, `package-lock.json`, `tsconfig.json`
 
 ## What never triggers a deploy
-- Tests and harnesses: `apps/web/e2e/**`, `apps/web/**/__tests__/**`, `apps/web/test-results/**`, `packages/core/**/__tests__/**`
+- Tests and harnesses: `apps/web/e2e/**`, `apps/web/**/__tests__/**`, `apps/web/test-results/**`, `packages/dataset/**/__tests__/**`
 - CI/meta: `.github/**`
 - Documentation and generated artifacts: `docs/**`, `artifacts/**`
 

@@ -4,8 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "vitest";
 
-import { validateDatasetSnapshot } from "../validateDatasetSnapshot";
-import type { DatasetSnapshot } from "../../model/snapshotTypes";
+import { validateDatasetSnapshot } from "../validateDatasetSnapshot.js";
+import type { DatasetSnapshot } from "../../model/snapshotTypes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

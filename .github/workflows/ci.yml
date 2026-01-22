@@ -18,6 +18,8 @@ jobs:
         run: npm ci
       - name: Repo guardrails
         run: npm run check:repo-guardrails
+      - name: Dataset package smoke test (Node import/require)
+        run: node tools/check-dataset-package-smoke.cjs
       - name: Lint
         run: npm run lint
       - name: Test

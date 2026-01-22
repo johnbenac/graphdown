@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-22T17:10:53.931Z
+Generated: 2026-01-22T19:14:19.390Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -57,7 +57,7 @@ Tests (1):
 
 ## NR-PLUG-HASH-001 — Plugins do not define hashing semantics (testable=true, verify=ci)
 Tests (1):
-- packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts — "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)"
+- packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts — "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by dataset semantics)"
 
 ## ID-001 — Identifier syntax is separator-safe (testable=true)
 Tests (3):

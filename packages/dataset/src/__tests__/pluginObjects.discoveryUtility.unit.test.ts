@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { DatasetSnapshot } from '..';
-import { discoverPluginObjects } from '..';
+import type { DatasetSnapshot } from "../index.js";
+import { discoverPluginObjects } from "../index.js";
 
 const encoder = new TextEncoder();
 
