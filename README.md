@@ -6,7 +6,7 @@ It ships:
 
 - the **standard** (`SPEC.md`) — the single source of truth (currently **Spec v0.5**)
 - a **web app** (`apps/web`) for importing/browsing/editing datasets
-- a **core domain library** (`packages/core/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
+- a **dataset domain library** (`packages/dataset/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
 - a **runtime API** (`packages/runtime`) for session-based dataset reads
 
 > If anything conflicts with `SPEC.md`, `SPEC.md` wins.
@@ -23,7 +23,7 @@ Graphdown defines **three first-class semantic object classes** in that reposito
 2. **Block objects** stored as uninterpreted bytes in the canonical block store (`blocks/…`).
 3. **Plugin objects** stored as a plugin manifest plus referenced plugin bundle files.
 
-Everything else in the repository is **non-semantic** and ignored by core (BLOCK-LAYOUT-003).
+Everything else in the repository is **non-semantic** and ignored by the dataset layer (BLOCK-LAYOUT-003).
 
 ### Content-based discovery (paths don’t matter)
 
@@ -78,7 +78,7 @@ Blocks are **content-addressed byte blobs** stored in the canonical block store.
 
   `[[<cid>]]`
 
-Core validation is strict about CID-shaped tokens:
+Dataset validation is strict about CID-shaped tokens:
 - CID-shaped tokens that fail DASL CIDv1 decoding are import-failing (`E_CID_INVALID`) (VAL-CID-001)
 - referenced blocks must exist and match their CID digest (VAL-BLOCK-001 / VAL-BLOCK-002)
 
@@ -203,7 +203,7 @@ npm run dev:web
 Run core tests:
 
 ```sh
-npm --workspace packages/core run test
+npm --workspace packages/dataset run test
 ```
 
 Run web tests:
@@ -365,7 +365,7 @@ Reference datasets used for compatibility checks:
 * `SPEC.md` — Graphdown standard (normative)
 * `Graphdown_Dataset_Authoring_Guide.md` — authoring guidance (non-normative)
 * `apps/web/` — React/Vite web app (import, browse, edit, export)
-* `packages/core/src/` — core parsing/validation/hashing/canonicalization/runtime helpers
+* `packages/dataset/src/` — dataset parsing/validation/hashing/canonicalization/runtime helpers
 * `docs/` — developer concept docs (glossary, graphs, snapshots/layout)
 * `artifacts/spec-trace/` — generated spec-to-test traceability artifacts
 * `tools/spec-trace.cjs` — spec-trace generator (matrix must match spec; GOV-002)

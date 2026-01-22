@@ -8,7 +8,7 @@ Graphdown is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
-- **packages/core/src/** — Framework-agnostic core domain library for parsing, validation, and hashing
+- **packages/dataset/src/** — Framework-agnostic core domain library for parsing, validation, and hashing
 - **packages/io-zip/src/** — Zip import/export helpers shared by core + web
 
 **Critical rule**: If anything conflicts with SPEC.md, SPEC.md wins.
@@ -88,7 +88,7 @@ npm --workspace apps/web run playwright:install
 
 ## Code Architecture
 
-### Core Library Structure (packages/core/src/)
+### Core Library Structure (packages/dataset/src/)
 
 The graphdown domain library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
 
@@ -210,7 +210,7 @@ Use these as golden compatibility references (read-only):
 
 - **No UI dependencies** — graphdown core cannot import React, react-router-dom, or app-level code
 - **Framework-agnostic** — Core must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `@graphdown/core` or `@graphdown/io-zip` barrels, not deep paths
+- **Import from barrel** — App code must import from `@graphdown/dataset` or `@graphdown/io-zip` barrels, not deep paths
 
 ### Spec Conformance
 
@@ -264,8 +264,8 @@ big_picture -f \
 ```bash
 # Feature overview
 big_picture -f \
-  "packages/core/src/parse/*.ts:Parsing modules" \
-  "packages/core/src/validate/*.ts:Validation modules" \
+  "packages/dataset/src/parse/*.ts:Parsing modules" \
+  "packages/dataset/src/validate/*.ts:Validation modules" \
   -o feature-context.txt
 
 # Debug context
@@ -276,7 +276,7 @@ big_picture -f \
   -o debug-context.txt
 
 # Architecture overview
-big_picture -f packages/core/src/**/*.ts -o architecture.txt
+big_picture -f packages/dataset/src/**/*.ts -o architecture.txt
 ```
 
 ### Tips

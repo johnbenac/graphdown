@@ -1,4 +1,4 @@
-import { isObject } from '@graphdown/core';
+import { isObject } from '@graphdown/dataset';
 
 export function collectStringValues(value: unknown, into: Set<string>): void {
   if (typeof value === 'string') {

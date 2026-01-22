@@ -3,18 +3,24 @@
     "target": "ES2022",
     "module": "CommonJS",
     "outDir": "dist",
-    "rootDir": "packages/core/src",
+    "rootDir": "packages",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["packages/core/src/**/*.ts"],
+  "include": ["packages/core/src/**/*.ts", "packages/dataset/src/**/*.ts"],
   "exclude": [
     "packages/core/src/**/__tests__/**",
     "packages/core/src/**/__fixtures__/**",
     "packages/core/src/**/*.test.ts",
     "packages/core/src/**/*.spec.ts",
     "packages/core/src/**/*.test.tsx",
-    "packages/core/src/**/*.spec.tsx"
+    "packages/core/src/**/*.spec.tsx",
+    "packages/dataset/src/**/__tests__/**",
+    "packages/dataset/src/**/__fixtures__/**",
+    "packages/dataset/src/**/*.test.ts",
+    "packages/dataset/src/**/*.spec.ts",
+    "packages/dataset/src/**/*.test.tsx",
+    "packages/dataset/src/**/*.spec.tsx"
   ]
 }

@@ -17,7 +17,7 @@ This directory contains configuration for the test conventions checker (`tools/c
       "areaName": {
         "reason": "Why this area is exempt from requiring co-located tests",
         "issue": "GitHub issue tracking remediation (e.g., GH-1234 or https://...)",
-        "owner": "Team or individual responsible (e.g., @graphdown/core)",
+        "owner": "Team or individual responsible (e.g., @graphdown/dataset)",
         "expires": "YYYY-MM-DD when this exception should be reviewed/removed"
       }
     }
@@ -35,13 +35,13 @@ This directory contains configuration for the test conventions checker (`tools/c
       "internal": {
         "reason": "Low-risk helpers; covered via integration tests in validate/ + parse/",
         "issue": "GH-1234",
-        "owner": "@graphdown/core",
+        "owner": "@graphdown/dataset",
         "expires": "2026-06-01"
       },
       "zip": {
         "reason": "Temporary exception while zip tests are added",
         "issue": "GH-1235",
-        "owner": "@graphdown/core",
+        "owner": "@graphdown/dataset",
         "expires": "2026-02-15"
       }
     }

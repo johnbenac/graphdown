@@ -12,6 +12,13 @@ export default [
     }
   },
   {
+    files: ['packages/dataset/src/**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module'
+    }
+  },
+  {
     files: ['packages/core/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
@@ -21,6 +28,21 @@ export default [
             { name: 'react', message: 'core must remain framework-agnostic.' },
             { name: 'react-dom', message: 'core must remain framework-agnostic.' },
             { name: 'react-router-dom', message: 'core must remain framework-agnostic.' }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['packages/dataset/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'react', message: 'dataset must remain framework-agnostic.' },
+            { name: 'react-dom', message: 'dataset must remain framework-agnostic.' },
+            { name: 'react-router-dom', message: 'dataset must remain framework-agnostic.' }
           ]
         }
       ]
@@ -44,6 +66,23 @@ export default [
     }
   },
   {
+    files: ['packages/dataset/src/**/*.{ts,tsx}'],
+    ignores: [
+      'packages/dataset/src/**/__tests__/**',
+      'packages/dataset/src/**/__fixtures__/**',
+      'packages/dataset/src/**/*.test.*',
+      'packages/dataset/src/**/*.spec.*'
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/__tests__/**', '**/__fixtures__/**']
+        }
+      ]
+    }
+  },
+  {
     files: ['packages/runtime/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
@@ -55,17 +94,29 @@ export default [
                 '@graphdown/core/*',
                 '@graphdown/core/src/*',
                 '@graphdown/core/src/**',
+                '@graphdown/dataset/*',
+                '@graphdown/dataset/src/*',
+                '@graphdown/dataset/src/**',
                 '../core/*',
                 '../core/**',
+                '../dataset/*',
+                '../dataset/**',
                 '../../core/*',
                 '../../core/**',
                 '../../core/src/**',
+                '../../dataset/*',
+                '../../dataset/**',
+                '../../dataset/src/**',
                 '../../../core/*',
                 '../../../core/**',
+                '../../../dataset/*',
+                '../../../dataset/**',
                 '../../../../core/**',
-                '**/packages/core/**'
+                '../../../../dataset/**',
+                '**/packages/core/**',
+                '**/packages/dataset/**'
               ],
-              message: 'Runtime must import @graphdown/core via the package barrel only.'
+              message: 'Runtime must import @graphdown/dataset via the package barrel only.'
             }
           ]
         }
@@ -75,10 +126,13 @@ export default [
   {
     files: [
       'packages/core/src/**/__tests__/**/*.{ts,tsx}',
+      'packages/dataset/src/**/__tests__/**/*.{ts,tsx}',
       'packages/runtime/src/**/__tests__/**/*.{ts,tsx}',
       'apps/web/src/**/__tests__/**/*.{ts,tsx}',
       'packages/core/src/**/*.test.{ts,tsx}',
       'packages/core/src/**/*.spec.{ts,tsx}',
+      'packages/dataset/src/**/*.test.{ts,tsx}',
+      'packages/dataset/src/**/*.spec.{ts,tsx}',
       'packages/runtime/src/**/*.test.{ts,tsx}',
       'packages/runtime/src/**/*.spec.{ts,tsx}',
       'apps/web/src/**/*.test.{ts,tsx}',
@@ -100,17 +154,29 @@ export default [
                 '@graphdown/core/*',
                 '@graphdown/core/src/*',
                 '@graphdown/core/src/**',
+                '@graphdown/dataset/*',
+                '@graphdown/dataset/src/*',
+                '@graphdown/dataset/src/**',
                 '../core/*',
                 '../core/**',
+                '../dataset/*',
+                '../dataset/**',
                 '../../core/*',
                 '../../core/**',
                 '../../core/src/**',
+                '../../dataset/*',
+                '../../dataset/**',
+                '../../dataset/src/**',
                 '../../../core/*',
                 '../../../core/**',
+                '../../../dataset/*',
+                '../../../dataset/**',
                 '../../../../core/**',
-                '**/packages/core/**'
+                '../../../../dataset/**',
+                '**/packages/core/**',
+                '**/packages/dataset/**'
               ],
-              message: 'Import from @graphdown/core (package barrel) only.'
+              message: 'Import from @graphdown/dataset (package barrel) only.'
             }
           ]
         }

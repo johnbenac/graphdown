@@ -1,6 +1,6 @@
-# Graphdown domain logic
+# Graphdown dataset logic
 
-The core package `src/` directory contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
+The dataset package `src/` directory contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
 
 ## Vocabulary (important)
 
@@ -64,6 +64,6 @@ Zip IO lives in `@graphdown/io-zip`.
 
 ## Tests
 
-The core package contains unit and integration tests for parsing and validation,
+The dataset package contains unit and integration tests for parsing and validation,
 including `__tests__/spec/validateDatasetSnapshot.integration.test.ts` and
 `parse/__tests__/markdownRecord.unit.test.ts`.
