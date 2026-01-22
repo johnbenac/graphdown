@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { blockPathForCid, canonicalizeDatasetSnapshot, cidFromRawBytes } from "@graphdown/core";
-import type { DatasetSnapshot } from "@graphdown/core";
+import {
+  blockPathForCid,
+  canonicalizeDatasetSnapshot,
+  cidFromRawBytes
+} from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 
 const enc = new TextEncoder();

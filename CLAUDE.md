@@ -210,7 +210,7 @@ Use these as golden compatibility references (read-only):
 
 - **No UI dependencies** — graphdown core cannot import React, react-router-dom, or app-level code
 - **Framework-agnostic** — Core must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `@graphdown/core` or `@graphdown/io-zip` barrels, not deep paths
+- **Import from barrel** — App code must import from `@graphdown/dataset` or `@graphdown/io-zip` barrels, not deep paths
 
 ### Spec Conformance
 

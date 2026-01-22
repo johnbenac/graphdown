@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildRecordLinkGraphFromSnapshot, validateDatasetSnapshot } from "@graphdown/core";
+import {
+  buildRecordLinkGraphFromSnapshot,
+  validateDatasetSnapshot
+} from "@graphdown/dataset";
 import { snapshotFromTextFiles } from "../../harness";
 
 describe("integration: core record link graph", () => {

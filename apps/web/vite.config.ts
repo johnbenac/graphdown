@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const pagesBase = process.env.PAGES_BASE;
 const appKitIndex = path.resolve(__dirname, "../../packages/app-kit/src/index.ts");
+const datasetIndex = path.resolve(__dirname, "../../packages/dataset/src/index.ts");
 const coreIndex = path.resolve(__dirname, "../../packages/core/src/index.ts");
 const ioIndex = path.resolve(__dirname, "../../packages/io/src/index.ts");
 const ioGitHubIndex = path.resolve(__dirname, "../../packages/io-github/src/index.ts");
@@ -32,6 +33,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^@graphdown\/app-kit$/, replacement: appKitIndex },
+      { find: /^@graphdown\/dataset$/, replacement: datasetIndex },
       { find: /^@graphdown\/core$/, replacement: coreIndex },
       { find: /^@graphdown\/io$/, replacement: ioIndex },
       { find: /^@graphdown\/io-github$/, replacement: ioGitHubIndex },
