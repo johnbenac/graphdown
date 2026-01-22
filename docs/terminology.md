@@ -40,7 +40,7 @@ Stable identifier for a record object within its type.
 The globally unique record identity string:
 `recordKey = typeId:recordId`
 
-Core treats `recordKey` as computed and MUST NOT store it as a separate YAML field.
+Dataset semantics treat `recordKey` as computed and MUST NOT store it as a separate YAML field.
 
 ### Record reference
 A string equal to a `recordKey` (`typeId:recordId`), used inside wiki-links.
@@ -64,7 +64,7 @@ These terms describe the TypeScript structures and derived views built from a da
 In-memory representation of files:
 `{ files: Map<string, Uint8Array> }`
 
-A snapshot may contain non-record files. Core semantics ignore non-record and non-block-store files (BLOCK-LAYOUT-003), but snapshots can still carry them for whole-snapshot export.
+A snapshot may contain non-record files. Dataset semantics ignore non-record and non-block-store files (BLOCK-LAYOUT-003), but snapshots can still carry them for whole-snapshot export.
 
 ### ParsedTypeObject / ParsedRecordObject
 Structured objects produced by `discoverGraphdownObjects()` from `parse/datasetObjects.ts`.

@@ -10,14 +10,14 @@ const jsonResponse = (data: unknown) =>
     headers: { "Content-Type": "application/json" }
   });
 
-describe("integration: io-github -> selection -> core validation -> runtime open", () => {
+describe("integration: io-github -> selection -> dataset validation -> runtime open", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
   it("imports from a stubbed GitHub repo, validates, and opens runtime API", async () => {
     // Use the well-known CID for an empty sha2-256 block.
-    // This is the exact CID referenced in the core plugin fixture.
+    // This is the exact CID referenced in the dataset plugin fixture.
     const EMPTY_BLOCK_CID =
       "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
     const EMPTY_BLOCK_PATH = `blocks/sha2-256/e3/${EMPTY_BLOCK_CID}`;
@@ -154,7 +154,7 @@ describe("integration: io-github -> selection -> core validation -> runtime open
     // Assert: ignored paths are reported (markdown noise + non-md noise)
     expect(ignored).toEqual(["assets/logo.png", "docs/readme.md"]);
 
-    // Assert: core validation passes
+    // Assert: dataset validation passes
     const validation = validateDatasetSnapshot(snapshot);
     expect(validation.ok).toBe(true);
 

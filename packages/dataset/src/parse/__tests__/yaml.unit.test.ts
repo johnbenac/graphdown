@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { parseYamlObject } from "../yaml";
+import { parseYamlObject } from "../yaml.js";
 
 test('FR-MD-020: parses YAML objects', () => {
   assert.deepEqual(parseYamlObject('a: 1'), { a: 1 });

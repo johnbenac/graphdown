@@ -3,22 +3,22 @@ import {
   IDENTIFIER_PATTERN,
   type ParsedRecordObject,
   type ParsedTypeObject,
-} from '../parse/datasetObjects';
+} from '../parse/datasetObjects.js';
 import {
   isSafeRelativePath,
   resolvePluginBundlePaths,
   type ParsedPluginManifest,
-} from '../parse/pluginManifest';
-import { discoverPluginObjects } from '../parse/pluginObjects';
+} from '../parse/pluginManifest.js';
+import { discoverPluginObjects } from '../parse/pluginObjects.js';
 import { sha256 } from '@noble/hashes/sha256';
-import { makeError, type ValidationError } from './errors';
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { isObject } from '../model/types';
-import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid';
-import { extractCidRefs, extractRecordRefs } from '../parse/wikiRefs';
-import { isValidPluginId } from '../model/ids';
-import { decodeUtf8Strict } from '../internal/text';
-import { collectStringValues } from '../internal/collectStringValues';
+import { makeError, type ValidationError } from './errors.js';
+import type { DatasetSnapshot } from '../model/snapshotTypes.js';
+import { isObject } from '../model/types.js';
+import { blockPathForCid, decodeDaslCidString } from '../cid/daslCid.js';
+import { extractCidRefs, extractRecordRefs } from '../parse/wikiRefs.js';
+import { isValidPluginId } from '../model/ids.js';
+import { decodeUtf8Strict } from '../internal/text.js';
+import { collectStringValues } from '../internal/collectStringValues.js';
 
 export type ValidateDatasetResult =
   | { ok: true }

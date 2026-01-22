@@ -1,10 +1,10 @@
-import { discoverGraphdownObjects, type ParsedRecordObject, type ParsedTypeObject } from '../parse/datasetObjects';
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { blockPathForCid } from '../cid/daslCid';
-import { extractCidRefs } from '../parse/wikiRefs';
-import { discoverPluginObjects } from '../parse/pluginObjects';
-import { isValidPluginId } from '../model/ids';
-import { collectStringValues } from '../internal/collectStringValues';
+import { discoverGraphdownObjects, type ParsedRecordObject, type ParsedTypeObject } from '../parse/datasetObjects.js';
+import type { DatasetSnapshot } from '../model/snapshotTypes.js';
+import { blockPathForCid } from '../cid/daslCid.js';
+import { extractCidRefs } from '../parse/wikiRefs.js';
+import { discoverPluginObjects } from '../parse/pluginObjects.js';
+import { isValidPluginId } from '../model/ids.js';
+import { collectStringValues } from '../internal/collectStringValues.js';
 
 function collectReachableBlockPaths(
   snapshot: DatasetSnapshot,

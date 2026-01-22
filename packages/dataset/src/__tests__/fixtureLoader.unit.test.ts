@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { validateDatasetSnapshot } from "..";
-import { loadFixtureSnapshot } from "./fixtureLoader";
+import { validateDatasetSnapshot } from "../index.js";
+import { loadFixtureSnapshot } from "./fixtureLoader.js";
 
 describe("fixtureLoader", () => {
   it("loads valid-dataset and validates OK", () => {
