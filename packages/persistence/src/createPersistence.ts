@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { serializeDatasetSnapshotV1, deserializeDatasetSnapshotV1 } from "./codec/snapshotCodec";
 import { KEY } from "./keys";
 import {

@@ -8,8 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@noble/hashes": "^1.4.0",
-    "yaml": "^2.8.2"
+    "@graphdown/dataset": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

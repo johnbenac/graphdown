@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 
 const encoder = new TextEncoder();
 

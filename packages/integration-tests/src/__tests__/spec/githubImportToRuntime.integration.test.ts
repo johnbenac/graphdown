@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { loadGitHubSnapshot } from "@graphdown/io-github";
-import { validateDatasetSnapshot } from "@graphdown/core";
+import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 
 const jsonResponse = (data: unknown) =>
