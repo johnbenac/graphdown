@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { ValidationError } from "@graphdown/core";
-import { canonicalizeDatasetSnapshot, makeError, parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/core";
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { ValidationError } from "@graphdown/dataset";
+import { canonicalizeDatasetSnapshot, makeError, parseMarkdownRecord, serializeMarkdownRecord } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { isImportError, type ImportErrorInfo } from "@graphdown/io";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
 import type { ImportProgress } from "../import/types";
