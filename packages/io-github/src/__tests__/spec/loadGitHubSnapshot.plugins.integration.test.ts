@@ -19,7 +19,7 @@ describe("loadGitHubSnapshot plugin bundles", () => {
     const testDir = path.dirname(fileURLToPath(import.meta.url));
     const fixturePath = path.resolve(
       testDir,
-      "../../../../core/src/__fixtures__/plugin-valid-dataset/plugins/demo/manifest.md"
+      "../../../../dataset/src/__fixtures__/plugin-valid-dataset/plugins/demo/manifest.md"
     );
     const manifestText = await readFile(fixturePath, "utf8");
     const updatedManifest = manifestText.replace(

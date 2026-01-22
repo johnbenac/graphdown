@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/core": "0.0.0",
+    "@graphdown/dataset": "0.0.0",
     "@graphdown/io": "0.0.0"
   },
   "devDependencies": {
