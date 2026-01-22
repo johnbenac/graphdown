@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { collectStringValues } from "../collectStringValues";
+import { collectStringValues } from "../collectStringValues.js";
 
 test("collectStringValues collects nested strings from objects + arrays", () => {
   const into = new Set<string>();

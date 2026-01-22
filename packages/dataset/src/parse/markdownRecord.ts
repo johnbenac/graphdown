@@ -1,6 +1,6 @@
-import { extractFrontMatter, buildFrontMatter } from './frontMatter';
-import { makeError, type ValidationError } from '../validate/errors';
-import { stringifyYamlObject, parseYamlObject } from './yaml';
+import { extractFrontMatter, buildFrontMatter } from './frontMatter.js';
+import { makeError, type ValidationError } from '../validate/errors.js';
+import { stringifyYamlObject, parseYamlObject } from './yaml.js';
 
 export function parseMarkdownRecord(
   text: string,

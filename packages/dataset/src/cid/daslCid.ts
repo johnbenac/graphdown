@@ -1,6 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
 
-import { decodeBase32, encodeBase32 } from './base32';
+import { decodeBase32, encodeBase32 } from './base32.js';
 
 export type DaslCodec = 'raw' | 'drisl';
 

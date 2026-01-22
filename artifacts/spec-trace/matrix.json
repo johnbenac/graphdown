@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-22T17:10:53.931Z",
+  "generatedAt": "2026-01-22T19:10:00.116Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -147,7 +147,7 @@
       "tests": [
         {
           "reqId": "NR-PLUG-HASH-001",
-          "testTitle": "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)",
+          "testTitle": "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by the dataset SDK)",
           "filePath": "packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
         }
       ]

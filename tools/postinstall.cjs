@@ -1,10 +1,12 @@
-// Skip Playwright browser installation in CI; run it only locally.
 const { execSync } = require("node:child_process");
 
 const isCI = Boolean(process.env.CI) || Boolean(process.env.GITHUB_ACTIONS);
 
+// Always build dataset artifacts so workspace consumers can import it.
+execSync("npm --workspace packages/dataset run build", { stdio: "inherit" });
+
 if (isCI) {
-  console.log("[postinstall] CI detected: skipping Playwright browser install (CI installs browsers explicitly in the E2E job).");
+  console.log("[postinstall] CI detected: skipping Playwright browser install.");
   process.exit(0);
 }
 

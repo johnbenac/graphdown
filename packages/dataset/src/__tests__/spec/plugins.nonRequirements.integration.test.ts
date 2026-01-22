@@ -8,8 +8,8 @@ import {
   cidFromRawBytes,
   computeGdHashV1,
   validateDatasetSnapshot
-} from "../../index";
-import type { DatasetSnapshot } from "../../index";
+} from "../../index.js";
+import type { DatasetSnapshot } from "../../index.js";
 
 const encoder = new TextEncoder();
 
@@ -25,7 +25,7 @@ function digestSnapshot(snapshot: DatasetSnapshot): string {
   return result.cid;
 }
 
-describe("plugin non-requirements (core must ignore plugin-defined semantics)", () => {
+describe("plugin non-requirements (dataset SDK must ignore plugin-defined semantics)", () => {
   it("NR-PLUG-LINK-001: no relationship or CID extraction from plugin manifest bodies or bundle contents", () => {
     // A CID-shaped token that should FAIL DASL CIDv1 decoding:
     // "b" + 58 base32 chars => matches CID lexical shape but is not a valid CID.
@@ -54,7 +54,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       ],
       [
         // These MUST be ignored for relationship/CID extraction:
-        "This body tries to smuggle semantics into core.",
+        "This body tries to smuggle semantics into the dataset SDK.",
         "Record ref that must NOT become a relationship edge: [[note:target]]",
         `Valid CID-shaped token that must NOT become a block ref: [[${orphanCid}]]`,
         `Invalid CID-shaped token that must NOT cause E_CID_INVALID: [[${invalidCidToken}]]`
@@ -66,7 +66,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       ["typeId: note", "recordId: bundle", "fields: {}"],
       [
         "This plugin bundle file contains record-looking front matter.",
-        "Links/CIDs here MUST NOT be scanned by core:",
+        "Links/CIDs here MUST NOT be scanned by the dataset SDK:",
         "Smuggled record link: [[note:target]]",
         `Smuggled CID: [[${orphanCid}]]`,
         `Smuggled invalid CID: [[${invalidCidToken}]]`
@@ -107,12 +107,12 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
       ])
     };
 
-    // If core incorrectly scans plugin bodies/bundles for CID refs, this would fail with E_CID_INVALID
+    // If the dataset SDK incorrectly scans plugin bodies/bundles for CID refs, this would fail with E_CID_INVALID
     // or block-reference errors. It MUST pass.
     const validation = validateDatasetSnapshot(snapshot);
     expect(validation.ok).toBe(true);
 
-    // If core incorrectly scans plugin bodies/bundles for record links, the record-link graph would
+    // If the dataset SDK incorrectly scans plugin bodies/bundles for record links, the record-link graph would
     // show incoming edges for note:target. It MUST NOT.
     const graphResult = buildRecordLinkGraphFromSnapshot(snapshot);
     expect(graphResult.ok).toBe(true);
@@ -122,18 +122,18 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
     expect(graphResult.graph.getOutgoingRecordLinks("note:a")).toEqual([]);
     expect(graphResult.graph.getOutgoingRecordLinks("note:bundle")).toEqual([]);
 
-    // If core incorrectly scans plugin bodies/bundles for CID refs during GC/export reachability,
+    // If the dataset SDK incorrectly scans plugin bodies/bundles for CID refs during GC/export reachability,
     // it would include orphanPath in canonical output. It MUST NOT.
     const canonical = canonicalizeDatasetSnapshot(snapshot);
     expect(canonical.files.has(orphanPath)).toBe(false);
   });
 
   it("NR-PLUG-VAL-001: plugin bundle content is not executed or interpreted as additional validity rules", () => {
-    // This record intentionally violates a hypothetical plugin rule; core must not care.
+    // This record intentionally violates a hypothetical plugin rule; the dataset SDK must not care.
     const typeBytes = mdWithFrontMatter(["typeId: note", "fields: {}"]);
     const recordBytes = mdWithFrontMatter(
       ["typeId: note", "recordId: a", "fields: {}"],
-      ["This is valid per core. A plugin might want to reject it; core MUST NOT execute that logic."]
+      ["This is valid per the dataset SDK. A plugin might want to reject it; the dataset SDK MUST NOT execute that logic."]
     );
 
     const manifestBytes = mdWithFrontMatter(
@@ -151,18 +151,18 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
         "    requiredFields:",
         "      - title"
       ],
-      ["Plugin declares rules/capabilities here; core must treat them as opaque (shape-checked only)."]
+      ["Plugin declares rules/capabilities here; the dataset SDK must treat them as opaque (shape-checked only)."]
     );
 
-    // If executed, this would throw. Core MUST NOT execute it during validation.
+    // If executed, this would throw. The dataset SDK MUST NOT execute it during validation.
     const entryBytes = encoder.encode(
       [
-        "throw new Error('If core executes plugin code during validation, this is a critical bug');",
+        "throw new Error('If the dataset SDK executes plugin code during validation, this is a critical bug');",
         ""
       ].join("\n")
     );
 
-    // A made-up plugin rules file; core MUST NOT interpret it.
+    // A made-up plugin rules file; the dataset SDK MUST NOT interpret it.
     const rulesBytes = encoder.encode(JSON.stringify({ requiredFields: ["title"] }, null, 2) + "\n");
 
     const snapshot: DatasetSnapshot = {
@@ -230,11 +230,11 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
 
     const canonical = canonicalizeDatasetSnapshot(snapshot);
 
-    // Core-defined export layout for types/records MUST hold, regardless of plugins.
+    // Dataset-defined export layout for types/records MUST hold, regardless of plugins.
     expect(canonical.files.get("types/note.md")).toEqual(typeBytes);
     expect(canonical.files.get("records/note.a/a.md")).toEqual(recordBytes);
 
-    // Core-defined plugin export layout MUST hold.
+    // Dataset-defined plugin export layout MUST hold.
     expect(canonical.files.get("plugins/demo/manifest.md")).toEqual(manifestBytes);
     expect(canonical.files.get("plugins/demo/entry.js")).toEqual(entryBytes);
     expect(canonical.files.get("plugins/demo/ui.md")).toEqual(uiBytes);
@@ -244,7 +244,7 @@ describe("plugin non-requirements (core must ignore plugin-defined semantics)", 
     expect(canonical.files.has("docs/README.txt")).toBe(false);
   });
 
-  it("NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)", () => {
+  it("NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by the dataset SDK)", () => {
     const typeBytes = mdWithFrontMatter(["typeId: note", "fields: {}"]);
     const recordBytes = mdWithFrontMatter(
       ["typeId: note", "recordId: a", "fields: {}"],

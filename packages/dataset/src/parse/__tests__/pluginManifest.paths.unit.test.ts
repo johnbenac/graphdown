@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isSafeRelativePath, resolvePluginBundlePaths } from "../pluginManifest";
+import { isSafeRelativePath, resolvePluginBundlePaths } from "../pluginManifest.js";
 
 describe("plugin manifest paths", () => {
   it("PLUG-LAYOUT-002: resolves bundle files relative to the manifest directory", () => {

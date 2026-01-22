@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "vitest";
 
-import { buildRecordLinkGraphFromSnapshot } from "../graph";
-import type { BuildRecordLinkGraphResult } from "../graph";
-import type { DatasetSnapshot } from "../../model/snapshotTypes";
+import { buildRecordLinkGraphFromSnapshot } from "../graph.js";
+import type { BuildRecordLinkGraphResult } from "../graph.js";
+import type { DatasetSnapshot } from "../../model/snapshotTypes.js";
 
 function loadDatasetSnapshotFromFs(root: string): DatasetSnapshot {
   const files = new Map<string, Uint8Array>();

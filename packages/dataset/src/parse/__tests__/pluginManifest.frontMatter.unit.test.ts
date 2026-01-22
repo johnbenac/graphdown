@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePluginManifest } from "../pluginManifest";
+import { parsePluginManifest } from "../pluginManifest.js";
 
 const manifestPath = "plugins/demo/manifest.md";
 

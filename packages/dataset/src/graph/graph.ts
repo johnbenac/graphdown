@@ -1,8 +1,8 @@
-import { discoverGraphdownObjects } from '../parse/datasetObjects';
-import { makeError, type ValidationError } from '../validate/errors';
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { extractRecordRefs } from '../parse/wikiRefs';
-import { collectStringValues } from '../internal/collectStringValues';
+import { discoverGraphdownObjects } from '../parse/datasetObjects.js';
+import { makeError, type ValidationError } from '../validate/errors.js';
+import type { DatasetSnapshot } from '../model/snapshotTypes.js';
+import { extractRecordRefs } from '../parse/wikiRefs.js';
+import { collectStringValues } from '../internal/collectStringValues.js';
 
 export type RecordLinkGraphNodeKind = 'type' | 'record';
 
