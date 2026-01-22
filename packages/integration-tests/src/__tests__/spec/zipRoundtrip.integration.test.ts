@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "@graphdown/core";
+import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 import { snapshotFromTextFiles } from "../../harness";
 
