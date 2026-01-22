@@ -1,5 +1,5 @@
-import type { DatasetSnapshot } from "@graphdown/core";
-import { buildRecordLinkGraphFromSnapshot, parseMarkdownRecord } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
+import { buildRecordLinkGraphFromSnapshot, parseMarkdownRecord } from "@graphdown/dataset";
 import type {
   RuntimeApiV1,
   RuntimeRecordViewV1,

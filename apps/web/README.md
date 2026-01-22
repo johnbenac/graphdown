@@ -2,7 +2,7 @@
 
 This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets.
 
-It uses `@graphdown/core` for parsing/validation and `@graphdown/runtime` as the read model, persisting the active dataset in the browser using IndexedDB (required).
+It uses `@graphdown/dataset` for parsing/validation and `@graphdown/runtime` as the read model, persisting the active dataset in the browser using IndexedDB (required).
 
 ## Run the app
 From the repo root:
@@ -22,7 +22,7 @@ npm --workspace apps/web run build
 ## Project layout
 
 * `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-* `@graphdown/core` shared, pure logic for dataset parsing/validation/hash/export helpers.
+* `@graphdown/dataset` shared, pure logic for dataset parsing/validation/hash/export helpers.
 * `@graphdown/runtime` read model (Runtime API v1 sessions for querying types/records/links/blocks).
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
@@ -67,6 +67,6 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.e2e.spec.js-snapsh
 
 ## Notes for contributors
 
-* Keep `@graphdown/core` pure and framework-agnostic; the UI should consume it through the runtime read model, not reimplement logic.
+* Keep `@graphdown/dataset` pure and framework-agnostic; the UI should consume it through the runtime read model, not reimplement logic.
 * When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
 * The app requires IndexedDB for persistence; environments that block it are unsupported.

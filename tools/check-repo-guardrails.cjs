@@ -64,10 +64,19 @@ function collectImports(filePath) {
 }
 
 function isForbiddenImport(spec) {
+  if (spec.startsWith('@graphdown/dataset/')) {
+    return true;
+  }
   if (spec.startsWith('@graphdown/core/')) {
     return true;
   }
+  if (spec.includes('packages/dataset/src')) {
+    return true;
+  }
   if (spec.includes('packages/core/src')) {
+    return true;
+  }
+  if (/(^|\/)dataset\/src\//.test(spec)) {
     return true;
   }
   if (/(^|\/)core\/src\//.test(spec)) {
