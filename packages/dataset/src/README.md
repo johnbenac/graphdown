@@ -1,6 +1,6 @@
 # Graphdown domain logic
 
-The core package `src/` directory contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
+The dataset package `src/` directory contains dataset parsing, validation, hashing, link extraction, and snapshot utilities shared by the import/export flows, persistence, and record editing features.
 
 ## Vocabulary (important)
 

@@ -5,7 +5,7 @@ import {
   parsePluginManifest,
   resolvePluginBundlePaths,
   type DatasetSnapshot
-} from "@graphdown/core";
+} from "@graphdown/dataset";
 
 // Keep @graphdown/io portable: do not import node:util types.
 // Type-only node imports can leak into consumer type environments / generated .d.ts.

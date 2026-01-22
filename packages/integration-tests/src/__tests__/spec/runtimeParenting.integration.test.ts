@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "@graphdown/core";
+import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { snapshotFromTextFiles } from "../../harness";
 

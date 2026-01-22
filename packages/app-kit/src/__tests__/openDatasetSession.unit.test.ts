@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { DatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot } from "@graphdown/dataset";
 import { openDatasetSession } from "../openDatasetSession";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 
