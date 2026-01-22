@@ -1,26 +1,43 @@
 {
   "name": "@graphdown/dataset",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
+  "private": false,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "require": "./dist-cjs/index.js"
     }
   },
+  "files": [
+    "dist/**",
+    "dist-cjs/**",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "@noble/hashes": "^1.4.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@graphdown/io-zip": "0.0.0",
+    "@graphdown/io-zip": "workspace:*",
     "@types/node": "^20.16.10",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   },
   "scripts": {
+    "clean": "rm -rf dist dist-cjs",
+    "build:esm": "tsc -p tsconfig.build.esm.json",
+    "build:cjs": "tsc -p tsconfig.build.cjs.json",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && node ./tools/write-dist-cjs-package-json.cjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }

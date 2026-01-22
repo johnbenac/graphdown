@@ -6,8 +6,8 @@ import {
   blockPathForCid,
   canonicalizeDatasetSnapshot,
   cidFromRawBytes
-} from "../../index";
-import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "../../index";
+} from "../../index.js";
+import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "../../index.js";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 
 const encoder = new TextEncoder();

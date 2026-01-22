@@ -11,7 +11,7 @@ function u8(text: string): Uint8Array {
   return encoder.encode(text);
 }
 
-describe("integration: io-zip -> selection -> core validation -> runtime open", () => {
+describe("integration: io-zip -> selection -> dataset validation -> runtime open", () => {
   it("imports a zip (with plugin bundles + binary + blocks), selects semantic files, validates, and opens runtime", async () => {
     // Well-known CID for an empty sha2-256 block (used in repo fixtures too).
     const EMPTY_BLOCK_CID =

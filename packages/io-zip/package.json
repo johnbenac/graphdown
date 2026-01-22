@@ -8,8 +8,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/dataset": "0.0.0",
-    "@graphdown/io": "0.0.0",
+    "@graphdown/dataset": "workspace:*",
+    "@graphdown/io": "workspace:*",
     "fflate": "^0.8.2"
   },
   "devDependencies": {

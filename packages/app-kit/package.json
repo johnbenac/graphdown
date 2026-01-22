@@ -8,9 +8,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/dataset": "0.0.0",
-    "@graphdown/runtime": "0.0.0",
-    "@graphdown/persistence": "0.0.0"
+    "@graphdown/dataset": "workspace:*",
+    "@graphdown/runtime": "workspace:*",
+    "@graphdown/persistence": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

@@ -1,10 +1,10 @@
-import { extractFrontMatter } from './frontMatter';
-import { makeError, type ValidationError } from '../validate/errors';
-import { isObject } from '../model/types';
-import { parseYamlObject } from './yaml';
-import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
-import { discoverPluginObjects } from './pluginObjects';
-import { isRecordFileBytes } from './recordFile';
+import { extractFrontMatter } from './frontMatter.js';
+import { makeError, type ValidationError } from '../validate/errors.js';
+import { isObject } from '../model/types.js';
+import { parseYamlObject } from './yaml.js';
+import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text.js';
+import { discoverPluginObjects } from './pluginObjects.js';
+import { isRecordFileBytes } from './recordFile.js';
 
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 export const RECORD_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9_-]*$/;

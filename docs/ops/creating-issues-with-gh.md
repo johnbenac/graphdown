@@ -58,7 +58,7 @@ Or, for safety, always pass `--repo johnbenac/graphdown` to commands.
 
 ## 3) Check for duplicates before creating a new issue
 
-Run a search with a few keywords (module name + core terms + a likely error string).
+Run a search with a few keywords (module name + dataset terms + a likely error string).
 
 Examples:
 
@@ -122,7 +122,7 @@ EOF
 
 Graphdown already uses consistent naming conventions and subsystem prefixes (see `docs/spec/trace-owners.md`). When drafting:
 
-* Prefer a **clear subsystem prefix** in the title (examples: `io-github:`, `io-zip:`, `core:`, `runtime:`, `web:`).
+* Prefer a **clear subsystem prefix** in the title (examples: `io-github:`, `io-zip:`, `dataset:`, `runtime:`, `web:`).
 * When relevant, include pointers to:
 
   * `SPEC.md` sections

@@ -3,7 +3,7 @@ import { validateDatasetSnapshot } from "@graphdown/dataset";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
 import { snapshotFromTextFiles } from "../../harness";
 
-describe("integration smoke: io-zip <-> core", () => {
+describe("integration smoke: io-zip <-> dataset", () => {
   it("round-trips a valid dataset snapshot through zip bytes", () => {
     const snapshot = snapshotFromTextFiles([
       [

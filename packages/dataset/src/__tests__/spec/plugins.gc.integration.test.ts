@@ -6,10 +6,10 @@ import {
   canonicalizeDatasetSnapshot,
   cidFromRawBytes,
   validateDatasetSnapshot
-} from "../../index";
-import type { DatasetSnapshot } from "../../index";
+} from "../../index.js";
+import type { DatasetSnapshot } from "../../index.js";
 import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
-import { loadFixtureSnapshot } from "../fixtureLoader";
+import { loadFixtureSnapshot } from "../fixtureLoader.js";
 
 const encoder = new TextEncoder();
 

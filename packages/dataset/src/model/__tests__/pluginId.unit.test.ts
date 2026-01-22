@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isValidPluginId } from "../ids";
+import { isValidPluginId } from "../ids.js";
 
 describe("plugin manifest ids", () => {
   it("PLUG-ID-001: pluginId matches separator-safe identifier syntax", () => {

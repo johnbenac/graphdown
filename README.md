@@ -6,7 +6,7 @@ It ships:
 
 - the **standard** (`SPEC.md`) — the single source of truth (currently **Spec v0.5**)
 - a **web app** (`apps/web`) for importing/browsing/editing datasets
-- a **core domain library** (`packages/core/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
+- the **dataset domain library** (`packages/dataset/src`) for parsing, validation, hashing, canonicalization, and import/export helpers
 - a **runtime API** (`packages/runtime`) for session-based dataset reads
 
 > If anything conflicts with `SPEC.md`, `SPEC.md` wins.
@@ -23,7 +23,7 @@ Graphdown defines **three first-class semantic object classes** in that reposito
 2. **Block objects** stored as uninterpreted bytes in the canonical block store (`blocks/…`).
 3. **Plugin objects** stored as a plugin manifest plus referenced plugin bundle files.
 
-Everything else in the repository is **non-semantic** and ignored by core (BLOCK-LAYOUT-003).
+Everything else in the repository is **non-semantic** and ignored by dataset semantics (BLOCK-LAYOUT-003).
 
 ### Content-based discovery (paths don’t matter)
 
@@ -108,10 +108,10 @@ A plugin manifest YAML object defines exactly these required keys:
 - `files` (array of strings; relative paths)
 
 Optional keys:
-- `meta` (object; opaque to core)
-- `config` (object; opaque to core)
-- `requires` (array of strings; opaque to core)
-- `blocks` (array of block CID strings; interpreted by core for reachability + validation)
+- `meta` (object; opaque to dataset semantics)
+- `config` (object; opaque to dataset semantics)
+- `requires` (array of strings; opaque to dataset semantics)
+- `blocks` (array of block CID strings; interpreted by dataset semantics for reachability + validation)
 
 Forbidden keys (manifests MUST NOT define these):
 - `typeId`, `recordId`, `parent`, `fields`
@@ -133,15 +133,15 @@ Plugin bundle paths MUST be safe relative paths (PLUG-LAYOUT-003), and validatio
 - `files[]` MUST NOT include `manifest.md` (reserved for canonical export) (VAL-PLUG-006)
 - optional `blocks[]` must be valid CIDs and must resolve to matching bytes in the block store (VAL-PLUG-007 / VAL-PLUG-008)
 
-### Plugin non-requirements (core must stay “dumb”)
+### Plugin non-requirements (dataset must stay “dumb”)
 
-Core MUST NOT:
+Dataset semantics MUST NOT:
 - execute or interpret plugin code to determine dataset validity (NR-PLUG-VAL-001)
 - extract record relationships or block references from plugin manifest bodies or plugin bundle contents (NR-PLUG-LINK-001)
 - allow plugins to modify canonical export semantics (NR-PLUG-EXP-001)
 - allow plugins to modify hashing semantics (NR-PLUG-HASH-001)
 
-Plugins affect core semantics only through:
+Plugins affect dataset semantics only through:
 - being validated as plugin objects,
 - being included in snapshot hashing,
 - being included in canonical export, and
@@ -200,10 +200,10 @@ npm run dev:web
 # Vite defaults to http://localhost:5173
 ```
 
-Run core tests:
+Run dataset tests:
 
 ```sh
-npm --workspace packages/core run test
+npm --workspace packages/dataset run test
 ```
 
 Run web tests:
@@ -326,7 +326,7 @@ blocks:
 ---
 
 Optional Markdown body describing the plugin.
-(Body is opaque to core; it is not scanned for links/CIDs.)
+(Body is opaque to dataset semantics; it is not scanned for links/CIDs.)
 ```
 
 Bundle files (`entry.js`, `ui.md`) are resolved relative to the manifest’s directory and are included in hashing and canonical export.
@@ -365,7 +365,7 @@ Reference datasets used for compatibility checks:
 * `SPEC.md` — Graphdown standard (normative)
 * `Graphdown_Dataset_Authoring_Guide.md` — authoring guidance (non-normative)
 * `apps/web/` — React/Vite web app (import, browse, edit, export)
-* `packages/core/src/` — core parsing/validation/hashing/canonicalization/runtime helpers
+* `packages/dataset/src/` — dataset parsing/validation/hashing/canonicalization/runtime helpers (core is now a shim)
 * `docs/` — developer concept docs (glossary, graphs, snapshots/layout)
 * `artifacts/spec-trace/` — generated spec-to-test traceability artifacts
 * `tools/spec-trace.cjs` — spec-trace generator (matrix must match spec; GOV-002)

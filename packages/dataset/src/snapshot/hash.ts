@@ -1,14 +1,14 @@
 import { sha256 } from '@noble/hashes/sha256';
 
-import { encodeBase32 } from '../cid/base32';
-import { isValidPluginId } from '../model/ids';
-import { parseGraphdownText } from '../parse/datasetObjects';
-import { isRecordFileBytes } from '../parse/recordFile';
-import { discoverPluginObjects } from '../parse/pluginObjects';
-import { isSafeRelativePath } from '../parse/pluginManifest';
-import { makeError, type ValidationError } from '../validate/errors';
-import type { DatasetSnapshot } from '../model/snapshotTypes';
-import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text';
+import { encodeBase32 } from '../cid/base32.js';
+import { isValidPluginId } from '../model/ids.js';
+import { parseGraphdownText } from '../parse/datasetObjects.js';
+import { isRecordFileBytes } from '../parse/recordFile.js';
+import { discoverPluginObjects } from '../parse/pluginObjects.js';
+import { isSafeRelativePath } from '../parse/pluginManifest.js';
+import { makeError, type ValidationError } from '../validate/errors.js';
+import type { DatasetSnapshot } from '../model/snapshotTypes.js';
+import { decodeUtf8Strict, normalizeLineEndings } from '../internal/text.js';
 
 export type HashScope = 'schema' | 'snapshot';
 

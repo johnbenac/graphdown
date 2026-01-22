@@ -1,4 +1,4 @@
-import { decodeDaslCidString } from '../cid/daslCid';
+import { decodeDaslCidString } from '../cid/daslCid.js';
 
 const RECORD_REF_PATTERN = /^([A-Za-z0-9][A-Za-z0-9_-]*):([A-Za-z0-9][A-Za-z0-9_-]*)$/;
 const CID_SHAPE_PATTERN = /^b[a-z2-7]{58}$/;

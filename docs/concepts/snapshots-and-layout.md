@@ -1,6 +1,6 @@
 # Snapshots, File Discovery, and Layout
 
-Graphdown works with datasets as files. Internally, the core uses a snapshot abstraction.
+Graphdown works with datasets as files. Internally, the dataset library uses a snapshot abstraction.
 
 ## DatasetSnapshot
 
@@ -11,7 +11,7 @@ It represents “a repository worth of files,” whether loaded from a zip, fetc
 
 ## Record file discovery (LAYOUT-001)
 
-Core does not treat directory names as semantic.
+Dataset semantics do not treat directory names as semantic.
 
 A file is a record file if:
 - it ends in `.md`
@@ -19,7 +19,7 @@ A file is a record file if:
 - the parsed YAML object contains a `typeId` key
 
 This behavior is implemented by:
-- `packages/core/src/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphdownFile`)
+- `packages/dataset/src/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphdownFile`)
 
 ## Type objects vs record objects
 
@@ -54,9 +54,9 @@ It rewrites paths into the canonical record-only layout:
 
 Canonicalization preserves original file bytes. It changes file paths, not file contents.
 
-## Web app import scope vs core semantics
+## Web app import scope vs dataset semantics
 
-The Graphdown core can operate on any snapshot and discovers record files by content (LAYOUT-001).
+The Graphdown dataset library can operate on any snapshot and discovers record files by content (LAYOUT-001).
 
 The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), but it must still include **all semantic files** required for validity, hashing, and export.
 
