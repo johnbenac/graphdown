@@ -25,7 +25,7 @@ The routes themselves live in `routes/` and are rendered through the
    - Import screens call into `DatasetContext` actions to validate GitHub URLs or
      read zip files.
 2. **Validation & canonicalization**
-   - `@graphdown/core` utilities validate the dataset, normalize file layout, and prune
+   - `@graphdown/dataset` utilities validate the dataset, normalize file layout, and prune
      unused blocks.
 3. **Runtime session**
    - `@graphdown/runtime` opens a Runtime API v1 session and serves as the read model
@@ -40,7 +40,7 @@ The routes themselves live in `routes/` and are rendered through the
 
 - `components/` - reusable UI components (navigation, record editor/viewer, UI
   wrappers).
-- `@graphdown/core` - dataset parsing, validation, hashing, zip handling, and front matter parsing.
+- `@graphdown/dataset` - dataset parsing, validation, hashing, zip handling, and front matter parsing.
 - `@graphdown/runtime` - runtime session API (read model).
 - `features/export/` - downloading dataset exports from the browser.
 - `import/` - zip parsing + GitHub import helpers.
