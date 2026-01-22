@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-21T20:42:27.250Z",
+  "generatedAt": "2026-01-22T16:44:16.660Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -17,12 +17,12 @@
         {
           "reqId": "GOV-002",
           "testTitle": "GOV-002: spec-trace includes io requirement-tagged tests",
-          "filePath": "packages/core/src/__tests__/governance/spec-trace-includes-io.governance.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/governance/spec-trace-includes-io.governance.integration.test.ts"
         },
         {
           "reqId": "GOV-002",
           "testTitle": "GOV-002: spec-trace output matches committed matrix",
-          "filePath": "packages/core/src/__tests__/governance/spec-trace-matrix.governance.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/governance/spec-trace-matrix.governance.integration.test.ts"
         }
       ]
     },
@@ -63,7 +63,7 @@
         {
           "reqId": "NR-UI-002",
           "testTitle": "NR-UI-002: arbitrary keys inside fields are accepted",
-          "filePath": "packages/core/src/__tests__/spec/gaps.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/gaps.integration.test.ts"
         }
       ]
     },
@@ -76,7 +76,7 @@
         {
           "reqId": "NR-SEM-001",
           "testTitle": "NR-SEM-001: semantic shapes are ignored by validation",
-          "filePath": "packages/core/src/__tests__/spec/gaps.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/gaps.integration.test.ts"
         }
       ]
     },
@@ -96,7 +96,7 @@
         {
           "reqId": "NR-LINK-001",
           "testTitle": "NR-LINK-001: missing record links are allowed (except composition)",
-          "filePath": "packages/core/src/__tests__/spec/gaps.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/gaps.integration.test.ts"
         }
       ]
     },
@@ -109,7 +109,7 @@
         {
           "reqId": "NR-PLUG-LINK-001",
           "testTitle": "NR-PLUG-LINK-001: no relationship or CID extraction from plugin manifest bodies or bundle contents",
-          "filePath": "packages/core/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
         }
       ]
     },
@@ -122,7 +122,7 @@
         {
           "reqId": "NR-PLUG-VAL-001",
           "testTitle": "NR-PLUG-VAL-001: plugin bundle content is not executed or interpreted as additional validity rules",
-          "filePath": "packages/core/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
         }
       ]
     },
@@ -135,7 +135,7 @@
         {
           "reqId": "NR-PLUG-EXP-001",
           "testTitle": "NR-PLUG-EXP-001: plugins do not define canonical export (no extra includes, no layout overrides, no rewrites)",
-          "filePath": "packages/core/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
         }
       ]
     },
@@ -148,7 +148,7 @@
         {
           "reqId": "NR-PLUG-HASH-001",
           "testTitle": "NR-PLUG-HASH-001: plugins do not define hashing semantics (gdhash-v1 inputs are fixed by core)",
-          "filePath": "packages/core/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.nonRequirements.integration.test.ts"
         }
       ]
     },
@@ -161,17 +161,17 @@
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: accepts valid identifiers",
-          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/ids.integration.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects recordId with colon",
-          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/ids.integration.test.ts"
         },
         {
           "reqId": "ID-001",
           "testTitle": "ID-001: rejects typeId with invalid characters",
-          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
@@ -184,7 +184,7 @@
         {
           "reqId": "PLUG-ID-001",
           "testTitle": "PLUG-ID-001: pluginId matches separator-safe identifier syntax",
-          "filePath": "packages/core/src/model/__tests__/pluginId.unit.test.ts"
+          "filePath": "packages/dataset/src/model/__tests__/pluginId.unit.test.ts"
         }
       ]
     },
@@ -197,7 +197,7 @@
         {
           "reqId": "PLUG-ID-002",
           "testTitle": "PLUG-ID-002: duplicate pluginId fails validation",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -210,42 +210,42 @@
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: binary plugin bundle files hash raw bytes",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate plugin bundle identities fail hashing with E_DUPLICATE_ID",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate pluginId manifests fail hashing with E_DUPLICATE_ID",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: plugin text bundle files normalize line endings",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: snapshot hash includes plugin objects and is path-independent for plugin directory relocation",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: duplicate identities fail hashing",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: line ending normalization yields stable hashes",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         },
         {
           "reqId": "HASH-001",
           "testTitle": "HASH-001: non-record files are ignored",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         }
       ]
     },
@@ -258,7 +258,7 @@
         {
           "reqId": "HASH-002",
           "testTitle": "HASH-002: schema fingerprint ignores record object changes",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         }
       ]
     },
@@ -271,12 +271,12 @@
         {
           "reqId": "HASH-003",
           "testTitle": "HASH-003: snapshot fingerprint changes when a plugin bundle file changes",
-          "filePath": "packages/core/src/__tests__/spec/hash.plugins.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/hash.plugins.integration.test.ts"
         },
         {
           "reqId": "HASH-003",
           "testTitle": "HASH-003: snapshot hash is path-independent for record files",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         }
       ]
     },
@@ -289,7 +289,7 @@
         {
           "reqId": "HASH-004",
           "testTitle": "HASH-004: invalid hash scope fails with E_USAGE",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         }
       ]
     },
@@ -302,7 +302,7 @@
         {
           "reqId": "HASH-005",
           "testTitle": "HASH-005: snapshot hash ignores block store bytes",
-          "filePath": "packages/core/src/snapshot/__tests__/hash.unit.test.ts"
+          "filePath": "packages/dataset/src/snapshot/__tests__/hash.unit.test.ts"
         }
       ]
     },
@@ -315,7 +315,7 @@
         {
           "reqId": "BLOCK-001",
           "testTitle": "BLOCK-001: digest embedded in CID is sha2-256(bytes)",
-          "filePath": "packages/core/src/cid/__tests__/cid.unit.test.ts"
+          "filePath": "packages/dataset/src/cid/__tests__/cid.unit.test.ts"
         }
       ]
     },
@@ -328,7 +328,7 @@
         {
           "reqId": "CID-001",
           "testTitle": "CID-001: cidFromRawBytes handles empty input",
-          "filePath": "packages/core/src/cid/__tests__/cid.unit.test.ts"
+          "filePath": "packages/dataset/src/cid/__tests__/cid.unit.test.ts"
         }
       ]
     },
@@ -341,7 +341,7 @@
         {
           "reqId": "CID-002",
           "testTitle": "CID-002: cidFromRawBytes handles hello",
-          "filePath": "packages/core/src/cid/__tests__/cid.unit.test.ts"
+          "filePath": "packages/dataset/src/cid/__tests__/cid.unit.test.ts"
         }
       ]
     },
@@ -354,7 +354,7 @@
         {
           "reqId": "CID-003",
           "testTitle": "CID-003: cidFromRawBytes handles abc",
-          "filePath": "packages/core/src/cid/__tests__/cid.unit.test.ts"
+          "filePath": "packages/dataset/src/cid/__tests__/cid.unit.test.ts"
         }
       ]
     },
@@ -367,7 +367,7 @@
         {
           "reqId": "CID-004",
           "testTitle": "CID-004: decodeDaslCidString round-trips and exposes digest",
-          "filePath": "packages/core/src/cid/__tests__/cid.unit.test.ts"
+          "filePath": "packages/dataset/src/cid/__tests__/cid.unit.test.ts"
         }
       ]
     },
@@ -380,7 +380,7 @@
         {
           "reqId": "LAYOUT-001",
           "testTitle": "LAYOUT-001: no recordId means the object is treated as a type",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -393,7 +393,7 @@
         {
           "reqId": "LAYOUT-002",
           "testTitle": "LAYOUT-002: only first front matter block defines a record object",
-          "filePath": "packages/core/src/__tests__/spec/layout.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/layout.integration.test.ts"
         }
       ]
     },
@@ -406,42 +406,42 @@
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: invalid YAML front matter is ignored for discovery and validation",
-          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: malformed YAML front matter is ignored for hashing",
-          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: valid YAML without reserved keys is ignored for hashing",
-          "filePath": "packages/core/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/frontMatterPermissive.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: plugin bundle files can include malformed front matter and remain hashed/exported",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: invalid YAML in non-semantic markdown is ignored",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: non-dataset files remain ignored",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: unterminated YAML front matter in non-semantic markdown is ignored",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "LAYOUT-003",
           "testTitle": "LAYOUT-003: valid YAML without reserved keys is ignored",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -454,7 +454,7 @@
         {
           "reqId": "BLOCK-LAYOUT-001",
           "testTitle": "BLOCK-LAYOUT-001: canonical block path is accepted",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -467,12 +467,12 @@
         {
           "reqId": "BLOCK-LAYOUT-002",
           "testTitle": "BLOCK-LAYOUT-002: blocks namespace is fully reserved",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "BLOCK-LAYOUT-002",
           "testTitle": "BLOCK-LAYOUT-002: invalid block path shape fails validation",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -485,7 +485,7 @@
         {
           "reqId": "BLOCK-LAYOUT-003",
           "testTitle": "BLOCK-LAYOUT-003: non-record, non-block files are ignored by validation",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -498,22 +498,22 @@
         {
           "reqId": "PLUG-000",
           "testTitle": "PLUG-000: dataset remains valid without plugins present",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         },
         {
           "reqId": "PLUG-000",
           "testTitle": "PLUG-000: plugin objects are included in canonical dataset export",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         },
         {
           "reqId": "PLUG-000",
           "testTitle": "PLUG-000: plugin objects are validated at import time",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         },
         {
           "reqId": "PLUG-000",
           "testTitle": "PLUG-000: plugin objects participate in snapshot hashing",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         }
       ]
     },
@@ -526,22 +526,22 @@
         {
           "reqId": "PLUG-LAYOUT-001",
           "testTitle": "PLUG-LAYOUT-001: detects plugin manifests with CR-only line endings",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
         },
         {
           "reqId": "PLUG-LAYOUT-001",
           "testTitle": "PLUG-LAYOUT-001: discovers plugin manifests in fixtures",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
         },
         {
           "reqId": "PLUG-LAYOUT-001",
           "testTitle": "PLUG-LAYOUT-001: record precedence keeps type records from being plugin manifests",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
         },
         {
           "reqId": "PLUG-LAYOUT-001",
           "testTitle": "PLUG-LAYOUT-001: requires pluginId and gdApiVersion keys",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.discovery.unit.test.ts"
         }
       ]
     },
@@ -561,12 +561,12 @@
         {
           "reqId": "PLUG-LAYOUT-002",
           "testTitle": "PLUG-LAYOUT-002: resolves bundle files relative to the manifest directory",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
         },
         {
           "reqId": "PLUG-LAYOUT-002",
           "testTitle": "PLUG-LAYOUT-002: root manifest resolves bundle files without a directory prefix",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
         }
       ]
     },
@@ -579,7 +579,7 @@
         {
           "reqId": "PLUG-LAYOUT-003",
           "testTitle": "PLUG-LAYOUT-003: safe relative path rules reject traversal, absolute paths, and whitespace",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.paths.unit.test.ts"
         }
       ]
     },
@@ -592,32 +592,32 @@
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: extracts yaml and body for valid front matter",
-          "filePath": "packages/core/src/parse/__tests__/frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/frontMatter.unit.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: missing YAML front matter fails parsing",
-          "filePath": "packages/core/src/parse/__tests__/frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/frontMatter.unit.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: parses YAML front matter with CR-only line endings",
-          "filePath": "packages/core/src/parse/__tests__/frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/frontMatter.unit.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: invalid YAML fails parsing",
-          "filePath": "packages/core/src/parse/__tests__/yaml.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/yaml.unit.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: non-object YAML front matter is invalid",
-          "filePath": "packages/core/src/parse/__tests__/yaml.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/yaml.unit.test.ts"
         },
         {
           "reqId": "FR-MD-020",
           "testTitle": "FR-MD-020: parses YAML objects",
-          "filePath": "packages/core/src/parse/__tests__/yaml.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/yaml.unit.test.ts"
         }
       ]
     },
@@ -630,12 +630,12 @@
         {
           "reqId": "FR-MD-021",
           "testTitle": "FR-MD-021: fields must be an object",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "FR-MD-021",
           "testTitle": "FR-MD-021: type objects must not define parent",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -648,17 +648,17 @@
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: missing fields in a record fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: record objects may include parent",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "FR-MD-023",
           "testTitle": "FR-MD-023: recordId must be a string identifier when present",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -671,7 +671,7 @@
         {
           "reqId": "FR-MD-022",
           "testTitle": "FR-MD-022: serializer preserves raw Markdown body and updated YAML",
-          "filePath": "packages/core/src/parse/__tests__/markdownRecord.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/markdownRecord.unit.test.ts"
         }
       ]
     },
@@ -684,22 +684,22 @@
         {
           "reqId": "PLUG-FR-001",
           "testTitle": "PLUG-FR-001: invalid YAML yields E_YAML_INVALID",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
         },
         {
           "reqId": "PLUG-FR-001",
           "testTitle": "PLUG-FR-001: missing closing delimiter yields E_FRONT_MATTER_UNTERMINATED",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
         },
         {
           "reqId": "PLUG-FR-001",
           "testTitle": "PLUG-FR-001: missing opening delimiter yields E_FRONT_MATTER_MISSING",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
         },
         {
           "reqId": "PLUG-FR-001",
           "testTitle": "PLUG-FR-001: non-object YAML yields E_YAML_NOT_OBJECT",
-          "filePath": "packages/core/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/pluginManifest.frontMatter.unit.test.ts"
         }
       ]
     },
@@ -712,22 +712,22 @@
         {
           "reqId": "PLUG-FR-002",
           "testTitle": "PLUG-FR-002: forbidden top-level keys fail with E_PLUGIN_KEYS_INVALID",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "PLUG-FR-002",
           "testTitle": "PLUG-FR-002: missing required keys fails with E_PLUGIN_KEYS_INVALID",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "PLUG-FR-002",
           "testTitle": "PLUG-FR-002: plugin-valid-dataset passes manifest schema validation",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "PLUG-FR-002",
           "testTitle": "PLUG-FR-002: unknown top-level keys fail with E_PLUGIN_KEYS_INVALID",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -747,12 +747,12 @@
         {
           "reqId": "EXT-001",
           "testTitle": "EXT-001: extra top-level keys are forbidden",
-          "filePath": "packages/core/src/__tests__/spec/reserved-vocabulary.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/reserved-vocabulary.integration.test.ts"
         },
         {
           "reqId": "EXT-001",
           "testTitle": "EXT-001: extra top-level keys are rejected",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -765,7 +765,7 @@
         {
           "reqId": "EXT-002",
           "testTitle": "EXT-002: accepts arbitrary shapes within fields",
-          "filePath": "packages/core/src/__tests__/spec/reserved-vocabulary.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/reserved-vocabulary.integration.test.ts"
         }
       ]
     },
@@ -778,7 +778,7 @@
         {
           "reqId": "TYPE-001",
           "testTitle": "TYPE-001: type object without recordId is valid",
-          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
@@ -791,7 +791,7 @@
         {
           "reqId": "TYPE-002",
           "testTitle": "TYPE-002: duplicate typeId fails validation",
-          "filePath": "packages/core/src/__tests__/spec/ids.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/ids.integration.test.ts"
         }
       ]
     },
@@ -804,7 +804,7 @@
         {
           "reqId": "TYPE-004",
           "testTitle": "TYPE-004: fieldDefs must be map of objects; required must be boolean when present",
-          "filePath": "packages/core/src/__tests__/spec/gaps.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/gaps.integration.test.ts"
         }
       ]
     },
@@ -817,12 +817,12 @@
         {
           "reqId": "TYPE-COMP-001",
           "testTitle": "TYPE-COMP-001: composition component must include required boolean",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         },
         {
           "reqId": "TYPE-COMP-001",
           "testTitle": "TYPE-COMP-001: composition must be a map with only typeId + required",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         }
       ]
     },
@@ -835,7 +835,7 @@
         {
           "reqId": "REL-001",
           "testTitle": "REL-001: record relationships use composite wiki-links",
-          "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/wikiRefs.unit.test.ts"
         }
       ]
     },
@@ -848,12 +848,12 @@
         {
           "reqId": "REL-002",
           "testTitle": "REL-002: does not synthesize links across separate string values",
-          "filePath": "packages/core/src/graph/__tests__/graph.unit.test.ts"
+          "filePath": "packages/dataset/src/graph/__tests__/graph.unit.test.ts"
         },
         {
           "reqId": "REL-002",
           "testTitle": "REL-002: extracts record links from bodies and fields",
-          "filePath": "packages/core/src/graph/__tests__/graph.unit.test.ts"
+          "filePath": "packages/dataset/src/graph/__tests__/graph.unit.test.ts"
         }
       ]
     },
@@ -866,12 +866,12 @@
         {
           "reqId": "REL-003",
           "testTitle": "REL-003: extracts record references from wiki-link tokens",
-          "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/wikiRefs.unit.test.ts"
         },
         {
           "reqId": "REL-003",
           "testTitle": "REL-003: ignores malformed record tokens and aliases",
-          "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/wikiRefs.unit.test.ts"
         }
       ]
     },
@@ -922,12 +922,12 @@
         {
           "reqId": "CID-REF-001",
           "testTitle": "CID-REF-001: split strings do not synthesize CID references",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "CID-REF-001",
           "testTitle": "CID-REF-001: extracts CID references",
-          "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/wikiRefs.unit.test.ts"
         }
       ]
     },
@@ -940,7 +940,7 @@
         {
           "reqId": "CID-REF-002",
           "testTitle": "CID-REF-002: ignores non-CID tokens",
-          "filePath": "packages/core/src/parse/__tests__/wikiRefs.unit.test.ts"
+          "filePath": "packages/dataset/src/parse/__tests__/wikiRefs.unit.test.ts"
         }
       ]
     },
@@ -953,7 +953,7 @@
         {
           "reqId": "HIER-001",
           "testTitle": "HIER-001: parent missing and parent null both define hierarchy roots",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -979,12 +979,12 @@
         {
           "reqId": "VAL-002",
           "testTitle": "VAL-002: duplicate record identity fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "VAL-002",
           "testTitle": "VAL-002: duplicate record identity fails Record Link Graph build",
-          "filePath": "packages/core/src/graph/__tests__/graph.unit.test.ts"
+          "filePath": "packages/dataset/src/graph/__tests__/graph.unit.test.ts"
         }
       ]
     },
@@ -997,12 +997,12 @@
         {
           "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing declared type passes validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "VAL-003",
           "testTitle": "VAL-003: record referencing missing type fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1015,7 +1015,7 @@
         {
           "reqId": "VAL-005",
           "testTitle": "VAL-005: required fields enforced when fieldDefs.required = true",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1028,7 +1028,7 @@
         {
           "reqId": "VAL-006",
           "testTitle": "VAL-006: semantic validation of field values is not enforced",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1041,7 +1041,7 @@
         {
           "reqId": "VAL-COMP-001",
           "testTitle": "VAL-COMP-001: composition referenced types must exist",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         }
       ]
     },
@@ -1054,17 +1054,17 @@
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: link to wrong type does not satisfy requirement",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         },
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: missing required component link fails",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         },
         {
           "reqId": "VAL-COMP-002",
           "testTitle": "VAL-COMP-002: required component link resolves to correct type",
-          "filePath": "packages/core/src/__tests__/spec/composition.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/composition.integration.test.ts"
         }
       ]
     },
@@ -1077,7 +1077,7 @@
         {
           "reqId": "VAL-PARENT-001",
           "testTitle": "VAL-PARENT-001: invalid parent shapes fail validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1090,7 +1090,7 @@
         {
           "reqId": "VAL-PARENT-002",
           "testTitle": "VAL-PARENT-002: parent pointers must resolve to an existing record",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1103,12 +1103,12 @@
         {
           "reqId": "VAL-PARENT-003",
           "testTitle": "VAL-PARENT-003: parent pointer cycles fail validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         },
         {
           "reqId": "VAL-PARENT-003",
           "testTitle": "VAL-PARENT-003: parent pointer self-cycle fails validation",
-          "filePath": "packages/core/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/validateDatasetSnapshot.integration.test.ts"
         }
       ]
     },
@@ -1121,7 +1121,7 @@
         {
           "reqId": "VAL-PLUG-001",
           "testTitle": "VAL-PLUG-001: plugin-valid-dataset validates successfully",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1134,7 +1134,7 @@
         {
           "reqId": "VAL-PLUG-002",
           "testTitle": "VAL-PLUG-002: duplicate pluginId fails validation",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1147,7 +1147,7 @@
         {
           "reqId": "VAL-PLUG-003",
           "testTitle": "VAL-PLUG-003: entry must appear in files list",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1160,7 +1160,7 @@
         {
           "reqId": "VAL-PLUG-004",
           "testTitle": "VAL-PLUG-004: unsafe relative paths are rejected",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1173,22 +1173,22 @@
         {
           "reqId": "VAL-PLUG-005",
           "testTitle": "VAL-PLUG-005: binary plugin bundle files are validated and exported with raw bytes",
-          "filePath": "packages/core/src/__tests__/spec/plugins.firstClass.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.firstClass.integration.test.ts"
         },
         {
           "reqId": "VAL-PLUG-005",
           "testTitle": "VAL-PLUG-005: binaryFiles entries must be listed in files",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "VAL-PLUG-005",
           "testTitle": "VAL-PLUG-005: binaryFiles entries skip UTF-8 validation",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         },
         {
           "reqId": "VAL-PLUG-005",
           "testTitle": "VAL-PLUG-005: non-binary plugin bundle files must be UTF-8 decodable",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1201,7 +1201,7 @@
         {
           "reqId": "VAL-PLUG-006",
           "testTitle": "VAL-PLUG-006: files must not include reserved manifest.md",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1214,7 +1214,7 @@
         {
           "reqId": "VAL-PLUG-007",
           "testTitle": "VAL-PLUG-007: blocks must contain valid CID strings",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1227,7 +1227,7 @@
         {
           "reqId": "VAL-PLUG-008",
           "testTitle": "VAL-PLUG-008: plugin-declared blocks must resolve to matching block bytes",
-          "filePath": "packages/core/src/__tests__/spec/plugins.validate.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.validate.integration.test.ts"
         }
       ]
     },
@@ -1240,7 +1240,7 @@
         {
           "reqId": "VAL-CID-001",
           "testTitle": "VAL-CID-001: invalid CID-shaped tokens fail validation",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -1253,12 +1253,12 @@
         {
           "reqId": "VAL-BLOCK-001",
           "testTitle": "VAL-BLOCK-001: referenced block must exist",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "VAL-BLOCK-001",
           "testTitle": "VAL-BLOCK-001: type object block reference must exist",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -1271,7 +1271,7 @@
         {
           "reqId": "VAL-BLOCK-002",
           "testTitle": "VAL-BLOCK-002: block bytes must match referenced CID digest",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         }
       ]
     },
@@ -1289,12 +1289,12 @@
         {
           "reqId": "GC-001",
           "testTitle": "GC-001: block referenced from type object is reachable for export",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "GC-001",
           "testTitle": "GC-001: plugin-declared blocks are included in the reachable set",
-          "filePath": "packages/core/src/__tests__/spec/plugins.gc.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.gc.integration.test.ts"
         }
       ]
     },
@@ -1307,12 +1307,12 @@
         {
           "reqId": "GC-002",
           "testTitle": "GC-002: export excludes blocks not referenced by records or plugin blocks",
-          "filePath": "packages/core/src/__tests__/spec/plugins.gc.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.gc.integration.test.ts"
         },
         {
           "reqId": "GC-002",
           "testTitle": "GC-002: export excludes unreferenced blocks",
-          "filePath": "packages/core/src/__tests__/spec/roundtrip.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/roundtrip.integration.test.ts"
         }
       ]
     },
@@ -1325,12 +1325,12 @@
         {
           "reqId": "GC-003",
           "testTitle": "GC-003: unreferenced but valid blocks do not fail validation",
-          "filePath": "packages/core/src/__tests__/spec/blocks.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/blocks.integration.test.ts"
         },
         {
           "reqId": "GC-003",
           "testTitle": "GC-003: garbage blocks do not make dataset invalid (with plugins present)",
-          "filePath": "packages/core/src/__tests__/spec/plugins.gc.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/plugins.gc.integration.test.ts"
         }
       ]
     },
@@ -1343,7 +1343,7 @@
         {
           "reqId": "ERR-001",
           "testTitle": "ERR-001: validation errors expose stable fields",
-          "filePath": "packages/core/src/validate/__tests__/errors.unit.test.ts"
+          "filePath": "packages/dataset/src/validate/__tests__/errors.unit.test.ts"
         }
       ]
     },
@@ -1497,7 +1497,7 @@
         {
           "reqId": "EXP-003",
           "testTitle": "EXP-003: canonical dataset export round-trips bytes and graph",
-          "filePath": "packages/core/src/__tests__/spec/roundtrip.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/roundtrip.integration.test.ts"
         }
       ]
     },
@@ -1520,7 +1520,7 @@
         {
           "reqId": "EXP-006",
           "testTitle": "EXP-006: export includes reachable blocks",
-          "filePath": "packages/core/src/__tests__/spec/roundtrip.integration.test.ts"
+          "filePath": "packages/dataset/src/__tests__/spec/roundtrip.integration.test.ts"
         }
       ]
     },
@@ -1667,7 +1667,7 @@
         {
           "reqId": "PLUG-UTIL-001",
           "testTitle": "PLUG-UTIL-001: discovers plugin manifests + resolves bundle paths deterministically (sorted by manifest path)",
-          "filePath": "packages/core/src/__tests__/pluginObjects.discoveryUtility.unit.test.ts"
+          "filePath": "packages/dataset/src/__tests__/pluginObjects.discoveryUtility.unit.test.ts"
         }
       ]
     },

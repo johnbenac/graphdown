@@ -4,7 +4,7 @@ Runtime API for Graphdown datasets.
 
 ## What is this package?
 
-`@graphdown/runtime` provides a session-based read API on top of `@graphdown/core`. While core handles parsing, validation, and hashing of dataset snapshots, runtime provides a convenient API for querying and navigating dataset contents in memory.
+`@graphdown/runtime` provides a session-based read API on top of `@graphdown/dataset`. While dataset handles parsing, validation, and hashing of dataset snapshots, runtime provides a convenient API for querying and navigating dataset contents in memory.
 
 The Runtime API v1 offers:
 
@@ -18,32 +18,32 @@ The Runtime API v1 offers:
 
 This package depends on:
 
-- `@graphdown/core` - Dataset parsing, validation, and graph building
+- `@graphdown/dataset` - Dataset parsing, validation, and graph building
 - `@noble/hashes` - Cryptographic hashing for block verification
 
 ## Architecture Constraints
 
-**Important:** Runtime must import from `@graphdown/core` via the package barrel only:
+**Important:** Runtime must import from `@graphdown/dataset` via the package barrel only:
 
 ```ts
 // ✅ Correct
-import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from '@graphdown/core';
+import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from '@graphdown/dataset';
 
 // ❌ Wrong - violates layering
-import { validateDatasetSnapshot } from '../../core/src/validate/validateDatasetSnapshot';
+import { validateDatasetSnapshot } from '../../dataset/src/validate/validateDatasetSnapshot';
 ```
 
 Runtime must not:
 
-- Import core internals via relative paths
-- Re-export core symbols
+- Import dataset internals via relative paths
+- Re-export dataset symbols
 - Depend on UI frameworks (runtime is platform-agnostic)
 
 ## Usage
 
 ```ts
 import { openRuntimeApiV1 } from '@graphdown/runtime';
-import type { DatasetSnapshot } from '@graphdown/core';
+import type { DatasetSnapshot } from '@graphdown/dataset';
 
 // Load your snapshot (e.g., from zip, filesystem, etc.)
 const snapshot: DatasetSnapshot = /* ... */;

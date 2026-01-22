@@ -1,12 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../..",
+    "rootDir": "./src",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "ES2022",
-    "outDir": "../../.ci/core-dist-cjs",
-    "tsBuildInfoFile": "../../.ci/core-dist-cjs/.tsbuildinfo",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "noEmit": false,
     "declaration": false,
     "sourceMap": false,
@@ -18,7 +18,6 @@
     "src/**/__fixtures__/**",
     "src/tests/**",
     "src/fixtures/**",
-    "src/runtime/tests/**",
     "src/**/*.test.*",
     "src/**/*.spec.*"
   ]

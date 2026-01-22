@@ -1,5 +1,5 @@
-import type { DatasetSnapshot, ValidationError } from "@graphdown/core";
-import { validateDatasetSnapshot } from "@graphdown/core";
+import type { DatasetSnapshot, ValidationError } from "@graphdown/dataset";
+import { validateDatasetSnapshot } from "@graphdown/dataset";
 import type { RuntimeApiV1 } from "@graphdown/runtime";
 import { openRuntimeApiV1 } from "@graphdown/runtime";
 import { buildSnapshotIndex, type SnapshotIndex } from "./buildSnapshotIndex";
