@@ -8,7 +8,7 @@ module.exports = {
     [
       '@semantic-release/exec',
       {
-        prepareCmd: 'npm ci && npm --workspace packages/dataset run build',
+        prepareCmd: 'npm install --workspace packages/dataset && npm --workspace packages/dataset run build',
       },
     ],
     [
@@ -19,18 +19,11 @@ module.exports = {
       },
     ],
     [
-      '@semantic-release/exec',
-      {
-        prepareCmd: 'npm install --package-lock-only --ignore-scripts',
-      },
-    ],
-    [
       '@semantic-release/git',
       {
         assets: [
           'CHANGELOG.md',
           'packages/dataset/package.json',
-          'package-lock.json',
         ],
         message:
           'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
