@@ -1,3 +1,22 @@
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphmd/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
+* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphmd/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
+* configure npm authentication in GitHub Actions ([bdbfb89](https://github.com/johnbenac/graphmd/commit/bdbfb892016a8e5e310dcc3f1a3411c0455a7379))
+* disable npm workspace updates during release ([2fedfde](https://github.com/johnbenac/graphmd/commit/2fedfde3664cee5fa2c650cbad06915eef93d9b5))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* remove lockfile update step for first publish ([5337ea7](https://github.com/johnbenac/graphmd/commit/5337ea78c5197f6dbf3947424d23e0746b0df8a6))
+
+
+### Features
+
+* **dataset:** publishable package build + docs ([3a7f58e](https://github.com/johnbenac/graphmd/commit/3a7f58e9fee6ec08eb70f61fddf9ac4d282de17a))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
 # [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-22)
 
 
