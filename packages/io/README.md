@@ -133,7 +133,7 @@ Non-semantic files (documentation, assets, configuration files) are excluded and
 ### Plugin Bundle Resolution
 
 The package handles the complexity of:
-1. Detecting plugin manifests (type records with `plugin:` field)
+1. Detecting plugin manifests (markdown files with `pluginId` and `gdApiVersion` fields)
 2. Extracting bundle path declarations from manifests
 3. Resolving relative bundle paths
 4. Ensuring all required bundles are present
