@@ -15,7 +15,7 @@ module.exports = {
       '@semantic-release/npm',
       {
         pkgRoot: 'packages/dataset',
-        npmPublish: true,
+        npmPublish: false, // TODO: Re-enable after first manual publish
       },
     ],
     [
