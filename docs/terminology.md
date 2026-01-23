@@ -1,14 +1,14 @@
 # Terminology and Glossary
 
-This glossary defines canonical terms used in Graphdown documentation and code.
+This glossary defines canonical terms used in GraphMD documentation and code.
 When writing docs, avoid ambiguous terms (especially “graph”) unless qualified.
 
 ## Standard terms (from SPEC.md)
 
-These are the terms used by the Graphdown Standard (see `SPEC.md`, §3).
+These are the terms used by the GraphMD Standard (see `SPEC.md`, §3).
 
 ### Dataset
-A repository (or repository-like snapshot) of files containing Graphdown record files and optional block store files.
+A repository (or repository-like snapshot) of files containing GraphMD record files and optional block store files.
 
 ### Record file
 A Markdown file discovered by content per **LAYOUT-001**:
@@ -67,7 +67,7 @@ In-memory representation of files:
 A snapshot may contain non-record files. Dataset semantics ignore non-record and non-block-store files (BLOCK-LAYOUT-003), but snapshots can still carry them for whole-snapshot export.
 
 ### ParsedTypeObject / ParsedRecordObject
-Structured objects produced by `discoverGraphdownObjects()` from `parse/datasetObjects.ts`.
+Structured objects produced by `discoverGraphMDObjects()` from `parse/datasetObjects.ts`.
 
 These represent type objects and record objects extracted from record files.
 

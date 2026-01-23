@@ -1,12 +1,12 @@
-import type { DatasetSnapshot } from "@graphdown/dataset";
-import { buildRecordLinkGraphFromSnapshot, parseMarkdownRecord } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
+import { buildRecordLinkGraphFromSnapshot, parseMarkdownRecord } from "@graphmd/dataset";
 import type {
   RuntimeApiV1,
   RuntimeRecordViewV1,
   RuntimeTypeCompositionComponentV1,
   RuntimeTypeCompositionEdgeV1,
   RuntimeTypeViewV1
-} from "@graphdown/runtime";
+} from "@graphmd/runtime";
 
 const textDecoder =
   typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8", { fatal: true }) : null;

@@ -5,9 +5,9 @@ import {
   parsePluginManifest,
   resolvePluginBundlePaths,
   type DatasetSnapshot
-} from "@graphdown/dataset";
+} from "@graphmd/dataset";
 
-// Keep @graphdown/io portable: do not import node:util types.
+// Keep @graphmd/io portable: do not import node:util types.
 // Type-only node imports can leak into consumer type environments / generated .d.ts.
 type TextDecoderCtor = new (
   label?: string,

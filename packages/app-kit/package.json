@@ -1,5 +1,5 @@
 {
-  "name": "@graphdown/app-kit",
+  "name": "@graphmd/app-kit",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,9 +8,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/dataset": "0.0.0",
-    "@graphdown/runtime": "0.0.0",
-    "@graphdown/persistence": "0.0.0"
+    "@graphmd/dataset": "0.0.0",
+    "@graphmd/runtime": "0.0.0",
+    "@graphmd/persistence": "0.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

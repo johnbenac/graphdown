@@ -1,4 +1,4 @@
-import { discoverGraphdownObjects, type ParsedRecordObject, type ParsedTypeObject } from '../parse/datasetObjects.js';
+import { discoverGraphMDObjects, type ParsedRecordObject, type ParsedTypeObject } from '../parse/datasetObjects.js';
 import type { DatasetSnapshot } from '../model/snapshotTypes.js';
 import { blockPathForCid } from '../cid/daslCid.js';
 import { extractCidRefs } from '../parse/wikiRefs.js';
@@ -69,7 +69,7 @@ function collectReachableBlockPaths(
 }
 
 export function canonicalizeDatasetSnapshot(snapshot: DatasetSnapshot): DatasetSnapshot {
-  const parsed = discoverGraphdownObjects(snapshot);
+  const parsed = discoverGraphMDObjects(snapshot);
   const outputFiles = new Map<string, Uint8Array>();
 
   for (const typeObj of parsed.typeObjects) {

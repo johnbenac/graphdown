@@ -2,7 +2,7 @@ import type { CommitPlan } from "./commitPlan";
 import { VcsApplyNotImplementedError } from "./errors";
 
 export type { CommitFileOp, CommitPlan, RelPath } from "./commitPlan";
-export { planGraphdownCommit } from "./commitPlan";
+export { planGraphMDCommit } from "./commitPlan";
 export { VcsApplyNotImplementedError };
 export { DuplicateCommitPathError } from "./errors";
 

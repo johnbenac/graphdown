@@ -1,8 +1,8 @@
-# Graphdown Web (Developer Guide)
+# GraphMD Web (Developer Guide)
 
-This is the React/Vite frontend for importing, validating, browsing, editing, and exporting Graphdown datasets.
+This is the React/Vite frontend for importing, validating, browsing, editing, and exporting GraphMD datasets.
 
-It uses `@graphdown/dataset` for parsing/validation and `@graphdown/runtime` as the read model, persisting the active dataset in the browser using IndexedDB (required).
+It uses `@graphmd/dataset` for parsing/validation and `@graphmd/runtime` as the read model, persisting the active dataset in the browser using IndexedDB (required).
 
 ## Run the app
 From the repo root:
@@ -22,13 +22,13 @@ npm --workspace apps/web run build
 ## Project layout
 
 * `src/main.tsx` boots the app; `src/App.tsx` wires top-level routes and layout.
-* `@graphdown/dataset` shared, pure logic for dataset parsing/validation/hash/export helpers.
-* `@graphdown/runtime` read model (Runtime API v1 sessions for querying types/records/links/blocks).
+* `@graphmd/dataset` shared, pure logic for dataset parsing/validation/hash/export helpers.
+* `@graphmd/runtime` read model (Runtime API v1 sessions for querying types/records/links/blocks).
 * `src/import/` dataset ingest: zip uploads and GitHub repo fetchers.
 * `src/features/export/` bundles the active dataset snapshot into a zip.
 * `src/state/` app-level state: `DatasetContext` orchestrates import → validation → canonical layout → runtime session → persistence.
-* `@graphdown/persistence` serializes dataset snapshots and UI state.
-* `@graphdown/storage-idb` provides the IndexedDB-backed store used by the web app.
+* `@graphmd/persistence` serializes dataset snapshots and UI state.
+* `@graphmd/storage-idb` provides the IndexedDB-backed store used by the web app.
 * `src/routes/` page containers (`ImportRoute`, `DatasetRoute`, `ExportRoute`) that compose the UI for each flow.
 * `src/components/` reusable UI pieces (navigation, record/type viewers and editors, warning banners, layout primitives).
 * `src/utils/` small UI-friendly helpers (e.g., wiki-link parsing/formatting).
@@ -38,7 +38,7 @@ npm --workspace apps/web run build
 ## Data flow quick reference
 
 1. **Import (zip or GitHub)** → loaders build a raw `DatasetSnapshot` from bytes or GitHub files.
-2. **Validate** → `validateDatasetSnapshot` enforces Graphdown structural rules; errors bubble to the UI.
+2. **Validate** → `validateDatasetSnapshot` enforces GraphMD structural rules; errors bubble to the UI.
 3. **Canonicalize layout** → `canonicalizeDatasetSnapshot` rewrites paths into the canonical record-only layout and prunes unreachable blocks; `importReport` summarizes changes.
 4. **Open runtime session** → `openRuntimeApiV1` builds the Runtime API v1 read model from the snapshot.
 5. **Persist** → `createPersistence` writes snapshot + UI state to storage.
@@ -67,6 +67,6 @@ Playwright snapshots live next to the spec: `apps/web/e2e/app.e2e.spec.js-snapsh
 
 ## Notes for contributors
 
-* Keep `@graphdown/dataset` pure and framework-agnostic; the UI should consume it through the runtime read model, not reimplement logic.
+* Keep `@graphmd/dataset` pure and framework-agnostic; the UI should consume it through the runtime read model, not reimplement logic.
 * When touching import/export/persistence flows, add or update Vitest coverage and regenerate Playwright snapshots if UI changes.
 * The app requires IndexedDB for persistence; environments that block it are unsupported.

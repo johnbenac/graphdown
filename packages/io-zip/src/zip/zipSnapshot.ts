@@ -1,6 +1,6 @@
 import { unzipSync, zipSync } from "fflate";
 
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 import { normalizeZipEntryPath } from "../internal/zipPath";
 
 export interface ZipBuildOptions {

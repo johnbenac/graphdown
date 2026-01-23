@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 import {
   deserializeDatasetSnapshotV1,
   serializeDatasetSnapshotV1

@@ -1,9 +1,9 @@
-# Graphdown Documentation Map
+# GraphMD Documentation Map
 
 This repository has two kinds of documentation:
 
 1) **The Standard (normative):**
-   - `SPEC.md` is the single source of truth for Graphdown behavior and vocabulary.
+   - `SPEC.md` is the single source of truth for GraphMD behavior and vocabulary.
    - If anything conflicts with `SPEC.md`, `SPEC.md` wins.
 
 2) **Developer documentation (explanatory):**

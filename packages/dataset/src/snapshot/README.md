@@ -15,10 +15,10 @@
   This canonicalization is a *layout* operation (filesystem tree), not a semantic “graph” operation.
 
 - `hash.ts`
-  - Computes deterministic Graphdown hashes (`graphdown:gdhash:v1`) for schema-only or full snapshots.
+  - Computes deterministic GraphMD hashes (`graphmd:gdhash:v1`) for schema-only or full snapshots.
   - Parses record/type files, normalizes line endings (for hashing only), and hashes content in stable identity order.
 
 ## Usage notes
 
-- Canonicalization relies on `discoverGraphdownObjects` parsing behavior; parsing errors should be handled upstream.
+- Canonicalization relies on `discoverGraphMDObjects` parsing behavior; parsing errors should be handled upstream.
 - Hashing returns validation errors if UTF-8 decoding or parsing fails.

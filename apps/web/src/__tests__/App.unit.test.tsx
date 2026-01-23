@@ -2,11 +2,11 @@ import "fake-indexeddb/auto";
 import { render, screen } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
-import { MemoryPersistStore } from "@graphdown/persistence";
+import { MemoryPersistStore } from "@graphmd/persistence";
 import { appRoutes } from "../App";
 import { DatasetProvider } from "../state/DatasetContext";
 
-vi.mock("@graphdown/storage-idb", () => ({
+vi.mock("@graphmd/storage-idb", () => ({
   createPersistStore: () => new MemoryPersistStore()
 }));
 

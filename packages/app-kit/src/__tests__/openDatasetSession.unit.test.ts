@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 import { openDatasetSession } from "../openDatasetSession";
-import { openRuntimeApiV1 } from "@graphdown/runtime";
+import { openRuntimeApiV1 } from "@graphmd/runtime";
 
-vi.mock("@graphdown/runtime", () => ({
+vi.mock("@graphmd/runtime", () => ({
   openRuntimeApiV1: vi.fn()
 }));
 

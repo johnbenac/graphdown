@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
-import type { RuntimeApiV1 } from "@graphdown/runtime";
+import type { RuntimeApiV1 } from "@graphmd/runtime";
 import DatasetRoute from "../DatasetRoute";
 
 const sampleSnapshot = {

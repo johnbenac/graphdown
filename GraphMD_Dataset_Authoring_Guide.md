@@ -1,19 +1,19 @@
-# Graphdown Dataset Authoring Guide
+# GraphMD Dataset Authoring Guide
 
-*Practical guidance for writing and maintaining Graphdown datasets (Markdown + YAML front matter).*
-Based on **Graphdown Standard v0.5 (Draft)** (last updated 2026-01-14).
+*Practical guidance for writing and maintaining GraphMD datasets (Markdown + YAML front matter).*
+Based on **GraphMD Standard v0.5 (Draft)** (last updated 2026-01-14).
 
 > This guide is intentionally **author-focused**: how to structure content, write files, and avoid common pitfalls.
-> For the exact normative rules, see `SPEC.md` in the Graphdown repo.
+> For the exact normative rules, see `SPEC.md` in the GraphMD repo.
 >
-> Note: Graphdown plugins are now first-class dataset objects. This guide includes a practical, minimal “how to bundle a plugin”
+> Note: GraphMD plugins are now first-class dataset objects. This guide includes a practical, minimal “how to bundle a plugin”
 > section, including support for binary bundle assets via `binaryFiles`.
 
 ---
 
 ## Quickstart: a tiny dataset you can copy-paste
 
-Here’s a minimal dataset with **two types** and a few records. If you understand this example, you understand 80% of Graphdown authoring.
+Here’s a minimal dataset with **two types** and a few records. If you understand this example, you understand 80% of GraphMD authoring.
 
 ### Repository layout
 
@@ -36,13 +36,13 @@ my-dataset/
       (bundle files live alongside)
 ```
 
-> Graphdown identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
+> GraphMD identities do **not** depend on file paths. `types/`, `records/`, and `blocks/` are the **canonical export shape**.
 > Plugins are authored under `plugins/` and exported in the same canonical layout.
 
 **Important implication (authoring vs export):**
 
-* While authoring, you *can* place record files anywhere (as long as they’re valid Graphdown objects).
-* On export, Graphdown will rewrite into the canonical `types/` + `records/` layout, and will **nest records according to `parent`**.
+* While authoring, you *can* place record files anywhere (as long as they’re valid GraphMD objects).
+* On export, GraphMD will rewrite into the canonical `types/` + `records/` layout, and will **nest records according to `parent`**.
 
 If you internalize that, you’ll stop fighting the filesystem and start using `parent` intentionally.
 
@@ -113,9 +113,9 @@ That `[[project:alpha]]` is a **relationship link**. It’s also what satisfies 
 
 ---
 
-## The mental model: what Graphdown is optimizing for
+## The mental model: what GraphMD is optimizing for
 
-Graphdown’s dataset format has a few strong opinions—mostly in service of long-term maintainability:
+GraphMD’s dataset format has a few strong opinions—mostly in service of long-term maintainability:
 
 * **Markdown-first, repo-first.** Your dataset is a folder of `.md` files that work well in Git.
 * **Schema-as-data.** Types are authored as data *inside* the dataset. No “per-dataset code” required for basic CRUD.
@@ -124,7 +124,7 @@ Graphdown’s dataset format has a few strong opinions—mostly in service of lo
 
   * it checks structure, required fields, composition constraints, hierarchy, and block integrity
   * it does **not** enforce rich data types (dates, enums, money, etc.) — that’s plugin territory
-* **Human-authored text stays human-authored.** Graphdown avoids rewriting your content just to “normalize” it.
+* **Human-authored text stays human-authored.** GraphMD avoids rewriting your content just to “normalize” it.
 
 If you keep those in mind, the format tends to feel… pleasantly unsurprising.
 
@@ -132,7 +132,7 @@ If you keep those in mind, the format tends to feel… pleasantly unsurprising.
 
 ## Modeling: how to structure a dataset that stays sane
 
-Graphdown is a generic system. You can use it for:
+GraphMD is a generic system. You can use it for:
 
 * creative works (books, films, scripts, story worlds)
 * software and engineering specs (SRS → subsystem specs → component specs → tests)
@@ -144,7 +144,7 @@ So this section stays **domain-neutral**. The point is to help you choose types,
 
 ### Ownership vs references
 
-Graphdown has **two core ways** to connect records:
+GraphMD has **two core ways** to connect records:
 
 * **`parent`** (top-level YAML key)
   Structural containment: *where the record lives in the exported tree*.
@@ -174,7 +174,7 @@ A dataset is not required to be one tree. It can be a **forest**:
 * multiple independent hierarchies living side by side
 * shared libraries referenced across those hierarchies by wiki-links
 
-Graphdown core does **not** enforce “singleton” records. If you want one top record, you can do that by convention—but Graphdown won’t force it.
+GraphMD core does **not** enforce “singleton” records. If you want one top record, you can do that by convention—but GraphMD won’t force it.
 
 ### Choose meaningful types and avoid generic buckets
 
@@ -215,7 +215,7 @@ This is how you avoid “SKU as a type” when what you really wanted was `field
 
 ### Prefer the simplest representation that meets your needs
 
-Graphdown gives you freedom—use it to stay light.
+GraphMD gives you freedom—use it to stay light.
 
 A common modeling trap is making “every row is a record” structures too early. Example patterns where you have options:
 
@@ -376,7 +376,7 @@ Core won’t validate those shapes semantically. Your plugin can.
 
 ---
 
-## Relationships: linking records the Graphdown way
+## Relationships: linking records the GraphMD way
 
 ### The only core relationship syntax is a wiki-link token
 
@@ -390,11 +390,11 @@ Example:
 See also [[person:johnny]] and [[project:alpha]].
 ```
 
-If you want Graphdown core to recognize a relationship, use that exact bracket form.
+If you want GraphMD core to recognize a relationship, use that exact bracket form.
 
 ### Where relationships are extracted from
 
-Graphdown extracts relationship targets from:
+GraphMD extracts relationship targets from:
 
 * the record **body**
 * **any string value** anywhere inside the record `fields` map (even nested)
@@ -592,7 +592,7 @@ What doesn’t count:
 
 ## Blocks: attachments and binary content
 
-Sometimes you need to reference bytes: images, PDFs, audio, etc. Graphdown does this with **content-addressed blocks**.
+Sometimes you need to reference bytes: images, PDFs, audio, etc. GraphMD does this with **content-addressed blocks**.
 
 ### What it looks like in a record
 
@@ -629,7 +629,7 @@ blocks/sha2-256/2c/bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq
 
 ### Practical workflow advice
 
-* Prefer adding attachments through Graphdown tooling/UI when available (so CIDs and paths are handled for you).
+* Prefer adding attachments through GraphMD tooling/UI when available (so CIDs and paths are handled for you).
 * If you generate blocks yourself, build a tiny helper script in your plugin/tooling that:
 
   1. hashes bytes
@@ -665,7 +665,7 @@ plugins/<pluginId>/
     logo.bin           # example binary asset
 ```
 
-When Graphdown exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
+When GraphMD exports a **canonical** dataset zip/snapshot, tools may rewrite plugins into a canonical layout (for example,
 placing the manifest at `plugins/<pluginId>/manifest.md`). Don’t panic if you see `plugins/` in exports — it’s the same plugin,
 just in canonical shape.
 
@@ -838,10 +838,10 @@ fields:
 ```md
 ---
 typeId: section
-recordId: why-graphdown
+recordId: why-graphmd
 parent: chapter:intro
 fields:
-  title: "Why Graphdown?"
+  title: "Why GraphMD?"
 ---
 (Body content here.)
 ```
@@ -961,7 +961,7 @@ Example pattern:
 
 ## Plugin-friendly authoring patterns
 
-Graphdown core is deliberately conservative about semantics. That’s good news for plugin authors: you can define rich conventions without breaking core compatibility.
+GraphMD core is deliberately conservative about semantics. That’s good news for plugin authors: you can define rich conventions without breaking core compatibility.
 
 ### Put plugin metadata under fields
 
@@ -1123,7 +1123,7 @@ Fix: avoid CID-shaped tokens that aren’t real CIDs. If you meant a record link
 ### E_PLUGIN_UTF8_INVALID for a plugin asset
 
 Fix: if the plugin bundle includes non-text bytes (png/ttf/wasm/zip/etc), list that path under `binaryFiles:` in the plugin manifest.
-If it’s *not* in `binaryFiles`, Graphdown treats it as text and requires valid UTF-8.
+If it’s *not* in `binaryFiles`, GraphMD treats it as text and requires valid UTF-8.
 
 ### binaryFiles entry must be listed in files
 
@@ -1199,11 +1199,11 @@ Usually no. Put long text in the Markdown body. Use `fields` for structured meta
 
 ### Do I have to keep records in records and types in types
 
-Graphdown’s core model doesn’t care about paths for identity, but this layout is the canonical export shape and is the most compatible choice with current tooling and human expectations.
+GraphMD’s core model doesn’t care about paths for identity, but this layout is the canonical export shape and is the most compatible choice with current tooling and human expectations.
 
 ### Can my dataset live in a GitHub subfolder
 
-If you plan to import via a GitHub URL in Graphdown, assume “dataset = repo root”.
+If you plan to import via a GitHub URL in GraphMD, assume “dataset = repo root”.
 Subdirectory GitHub URLs (like `/tree/main/some/subdir`) are rejected by design.
 
 Practical workaround: put the dataset at the repo root, or use a dedicated repo per dataset.

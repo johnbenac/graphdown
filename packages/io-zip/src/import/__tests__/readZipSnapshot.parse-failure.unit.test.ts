@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { isImportError } from "@graphdown/io";
+import { isImportError } from "@graphmd/io";
 
-vi.mock("@graphdown/dataset", async () => {
-  const actual = await vi.importActual<typeof import("@graphdown/dataset")>("@graphdown/dataset");
+vi.mock("@graphmd/dataset", async () => {
+  const actual = await vi.importActual<typeof import("@graphmd/dataset")>("@graphmd/dataset");
   return {
     ...actual,
     isPluginManifestCandidateBytes: vi.fn(() => true),

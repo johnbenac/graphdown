@@ -1,421 +1,421 @@
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-22)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-22)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-22)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-22)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-22)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-21)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-21)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-22)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-21)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-21)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-21)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-21)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-21)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-21)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
-
-
-### Features
-
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
-
-# [0.14.0](https://github.com/johnbenac/graphdown/compare/v0.13.0...v0.14.0) (2026-01-20)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-21)
 
 
 ### Features
 
-* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphdown/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-21)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.14.0](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.14.0) (2026-01-20)
+
+
+### Features
+
+* split indexeddb storage package ([bb1cd01](https://github.com/johnbenac/graphmd/commit/bb1cd0110b24faa3c2ea6c0690021503bb1946c3))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Bug Fixes
 
-* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphdown/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
-* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphdown/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
-* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphmd/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
+* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphmd/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Bug Fixes
 
-* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphdown/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
-* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphdown/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
-* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* change workspace:* to 0.0.0 for npm ci compatibility ([dd9816b](https://github.com/johnbenac/graphmd/commit/dd9816b963088e13113da0fdf5b5ab43faf6ea6b))
+* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphmd/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Bug Fixes
 
-* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphdown/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
-* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* change workspace:* to 0.0.0 for npm ci compatibility ([ac3c739](https://github.com/johnbenac/graphmd/commit/ac3c739d74ebcc5c469f48528fbf653051dab3e0))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Bug Fixes
 
-* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Bug Fixes
 
-* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphdown/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
+* normalize cross-realm zip bytes ([e6c8f6c](https://github.com/johnbenac/graphmd/commit/e6c8f6c7ef76f0a3d3a6be0d640b7d5f5be11894))
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-19)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-18)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-18)
-
-
-### Features
-
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
-
-# [0.13.0](https://github.com/johnbenac/graphdown/compare/v0.12.6...v0.13.0) (2026-01-18)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
 
 
 ### Features
 
-* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphdown/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
 
-## [0.12.6](https://github.com/johnbenac/graphdown/compare/v0.12.5...v0.12.6) (2026-01-14)
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-19)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-18)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-18)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+# [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-18)
+
+
+### Features
+
+* standardize import contracts and errors ([43dd3d2](https://github.com/johnbenac/graphmd/commit/43dd3d27ea258786e74e965d55784f738c7a6338))
+
+## [0.12.6](https://github.com/johnbenac/graphmd/compare/v0.12.5...v0.12.6) (2026-01-14)
 
 
 ### Bug Fixes
 
-* include type block references ([23bd7b1](https://github.com/johnbenac/graphdown/commit/23bd7b13bd03ef5305933afdf3785bc6b8d62443))
+* include type block references ([23bd7b1](https://github.com/johnbenac/graphmd/commit/23bd7b13bd03ef5305933afdf3785bc6b8d62443))
 
-## [0.12.5](https://github.com/johnbenac/graphdown/compare/v0.12.4...v0.12.5) (2026-01-14)
-
-
-### Bug Fixes
-
-* dedupe record export and align plugin test naming ([535f9ca](https://github.com/johnbenac/graphdown/commit/535f9ca7add75cffb8fa95191d083ceeef526737))
-
-## [0.12.4](https://github.com/johnbenac/graphdown/compare/v0.12.3...v0.12.4) (2026-01-14)
+## [0.12.5](https://github.com/johnbenac/graphmd/compare/v0.12.4...v0.12.5) (2026-01-14)
 
 
 ### Bug Fixes
 
-* remove excessive timeout from Pages deployment ([e0e045f](https://github.com/johnbenac/graphdown/commit/e0e045ffbfa7a8ee596a7f740c525abb33ae6d8c))
+* dedupe record export and align plugin test naming ([535f9ca](https://github.com/johnbenac/graphmd/commit/535f9ca7add75cffb8fa95191d083ceeef526737))
 
-## [0.12.3](https://github.com/johnbenac/graphdown/compare/v0.12.2...v0.12.3) (2026-01-14)
-
-
-### Bug Fixes
-
-* ignore plugin bundle markdown in discovery ([0756bd7](https://github.com/johnbenac/graphdown/commit/0756bd7f65bc790e4e49d69e6d8853d6ce689ae3))
-
-## [0.12.2](https://github.com/johnbenac/graphdown/compare/v0.12.1...v0.12.2) (2026-01-13)
+## [0.12.4](https://github.com/johnbenac/graphmd/compare/v0.12.3...v0.12.4) (2026-01-14)
 
 
 ### Bug Fixes
 
-* **core:** use InstanceType for TextDecoder cache ([70271b5](https://github.com/johnbenac/graphdown/commit/70271b5bb3419fc29604b3ebc4ec3fffe8375117))
+* remove excessive timeout from Pages deployment ([e0e045f](https://github.com/johnbenac/graphmd/commit/e0e045ffbfa7a8ee596a7f740c525abb33ae6d8c))
 
-## [0.12.1](https://github.com/johnbenac/graphdown/compare/v0.12.0...v0.12.1) (2026-01-13)
+## [0.12.3](https://github.com/johnbenac/graphmd/compare/v0.12.2...v0.12.3) (2026-01-14)
 
 
 ### Bug Fixes
 
-* **parse:** handle CR-only front matter for manifests ([d2fed98](https://github.com/johnbenac/graphdown/commit/d2fed980943f6e2d4c718dd02f6c2be292d8f63a))
+* ignore plugin bundle markdown in discovery ([0756bd7](https://github.com/johnbenac/graphmd/commit/0756bd7f65bc790e4e49d69e6d8853d6ce689ae3))
 
-# [0.12.0](https://github.com/johnbenac/graphdown/compare/v0.11.0...v0.12.0) (2026-01-05)
+## [0.12.2](https://github.com/johnbenac/graphmd/compare/v0.12.1...v0.12.2) (2026-01-13)
+
+
+### Bug Fixes
+
+* **core:** use InstanceType for TextDecoder cache ([70271b5](https://github.com/johnbenac/graphmd/commit/70271b5bb3419fc29604b3ebc4ec3fffe8375117))
+
+## [0.12.1](https://github.com/johnbenac/graphmd/compare/v0.12.0...v0.12.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **parse:** handle CR-only front matter for manifests ([d2fed98](https://github.com/johnbenac/graphmd/commit/d2fed980943f6e2d4c718dd02f6c2be292d8f63a))
+
+# [0.12.0](https://github.com/johnbenac/graphmd/compare/v0.11.0...v0.12.0) (2026-01-05)
 
 
 ### Features
 
-* show type bodies in dataset view ([f235ac9](https://github.com/johnbenac/graphdown/commit/f235ac9e8a814396d9e9eac71023a7db7a1e158d))
+* show type bodies in dataset view ([f235ac9](https://github.com/johnbenac/graphmd/commit/f235ac9e8a814396d9e9eac71023a7db7a1e158d))
 
-# [0.11.0](https://github.com/johnbenac/graphdown/compare/v0.10.0...v0.11.0) (2026-01-05)
-
-
-### Features
-
-* surface import warnings ([d719439](https://github.com/johnbenac/graphdown/commit/d7194392972cacd8a7ff3593ee2e7d4b52dd07e9))
-
-# [0.10.0](https://github.com/johnbenac/graphdown/compare/v0.9.0...v0.10.0) (2026-01-05)
+# [0.11.0](https://github.com/johnbenac/graphmd/compare/v0.10.0...v0.11.0) (2026-01-05)
 
 
 ### Features
 
-* canonicalize dataset snapshots on import ([efaff4b](https://github.com/johnbenac/graphdown/commit/efaff4b8cb9611f15665bb7fa10c046dada98172))
+* surface import warnings ([d719439](https://github.com/johnbenac/graphmd/commit/d7194392972cacd8a7ff3593ee2e7d4b52dd07e9))
 
-# [0.9.0](https://github.com/johnbenac/graphdown/compare/v0.8.4...v0.9.0) (2026-01-05)
+# [0.10.0](https://github.com/johnbenac/graphmd/compare/v0.9.0...v0.10.0) (2026-01-05)
 
 
 ### Features
 
-* drop non-dataset files on import ([dddc335](https://github.com/johnbenac/graphdown/commit/dddc33586f3daeb43ae613fe6b1b4b35009df500))
+* canonicalize dataset snapshots on import ([efaff4b](https://github.com/johnbenac/graphmd/commit/efaff4b8cb9611f15665bb7fa10c046dada98172))
 
-## [0.8.4](https://github.com/johnbenac/graphdown/compare/v0.8.3...v0.8.4) (2026-01-03)
+# [0.9.0](https://github.com/johnbenac/graphmd/compare/v0.8.4...v0.9.0) (2026-01-05)
+
+
+### Features
+
+* drop non-dataset files on import ([dddc335](https://github.com/johnbenac/graphmd/commit/dddc33586f3daeb43ae613fe6b1b4b35009df500))
+
+## [0.8.4](https://github.com/johnbenac/graphmd/compare/v0.8.3...v0.8.4) (2026-01-03)
 
 
 ### Bug Fixes
 
-* use fontsource variable inter ([722bbe8](https://github.com/johnbenac/graphdown/commit/722bbe80ff664a2837c6e4c27ee7c5f7dc919ce0))
+* use fontsource variable inter ([722bbe8](https://github.com/johnbenac/graphmd/commit/722bbe80ff664a2837c6e4c27ee7c5f7dc919ce0))
 
-## [0.8.3](https://github.com/johnbenac/graphdown/compare/v0.8.2...v0.8.3) (2026-01-03)
-
-
-### Bug Fixes
-
-* bundle inter font for stable e2e screenshots ([e5182aa](https://github.com/johnbenac/graphdown/commit/e5182aa51318024e517d093b2fff7adb8bb1ece4))
-
-## [0.8.2](https://github.com/johnbenac/graphdown/compare/v0.8.1...v0.8.2) (2026-01-03)
+## [0.8.3](https://github.com/johnbenac/graphmd/compare/v0.8.2...v0.8.3) (2026-01-03)
 
 
 ### Bug Fixes
 
-* align web UI with new graph API and Playwright config ([b79b2a2](https://github.com/johnbenac/graphdown/commit/b79b2a213fce1a5ef94a73ddfec6c1a50c7ffd88))
+* bundle inter font for stable e2e screenshots ([e5182aa](https://github.com/johnbenac/graphmd/commit/e5182aa51318024e517d093b2fff7adb8bb1ece4))
 
-## [0.8.1](https://github.com/johnbenac/graphdown/compare/v0.8.0...v0.8.1) (2026-01-02)
-
-
-### Bug Fixes
-
-* handle per-string link extraction ([9004393](https://github.com/johnbenac/graphdown/commit/9004393694e899f505aeadc0f6b5cce03d4ba1ea))
-
-# [0.8.0](https://github.com/johnbenac/graphdown/compare/v0.7.0...v0.8.0) (2026-01-02)
-
-
-### Features
-
-* align core with blob spec and verification ([ea015e8](https://github.com/johnbenac/graphdown/commit/ea015e8dad610040f612cb27f6bc0f3ffff171cd))
-
-# [0.7.0](https://github.com/johnbenac/graphdown/compare/v0.6.0...v0.7.0) (2026-01-01)
-
-
-### Features
-
-* make UI editor schema-agnostic per UI-RAW-001 ([0aea8ac](https://github.com/johnbenac/graphdown/commit/0aea8ac1d246b37b44c06ee63c1e8f1a9a2649c1))
-
-# [0.6.0](https://github.com/johnbenac/graphdown/compare/v0.5.0...v0.6.0) (2026-01-01)
-
-
-### Features
-
-* add raw field fallback for UI-RAW-001 ([c5c660d](https://github.com/johnbenac/graphdown/commit/c5c660dce97f09d1f6107861f35708c1ee53f2d9))
-
-# [0.5.0](https://github.com/johnbenac/graphdown/compare/v0.4.2...v0.5.0) (2026-01-01)
-
-
-### Features
-
-* enforce hash scope constraints ([f1a4ccb](https://github.com/johnbenac/graphdown/commit/f1a4ccb2bb2df9e8b427fa83a7e80021a4194704))
-
-## [0.4.2](https://github.com/johnbenac/graphdown/compare/v0.4.1...v0.4.2) (2026-01-01)
+## [0.8.2](https://github.com/johnbenac/graphmd/compare/v0.8.1...v0.8.2) (2026-01-03)
 
 
 ### Bug Fixes
 
-* handle binary snapshots in commit batch tool ([253da37](https://github.com/johnbenac/graphdown/commit/253da372e4733d0640647994a3de1082b0832474))
+* align web UI with new graph API and Playwright config ([b79b2a2](https://github.com/johnbenac/graphmd/commit/b79b2a213fce1a5ef94a73ddfec6c1a50c7ffd88))
 
-## [0.4.1](https://github.com/johnbenac/graphdown/compare/v0.4.0...v0.4.1) (2026-01-01)
-
-
-### Bug Fixes
-
-* make gdhash deterministic and reject duplicates ([4ac411b](https://github.com/johnbenac/graphdown/commit/4ac411b61f1c5f85bf6d6829a7ae38ad38d98862))
-
-# [0.4.0](https://github.com/johnbenac/graphdown/compare/v0.3.0...v0.4.0) (2026-01-01)
-
-
-### Features
-
-* add gdhash-v1 hashing ([268d940](https://github.com/johnbenac/graphdown/commit/268d94048f59359ae4a51a23db49b20abd8e72e8))
-
-# [0.3.0](https://github.com/johnbenac/graphdown/compare/v0.2.0...v0.3.0) (2026-01-01)
-
-
-### Features
-
-* add composition validation and GH-008 coverage ([47e266b](https://github.com/johnbenac/graphdown/commit/47e266b8ae836e8992924a2d44f19d33bd1310f1)), closes [#008](https://github.com/johnbenac/graphdown/issues/008)
-
-# [0.2.0](https://github.com/johnbenac/graphdown/compare/v0.1.0...v0.2.0) (2025-12-31)
-
-
-### Features
-
-* extend spec trace with testable/verify metadata ([2b48fe7](https://github.com/johnbenac/graphdown/commit/2b48fe79313f9e74db1bcf59af9edd8f99eae75a))
-
-# [0.1.0](https://github.com/johnbenac/graphdown/compare/v0.0.2...v0.1.0) (2025-12-31)
-
-
-### Features
-
-* enforce VAL-005 and GH-002; add tests and trace owners ([97c20ee](https://github.com/johnbenac/graphdown/commit/97c20eec7eec092a6f79380862555491ebcd8af0)), closes [#002](https://github.com/johnbenac/graphdown/issues/002) [#002](https://github.com/johnbenac/graphdown/issues/002)
-
-## [0.0.2](https://github.com/johnbenac/graphdown/compare/v0.0.1...v0.0.2) (2025-12-29)
+## [0.8.1](https://github.com/johnbenac/graphmd/compare/v0.8.0...v0.8.1) (2026-01-02)
 
 
 ### Bug Fixes
 
-* **e2e:** add pixel difference tolerance for cross-environment screenshots ([0909361](https://github.com/johnbenac/graphdown/commit/0909361822a09527fad5741f7d768e46dcd82dab))
+* handle per-string link extraction ([9004393](https://github.com/johnbenac/graphmd/commit/9004393694e899f505aeadc0f6b5cce03d4ba1ea))
 
-## [0.0.1](https://github.com/johnbenac/graphdown/compare/v0.0.0...v0.0.1) (2025-12-29)
+# [0.8.0](https://github.com/johnbenac/graphmd/compare/v0.7.0...v0.8.0) (2026-01-02)
+
+
+### Features
+
+* align core with blob spec and verification ([ea015e8](https://github.com/johnbenac/graphmd/commit/ea015e8dad610040f612cb27f6bc0f3ffff171cd))
+
+# [0.7.0](https://github.com/johnbenac/graphmd/compare/v0.6.0...v0.7.0) (2026-01-01)
+
+
+### Features
+
+* make UI editor schema-agnostic per UI-RAW-001 ([0aea8ac](https://github.com/johnbenac/graphmd/commit/0aea8ac1d246b37b44c06ee63c1e8f1a9a2649c1))
+
+# [0.6.0](https://github.com/johnbenac/graphmd/compare/v0.5.0...v0.6.0) (2026-01-01)
+
+
+### Features
+
+* add raw field fallback for UI-RAW-001 ([c5c660d](https://github.com/johnbenac/graphmd/commit/c5c660dce97f09d1f6107861f35708c1ee53f2d9))
+
+# [0.5.0](https://github.com/johnbenac/graphmd/compare/v0.4.2...v0.5.0) (2026-01-01)
+
+
+### Features
+
+* enforce hash scope constraints ([f1a4ccb](https://github.com/johnbenac/graphmd/commit/f1a4ccb2bb2df9e8b427fa83a7e80021a4194704))
+
+## [0.4.2](https://github.com/johnbenac/graphmd/compare/v0.4.1...v0.4.2) (2026-01-01)
 
 
 ### Bug Fixes
 
-* **test:** configure Vitest to exclude e2e tests and enable globals ([1b022ef](https://github.com/johnbenac/graphdown/commit/1b022ef5aff82f1c34d6bedfc9bd3c0eeb84553e))
+* handle binary snapshots in commit batch tool ([253da37](https://github.com/johnbenac/graphmd/commit/253da372e4733d0640647994a3de1082b0832474))
+
+## [0.4.1](https://github.com/johnbenac/graphmd/compare/v0.4.0...v0.4.1) (2026-01-01)
+
+
+### Bug Fixes
+
+* make gdhash deterministic and reject duplicates ([4ac411b](https://github.com/johnbenac/graphmd/commit/4ac411b61f1c5f85bf6d6829a7ae38ad38d98862))
+
+# [0.4.0](https://github.com/johnbenac/graphmd/compare/v0.3.0...v0.4.0) (2026-01-01)
+
+
+### Features
+
+* add gdhash-v1 hashing ([268d940](https://github.com/johnbenac/graphmd/commit/268d94048f59359ae4a51a23db49b20abd8e72e8))
+
+# [0.3.0](https://github.com/johnbenac/graphmd/compare/v0.2.0...v0.3.0) (2026-01-01)
+
+
+### Features
+
+* add composition validation and GH-008 coverage ([47e266b](https://github.com/johnbenac/graphmd/commit/47e266b8ae836e8992924a2d44f19d33bd1310f1)), closes [#008](https://github.com/johnbenac/graphmd/issues/008)
+
+# [0.2.0](https://github.com/johnbenac/graphmd/compare/v0.1.0...v0.2.0) (2025-12-31)
+
+
+### Features
+
+* extend spec trace with testable/verify metadata ([2b48fe7](https://github.com/johnbenac/graphmd/commit/2b48fe79313f9e74db1bcf59af9edd8f99eae75a))
+
+# [0.1.0](https://github.com/johnbenac/graphmd/compare/v0.0.2...v0.1.0) (2025-12-31)
+
+
+### Features
+
+* enforce VAL-005 and GH-002; add tests and trace owners ([97c20ee](https://github.com/johnbenac/graphmd/commit/97c20eec7eec092a6f79380862555491ebcd8af0)), closes [#002](https://github.com/johnbenac/graphmd/issues/002) [#002](https://github.com/johnbenac/graphmd/issues/002)
+
+## [0.0.2](https://github.com/johnbenac/graphmd/compare/v0.0.1...v0.0.2) (2025-12-29)
+
+
+### Bug Fixes
+
+* **e2e:** add pixel difference tolerance for cross-environment screenshots ([0909361](https://github.com/johnbenac/graphmd/commit/0909361822a09527fad5741f7d768e46dcd82dab))
+
+## [0.0.1](https://github.com/johnbenac/graphmd/compare/v0.0.0...v0.0.1) (2025-12-29)
+
+
+### Bug Fixes
+
+* **test:** configure Vitest to exclude e2e tests and enable globals ([1b022ef](https://github.com/johnbenac/graphmd/commit/1b022ef5aff82f1c34d6bedfc9bd3c0eeb84553e))

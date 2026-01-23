@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validateDatasetSnapshot } from "@graphdown/dataset";
-import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
+import { validateDatasetSnapshot } from "@graphmd/dataset";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphmd/io-zip";
 import { snapshotFromTextFiles } from "../../harness";
 
 describe("integration smoke: io-zip <-> dataset", () => {

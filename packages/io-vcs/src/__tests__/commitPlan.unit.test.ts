@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   applyCommitPlan,
   DuplicateCommitPathError,
-  planGraphdownCommit,
+  planGraphMDCommit,
   VcsApplyNotImplementedError
 } from "../index";
 
 const encoder = new TextEncoder();
 
-describe("planGraphdownCommit", () => {
+describe("planGraphMDCommit", () => {
   it("is deterministic regardless of file iteration order", () => {
     const filesA = new Map<string, Uint8Array>([
       ["b.txt", encoder.encode("beta")],
@@ -19,8 +19,8 @@ describe("planGraphdownCommit", () => {
       ["b.txt", encoder.encode("beta")]
     ]);
 
-    const planA = planGraphdownCommit({ files: filesA });
-    const planB = planGraphdownCommit({ files: filesB });
+    const planA = planGraphMDCommit({ files: filesA });
+    const planB = planGraphMDCommit({ files: filesB });
 
     expect(planA).toEqual(planB);
   });
@@ -33,7 +33,7 @@ describe("planGraphdownCommit", () => {
       ["dir/a.txt", encoder.encode("a")]
     ]);
 
-    const plan = planGraphdownCommit({ files });
+    const plan = planGraphMDCommit({ files });
 
     expect(plan.ops.map((op) => op.path)).toEqual([
       "a.txt",
@@ -45,7 +45,7 @@ describe("planGraphdownCommit", () => {
 
   it("preserves bytes and encodes strings in UTF-8", () => {
     const binary = new Uint8Array([0, 1, 2, 255, 254]);
-    const planBinary = planGraphdownCommit({
+    const planBinary = planGraphMDCommit({
       files: new Map([["data.bin", binary]])
     });
 
@@ -55,7 +55,7 @@ describe("planGraphdownCommit", () => {
       expect(Array.from(binaryOp.bytes)).toEqual([0, 1, 2, 255, 254]);
     }
 
-    const planString = planGraphdownCommit({
+    const planString = planGraphMDCommit({
       files: new Map<string, Uint8Array | string>([["lambda.txt", "λ"]])
     });
 
@@ -79,7 +79,7 @@ describe("planGraphdownCommit", () => {
       [path, encoder.encode("bad")]
     ]);
 
-    expect(() => planGraphdownCommit({ files })).toThrow(/Invalid commit path/);
+    expect(() => planGraphMDCommit({ files })).toThrow(/Invalid commit path/);
   });
 
   it("rejects duplicate normalized paths", () => {
@@ -89,8 +89,8 @@ describe("planGraphdownCommit", () => {
     ]);
 
     try {
-      planGraphdownCommit({ files });
-      throw new Error("Expected planGraphdownCommit to throw");
+      planGraphMDCommit({ files });
+      throw new Error("Expected planGraphMDCommit to throw");
     } catch (err) {
       expect(err).toBeInstanceOf(DuplicateCommitPathError);
       expect(err).toMatchObject({
@@ -112,7 +112,7 @@ describe("planGraphdownCommit", () => {
 
     const getError = (files: Map<string, Uint8Array | string>) => {
       try {
-        planGraphdownCommit({ files });
+        planGraphMDCommit({ files });
         throw new Error("Expected throw");
       } catch (err) {
         return err;
@@ -142,7 +142,7 @@ describe("applyCommitPlan", () => {
   it("throws a not-implemented error", async () => {
     const plan = {
       ops: [],
-      message: "graphdown: update 0 files"
+      message: "graphmd: update 0 files"
     };
 
     await expect(applyCommitPlan(plan)).rejects.toBeInstanceOf(

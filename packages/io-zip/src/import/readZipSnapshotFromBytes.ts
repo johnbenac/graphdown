@@ -4,7 +4,7 @@ import {
   isImportError,
   selectSemanticSnapshotFiles,
   type ImportResult
-} from "@graphdown/io";
+} from "@graphmd/io";
 
 import { normalizeZipEntryPath } from "../internal/zipPath";
 

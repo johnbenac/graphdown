@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecordEditor from "../RecordEditor";
-import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphmd/runtime";
 import { vi } from "vitest";
 
 const mockUpdateRecord = vi.fn();

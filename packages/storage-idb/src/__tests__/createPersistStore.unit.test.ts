@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createPersistStore, IndexedDbStore } from "@graphdown/storage-idb";
+import { createPersistStore, IndexedDbStore } from "@graphmd/storage-idb";
 
 describe("createPersistStore", () => {
   afterEach(() => {
@@ -18,7 +18,7 @@ describe("createPersistStore", () => {
 
   it("returns an IndexedDbStore when IndexedDB is available", async () => {
     const store = createPersistStore({
-      dbName: `graphdown-test-${Math.random().toString(16).slice(2)}`
+      dbName: `graphmd-test-${Math.random().toString(16).slice(2)}`
     });
 
     expect(store).toBeInstanceOf(IndexedDbStore);

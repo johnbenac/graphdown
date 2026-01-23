@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
-import { createPersistence } from "@graphdown/persistence";
+import { createPersistence } from "@graphmd/persistence";
 import { IndexedDbStore } from "../indexedDbStore";
 
 function makeDbName(prefix: string) {

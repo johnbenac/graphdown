@@ -47,7 +47,7 @@ export function createIndexedDbPersistStore(options?: IndexedDbStoreOptions): In
   if (typeof indexedDB === "undefined") {
     const err = new Error(
       [
-        "Graphdown Web requires IndexedDB for persistence, but IndexedDB is unavailable.",
+        "GraphMD Web requires IndexedDB for persistence, but IndexedDB is unavailable.",
         "",
         "This environment is not supported (e.g. restricted webview, storage disabled, or non-browser runtime)."
       ].join("\n")
@@ -63,7 +63,7 @@ export class IndexedDbStore {
   private readonly storeName: string;
 
   constructor(options?: IndexedDbStoreOptions) {
-    this.dbName = options?.dbName ?? "graphdown";
+    this.dbName = options?.dbName ?? "graphmd";
     this.storeName = options?.storeName ?? "kv";
     trackedDbNames.add(this.dbName);
   }

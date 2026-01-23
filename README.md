@@ -1,6 +1,6 @@
-# Graphdown
+# GraphMD
 
-Graphdown is a toolkit for **repository-first, Markdown-canonical datasets** defined by the **Graphdown Standard**.
+GraphMD is a toolkit for **repository-first, Markdown-canonical datasets** defined by the **GraphMD Standard**.
 
 It ships:
 
@@ -13,11 +13,11 @@ It ships:
 
 ---
 
-## What is a Graphdown dataset?
+## What is a GraphMD dataset?
 
-A Graphdown dataset is a **repository of files** (not a database dump).
+A GraphMD dataset is a **repository of files** (not a database dump).
 
-Graphdown defines **three first-class semantic object classes** in that repository (SPEC v0.5, P-001):
+GraphMD defines **three first-class semantic object classes** in that repository (SPEC v0.5, P-001):
 
 1. **Type objects** and **Record objects** stored as Markdown files with YAML front matter.
 2. **Block objects** stored as uninterpreted bytes in the canonical block store (`blocks/…`).
@@ -27,7 +27,7 @@ Everything else in the repository is **non-semantic** and ignored by dataset val
 
 ### Content-based discovery (paths don’t matter)
 
-Graphdown is intentionally **path-agnostic** for discovery and identity.
+GraphMD is intentionally **path-agnostic** for discovery and identity.
 
 - **Record files** are discovered by content, not directories (LAYOUT-001):
   - file ends in `.md`
@@ -153,7 +153,7 @@ Plugins affect dataset semantics only through:
 
 ### Hashing (gdhash-v1)
 
-Graphdown defines exactly two standardized dataset fingerprints (HASH-004):
+GraphMD defines exactly two standardized dataset fingerprints (HASH-004):
 
 - **schema fingerprint**: type objects only (HASH-002)
 - **snapshot fingerprint**: type objects + record objects + plugin objects (HASH-003)
@@ -225,7 +225,7 @@ Development docs:
 
 ## Dataset format (minimal examples)
 
-Graphdown distinguishes **type objects**, **record objects**, **blocks**, and **plugins**.
+GraphMD distinguishes **type objects**, **record objects**, **blocks**, and **plugins**.
 
 ### Type object (FR-MD-021)
 
@@ -362,8 +362,8 @@ Reference datasets used for compatibility checks:
 
 ## Repo layout (implementation)
 
-* `SPEC.md` — Graphdown standard (normative)
-* `Graphdown_Dataset_Authoring_Guide.md` — authoring guidance (non-normative)
+* `SPEC.md` — GraphMD standard (normative)
+* `GraphMD_Dataset_Authoring_Guide.md` — authoring guidance (non-normative)
 * `apps/web/` — React/Vite web app (import, browse, edit, export)
 * `packages/dataset/src/` — dataset parsing/validation/hashing/canonicalization/runtime helpers
 * `docs/` — developer concept docs (glossary, graphs, snapshots/layout)

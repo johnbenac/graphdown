@@ -1,6 +1,6 @@
 # Record Link Graph utilities
 
-`graph/` builds the **Record Link Graph** from parsed Graphdown datasets.
+`graph/` builds the **Record Link Graph** from parsed GraphMD datasets.
 
 This graph is used by the UI for:
 - looking up type/record nodes by identity

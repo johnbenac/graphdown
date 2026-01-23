@@ -8,7 +8,7 @@ import {
   cidFromRawBytes
 } from "../../index.js";
 import type { BuildRecordLinkGraphResult, DatasetSnapshot } from "../../index.js";
-import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphmd/io-zip";
 
 const encoder = new TextEncoder();
 

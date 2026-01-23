@@ -1,3 +1,3 @@
 node_modules/
 dist/
-apps/web/src/graphdown/__fixtures__/**/blocks/**
+apps/web/src/graphmd/__fixtures__/**/blocks/**

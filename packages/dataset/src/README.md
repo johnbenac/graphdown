@@ -1,6 +1,6 @@
 # Dataset module map
 
-This folder contains the canonical dataset semantics used across Graphdown.
+This folder contains the canonical dataset semantics used across GraphMD.
 
 ## Module overview
 

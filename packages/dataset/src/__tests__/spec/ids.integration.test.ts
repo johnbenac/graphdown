@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 
-import { parseGraphdownText } from "../../parse/datasetObjects.js";
+import { parseGraphMDText } from "../../parse/datasetObjects.js";
 import { validateDatasetSnapshot } from "../../validate/validateDatasetSnapshot.js";
 import type { DatasetSnapshot } from "../../model/snapshotTypes.js";
 import type { ValidateDatasetResult } from "../../validate/validateDatasetSnapshot.js";
@@ -16,7 +16,7 @@ function snapshot(entries: SnapshotEntry[]): DatasetSnapshot {
 }
 
 function parse(text: string) {
-  return parseGraphdownText("test.md", text);
+  return parseGraphMDText("test.md", text);
 }
 
 function expectErrors(result: ValidateDatasetResult): ValidationError[] {

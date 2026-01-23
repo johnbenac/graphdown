@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 
 export type SerializedDatasetSnapshotV1 = {
   files: Array<[string, Uint8Array]>;

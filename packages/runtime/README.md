@@ -1,10 +1,10 @@
-# @graphdown/runtime
+# @graphmd/runtime
 
-Runtime API for Graphdown datasets.
+Runtime API for GraphMD datasets.
 
 ## What is this package?
 
-`@graphdown/runtime` provides a session-based read API on top of `@graphdown/dataset`. While core handles parsing, validation, and hashing of dataset snapshots, runtime provides a convenient API for querying and navigating dataset contents in memory.
+`@graphmd/runtime` provides a session-based read API on top of `@graphmd/dataset`. While core handles parsing, validation, and hashing of dataset snapshots, runtime provides a convenient API for querying and navigating dataset contents in memory.
 
 The Runtime API v1 offers:
 
@@ -18,16 +18,16 @@ The Runtime API v1 offers:
 
 This package depends on:
 
-- `@graphdown/dataset` - Dataset parsing, validation, and graph building
+- `@graphmd/dataset` - Dataset parsing, validation, and graph building
 - `@noble/hashes` - Cryptographic hashing for block verification
 
 ## Architecture Constraints
 
-**Important:** Runtime must import from `@graphdown/dataset` via the package barrel only:
+**Important:** Runtime must import from `@graphmd/dataset` via the package barrel only:
 
 ```ts
 // ✅ Correct
-import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from '@graphdown/dataset';
+import { validateDatasetSnapshot, buildRecordLinkGraphFromSnapshot } from '@graphmd/dataset';
 
 // ❌ Wrong - violates layering
 import { validateDatasetSnapshot } from '../../dataset/src/validate/validateDatasetSnapshot';
@@ -42,8 +42,8 @@ Runtime must not:
 ## Usage
 
 ```ts
-import { openRuntimeApiV1 } from '@graphdown/runtime';
-import type { DatasetSnapshot } from '@graphdown/dataset';
+import { openRuntimeApiV1 } from '@graphmd/runtime';
+import type { DatasetSnapshot } from '@graphmd/dataset';
 
 // Load your snapshot (e.g., from zip, filesystem, etc.)
 const snapshot: DatasetSnapshot = /* ... */;

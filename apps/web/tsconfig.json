@@ -6,13 +6,13 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@graphdown/app-kit": ["../../packages/app-kit/src/index.ts"],
-      "@graphdown/dataset": ["../../packages/dataset/src/index.ts"],
-      "@graphdown/io": ["../../packages/io/src/index.ts"],
-      "@graphdown/io-github": ["../../packages/io-github/src/index.ts"],
-      "@graphdown/io-zip": ["../../packages/io-zip/src/index.ts"],
-      "@graphdown/runtime": ["../../packages/runtime/src/index.ts"],
-      "@graphdown/storage-idb": ["../../packages/storage-idb/src/index.ts"]
+      "@graphmd/app-kit": ["../../packages/app-kit/src/index.ts"],
+      "@graphmd/dataset": ["../../packages/dataset/src/index.ts"],
+      "@graphmd/io": ["../../packages/io/src/index.ts"],
+      "@graphmd/io-github": ["../../packages/io-github/src/index.ts"],
+      "@graphmd/io-zip": ["../../packages/io-zip/src/index.ts"],
+      "@graphmd/runtime": ["../../packages/runtime/src/index.ts"],
+      "@graphmd/storage-idb": ["../../packages/storage-idb/src/index.ts"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

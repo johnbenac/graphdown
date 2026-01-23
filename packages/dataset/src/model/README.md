@@ -1,6 +1,6 @@
 # Model primitives
 
-`model/` contains the shared types and helpers that define Graphdown’s in-memory
+`model/` contains the shared types and helpers that define GraphMD’s in-memory
 shape for datasets.
 
 ## Files

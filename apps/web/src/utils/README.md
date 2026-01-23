@@ -11,7 +11,7 @@ are placed in this directory.
   - `writeRef` and `writeRefs` format IDs as wiki-link tokens:
     - record relationships: `[[typeId:recordId]]` (recordKey)
     - block references: `[[<cid>]]`
-  - Uses `@graphdown/dataset` exports (`cleanId`, `isObject`) to keep normalization
+  - Uses `@graphmd/dataset` exports (`cleanId`, `isObject`) to keep normalization
     behavior consistent with dataset parsing.
 
 ## Tests

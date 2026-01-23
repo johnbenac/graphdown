@@ -2,7 +2,7 @@ import { sha256 } from '@noble/hashes/sha256';
 
 import { encodeBase32 } from '../cid/base32.js';
 import { isValidPluginId } from '../model/ids.js';
-import { parseGraphdownText } from '../parse/datasetObjects.js';
+import { parseGraphMDText } from '../parse/datasetObjects.js';
 import { isRecordFileBytes } from '../parse/recordFile.js';
 import { discoverPluginObjects } from '../parse/pluginObjects.js';
 import { isSafeRelativePath } from '../parse/pluginManifest.js';
@@ -63,7 +63,7 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
     }
 
     const normalizedText = normalizeLineEndings(decoded.text);
-    const parsed = parseGraphdownText(file, normalizedText);
+    const parsed = parseGraphMDText(file, normalizedText);
     if (parsed.kind === 'error') {
       errors.push(parsed.error);
       continue;
@@ -274,7 +274,7 @@ export function computeGdHashV1(snapshot: DatasetSnapshot, scope: HashScope): Ha
   entries.sort((a, b) => lexCompareBytes(a.idBytes, b.idBytes));
 
   const hash = sha256.create();
-  hash.update(encoder.encode('graphdown:gdhash:v1\0'));
+  hash.update(encoder.encode('graphmd:gdhash:v1\0'));
 
   for (const entry of entries) {
     hash.update(entry.idBytes);

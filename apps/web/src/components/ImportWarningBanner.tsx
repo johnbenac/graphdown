@@ -1,4 +1,4 @@
-import type { ImportReport } from "@graphdown/persistence";
+import type { ImportReport } from "@graphmd/persistence";
 
 function WarningList({ title, sample }: { title: string; sample: string[] }) {
   if (!sample.length) {

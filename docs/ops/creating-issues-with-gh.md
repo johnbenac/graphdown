@@ -1,10 +1,10 @@
-# Memo: Creating GitHub Issues from the Command Line (Graphdown + `gh`)
+# Memo: Creating GitHub Issues from the Command Line (GraphMD + `gh`)
 
 ## Scope
 
 This memo documents the standard workflow for creating GitHub issues via the GitHub CLI (`gh`) for:
 
-* Repo: **`johnbenac/graphdown`**
+* Repo: **`johnbenac/graphmd`**
 * Account: **`johnbenac`**
 * Environment: a machine where `gh` is installed and already authenticated
 
@@ -19,7 +19,7 @@ It's intended to be generic so we can use it repeatedly for many future issues.
 Go to the repo root so commands that infer context do the right thing:
 
 ```bash
-cd /home/johnb/Downloads/tmp/graphdown
+cd /home/johnb/Downloads/tmp/graphmd
 ```
 
 (Optional but recommended) confirm you're at the repo root:
@@ -44,15 +44,15 @@ gh repo view --json nameWithOwner -q .nameWithOwner
 
 Expected output should be:
 
-* `johnbenac/graphdown`
+* `johnbenac/graphmd`
 
 **Best practice:** if you ever work across multiple repos, set the default explicitly:
 
 ```bash
-gh repo set-default johnbenac/graphdown
+gh repo set-default johnbenac/graphmd
 ```
 
-Or, for safety, always pass `--repo johnbenac/graphdown` to commands.
+Or, for safety, always pass `--repo johnbenac/graphmd` to commands.
 
 ---
 
@@ -118,9 +118,9 @@ Anything that could bite us later.
 EOF
 ```
 
-### Keep it Graphdown-native
+### Keep it GraphMD-native
 
-Graphdown already uses consistent naming conventions and subsystem prefixes (see `docs/spec/trace-owners.md`). When drafting:
+GraphMD already uses consistent naming conventions and subsystem prefixes (see `docs/spec/trace-owners.md`). When drafting:
 
 * Prefer a **clear subsystem prefix** in the title (examples: `io-github:`, `io-zip:`, `dataset:`, `runtime:`, `web:`).
 * When relevant, include pointers to:
@@ -147,7 +147,7 @@ gh issue create \
 
 ```bash
 gh issue create \
-  --repo johnbenac/graphdown \
+  --repo johnbenac/graphmd \
   --title "subsystem: short descriptive title" \
   --body-file /tmp/issue.md
 ```

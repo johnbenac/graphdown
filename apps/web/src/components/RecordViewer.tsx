@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphmd/runtime";
 
 type RecordViewerProps = {
   record: RuntimeRecordViewV1;

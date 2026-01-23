@@ -4,7 +4,7 @@ import {
   selectSemanticSnapshotFiles,
   type ImportProgress,
   type ImportResult
-} from "@graphdown/io";
+} from "@graphmd/io";
 import { GitHubImportError, mapGitHubError } from "./mapGitHubError";
 
 const API_BASE = "https://api.github.com";
@@ -113,7 +113,7 @@ export async function loadGitHubSnapshot(input: {
         continue;
       }
       if (isMarkdownFile(snapshotPath)) {
-        // Might be Graphdown markdown; decide after download via isRecordFileBytes.
+        // Might be GraphMD markdown; decide after download via isRecordFileBytes.
         stage1Files.push({ repoPath: entry.path, snapshotPath, kind: "markdown" });
         continue;
       }

@@ -1,9 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import YAML from "yaml";
-import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
-import type { ValidationError } from "@graphdown/dataset";
-import { makeError } from "@graphdown/dataset";
-import { isObject } from "@graphdown/dataset";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphmd/runtime";
+import type { ValidationError } from "@graphmd/dataset";
+import { makeError } from "@graphmd/dataset";
+import { isObject } from "@graphmd/dataset";
 import { useDataset } from "../state/DatasetContext";
 
 type RecordEditorProps = {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Graphdown is a toolkit for Markdown-first datasets. The repository contains:
+GraphMD is a toolkit for Markdown-first datasets. The repository contains:
 
 - **SPEC.md** — The normative specification (single source of truth)
 - **apps/web/** — React/Vite web application for browsing/editing datasets
@@ -89,7 +89,7 @@ npm --workspace apps/web run playwright:install
 
 ### Dataset Library Structure (packages/dataset/src/)
 
-The graphdown dataset library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
+The graphmd dataset library is **framework-agnostic** and cannot import React or any UI framework code. ESLint enforces this boundary.
 
 Key modules:
 
@@ -97,7 +97,7 @@ Key modules:
   - `snapshotTypes.ts` — `DatasetSnapshot` (map of path → Uint8Array)
   - `ids.ts`, `refs.ts` — Identifier and reference normalization
 
-- **parse/** — Parsing Graphdown markdown files
+- **parse/** — Parsing GraphMD markdown files
   - `frontMatter.ts` — Extract YAML front matter and body
   - `yaml.ts` — Wrapper around yaml package
   - `datasetObjects.ts` — Detect and parse type/record objects from snapshots
@@ -207,9 +207,9 @@ Use these as golden compatibility references (read-only):
 
 ### Dataset Library Constraints
 
-- **No UI dependencies** — graphdown dataset cannot import React, react-router-dom, or app-level code
+- **No UI dependencies** — graphmd dataset cannot import React, react-router-dom, or app-level code
 - **Framework-agnostic** — Dataset library must work in any environment (enforced by ESLint)
-- **Import from barrel** — App code must import from `@graphdown/dataset` or other package barrels, not deep paths
+- **Import from barrel** — App code must import from `@graphmd/dataset` or other package barrels, not deep paths
 
 ### Spec Conformance
 

@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from '@graphdown/dataset';
+import type { DatasetSnapshot } from '@graphmd/dataset';
 
 export function utf8(text: string): Uint8Array {
   return new TextEncoder().encode(text);

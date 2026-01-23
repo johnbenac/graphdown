@@ -884,7 +884,7 @@
     },
     {
       "id": "REL-005",
-      "title": "Graphdown-created relationships are serialized as wiki-links",
+      "title": "GraphMD-created relationships are serialized as wiki-links",
       "testable": true,
       "verify": null,
       "tests": [
@@ -1719,7 +1719,7 @@
     },
     {
       "id": "API-004",
-      "title": "Runtime API addresses objects by Graphdown identities",
+      "title": "Runtime API addresses objects by GraphMD identities",
       "testable": true,
       "verify": null,
       "tests": [

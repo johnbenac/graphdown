@@ -1,4 +1,4 @@
-import { discoverGraphdownObjects } from '../parse/datasetObjects.js';
+import { discoverGraphMDObjects } from '../parse/datasetObjects.js';
 import { makeError, type ValidationError } from '../validate/errors.js';
 import type { DatasetSnapshot } from '../model/snapshotTypes.js';
 import { extractRecordRefs } from '../parse/wikiRefs.js';
@@ -98,7 +98,7 @@ class RecordLinkGraphImpl implements RecordLinkGraph {
 }
 
 export function buildRecordLinkGraphFromSnapshot(snapshot: DatasetSnapshot): BuildRecordLinkGraphResult {
-  const parsed = discoverGraphdownObjects(snapshot);
+  const parsed = discoverGraphMDObjects(snapshot);
   if (parsed.errors.length) {
     return { ok: false, errors: parsed.errors };
   }

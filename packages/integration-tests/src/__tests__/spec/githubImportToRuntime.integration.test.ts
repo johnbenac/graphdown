@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { loadGitHubSnapshot } from "@graphdown/io-github";
-import { validateDatasetSnapshot } from "@graphdown/dataset";
-import { openRuntimeApiV1 } from "@graphdown/runtime";
+import { loadGitHubSnapshot } from "@graphmd/io-github";
+import { validateDatasetSnapshot } from "@graphmd/dataset";
+import { openRuntimeApiV1 } from "@graphmd/runtime";
 
 const jsonResponse = (data: unknown) =>
   new Response(JSON.stringify(data), {
@@ -22,7 +22,7 @@ describe("integration: io-github -> selection -> dataset validation -> runtime o
       "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
     const EMPTY_BLOCK_PATH = `blocks/sha2-256/e3/${EMPTY_BLOCK_CID}`;
 
-    // Graphdown type + record (minimal valid dataset)
+    // GraphMD type + record (minimal valid dataset)
     const typeNoteMd = ["---", "typeId: note", "fields: {}", "---", "# Note Type", ""].join("\n");
 
     const recordOneMd = [

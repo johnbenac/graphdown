@@ -1,5 +1,5 @@
-import { readZipSnapshotFromBytes } from "@graphdown/io-zip";
-import type { ImportResult } from "@graphdown/io";
+import { readZipSnapshotFromBytes } from "@graphmd/io-zip";
+import type { ImportResult } from "@graphmd/io";
 
 export async function readZipSnapshot(
   file: File

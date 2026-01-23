@@ -1,5 +1,5 @@
 {
-  "name": "@graphdown/io",
+  "name": "@graphmd/io",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphdown/dataset": "0.0.0"
+    "@graphmd/dataset": "0.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

@@ -15,10 +15,10 @@
 ```json
 {
   "dependencies": {
-    "@graphdown/package-name": "0.0.0"
+    "@graphmd/package-name": "0.0.0"
   },
   "devDependencies": {
-    "@graphdown/other-package": "0.0.0"
+    "@graphmd/other-package": "0.0.0"
   }
 }
 ```
@@ -28,7 +28,7 @@
 ```json
 {
   "dependencies": {
-    "@graphdown/package-name": "workspace:*"  // ❌ WRONG - pnpm only
+    "@graphmd/package-name": "workspace:*"  // ❌ WRONG - pnpm only
   }
 }
 ```
@@ -44,9 +44,9 @@
 1. Check existing packages for the pattern:
 ```bash
 # See how other packages declare workspace deps
-cat packages/persistence/package.json | grep "@graphdown"
-cat packages/io/package.json | grep "@graphdown"
-cat packages/app-kit/package.json | grep "@graphdown"
+cat packages/persistence/package.json | grep "@graphmd"
+cat packages/io/package.json | grep "@graphmd"
+cat packages/app-kit/package.json | grep "@graphmd"
 ```
 
 2. Always use `"0.0.0"` as the version string
@@ -64,7 +64,7 @@ grep -r "workspace:" packages/*/package.json apps/*/package.json
 **Adding a new workspace package dependency:**
 ```bash
 # In the consuming package's package.json, add:
-"@graphdown/new-package": "0.0.0"
+"@graphmd/new-package": "0.0.0"
 
 # Then from repo root:
 npm install

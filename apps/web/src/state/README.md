@@ -11,7 +11,7 @@ components to load, edit, and persist datasets.
     1) import (zip or GitHub)
     2) canonical record-only layout (`canonicalizeDatasetSnapshot`, import only)
     3) DatasetContext delegates session opening + snapshot indexing + import report
-       building to `@graphdown/app-kit`.
+       building to `@graphmd/app-kit`.
     4) persistence (IndexedDB; required)
 
   - Runtime sessions are derived from snapshots, rebuilt on load and every
@@ -29,7 +29,7 @@ components to load, edit, and persist datasets.
 
 ## Import reports
 
-- Import reports are built in `@graphdown/app-kit` to compare raw vs canonical
+- Import reports are built in `@graphmd/app-kit` to compare raw vs canonical
   snapshots for ignored files and dropped unreferenced blocks.
   - Limits report samples to keep UI payloads small.
 

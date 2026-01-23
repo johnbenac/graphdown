@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isImportError } from "@graphdown/io";
+import { isImportError } from "@graphmd/io";
 import { loadGitHubSnapshot } from "../loadGitHubSnapshot";
 
 const jsonResponse = (data: unknown) =>
@@ -184,7 +184,7 @@ describe("loadGitHubSnapshot", () => {
     expect(ignored.sort()).toEqual(["docs/readme.md"].sort());
   });
 
-  it("imports Graphdown markdown in non-canonical paths", async () => {
+  it("imports GraphMD markdown in non-canonical paths", async () => {
     const fetchMock = vi.fn();
 
     fetchMock

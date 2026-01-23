@@ -7,7 +7,7 @@ The import layer ingests datasets from zip files or GitHub repositories and retu
 
 ## Important: import scope vs core semantics
 
-The Graphdown core discovers record files by **content** (SPEC: LAYOUT-001) and ignores non-record/non-block-store files for semantics (BLOCK-LAYOUT-003).
+The GraphMD core discovers record files by **content** (SPEC: LAYOUT-001) and ignores non-record/non-block-store files for semantics (BLOCK-LAYOUT-003).
 
 The **web app importer** may choose to load only a subset of repository files for UX/performance, but it must include all semantic files required for validity, hashing, and export (records, types, plugin manifests + bundle files, and referenced blocks).
 
@@ -15,12 +15,12 @@ The **web app importer** may choose to load only a subset of repository files fo
 
 - `readZipSnapshot.ts`
   - Reads a user-selected zip file via `File.arrayBuffer()`.
-  - Delegates bytes-only parsing and filtering to `@graphdown/io-zip`, which
-    applies shared semantic selection from `@graphdown/io`.
+  - Delegates bytes-only parsing and filtering to `@graphmd/io-zip`, which
+    applies shared semantic selection from `@graphmd/io`.
 
-## GitHub imports (`@graphdown/io-github`)
+## GitHub imports (`@graphmd/io-github`)
 
-- GitHub imports are implemented in `@graphdown/io-github` (transport-only) and
+- GitHub imports are implemented in `@graphmd/io-github` (transport-only) and
   consumed by the web app before continuing the session pipeline.
 
 - `parseGitHubUrl`
@@ -32,7 +32,7 @@ The **web app importer** may choose to load only a subset of repository files fo
     files, and download selected files from the raw content endpoint.
   - Streams progress updates through `ImportProgress` phases.
   - Downloads `blocks/**` and all Markdown files, then delegates semantic
-    selection (records, plugin manifests, bundle files) to `@graphdown/io`.
+    selection (records, plugin manifests, bundle files) to `@graphmd/io`.
   - Runs a second fetch pass for missing plugin bundles before returning the
     final semantic snapshot.
 

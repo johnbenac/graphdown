@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildRecordLinkGraphFromSnapshot, validateDatasetSnapshot } from "@graphdown/dataset";
+import { buildRecordLinkGraphFromSnapshot, validateDatasetSnapshot } from "@graphmd/dataset";
 import { snapshotFromTextFiles } from "../../harness";
 
 describe("integration: dataset record link graph", () => {
@@ -73,7 +73,7 @@ describe("integration: dataset record link graph", () => {
       ["blocks/sha2-256/e3/bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku", ""],
 
       // Plugin manifest declares a bundle file "recordlike.md" that LOOKS like a record and contains links.
-      // That file MUST be ignored by graphdown record discovery (plugin bundles are excluded),
+      // That file MUST be ignored by graphmd record discovery (plugin bundles are excluded),
       // so it MUST NOT create nodes/edges in the Record Link Graph.
       [
         "plugins/demo/manifest.md",

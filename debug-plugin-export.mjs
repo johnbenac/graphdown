@@ -2,7 +2,7 @@ import {
   blockPathForCid,
   canonicalizeDatasetSnapshot,
   cidFromRawBytes
-} from "@graphdown/dataset";
+} from "@graphmd/dataset";
 
 const enc = new TextEncoder();
 const toBytes = (text) => enc.encode(text);

@@ -32,7 +32,7 @@ describe("readZipSnapshot", () => {
     expect(ignored.sort()).toEqual(["assets/logo.png", "docs/readme.md"].sort());
   });
 
-  it("imports Graphdown markdown files regardless of folder layout", async () => {
+  it("imports GraphMD markdown files regardless of folder layout", async () => {
     const zipBytes = zipSync({
       "random/type-location.md": new Uint8Array(
         strToU8(["---", "typeId: note", "fields: {}", "---"].join("\n"))
@@ -40,7 +40,7 @@ describe("readZipSnapshot", () => {
       "deep/nested/record-location.md": new Uint8Array(
         strToU8(["---", "typeId: note", "recordId: one", "fields: {}", "---"].join("\n"))
       ),
-      "docs/readme.md": new Uint8Array(strToU8("# not a graphdown record"))
+      "docs/readme.md": new Uint8Array(strToU8("# not a graphmd record"))
     });
 
     const { snapshot, ignored } = readZipSnapshotFromBytes(zipBytes);

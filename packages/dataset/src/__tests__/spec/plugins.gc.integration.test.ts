@@ -8,7 +8,7 @@ import {
   validateDatasetSnapshot
 } from "../../index.js";
 import type { DatasetSnapshot } from "../../index.js";
-import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphmd/io-zip";
 import { loadFixtureSnapshot } from "../fixtureLoader.js";
 
 const encoder = new TextEncoder();

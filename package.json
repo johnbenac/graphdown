@@ -1,9 +1,9 @@
 {
-  "name": "graphdown",
+  "name": "graphmd",
   "version": "0.0.0",
-  "description": "Graphdown dataset validator.",
+  "description": "GraphMD dataset validator.",
   "license": "MIT",
-  "repository": "https://github.com/johnbenac/graphdown",
+  "repository": "https://github.com/johnbenac/graphmd",
   "engines": {
     "node": ">=20"
   },
@@ -31,6 +31,7 @@
     "format:check": "prettier --check .",
     "check:no-emitted-js": "node tools/check-no-emitted-js.cjs",
     "check:build-scope": "node tools/check-tsc-build-scope.cjs",
+    "check:no-legacy-brand": "node tools/check-no-legacy-brand.cjs",
     "test:dataset": "npm --workspace packages/dataset run typecheck && npm --workspace packages/dataset run test",
     "test:persistence": "npm --workspace packages/persistence run typecheck && npm --workspace packages/persistence run test",
     "test:io": "npm --workspace packages/io run typecheck && npm --workspace packages/io run test",

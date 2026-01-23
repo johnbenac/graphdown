@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
-import { selectSemanticSnapshotFiles } from "@graphdown/io";
-import { validateDatasetSnapshot } from "@graphdown/dataset";
-import { openRuntimeApiV1 } from "@graphdown/runtime";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphmd/io-zip";
+import { selectSemanticSnapshotFiles } from "@graphmd/io";
+import { validateDatasetSnapshot } from "@graphmd/dataset";
+import { openRuntimeApiV1 } from "@graphmd/runtime";
 
 const encoder = new TextEncoder();
 
@@ -64,7 +64,7 @@ describe("integration: io-zip -> selection -> dataset validation -> runtime open
     const pluginLogoPngBytes = new Uint8Array([0, 1, 2, 3]);
 
     // Noise files that must be ignored by semantic selection
-    const docsReadmeMd = ["# readme", "", "not a graphdown record", ""].join("\n");
+    const docsReadmeMd = ["# readme", "", "not a graphmd record", ""].join("\n");
     const assetsLogoPngBytes = new Uint8Array([9, 9, 9]);
 
     // Build a "raw snapshot" that simulates an on-disk repo before selection.

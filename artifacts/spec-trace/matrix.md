@@ -266,7 +266,7 @@ Tests (2):
 Tests (0):
 - (none)
 
-## REL-005 — Graphdown-created relationships are serialized as wiki-links (testable=true)
+## REL-005 — GraphMD-created relationships are serialized as wiki-links (testable=true)
 Tests (2):
 - apps/web/src/utils/__tests__/wikiRefStrings.unit.test.ts — "REL-005: writeRef writes wiki-links"
 - apps/web/src/utils/__tests__/wikiRefStrings.unit.test.ts — "REL-005: writeRefs writes wiki-link arrays"
@@ -516,7 +516,7 @@ Tests (1):
 Tests (1):
 - packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-003: all Runtime API operations are asynchronous (thenable)"
 
-## API-004 — Runtime API addresses objects by Graphdown identities (testable=true)
+## API-004 — Runtime API addresses objects by GraphMD identities (testable=true)
 Tests (1):
 - packages/runtime/src/__tests__/runtimeApiV1.unit.test.ts — "API-004: runtime api methods are identity-addressed and path-independent"
 

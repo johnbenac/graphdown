@@ -1,15 +1,15 @@
 {
-  "name": "@graphdown/integration-tests",
+  "name": "@graphmd/integration-tests",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
   "dependencies": {
-    "@graphdown/dataset": "0.0.0",
-    "@graphdown/io-zip": "0.0.0",
-    "@graphdown/io": "0.0.0",
-    "@graphdown/io-github": "0.0.0",
-    "@graphdown/runtime": "0.0.0"
+    "@graphmd/dataset": "0.0.0",
+    "@graphmd/io-zip": "0.0.0",
+    "@graphmd/io": "0.0.0",
+    "@graphmd/io-github": "0.0.0",
+    "@graphmd/runtime": "0.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.16.10",

@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 import { toBytes } from "./bytes";
 import { DuplicateCommitPathError } from "./errors";
 import { normalizeRelPath } from "./path";
@@ -23,11 +23,11 @@ export interface CommitPlan {
   readonly meta?: Record<string, unknown>;
 }
 
-export function planGraphdownCommit(renderResult: DatasetSnapshot): CommitPlan;
-export function planGraphdownCommit(renderResult: {
+export function planGraphMDCommit(renderResult: DatasetSnapshot): CommitPlan;
+export function planGraphMDCommit(renderResult: {
   files: Map<string, Uint8Array | string>;
 }): CommitPlan;
-export function planGraphdownCommit(renderResult: {
+export function planGraphMDCommit(renderResult: {
   files: Map<string, Uint8Array | string>;
 }): CommitPlan {
   const grouped = new Map<
@@ -80,9 +80,9 @@ export function planGraphdownCommit(renderResult: {
 
   return {
     ops,
-    message: `graphdown: update ${ops.length} files`,
+    message: `graphmd: update ${ops.length} files`,
     meta: {
-      generator: "@graphdown/io-vcs"
+      generator: "@graphmd/io-vcs"
     }
   };
 }

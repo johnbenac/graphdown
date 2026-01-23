@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import type { RuntimeTypeViewV1 } from "@graphdown/runtime";
+import type { RuntimeTypeViewV1 } from "@graphmd/runtime";
 import { getTypeLabel } from "./TypeNav";
 
 type TypeViewerProps = {

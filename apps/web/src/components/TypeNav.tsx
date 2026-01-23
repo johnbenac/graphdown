@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import type { RuntimeTypeViewV1 } from "@graphdown/runtime";
+import type { RuntimeTypeViewV1 } from "@graphmd/runtime";
 
 type TypeNavProps = {
   types: RuntimeTypeViewV1[];

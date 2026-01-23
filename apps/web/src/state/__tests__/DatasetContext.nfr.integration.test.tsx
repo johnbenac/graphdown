@@ -2,18 +2,18 @@ import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { DatasetSnapshot } from "@graphdown/dataset";
-import { makeError } from "@graphdown/dataset";
-import { openRuntimeApiV1 } from "@graphdown/runtime";
+import type { DatasetSnapshot } from "@graphmd/dataset";
+import { makeError } from "@graphmd/dataset";
+import { openRuntimeApiV1 } from "@graphmd/runtime";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
-import { createPersistence } from "@graphdown/persistence";
-import { createPersistStore, IndexedDbStore } from "@graphdown/storage-idb";
+import { createPersistence } from "@graphmd/persistence";
+import { createPersistStore, IndexedDbStore } from "@graphmd/storage-idb";
 
 let store: IndexedDbStore;
 
-vi.mock("@graphdown/storage-idb", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@graphdown/storage-idb")>();
+vi.mock("@graphmd/storage-idb", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@graphmd/storage-idb")>();
   return {
     ...actual,
     createPersistStore: () => store

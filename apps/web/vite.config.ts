@@ -32,15 +32,15 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      { find: /^@graphdown\/app-kit$/, replacement: appKitIndex },
-      { find: /^@graphdown\/core$/, replacement: coreIndex },
-      { find: /^@graphdown\/dataset$/, replacement: datasetIndex },
-      { find: /^@graphdown\/io$/, replacement: ioIndex },
-      { find: /^@graphdown\/io-github$/, replacement: ioGitHubIndex },
-      { find: /^@graphdown\/io-zip$/, replacement: ioZipIndex },
-      { find: /^@graphdown\/persistence$/, replacement: persistenceIndex },
-      { find: /^@graphdown\/runtime$/, replacement: runtimeIndex },
-      { find: /^@graphdown\/storage-idb$/, replacement: storageIdbIndex }
+      { find: /^@graphmd\/app-kit$/, replacement: appKitIndex },
+      { find: /^@graphmd\/core$/, replacement: coreIndex },
+      { find: /^@graphmd\/dataset$/, replacement: datasetIndex },
+      { find: /^@graphmd\/io$/, replacement: ioIndex },
+      { find: /^@graphmd\/io-github$/, replacement: ioGitHubIndex },
+      { find: /^@graphmd\/io-zip$/, replacement: ioZipIndex },
+      { find: /^@graphmd\/persistence$/, replacement: persistenceIndex },
+      { find: /^@graphmd\/runtime$/, replacement: runtimeIndex },
+      { find: /^@graphmd\/storage-idb$/, replacement: storageIdbIndex }
     ]
   },
   server: {

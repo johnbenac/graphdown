@@ -1,21 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { DatasetSnapshot, ValidationError } from "@graphdown/dataset";
+import type { DatasetSnapshot, ValidationError } from "@graphmd/dataset";
 import {
   canonicalizeDatasetSnapshot,
   makeError,
   parseMarkdownRecord,
   serializeMarkdownRecord
-} from "@graphdown/dataset";
-import { isImportError, type ImportErrorInfo } from "@graphdown/io";
-import type { RuntimeApiV1 } from "@graphdown/runtime";
+} from "@graphmd/dataset";
+import { isImportError, type ImportErrorInfo } from "@graphmd/io";
+import type { RuntimeApiV1 } from "@graphmd/runtime";
 import type { ImportProgress } from "../import/types";
 export type { ImportProgress } from "../import/types";
-import { loadGitHubSnapshot, parseGitHubUrl } from "@graphdown/io-github";
+import { loadGitHubSnapshot, parseGitHubUrl } from "@graphmd/io-github";
 import { readZipSnapshot } from "../import/readZipSnapshot";
-import { createPersistence } from "@graphdown/persistence";
-import { createPersistStore } from "@graphdown/storage-idb";
-import type { ImportReport, LoadedDataset } from "@graphdown/persistence";
-import { buildImportReport, openDatasetSession, type SnapshotIndex } from "@graphdown/app-kit";
+import { createPersistence } from "@graphmd/persistence";
+import { createPersistStore } from "@graphmd/storage-idb";
+import type { ImportReport, LoadedDataset } from "@graphmd/persistence";
+import { buildImportReport, openDatasetSession, type SnapshotIndex } from "@graphmd/app-kit";
 
 export type ImportErrorCategory =
   | "invalid_url"
@@ -81,7 +81,7 @@ const isTestEnv =
     import.meta.env.MODE === "test");
 let testDbCounter = 0;
 
-function makeTestDbName(prefix = "graphdown-test"): string {
+function makeTestDbName(prefix = "graphmd-test"): string {
   testDbCounter += 1;
   return `${prefix}-${testDbCounter}-${Math.random().toString(16).slice(2)}`;
 }
@@ -113,7 +113,7 @@ function buildPersistenceError(err: unknown): ImportErrorState {
     message:
       err instanceof Error
         ? err.message
-        : "IndexedDB failed. Graphdown requires IndexedDB and does not fall back."
+        : "IndexedDB failed. GraphMD requires IndexedDB and does not fall back."
   };
 }
 
@@ -167,7 +167,7 @@ function mapImportErrorInfo(info: ImportErrorInfo): ImportErrorState {
         message: info.message,
         hint:
           info.source === "github"
-            ? "This repository may be private. Graphdown currently imports public repositories only."
+            ? "This repository may be private. GraphMD currently imports public repositories only."
             : undefined,
         status: info.httpStatus
       };
@@ -340,7 +340,7 @@ export function DatasetProvider({ children }: { children: React.ReactNode }) {
       importReport?: ImportReport
     ) => {
       if (!persistence) {
-        throw new Error("IndexedDB failed. Graphdown requires IndexedDB and does not fall back.");
+        throw new Error("IndexedDB failed. GraphMD requires IndexedDB and does not fall back.");
       }
       const now = Date.now();
       const meta = {

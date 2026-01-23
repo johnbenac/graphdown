@@ -56,7 +56,7 @@ function expectGraphOk(
 }
 
 test('REL-002: extracts record links from bodies and fields', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphmd-graph-"));
   try {
     writeFile(tempDir, "types/note.md", typeFile("note"));
     writeFile(tempDir, "records/note-1.md", recordFile("note", "one", "See [[note:two]]."));
@@ -77,7 +77,7 @@ test('REL-002: extracts record links from bodies and fields', () => {
 });
 
 test('REL-002: does not synthesize links across separate string values', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphmd-graph-"));
   try {
     writeFile(tempDir, "types/note.md", typeFile("note"));
     writeFile(
@@ -100,7 +100,7 @@ test('REL-002: does not synthesize links across separate string values', () => {
 });
 
 test('Record Link Graph exposes type and record lookup by identity', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphmd-graph-"));
   try {
     writeFile(tempDir, "t.md", typeFile("note"));
     writeFile(tempDir, "r.md", recordFile("note", "one"));
@@ -119,7 +119,7 @@ test('Record Link Graph exposes type and record lookup by identity', () => {
 });
 
 test('VAL-002: duplicate record identity fails Record Link Graph build', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphdown-graph-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "graphmd-graph-"));
   try {
     writeFile(tempDir, "t.md", typeFile("note"));
     const content = recordFile("note", "one");

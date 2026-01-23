@@ -1,11 +1,11 @@
-# @graphdown/dataset
+# @graphmd/dataset
 
-The `@graphdown/dataset` package is the **canonical home for Graphdown dataset semantics**. It contains the parsing, validation, hashing, and canonicalization logic that defines what a Graphdown dataset means. Other packages (including the legacy `packages/core` wrapper) should treat this as the authoritative implementation.
+The `@graphmd/dataset` package is the **canonical home for GraphMD dataset semantics**. It contains the parsing, validation, hashing, and canonicalization logic that defines what a GraphMD dataset means. Other packages (including the legacy `packages/core` wrapper) should treat this as the authoritative implementation.
 
 ## Install
 
 ```bash
-npm install @graphdown/dataset
+npm install @graphmd/dataset
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @graphdown/dataset
 ### Validate a snapshot
 
 ```ts
-import { validateDatasetSnapshot } from '@graphdown/dataset';
+import { validateDatasetSnapshot } from '@graphmd/dataset';
 
 const snapshot = {
   files: new Map([
@@ -30,7 +30,7 @@ if (!result.ok) {
 ### Compute a dataset hash
 
 ```ts
-import { computeGdHashV1 } from '@graphdown/dataset';
+import { computeGdHashV1 } from '@graphmd/dataset';
 
 const result = computeGdHashV1(snapshot, 'snapshot');
 if (result.ok) {
@@ -41,7 +41,7 @@ if (result.ok) {
 ### Canonicalize a snapshot
 
 ```ts
-import { canonicalizeDatasetSnapshot } from '@graphdown/dataset';
+import { canonicalizeDatasetSnapshot } from '@graphmd/dataset';
 
 const canonical = canonicalizeDatasetSnapshot(snapshot);
 ```

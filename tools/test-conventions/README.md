@@ -17,7 +17,7 @@ This directory contains configuration for the test conventions checker (`tools/c
       "areaName": {
         "reason": "Why this area is exempt from requiring co-located tests",
         "issue": "GitHub issue tracking remediation (e.g., GH-1234 or https://...)",
-        "owner": "Team or individual responsible (e.g., @graphdown/core)",
+        "owner": "Team or individual responsible (e.g., @graphmd/core)",
         "expires": "YYYY-MM-DD when this exception should be reviewed/removed"
       }
     }
@@ -35,13 +35,13 @@ This directory contains configuration for the test conventions checker (`tools/c
       "internal": {
         "reason": "Low-risk helpers; covered via integration tests in validate/ + parse/",
         "issue": "GH-1234",
-        "owner": "@graphdown/core",
+        "owner": "@graphmd/core",
         "expires": "2026-06-01"
       },
       "zip": {
         "reason": "Temporary exception while zip tests are added",
         "issue": "GH-1235",
-        "owner": "@graphdown/core",
+        "owner": "@graphmd/core",
         "expires": "2026-02-15"
       }
     }
@@ -98,8 +98,8 @@ In CI, defaults to `test-results/test-conventions/violations.json` if not set.
 This configuration is protected by CODEOWNERS to ensure allowlist changes require approval:
 
 ```
-/tools/check-test-conventions.js           @graphdown/maintainers
-/tools/test-conventions/config.json        @graphdown/maintainers
+/tools/check-test-conventions.js           @graphmd/maintainers
+/tools/test-conventions/config.json        @graphmd/maintainers
 ```
 
 Any changes to the checker or allowlist require maintainer approval.

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphdown/runtime";
+import type { RuntimeRecordViewV1, RuntimeTypeViewV1 } from "@graphmd/runtime";
 import AppShell from "../components/AppShell";
 import EmptyState from "../components/EmptyState";
 import ImportWarningBanner from "../components/ImportWarningBanner";

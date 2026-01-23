@@ -29,7 +29,7 @@ export type ParsedRecordObject = {
   identity: string;
 };
 
-export type ParsedGraphdownObject =
+export type ParsedGraphMDObject =
   | ParsedTypeObject
   | ParsedRecordObject
   | { kind: 'ignored' }
@@ -77,7 +77,7 @@ function validateIdentifier(value: unknown, key: 'typeId' | 'recordId', file: st
   return { ok: true, value: trimmed };
 }
 
-export function parseGraphdownText(path: string, text: string): ParsedGraphdownObject {
+export function parseGraphMDText(path: string, text: string): ParsedGraphMDObject {
   try {
     const normalized = normalizeLineEndings(text);
     let yamlSection: string;
@@ -108,7 +108,7 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
     const topLevelKeys = Object.keys(yamlObject);
     const hasRecordId = Object.prototype.hasOwnProperty.call(yamlObject, 'recordId');
     const declaredKind: 'type' | 'record' = hasRecordId ? 'record' : 'type';
-    const makeDeclaredError = (error: ValidationError): ParsedGraphdownObject => ({
+    const makeDeclaredError = (error: ValidationError): ParsedGraphMDObject => ({
       kind: 'error',
       error,
       declaredTypeId: typeId,
@@ -192,7 +192,7 @@ export function parseGraphdownText(path: string, text: string): ParsedGraphdownO
   }
 }
 
-export function parseGraphdownFile(path: string, bytes: Uint8Array): ParsedGraphdownObject {
+export function parseGraphMDFile(path: string, bytes: Uint8Array): ParsedGraphMDObject {
   if (!isRecordFileBytes(path, bytes)) {
     return { kind: 'ignored' };
   }
@@ -200,10 +200,10 @@ export function parseGraphdownFile(path: string, bytes: Uint8Array): ParsedGraph
   if (!decoded.ok) {
     return { kind: 'error', error: decoded.error };
   }
-  return parseGraphdownText(path, decoded.text);
+  return parseGraphMDText(path, decoded.text);
 }
 
-export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Array> }): {
+export function discoverGraphMDObjects(snapshot: { files: Map<string, Uint8Array> }): {
   typeObjects: ParsedTypeObject[];
   recordObjects: ParsedRecordObject[];
   ignored: string[];
@@ -228,7 +228,7 @@ export function discoverGraphdownObjects(snapshot: { files: Map<string, Uint8Arr
     }
     const bytes = snapshot.files.get(file);
     if (!bytes) continue;
-    const parsed = parseGraphdownFile(file, bytes);
+    const parsed = parseGraphMDFile(file, bytes);
     if (parsed.kind === 'ignored') {
       ignored.push(file);
       continue;

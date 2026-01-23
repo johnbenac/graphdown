@@ -1,18 +1,18 @@
 import { sha256 } from '@noble/hashes/sha256';
 
-import type { DatasetSnapshot, ValidationError } from '@graphdown/dataset';
+import type { DatasetSnapshot, ValidationError } from '@graphmd/dataset';
 import {
   blockPathForCid,
   buildRecordLinkGraphFromSnapshot,
   decodeDaslCidString,
-  discoverGraphdownObjects,
+  discoverGraphMDObjects,
   discoverPluginObjects,
   extractCidRefs,
   IDENTIFIER_PATTERN,
   makeError,
   RECORD_KEY_PATTERN,
   validateDatasetSnapshot
-} from '@graphdown/dataset';
+} from '@graphmd/dataset';
 import { fail } from './errors';
 import { collectStringValues } from './internal/collectStringValues';
 
@@ -186,7 +186,7 @@ export async function openRuntimeApiV1(input: {
     return { ok: false, errors: validated.errors };
   }
 
-  const parsed = discoverGraphdownObjects(input.snapshot);
+  const parsed = discoverGraphMDObjects(input.snapshot);
   if (parsed.errors.length > 0) {
     return { ok: false, errors: parsed.errors };
   }

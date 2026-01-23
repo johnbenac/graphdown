@@ -3,9 +3,9 @@ import {
   blockPathForCid,
   canonicalizeDatasetSnapshot,
   cidFromRawBytes
-} from "@graphdown/dataset";
-import type { DatasetSnapshot } from "@graphdown/dataset";
-import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphdown/io-zip";
+} from "@graphmd/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
+import { buildDatasetZipBytes, loadDatasetSnapshotFromZipBytes } from "@graphmd/io-zip";
 
 const enc = new TextEncoder();
 const toBytes = (text: string) => enc.encode(text);

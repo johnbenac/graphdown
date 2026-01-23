@@ -1,4 +1,4 @@
-# Graphs in Graphdown
+# Graphs in GraphMD
 
 This repository contains several distinct “graph-like” structures.
 They are related, but not interchangeable.

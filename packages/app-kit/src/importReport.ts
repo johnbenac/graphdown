@@ -1,5 +1,5 @@
-import type { DatasetSnapshot } from "@graphdown/dataset";
-import type { ImportReport } from "@graphdown/persistence";
+import type { DatasetSnapshot } from "@graphmd/dataset";
+import type { ImportReport } from "@graphmd/persistence";
 
 const SAMPLE_LIMIT = 20;
 

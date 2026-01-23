@@ -1,6 +1,6 @@
 # Parsing helpers
 
-`parse/` holds the logic that turns dataset bytes into structured Graphdown
+`parse/` holds the logic that turns dataset bytes into structured GraphMD
 objects. The modules focus on front matter parsing, YAML handling, record/type
 validation, and extracting link references.
 
@@ -12,10 +12,10 @@ validation, and extracting link references.
 - `yaml.ts`
   - Wraps the `yaml` package with error normalization and object-shape guards.
 - `datasetObjects.ts`
-  - Detects Graphdown markdown files, parses front matter, validates identifiers
+  - Detects GraphMD markdown files, parses front matter, validates identifiers
     and top-level keys, and returns `ParsedTypeObject`/`ParsedRecordObject`
     entries.
-  - `discoverGraphdownObjects` scans a `DatasetSnapshot` and returns parsed
+  - `discoverGraphMDObjects` scans a `DatasetSnapshot` and returns parsed
     objects plus ignored files and errors.
 - `markdownRecord.ts`
   - Focused parser/serializer for a single markdown record used in the record

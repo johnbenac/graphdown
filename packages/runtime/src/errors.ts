@@ -1,4 +1,4 @@
-import type { ValidationErrorCode } from '@graphdown/dataset';
+import type { ValidationErrorCode } from '@graphmd/dataset';
 
 export type RuntimeApiError = {
   code: ValidationErrorCode;

@@ -1,5 +1,5 @@
 import {
-  discoverGraphdownObjects,
+  discoverGraphMDObjects,
   IDENTIFIER_PATTERN,
   type ParsedRecordObject,
   type ParsedTypeObject,
@@ -296,7 +296,7 @@ function collectRecordRefsFromRecord(record: ParsedRecordObject): Set<string> {
 export function validateDatasetSnapshot(snapshot: DatasetSnapshot): ValidateDatasetResult {
   const errors: ValidationError[] = [];
 
-  const parsed = discoverGraphdownObjects(snapshot);
+  const parsed = discoverGraphMDObjects(snapshot);
   if (parsed.errors.length) {
     errors.push(...parsed.errors);
   }

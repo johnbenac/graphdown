@@ -1,6 +1,6 @@
 # Zip import/export
 
-`zip/` wraps `fflate` helpers for moving Graphdown snapshots into and out of
+`zip/` wraps `fflate` helpers for moving GraphMD snapshots into and out of
 zip archives.
 
 ## Key modules

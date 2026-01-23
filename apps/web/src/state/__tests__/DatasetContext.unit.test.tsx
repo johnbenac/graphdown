@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildDatasetZipBytes } from "@graphdown/io-zip";
+import { buildDatasetZipBytes } from "@graphmd/io-zip";
 import { DatasetProvider, useDataset } from "../DatasetContext";
 import type { DatasetContextValue } from "../DatasetContext";
 

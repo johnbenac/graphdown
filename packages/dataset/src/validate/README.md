@@ -1,6 +1,6 @@
 # Validation rules
 
-`validate/` implements Graphdown dataset validation and the shared error
+`validate/` implements GraphMD dataset validation and the shared error
 structures used throughout the domain layer.
 
 ## Key modules

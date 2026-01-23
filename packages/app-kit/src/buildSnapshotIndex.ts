@@ -1,5 +1,5 @@
-import type { DatasetSnapshot, ValidationError } from "@graphdown/dataset";
-import { makeError, parseMarkdownRecord } from "@graphdown/dataset";
+import type { DatasetSnapshot, ValidationError } from "@graphmd/dataset";
+import { makeError, parseMarkdownRecord } from "@graphmd/dataset";
 
 export type SnapshotIndex = {
   typeFileById: Map<string, string>;

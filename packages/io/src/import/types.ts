@@ -1,4 +1,4 @@
-import type { DatasetSnapshot } from "@graphdown/dataset";
+import type { DatasetSnapshot } from "@graphmd/dataset";
 
 export type ImportSource = "zip" | "github";
 

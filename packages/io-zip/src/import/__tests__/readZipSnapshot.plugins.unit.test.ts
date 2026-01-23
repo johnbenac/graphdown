@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { strToU8, zipSync } from "fflate";
-import { isImportError } from "@graphdown/io";
+import { isImportError } from "@graphmd/io";
 import { readZipSnapshotFromBytes } from "../readZipSnapshotFromBytes";
 
 describe("readZipSnapshot plugin bundles", () => {

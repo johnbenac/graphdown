@@ -1,7 +1,7 @@
-# Graphdown fixtures
+# GraphMD fixtures
 
 These fixture datasets are used by unit tests and manual validation of the
-Graphdown parsing and validation logic. Each fixture mirrors a small dataset
+GraphMD parsing and validation logic. Each fixture mirrors a small dataset
 layout on disk so tests can load them as `DatasetSnapshot` inputs.
 
 All fixtures must conform to SPEC.md v0.5, especially the strict top-level

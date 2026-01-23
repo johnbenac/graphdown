@@ -4,7 +4,7 @@ import { selectSemanticSnapshotFiles } from "../selectSemanticSnapshotFiles";
 const encoder = new TextEncoder();
 
 describe("selectSemanticSnapshotFiles", () => {
-  it("includes blocks and Graphdown markdown while sorting ignored paths", () => {
+  it("includes blocks and GraphMD markdown while sorting ignored paths", () => {
     const entries = new Map<string, Uint8Array>([
       ["blocks/block-1.bin", new Uint8Array([1, 2, 3])],
       ["types/note.md", encoder.encode(["---", "typeId: note", "fields: {}", "---"].join("\n"))],

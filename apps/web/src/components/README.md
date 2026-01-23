@@ -20,7 +20,7 @@ components are presentational and consume data passed from `routes/` or the
 ## Buttons and UI helpers
 
 - `Button.tsx`
-  - Thin wrapper around `<button>` that applies Graphdown button classes and
+  - Thin wrapper around `<button>` that applies GraphMD button classes and
     supports a `secondary` variant.
 - `Panel.tsx`
   - Simple container that renders a section header and wraps child content.

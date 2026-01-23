@@ -1,5 +1,5 @@
-import type { ImportErrorInfo } from "@graphdown/io";
-import { ImportError } from "@graphdown/io";
+import type { ImportErrorInfo } from "@graphmd/io";
+import { ImportError } from "@graphmd/io";
 
 export type GitHubImportErrorInfo = ImportErrorInfo & { source: "github" };
 

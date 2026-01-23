@@ -1,4 +1,4 @@
-import type { ImportProgress as SourceImportProgress } from "@graphdown/io";
+import type { ImportProgress as SourceImportProgress } from "@graphmd/io";
 
 type SourceImportPhase = SourceImportProgress["phase"];
 

@@ -1,6 +1,6 @@
 # Snapshots, File Discovery, and Layout
 
-Graphdown works with datasets as files. Internally, the dataset package uses a snapshot abstraction.
+GraphMD works with datasets as files. Internally, the dataset package uses a snapshot abstraction.
 
 ## DatasetSnapshot
 
@@ -19,7 +19,7 @@ A file is a record file if:
 - the parsed YAML object contains a `typeId` key
 
 This behavior is implemented by:
-- `packages/dataset/src/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphdownFile`)
+- `packages/dataset/src/parse/datasetObjects.ts` (`isRecordFileBytes`, `parseGraphMDFile`)
 
 ## Type objects vs record objects
 
@@ -34,7 +34,7 @@ unknown top-level keys produce errors (EXT-001).
 ## Canonicalization vs validation
 
 ### Validation (`validateDatasetSnapshot`)
-Validation answers: “Is this snapshot a valid Graphdown dataset?”
+Validation answers: “Is this snapshot a valid GraphMD dataset?”
 
 It checks:
 - parsing errors
@@ -56,9 +56,9 @@ Canonicalization preserves original file bytes. It changes file paths, not file 
 
 ## Web app import scope vs dataset semantics
 
-The Graphdown dataset package can operate on any snapshot and discovers record files by content (LAYOUT-001).
+The GraphMD dataset package can operate on any snapshot and discovers record files by content (LAYOUT-001).
 
-The Graphdown web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), but it must still include **all semantic files** required for validity, hashing, and export.
+The GraphMD web app importer may choose to include only a subset of repository files when building a snapshot (for performance and UX), but it must still include **all semantic files** required for validity, hashing, and export.
 
 At minimum, the web app importer must include:
 - type objects (`types/**/*.md` or any Markdown record file discovered by content)

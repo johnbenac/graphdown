@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeGdHashV1,
-  discoverGraphdownObjects,
+  discoverGraphMDObjects,
   validateDatasetSnapshot
 } from "../../index.js";
 import type { DatasetSnapshot } from "../../index.js";
@@ -28,7 +28,7 @@ describe("front matter permissiveness", () => {
     const validation = validateDatasetSnapshot(snap);
     expect(validation.ok).toBe(true);
 
-    const discovery = discoverGraphdownObjects(snap);
+    const discovery = discoverGraphMDObjects(snap);
     expect(discovery.errors).toEqual([]);
     expect(discovery.typeObjects).toEqual([]);
     expect(discovery.recordObjects).toEqual([]);

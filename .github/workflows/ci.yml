@@ -18,6 +18,8 @@ jobs:
         run: npm ci
       - name: Repo guardrails
         run: npm run check:repo-guardrails
+      - name: Legacy brand check
+        run: npm run check:no-legacy-brand
       - name: Dataset package smoke test (Node import/require)
         run: node tools/check-dataset-package-smoke.cjs
       - name: Lint
@@ -71,7 +73,7 @@ jobs:
     env:
       DATASET_DIST: ${{ github.workspace }}/.ci/dataset-dist-cjs
     steps:
-      - name: Checkout graphdown
+      - name: Checkout GraphMD
         uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4

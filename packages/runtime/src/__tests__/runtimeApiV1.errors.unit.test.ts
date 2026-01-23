@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import { blockPathForCid, cidFromRawBytes } from '@graphdown/dataset';
+import { blockPathForCid, cidFromRawBytes } from '@graphmd/dataset';
 import { openRuntimeApiV1, isRuntimeApiError } from '../index';
 import { utf8, validDatasetMinimal } from './fixtures';
 

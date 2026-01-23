@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell";
 import Button from "../components/Button";
 import EmptyState from "../components/EmptyState";
-import { buildDatasetZipBytes } from "@graphdown/io-zip";
+import { buildDatasetZipBytes } from "@graphmd/io-zip";
 import { downloadZipBytes } from "../features/export";
 import { useDataset } from "../state/DatasetContext";
 
@@ -60,7 +60,7 @@ export default function ExportRoute() {
                       return;
                     }
                     const bytes = buildDatasetZipBytes(activeDataset.snapshot);
-                    downloadZipBytes(bytes, `graphdown-export--${safeLabel}.zip`);
+                    downloadZipBytes(bytes, `graphmd-export--${safeLabel}.zip`);
                   }}
                 >
                   Download zip

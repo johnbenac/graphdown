@@ -1,7 +1,7 @@
-# Graphdown tests
+# GraphMD tests
 
 This directory contains shared test helpers plus centralized integration/spec
-tests for the Graphdown dataset library. Unit tests now live alongside their
+tests for the GraphMD dataset library. Unit tests now live alongside their
 modules in `src/<area>/__tests__/`.
 
 ## Focus areas

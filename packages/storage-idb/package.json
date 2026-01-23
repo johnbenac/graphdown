@@ -1,5 +1,5 @@
 {
-  "name": "@graphdown/storage-idb",
+  "name": "@graphmd/storage-idb",
   "private": true,
   "version": "0.0.0",
   "type": "module",

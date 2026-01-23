@@ -91,12 +91,12 @@ export default [
           patterns: [
             {
               group: [
-                '@graphdown/core/*',
-                '@graphdown/core/src/*',
-                '@graphdown/core/src/**',
-                '@graphdown/dataset/*',
-                '@graphdown/dataset/src/*',
-                '@graphdown/dataset/src/**',
+                '@graphmd/core/*',
+                '@graphmd/core/src/*',
+                '@graphmd/core/src/**',
+                '@graphmd/dataset/*',
+                '@graphmd/dataset/src/*',
+                '@graphmd/dataset/src/**',
                 '../core/*',
                 '../core/**',
                 '../dataset/*',
@@ -116,7 +116,7 @@ export default [
                 '**/packages/core/**',
                 '**/packages/dataset/**'
               ],
-              message: 'Runtime must import @graphdown/dataset via the package barrel only.'
+              message: 'Runtime must import @graphmd/dataset via the package barrel only.'
             }
           ]
         }
@@ -151,12 +151,12 @@ export default [
           patterns: [
             {
               group: [
-                '@graphdown/core/*',
-                '@graphdown/core/src/*',
-                '@graphdown/core/src/**',
-                '@graphdown/dataset/*',
-                '@graphdown/dataset/src/*',
-                '@graphdown/dataset/src/**',
+                '@graphmd/core/*',
+                '@graphmd/core/src/*',
+                '@graphmd/core/src/**',
+                '@graphmd/dataset/*',
+                '@graphmd/dataset/src/*',
+                '@graphmd/dataset/src/**',
                 '../core/*',
                 '../core/**',
                 '../dataset/*',
@@ -176,7 +176,7 @@ export default [
                 '**/packages/core/**',
                 '**/packages/dataset/**'
               ],
-              message: 'Import from @graphdown/dataset (package barrel) only.'
+              message: 'Import from @graphmd/dataset (package barrel) only.'
             }
           ]
         }
