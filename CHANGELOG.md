@@ -1,3 +1,10 @@
+## [0.13.1](https://github.com/johnbenac/graphmd/compare/v0.13.0...v0.13.1) (2026-01-23)
+
+
+### Bug Fixes
+
+* enable npm publishing for @graphmd/dataset ([cfd5c69](https://github.com/johnbenac/graphmd/commit/cfd5c69ac6cafe1edffbdcfee8c8e1768ccc9a1c))
+
 # [0.13.0](https://github.com/johnbenac/graphmd/compare/v0.12.6...v0.13.0) (2026-01-23)
 
 
