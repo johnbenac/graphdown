@@ -5,7 +5,7 @@
   "type": "module",
   "sideEffects": false,
   "dependencies": {
-    "@graphmd/dataset": "0.0.0",
+    "@graphmd/dataset": "*",
     "@graphmd/io-zip": "0.0.0",
     "@graphmd/io": "0.0.0",
     "@graphmd/io-github": "0.0.0",
