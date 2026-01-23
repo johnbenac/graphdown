@@ -8,36 +8,58 @@
 
 ## Workspace Dependency Format
 
-**CRITICAL**: This repository uses npm (not pnpm). Workspace dependencies MUST use version format, not protocol format.
+**CRITICAL**: This repository uses **npm** workspaces (not pnpm). Workspace dependencies MUST use **semver strings** (like `"0.0.0"`, `"*"`, `"^x.y.z"`), **not protocol format**.
 
-### Correct Format
-
-```json
-{
-  "dependencies": {
-    "@graphmd/package-name": "0.0.0"
-  },
-  "devDependencies": {
-    "@graphmd/other-package": "0.0.0"
-  }
-}
-```
-
-### Incorrect Format (DO NOT USE)
+### ❌ Incorrect Format (DO NOT USE)
 
 ```json
 {
   "dependencies": {
-    "@graphmd/package-name": "workspace:*"  // ❌ WRONG - pnpm only
+    "@graphmd/package-name": "workspace:*"
   }
 }
 ```
 
-### Why This Matters
+Why: `workspace:*` is pnpm-specific and causes npm to fail with `EUNSUPPORTEDPROTOCOL`.
 
-- The `workspace:*` protocol is **pnpm-specific** and not supported by npm
-- Using it causes `npm ci` to fail with: `npm error code EUNSUPPORTEDPROTOCOL`
-- This breaks all CI builds immediately
+### ✅ Correct Formats (npm workspaces)
+
+This repo uses **two** patterns depending on whether the depended-on workspace package is “placeholder-versioned” or “real-versioned”.
+
+#### 1) Internal-only packages that are versioned `0.0.0`
+
+Use `"0.0.0"` when the **depended-on workspace package itself** is also `0.0.0`.
+
+```json
+{
+  "dependencies": {
+    "@graphmd/io": "0.0.0",
+    "@graphmd/runtime": "0.0.0"
+  }
+}
+```
+
+#### 2) Workspace packages that are real-versioned (example: `@graphmd/dataset`)
+
+If a workspace package has a real version (e.g. `@graphmd/dataset@0.13.0`), consumers MUST use a range that will always satisfy the local workspace version. In this repo we use `"*"` for that purpose:
+
+```json
+{
+  "dependencies": {
+    "@graphmd/dataset": "*"
+  }
+}
+```
+
+##### Why this matters
+
+If a consumer declares:
+
+```json
+"@graphmd/dataset": "0.0.0"
+```
+
+…but the workspace package is versioned `0.13.0`, then during `npm ci` npm may try the registry for `@graphmd/dataset@0.0.0` and fail (404) when it isn’t published.
 
 ### Before Adding Any Workspace Dependency
 
@@ -49,7 +71,7 @@ cat packages/io/package.json | grep "@graphmd"
 cat packages/app-kit/package.json | grep "@graphmd"
 ```
 
-2. Always use `"0.0.0"` as the version string
+2. Use `"0.0.0"` only when the depended-on workspace package is versioned `0.0.0`. For real-versioned packages (like `@graphmd/dataset`), use `"*"`.
 
 3. Verify before committing:
 ```bash
@@ -74,6 +96,12 @@ npm install
 ```bash
 # Must succeed without EUNSUPPORTEDPROTOCOL
 npm ci
+```
+
+Helpful audit command:
+
+```bash
+rg '"@graphmd/dataset": "0.0.0"' -S packages apps || true
 ```
 
 See `package-lock.json` lockfileVersion (currently v3) which confirms npm usage.
