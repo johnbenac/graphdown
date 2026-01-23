@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@graphmd/dataset": "0.0.0",
+    "@graphmd/dataset": "*",
     "@noble/hashes": "^1.4.0"
   },
   "devDependencies": {

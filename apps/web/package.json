@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@graphmd/app-kit": "0.0.0",
-    "@graphmd/dataset": "0.0.0",
+    "@graphmd/dataset": "*",
     "@graphmd/io": "0.0.0",
     "@graphmd/io-github": "0.0.0",
     "@graphmd/io-zip": "0.0.0",
