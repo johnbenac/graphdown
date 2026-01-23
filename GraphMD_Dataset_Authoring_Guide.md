@@ -1229,6 +1229,261 @@ If you want stable long-lived links, prefer leaving IDs alone and changing displ
 
 ---
 
+## Continuous Validation in CI (Required)
+
+**Purpose:** Every dataset repo must validate itself in CI using the published `@graphmd/dataset` validator from npm.  
+**Non-goal:** dataset repos do not vendor GraphMD code, do not “pin forever,” and do not silently pass on old validator semantics.
+
+### Policy (required)
+
+1. **Dataset repos MUST validate on every PR + push to main.**  
+   If CI doesn’t validate the dataset, the repo is not compliant.
+2. **Dataset repos MUST install the validator from npm (`@graphmd/dataset`).**  
+   No git submodules. No copy/paste validator code. No “fallback.”
+3. **Dataset repos MUST track the latest validator within the supported major line.**
+   * Do **not** pin an exact patch version (e.g. `0.13.1`).
+   * Accept updates within the major line automatically (minor + patch).
+   * CI must **fail** if the lockfile is behind the latest available validator within that major line.
+4. **Dataset repos MUST commit a lockfile (`package-lock.json`).**  
+   CI must use `npm ci`. Deterministic installs are required.
+
+> **Hard rule:** Use a **major-line range** and enforce “latest in-range” via CI. Exact pins are not acceptable for dataset repos.
+
+### Minimal Node harness (copy/paste)
+
+#### A) `package.json` (required)
+
+Add a minimal `package.json` at the dataset repo root. This repo is a dataset repo, so keep it tiny.
+
+**Versioning rule: use “latest within major.”**
+
+* While GraphMD is **pre-1.0** (major `0`), use:
+  * `"@graphmd/dataset": "0.x"`  
+    This means: “always the latest 0.* validator.”
+* Once GraphMD is **1.0+**, use:
+  * `"@graphmd/dataset": "^1.0.0"`  
+    (or `^2.0.0`, etc — always “latest within this major.”)
+
+✅ Template:
+
+```json
+{
+  "name": "my-dataset",
+  "private": true,
+  "version": "0.0.0",
+  "description": "GraphMD dataset repo validated by @graphmd/dataset in CI.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate:dataset": "node tools/validate-dataset.cjs",
+    "test": "npm run validate:dataset"
+  },
+  "devDependencies": {
+    "@graphmd/dataset": "0.x"
+  }
+}
+```
+
+**Hard rule:** Do not pin `@graphmd/dataset` to an exact version. Use a major-line range.
+
+#### B) Generate + commit the lockfile (required)
+
+In the dataset repo root:
+
+```bash
+npm install
+git add package-lock.json
+git commit -m "chore: add deterministic validator lockfile"
+```
+
+**Hard rule:** If `package-lock.json` is missing, CI is misconfigured. Fix it immediately.
+
+#### C) `tools/validate-dataset.cjs` (required)
+
+This script loads only the **dataset surface area** and calls the official validator.
+
+✅ Template:
+
+```js
+/* eslint-disable no-console */
+const fs = require("node:fs");
+const path = require("node:path");
+
+const { validateDatasetSnapshot } = require("@graphmd/dataset");
+
+// Repo root = one level up from tools/
+const ROOT = path.resolve(__dirname, "..");
+
+// Validate only canonical dataset dirs.
+// Keep CI/tooling files from ever affecting dataset validity.
+const DATASET_DIRS = ["types", "records", "blocks", "plugins"];
+
+// Never ingest these.
+const SKIP_DIRS = new Set([".git", "node_modules"]);
+
+function walk(absDir, relDir, files) {
+  const entries = fs.readdirSync(absDir, { withFileTypes: true });
+  for (const e of entries) {
+    if (SKIP_DIRS.has(e.name)) continue;
+
+    const abs = path.join(absDir, e.name);
+    const rel = path.posix.join(relDir, e.name);
+
+    if (e.isDirectory()) {
+      walk(abs, rel, files);
+    } else if (e.isFile()) {
+      files.set(rel, fs.readFileSync(abs));
+    }
+  }
+}
+
+function loadSnapshot(root) {
+  const files = new Map();
+
+  for (const dir of DATASET_DIRS) {
+    const abs = path.join(root, dir);
+    if (!fs.existsSync(abs)) continue;
+    walk(abs, dir, files);
+  }
+
+  return { files };
+}
+
+function main() {
+  const snapshot = loadSnapshot(ROOT);
+
+  console.log(
+    `GraphMD dataset validation: loaded ${snapshot.files.size} files from ${DATASET_DIRS.join(", ")}`
+  );
+
+  const result = validateDatasetSnapshot(snapshot);
+
+  if (!result || result.ok !== true) {
+    console.error("❌ DATASET INVALID (GraphMD validator)");
+    console.error(JSON.stringify(result, null, 2));
+    process.exit(1);
+  }
+
+  console.log("✅ DATASET VALID (GraphMD validator)");
+}
+
+main();
+```
+
+**Hard rule:** Only `types/`, `records/`, `blocks/`, `plugins/` participate in dataset validity. CI config changes must not affect validity.
+
+#### D) Canonical GitHub Actions workflow (required)
+
+`.github/workflows/ci.yml` must do three things:
+
+1. Use Node 20
+2. Fail fast if the validator isn’t published
+3. Fail if the repo is not using the **latest validator within its major line** (i.e., lockfile is stale)
+
+✅ Template:
+
+```yaml
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  validate-dataset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: FAIL-FAST PREFLIGHT — validator must exist + lockfile must be current
+        run: |
+          set -euo pipefail
+          REG='https://registry.npmjs.org'
+
+          # 1) Lockfile must exist (setup-node npm cache + npm ci require it).
+          test -f package-lock.json || {
+            echo "FATAL: package-lock.json is missing."
+            echo "Run: npm install && commit package-lock.json"
+            exit 1
+          }
+
+          # 2) Determine declared validator range from package.json
+          RANGE=$(node -p "require('./package.json').devDependencies['@graphmd/dataset']")
+          echo "Declared @graphmd/dataset range: $RANGE"
+
+          # 3) Ensure the package exists on npm (and find latest that satisfies the range)
+          LATEST=$(npm view "@graphmd/dataset@${RANGE}" version --registry="$REG" 2>/dev/null || true)
+          if [ -z "$LATEST" ]; then
+            echo "FATAL: @graphmd/dataset range '$RANGE' not resolvable on npm."
+            echo "Either the package is unpublished or the range is invalid."
+            exit 1
+          fi
+          echo "Latest @graphmd/dataset satisfying range: $LATEST"
+
+          # 4) Ensure lockfile is not stale (must be the latest in-range)
+          LOCKED=$(node -p "require('./package-lock.json').packages['node_modules/@graphmd/dataset'].version")
+          echo "Locked @graphmd/dataset in package-lock.json: $LOCKED"
+
+          if [ "$LOCKED" != "$LATEST" ]; then
+            echo "FATAL: validator is stale."
+            echo "Update your lockfile to the latest validator within the major line:"
+            echo "  npm install"
+            echo "  git add package-lock.json"
+            echo "  git commit -m \"chore: bump @graphmd/dataset validator\""
+            exit 1
+          fi
+
+          echo "OK: validator is published and lockfile is current."
+
+      - name: Install validator (deterministic)
+        run: npm ci
+
+      - name: Validate dataset with GraphMD
+        run: npm test
+```
+
+**Hard rule:** CI intentionally fails when GraphMD publishes a new validator version in your major line and your dataset repo hasn’t updated its lockfile yet. This is enforcement, not a bug.
+
+### Keeping your dataset repo current with GraphMD releases
+
+When `@graphmd/dataset` publishes a new version in your major line:
+
+```bash
+npm install
+git add package-lock.json
+git commit -m "chore: bump @graphmd/dataset validator"
+```
+
+If GraphMD publishes a **new major**:
+
+* Update the dependency range in `package.json` (e.g. `^1.0.0` → `^2.0.0`)
+* Then run `npm install` and commit the lockfile.
+
+### Optional but recommended: Dependabot for validator updates
+
+Add `.github/dependabot.yml` so dataset repos get automatic PRs whenever `@graphmd/dataset` releases:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+```
+
+This pairs perfectly with the CI “stale validator” check: Dependabot opens the PR, CI goes green, maintainer merges.
+
+---
+
 ## Starter templates and cheat sheets
 
 To make this easier to adopt, here are two small resources:
