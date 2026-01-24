@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-22T19:14:19.390Z",
+  "generatedAt": "2026-01-24T09:46:33.274Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -2051,5 +2051,6 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [],
+  "untracedTests": []
 }

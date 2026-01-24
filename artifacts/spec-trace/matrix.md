@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-22T19:14:19.390Z
+Generated: 2026-01-24T09:46:33.274Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):

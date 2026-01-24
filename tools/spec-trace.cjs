@@ -6,6 +6,7 @@ const path = require('path');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const SPEC_PATH = path.join(REPO_ROOT, 'SPEC.md');
+const ALLOWLIST_PATH = path.join(REPO_ROOT, 'tools', 'spec-trace.allowlist.json');
 
 const REQ_LINE_REGEX =
   /(?:@--|<!--)\s*req:id=([A-Za-z0-9-]+)\s+title="([^"]+)"([^>-]*)(?:--|-->)/;
@@ -204,8 +205,61 @@ function collectTestFiles() {
   return files;
 }
 
-function extractReferencedRequirements(testFiles) {
+function globToRegExp(pattern) {
+  let regex = '^';
+  let i = 0;
+  while (i < pattern.length) {
+    const char = pattern[i];
+    if (char === '*') {
+      if (pattern[i + 1] === '*') {
+        regex += '.*';
+        i += 2;
+      } else {
+        regex += '[^/]*';
+        i += 1;
+      }
+      continue;
+    }
+    if (char === '?') {
+      regex += '.';
+      i += 1;
+      continue;
+    }
+    if ('\\.[]{}()+-^$|'.includes(char)) {
+      regex += `\\${char}`;
+    } else {
+      regex += char;
+    }
+    i += 1;
+  }
+  regex += '$';
+  return new RegExp(regex);
+}
+
+function loadAllowlist() {
+  if (!fs.existsSync(ALLOWLIST_PATH)) {
+    return { paths: [], titles: [] };
+  }
+  const raw = fs.readFileSync(ALLOWLIST_PATH, 'utf8');
+  const parsed = JSON.parse(raw);
+  return {
+    paths: Array.isArray(parsed.paths) ? parsed.paths : [],
+    titles: Array.isArray(parsed.titles) ? parsed.titles : [],
+  };
+}
+
+function isAllowlisted(test, allowlist) {
+  if (allowlist.titles.includes(test.testTitle)) return true;
+  if (allowlist.paths.length === 0) return false;
+  return allowlist.paths.some((pattern) => {
+    const regex = globToRegExp(pattern);
+    return regex.test(test.filePath);
+  });
+}
+
+function collectTestsAndReferences(testFiles) {
   const references = new Map(); // reqId -> [{ reqId, testTitle, filePath }...]
+  const allTests = [];
 
   testFiles.forEach((filePath) => {
     const content = fs.readFileSync(filePath, 'utf8');
@@ -216,11 +270,12 @@ function extractReferencedRequirements(testFiles) {
     let match;
     while ((match = TEST_TITLE_REGEX.exec(content)) !== null) {
       const title = match[2];
+      const relativePath = toPosixPath(path.relative(REPO_ROOT, filePath));
+      allTests.push({ testTitle: title, filePath: relativePath });
       const prefixMatch = title.match(REQ_PREFIX_REGEX);
       if (!prefixMatch) continue;
 
       const reqId = prefixMatch[1];
-      const relativePath = toPosixPath(path.relative(REPO_ROOT, filePath));
 
       if (!references.has(reqId)) {
         references.set(reqId, []);
@@ -243,7 +298,7 @@ function extractReferencedRequirements(testFiles) {
     );
   }
 
-  return references;
+  return { references, allTests };
 }
 
 function collectUnknownReferences(references, specReqs) {
@@ -275,6 +330,24 @@ function collectMissingTestable(specReqs, references) {
   }
   missing.sort((a, b) => a.id.localeCompare(b.id));
   return missing;
+}
+
+function collectUntracedTests(allTests, allowlist) {
+  const untraced = [];
+
+  allTests.forEach((test) => {
+    if (test.testTitle.match(REQ_PREFIX_REGEX)) return;
+    if (isAllowlisted(test, allowlist)) return;
+    untraced.push(test);
+  });
+
+  untraced.sort(
+    (a, b) =>
+      a.filePath.localeCompare(b.filePath) ||
+      a.testTitle.localeCompare(b.testTitle),
+  );
+
+  return untraced;
 }
 
 function buildMatrixData(generatedAt, specReqs, order, references, unknownRefs, missingTestable) {
@@ -311,6 +384,14 @@ function writeMatrix(outputDir, matrixData) {
     markdownLines.push('## Unknown requirement IDs referenced by tests');
     matrixData.unknownReferences.forEach((ref) => {
       markdownLines.push(`- ${ref.reqId} (${ref.filePath}: "${ref.testTitle}")`);
+    });
+    markdownLines.push('');
+  }
+
+  if (matrixData.untracedTests?.length > 0) {
+    markdownLines.push('## Untraced tests (missing requirement IDs)');
+    matrixData.untracedTests.forEach((test) => {
+      markdownLines.push(`- ${test.filePath}: "${test.testTitle}"`);
     });
     markdownLines.push('');
   }
@@ -376,6 +457,16 @@ function reportMissingTestable(missingTestable) {
   process.exit(1);
 }
 
+function reportUntracedTests(untracedTests) {
+  if (!untracedTests || untracedTests.length === 0) return;
+
+  console.error('Tests missing requirement IDs (allowlist if intentional):');
+  untracedTests.forEach((test) => {
+    console.error(`- ${test.filePath}: "${test.testTitle}"`);
+  });
+  process.exit(1);
+}
+
 function generateSpecTrace({
   outputDir = path.join(REPO_ROOT, 'artifacts', 'spec-trace'),
   writeFiles = true,
@@ -387,9 +478,11 @@ function generateSpecTrace({
 
   const { specReqs, order } = readSpecRequirements(SPEC_PATH);
   const testFiles = collectTestFiles();
-  const references = extractReferencedRequirements(testFiles);
+  const { references, allTests } = collectTestsAndReferences(testFiles);
+  const allowlist = loadAllowlist();
   const unknownRefs = collectUnknownReferences(references, specReqs);
   const missingTestable = collectMissingTestable(specReqs, references);
+  const untracedTests = collectUntracedTests(allTests, allowlist);
 
   const matrixData = buildMatrixData(
     generatedAt,
@@ -399,6 +492,7 @@ function generateSpecTrace({
     unknownRefs,
     missingTestable,
   );
+  matrixData.untracedTests = untracedTests;
 
   if (writeFiles) {
     writeMatrix(outputDir, matrixData);
@@ -411,6 +505,7 @@ function generateSpecTrace({
     references,
     unknownRefs,
     missingTestable,
+    untracedTests,
     outputDir,
   };
 }
@@ -421,6 +516,7 @@ function main() {
 
   // Fail only on unknown IDs (not on missing coverage).
   reportUnknownIds(matrixData.unknownReferences);
+  reportUntracedTests(matrixData.untracedTests);
   reportMissingTestable(matrixData.missingTestable);
 
   console.log(
