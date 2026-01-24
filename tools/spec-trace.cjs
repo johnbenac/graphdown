@@ -36,9 +36,61 @@ const PLAYWRIGHT_SNAPSHOT_DIR_POSIXES = [
 const ENFORCE_TESTABLE =
   process.env.TRACE_ENFORCE_TESTABLE &&
   process.env.TRACE_ENFORCE_TESTABLE.toLowerCase() === 'true';
+const ALLOWLIST_PATH = path.join(__dirname, 'spec-trace.allowlist.json');
 
 function toPosixPath(filePath) {
   return filePath.split(path.sep).join('/');
+}
+
+function loadAllowlist() {
+  if (!fs.existsSync(ALLOWLIST_PATH)) {
+    return { pathMatchers: [], titleMatchers: [] };
+  }
+  const raw = fs.readFileSync(ALLOWLIST_PATH, 'utf8');
+  const parsed = JSON.parse(raw);
+  const paths = Array.isArray(parsed.paths) ? parsed.paths : [];
+  const titles = Array.isArray(parsed.titles) ? parsed.titles : [];
+  return {
+    pathMatchers: compileGlobList(paths),
+    titleMatchers: compileGlobList(titles),
+  };
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function globToRegex(glob) {
+  const normalized = toPosixPath(glob);
+  let regex = '^';
+  for (let i = 0; i < normalized.length; i += 1) {
+    const char = normalized[i];
+    const next = normalized[i + 1];
+    if (char === '*' && next === '*') {
+      regex += '.*';
+      i += 1;
+      continue;
+    }
+    if (char === '*') {
+      regex += '[^/]*';
+      continue;
+    }
+    regex += escapeRegex(char);
+  }
+  regex += '$';
+  return new RegExp(regex);
+}
+
+function compileGlobList(globs) {
+  return globs.map((glob) => ({ glob, regex: globToRegex(glob) }));
+}
+
+function matchesAllowlist(test, allowlist) {
+  const path = test.filePath;
+  const title = test.testTitle;
+  if (allowlist.pathMatchers.some((entry) => entry.regex.test(path))) return true;
+  if (allowlist.titleMatchers.some((entry) => entry.regex.test(title))) return true;
+  return false;
 }
 
 function parseOutputDir() {
@@ -206,6 +258,7 @@ function collectTestFiles() {
 
 function extractReferencedRequirements(testFiles) {
   const references = new Map(); // reqId -> [{ reqId, testTitle, filePath }...]
+  const allTests = [];
 
   testFiles.forEach((filePath) => {
     const content = fs.readFileSync(filePath, 'utf8');
@@ -217,10 +270,17 @@ function extractReferencedRequirements(testFiles) {
     while ((match = TEST_TITLE_REGEX.exec(content)) !== null) {
       const title = match[2];
       const prefixMatch = title.match(REQ_PREFIX_REGEX);
+      const relativePath = toPosixPath(path.relative(REPO_ROOT, filePath));
+
+      allTests.push({
+        testTitle: title,
+        filePath: relativePath,
+        hasReqPrefix: Boolean(prefixMatch),
+      });
+
       if (!prefixMatch) continue;
 
       const reqId = prefixMatch[1];
-      const relativePath = toPosixPath(path.relative(REPO_ROOT, filePath));
 
       if (!references.has(reqId)) {
         references.set(reqId, []);
@@ -243,7 +303,7 @@ function extractReferencedRequirements(testFiles) {
     );
   }
 
-  return references;
+  return { references, allTests };
 }
 
 function collectUnknownReferences(references, specReqs) {
@@ -277,7 +337,25 @@ function collectMissingTestable(specReqs, references) {
   return missing;
 }
 
-function buildMatrixData(generatedAt, specReqs, order, references, unknownRefs, missingTestable) {
+function collectUntracedTests(allTests, allowlist) {
+  const untraced = allTests.filter((test) => !test.hasReqPrefix && !matchesAllowlist(test, allowlist));
+  untraced.sort(
+    (a, b) =>
+      a.filePath.localeCompare(b.filePath) ||
+      a.testTitle.localeCompare(b.testTitle),
+  );
+  return untraced;
+}
+
+function buildMatrixData(
+  generatedAt,
+  specReqs,
+  order,
+  references,
+  unknownRefs,
+  missingTestable,
+  untracedTests,
+) {
   return {
     generatedAt,
     requirements: order.map((id) => {
@@ -292,6 +370,7 @@ function buildMatrixData(generatedAt, specReqs, order, references, unknownRefs, 
     }),
     unknownReferences: unknownRefs,
     missingTestable,
+    untracedTests,
   };
 }
 
@@ -311,6 +390,14 @@ function writeMatrix(outputDir, matrixData) {
     markdownLines.push('## Unknown requirement IDs referenced by tests');
     matrixData.unknownReferences.forEach((ref) => {
       markdownLines.push(`- ${ref.reqId} (${ref.filePath}: "${ref.testTitle}")`);
+    });
+    markdownLines.push('');
+  }
+
+  if (matrixData.untracedTests.length > 0) {
+    markdownLines.push('## Tests missing requirement references');
+    matrixData.untracedTests.forEach((test) => {
+      markdownLines.push(`- ${test.filePath}: "${test.testTitle}"`);
     });
     markdownLines.push('');
   }
@@ -376,6 +463,16 @@ function reportMissingTestable(missingTestable) {
   process.exit(1);
 }
 
+function reportUntracedTests(untracedTests) {
+  if (untracedTests.length === 0) return;
+
+  console.error('Tests missing requirement references (allowlist with tools/spec-trace.allowlist.json):');
+  untracedTests.forEach((test) => {
+    console.error(`- ${test.filePath}: "${test.testTitle}"`);
+  });
+  process.exit(1);
+}
+
 function generateSpecTrace({
   outputDir = path.join(REPO_ROOT, 'artifacts', 'spec-trace'),
   writeFiles = true,
@@ -387,9 +484,11 @@ function generateSpecTrace({
 
   const { specReqs, order } = readSpecRequirements(SPEC_PATH);
   const testFiles = collectTestFiles();
-  const references = extractReferencedRequirements(testFiles);
+  const allowlist = loadAllowlist();
+  const { references, allTests } = extractReferencedRequirements(testFiles);
   const unknownRefs = collectUnknownReferences(references, specReqs);
   const missingTestable = collectMissingTestable(specReqs, references);
+  const untracedTests = collectUntracedTests(allTests, allowlist);
 
   const matrixData = buildMatrixData(
     generatedAt,
@@ -398,6 +497,7 @@ function generateSpecTrace({
     references,
     unknownRefs,
     missingTestable,
+    untracedTests,
   );
 
   if (writeFiles) {
@@ -411,6 +511,7 @@ function generateSpecTrace({
     references,
     unknownRefs,
     missingTestable,
+    untracedTests,
     outputDir,
   };
 }
@@ -422,6 +523,7 @@ function main() {
   // Fail only on unknown IDs (not on missing coverage).
   reportUnknownIds(matrixData.unknownReferences);
   reportMissingTestable(matrixData.missingTestable);
+  reportUntracedTests(matrixData.untracedTests);
 
   console.log(
     `Spec trace completed. Matrix written to ${toPosixPath(

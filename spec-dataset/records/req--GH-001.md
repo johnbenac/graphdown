@@ -1,0 +1,15 @@
+---
+typeId: req
+recordId: "GH-001"
+parent: "section:import-from-github-requirements"
+fields:
+  title: "Supported URL forms"
+  order: 0
+---
+
+
+Import MUST accept:
+
+* `github.com/<owner>/<repo>`
+* `https://github.com/<owner>/<repo>`
+* `github.com/<owner>/<repo>/tree/<ref>`

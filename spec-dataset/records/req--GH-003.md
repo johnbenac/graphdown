@@ -1,0 +1,14 @@
+---
+typeId: req
+recordId: "GH-003"
+parent: "section:import-from-github-requirements"
+fields:
+  title: "Recursive listing + raw fetch"
+  order: 2
+---
+
+
+Importer MUST:
+
+* list files recursively via GitHub tree API (`?recursive=1`)
+* fetch contents via `raw.githubusercontent.com`

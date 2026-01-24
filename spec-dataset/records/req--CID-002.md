@@ -1,0 +1,14 @@
+---
+typeId: req
+recordId: "CID-002"
+parent: "section:2-block-identity"
+fields:
+  title: "CID test vector for hello"
+  order: 2
+  testable: true
+---
+
+
+`cidFromRawBytes(utf8("hello"))` MUST equal:
+
+`bafkreibm6jg3ux5qumhcn2b3flc3tyu6dmlb4xa7u5bf44yegnrjhc4yeq`

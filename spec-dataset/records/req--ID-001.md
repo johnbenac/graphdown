@@ -1,0 +1,19 @@
+---
+typeId: req
+recordId: "ID-001"
+parent: "section:terminology"
+fields:
+  title: "Identifier syntax is separator-safe"
+  order: 19
+  testable: true
+---
+
+
+`typeId` and `recordId` MUST be strings and MUST be non-empty after trimming.
+
+`typeId` MUST match: `^[A-Za-z0-9][A-Za-z0-9_-]*$`
+
+`recordId` MUST match: `^[A-Za-z0-9][A-Za-z0-9_-]*$`
+
+`typeId` and `recordId` MUST NOT contain `:`.
+Colon is reserved as the separator in `typeId:recordId` record references.

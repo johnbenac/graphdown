@@ -1,0 +1,17 @@
+---
+typeId: req
+recordId: "HASH-003"
+parent: "section:1-dataset-identity-hashes"
+fields:
+  title: "Snapshot fingerprint (types + record objects + plugin objects)"
+  order: 2
+---
+
+
+Implementations MUST compute a **snapshot fingerprint** for a dataset.
+
+The snapshot fingerprint is the gdhash-v1 SHA-256 digest computed over:
+
+* all type objects (FR-MD-021),
+* all record objects (FR-MD-023), and
+* all plugin objects (plugin manifests + plugin bundle files per HASH-001).

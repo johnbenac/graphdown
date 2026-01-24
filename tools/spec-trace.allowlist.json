@@ -1,0 +1,10 @@
+{
+  "paths": [
+    "apps/web/e2e/**",
+    "apps/web/src/__tests__/**",
+    "apps/web/src/**/__tests__/**",
+    "packages/**/__tests__/**",
+    "tests/**"
+  ],
+  "titles": []
+}

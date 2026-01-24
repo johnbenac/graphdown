@@ -1,0 +1,20 @@
+---
+typeId: req
+recordId: "EXT-002"
+parent: "section:reserved-keys-and-extensibility-rules"
+fields:
+  title: "`fields` is open"
+  order: 1
+---
+
+
+`fields` MAY contain any YAML value shapes:
+
+* scalars (string/number/bool/null)
+* arrays
+* objects/maps
+* arbitrarily nested structures
+
+Core MUST NOT reject records because `fields` contains unfamiliar structures.
+
+---
