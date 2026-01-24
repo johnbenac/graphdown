@@ -1,0 +1,12 @@
+---
+typeId: req
+recordId: NFR-010
+fields:
+  title: Read-only offline after initial load
+  order: 5
+  testable: true
+parent: section:13-ui-requirements
+---
+
+
+After a dataset is loaded, the UI MUST allow read-only navigation of already-loaded records while the browser is offline.

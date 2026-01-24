@@ -1,0 +1,22 @@
+---
+typeId: req
+recordId: EXP-003
+fields:
+  title: Canonical dataset export
+  order: 1
+parent: section:12-export-requirements
+---
+
+
+Export MUST support producing a zip archive that contains exactly:
+
+* all type objects (FR-MD-021)
+* all record objects (FR-MD-023)
+* all plugin objects (plugin manifests + plugin bundle files; PLUG-000 / PLUG-LAYOUT-002)
+* all reachable block files (GC-001) at their canonical block store paths (BLOCK-LAYOUT-001)
+
+The canonical dataset export MUST:
+
+* use the canonical parent-based layout for records defined in EXP-HIER-001,
+* use the canonical plugin layout defined in EXP-PLUG-001,
+* and MUST NOT include non-record, non-plugin, non-block-store files.

@@ -1,0 +1,20 @@
+---
+typeId: req
+recordId: TYPE-004
+fields:
+  title: fieldDefs shape
+  order: 3
+  testable: true
+parent: section:7-types-and-schema-as-data
+---
+
+
+A type object is valid with or without `fields.fieldDefs`.
+
+When present, `fields.fieldDefs` MUST be a map keyed by field name. Each field definition value MUST be an object.
+
+Core recognizes exactly one standard key inside a field definition object:
+
+* `required` (boolean)
+
+All other keys inside field definition objects are allowed and MUST be treated as opaque by core.

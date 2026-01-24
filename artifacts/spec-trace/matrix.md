@@ -1,6 +1,6 @@
 # Verification Matrix (SPEC.md ↔ tests)
 
-Generated: 2026-01-22T19:14:19.390Z
+Generated: 2026-01-24T09:43:43.914Z
 
 ## GOV-001 — Spec-first changes (testable=false)
 Tests (0):
@@ -39,7 +39,7 @@ Tests (1):
 Tests (0):
 - (none)
 
-## NR-LINK-001 — No requirement that links resolve
+## NR-LINK-001 — No requirement that links resolve (except composition constraints)
 Tests (1):
 - packages/dataset/src/__tests__/spec/gaps.integration.test.ts — "NR-LINK-001: missing record links are allowed (except composition)"
 
@@ -470,7 +470,7 @@ Tests (0):
 Tests (0):
 - (none)
 
-## NFR-001 — No full reloads for CRUD (testable=true)
+## NFR-001 — CRUD does not perform full document reloads (testable=true)
 Tests (1):
 - apps/web/src/state/__tests__/DatasetContext.nfr.integration.test.tsx — "NFR-001: CRUD actions do not trigger a full document load event"
 

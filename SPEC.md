@@ -1,4 +1,3 @@
-
 # GraphMD Standard: Dataset Repositories
 
 **Spec Version:** 0.5 (Draft)
@@ -136,7 +135,7 @@ If you want those semantics, that’s plugin territory (or dataset-author toolin
 
 This standard does not require defenses against malicious datasets (e.g., injection attempts). The spec is about interoperability and determinism, not adversarial threat models.
 
-<!-- req:id=NR-LINK-001 title="No requirement that links resolve" -->
+<!-- req:id=NR-LINK-001 title="No requirement that links resolve (except composition constraints)" -->
 ### NR-LINK-001 — No requirement that links resolve (except composition constraints)
 
 Wiki-links MAY point to non-existent record references `typeId:recordId` (Obsidian-style “uncreated” notes). Unresolved links are not an import-failing error.
@@ -723,7 +722,6 @@ Non-semantic Markdown files (including those with invalid or unterminated YAML f
 The plugin manifest body is optional and treated as uninterpreted Markdown text (PLUG-FR-003).
 
 <!-- req:id=PLUG-FR-002 title="Required top-level keys for plugin manifests" testable=true verify=ci -->
-
 ### PLUG-FR-002 — Required top-level keys for plugin manifests
 
 A YAML front matter object is a **plugin manifest object** when it defines exactly:
@@ -757,7 +755,6 @@ Forbidden keys:
 No other top-level keys are allowed.
 
 <!-- req:id=PLUG-FR-003 title="Plugin manifest body is raw Markdown" testable=false -->
-
 ### PLUG-FR-003 — Plugin manifest body is raw Markdown
 
 The plugin manifest body is everything after the closing `---`.
@@ -1378,7 +1375,7 @@ UI shall be usable on desktop and mobile form factors (non-testable intent).
 
 UI shall provide consistent CRUD + relationship affordances (non-testable intent).
 
-<!-- req:id=NFR-001 title="No full reloads for CRUD" testable=true -->
+<!-- req:id=NFR-001 title="CRUD does not perform full document reloads" testable=true -->
 ### NFR-001 — CRUD does not perform full document reloads
 
 In the GraphMD web UI, performing CRUD actions MUST NOT trigger a full document navigation/reload.
@@ -1491,7 +1488,6 @@ The Runtime API is a **local** API surface (not a network protocol). It MUST pre
 ### Conformance
 
 <!-- req:id=API-V1-000 title="Runtime API v1 conformance scope" testable=false -->
-
 ### API-V1-000 — Runtime API v1 conformance scope
 
 A Runtime API implementation conforms to **Runtime API v1** if and only if it satisfies **all requirements in §16**.
@@ -1503,7 +1499,6 @@ Requirements in **§16P** are **parked** and are not required for v1 conformance
 ### Versioning, capabilities, and general contract rules
 
 <!-- req:id=API-001 title="Runtime API is explicitly versioned" testable=true -->
-
 ### API-001 — Runtime API is explicitly versioned
 
 The Runtime API MUST expose a machine-readable `apiVersion`.
@@ -1515,7 +1510,6 @@ The Runtime API MUST expose a machine-readable `apiVersion`.
 ---
 
 <!-- req:id=API-002 title="Capabilities are discoverable" testable=true -->
-
 ### API-002 — Capabilities are discoverable
 
 The Runtime API MUST expose a machine-readable set of supported capabilities for the current session.
@@ -1530,7 +1524,6 @@ A v1 implementation MUST declare at least capability:
 ---
 
 <!-- req:id=API-003 title="All Runtime API operations are asynchronous" testable=false -->
-
 ### API-003 — All Runtime API operations are asynchronous
 
 All Runtime API operations MUST be asynchronous and MUST return Promise-like results.
@@ -1538,7 +1531,6 @@ All Runtime API operations MUST be asynchronous and MUST return Promise-like res
 ---
 
 <!-- req:id=API-004 title="Runtime API addresses objects by GraphMD identities" testable=true -->
-
 ### API-004 — Runtime API addresses objects by GraphMD identities
 
 Runtime API methods MUST address GraphMD objects using GraphMD identities:
@@ -1551,7 +1543,6 @@ The Runtime API MUST NOT require clients to address types or records by reposito
 ---
 
 <!-- req:id=API-005 title="Runtime API payloads are structured-clone compatible" testable=false -->
-
 ### API-005 — Runtime API payloads are structured-clone compatible
 
 All request/response payloads used by the Runtime API MUST be representable using structured-clone-compatible values:
@@ -1564,7 +1555,6 @@ The API MUST NOT require functions, class instances, or other non-clonable value
 ---
 
 <!-- req:id=API-ERR-001 title="Errors are structured and include stable codes" testable=false -->
-
 ### API-ERR-001 — Errors are structured and include stable codes
 
 If a Runtime API operation fails, it MUST fail with a structured error that includes:
@@ -1587,7 +1577,6 @@ Notes:
 ### Required session behavior
 
 <!-- req:id=API-SESSION-001 title="Runtime API can open a session from a snapshot" testable=false -->
-
 ### API-SESSION-001 — Runtime API can open a session from a snapshot
 
 The Runtime API MUST support opening a session from a snapshot-equivalent file map (DatasetSnapshot semantics).
@@ -1601,7 +1590,6 @@ Opening a session MUST:
 ---
 
 <!-- req:id=API-SESSION-002 title="Read operations are side-effect free" testable=false -->
-
 ### API-SESSION-002 — Read operations are side-effect free
 
 All Runtime API **read** operations MUST be side-effect free:
@@ -1615,7 +1603,6 @@ All Runtime API **read** operations MUST be side-effect free:
 ### Required returned object shapes
 
 <!-- req:id=API-SHAPE-001 title="Type object view shape" testable=false -->
-
 ### API-SHAPE-001 — Type object view shape
 
 When the Runtime API returns a type object as structured data, it MUST provide at least:
@@ -1629,7 +1616,6 @@ The `fields` map MUST preserve user-authored content as opaque data (EXT-002 / T
 ---
 
 <!-- req:id=API-SHAPE-002 title="Record object view shape" testable=false -->
-
 ### API-SHAPE-002 — Record object view shape
 
 When the Runtime API returns a record object as structured data, it MUST provide at least:
@@ -1648,7 +1634,6 @@ Core MUST treat `recordKey` as computed and MUST NOT persist it as a YAML field 
 ### Required read operations (types and records)
 
 <!-- req:id=API-READ-001 title="List and get type objects" testable=false -->
-
 ### API-READ-001 — List and get type objects
 
 The Runtime API MUST provide read operations to:
@@ -1661,7 +1646,6 @@ List results MUST be deterministic and SHOULD be sorted lexicographically by `ty
 ---
 
 <!-- req:id=API-READ-002 title="List and get record objects" testable=false -->
-
 ### API-READ-002 — List and get record objects
 
 The Runtime API MUST provide read operations to:
@@ -1674,7 +1658,6 @@ List results MUST be deterministic and SHOULD be sorted lexicographically by `re
 ---
 
 <!-- req:id=API-READ-003 title="Raw Markdown access for type/record files is available" testable=false -->
-
 ### API-READ-003 — Raw Markdown access for type/record files is available
 
 The Runtime API MUST provide a read operation to retrieve the raw Markdown content for:
@@ -1698,7 +1681,6 @@ This subsection defines required access to GraphMD’s distinct “graph-like”
 ---
 
 <!-- req:id=API-RLG-001 title="Record Link Graph adjacency is readable" testable=false -->
-
 ### API-RLG-001 — Record Link Graph adjacency is readable
 
 The Runtime API MUST provide read access to **Record Link Graph** adjacency derived per REL-001/REL-002/REL-003/REL-007.
@@ -1719,7 +1701,6 @@ Notes:
 ---
 
 <!-- req:id=API-HIER-001 title="Record Hierarchy (parent pointers) is readable" testable=false -->
-
 ### API-HIER-001 — Record Hierarchy (parent pointers) is readable
 
 The Runtime API MUST provide read access to the **Record Hierarchy** derived only from record `parent` pointers (HIER-001), including at minimum:
@@ -1732,7 +1713,6 @@ Results MUST reflect only `parent` pointers and MUST NOT be inferred from wiki-l
 ---
 
 <!-- req:id=API-COMP-001 title="Type Composition Dependencies are readable" testable=false -->
-
 ### API-COMP-001 — Type Composition Dependencies are readable
 
 The Runtime API MUST provide read access to **Type Composition Dependencies** derived from `fields.composition` (TYPE-COMP-001), including at minimum:
@@ -1751,7 +1731,6 @@ Blocks are content-addressed byte objects with canonical layout and integrity ru
 ---
 
 <!-- req:id=API-BLOCK-001 title="Block identity is CID and blocks are immutable" testable=false -->
-
 ### API-BLOCK-001 — Block identity is CID and blocks are immutable
 
 The Runtime API MUST treat a block object’s identity as its CID string.
@@ -1765,7 +1744,6 @@ Blocks MUST be immutable:
 ---
 
 <!-- req:id=API-BLOCK-READ-001 title="Resolve block bytes by CID" testable=false -->
-
 ### API-BLOCK-READ-001 — Resolve block bytes by CID
 
 The Runtime API MUST provide a method to resolve a block CID to its raw bytes.
@@ -1780,7 +1758,6 @@ Returned bytes MUST be the raw bytes (BLOCK-001) with no normalization or decodi
 ---
 
 <!-- req:id=API-BLOCK-READ-002 title="Block existence check by CID" testable=false -->
-
 ### API-BLOCK-READ-002 — Block existence check by CID
 
 The Runtime API MUST provide a method to check whether a block exists for a given CID in the current snapshot.
@@ -1790,7 +1767,6 @@ This check MUST NOT require returning the block bytes.
 ---
 
 <!-- req:id=API-BLOCK-READ-003 title="List blocks present in the snapshot" testable=false -->
-
 ### API-BLOCK-READ-003 — List blocks present in the snapshot
 
 The Runtime API MUST provide a method to list block CIDs present in the current snapshot (including garbage blocks; GC-003).
@@ -1800,7 +1776,6 @@ The list MUST be deterministic and SHOULD be sorted lexicographically by CID.
 ---
 
 <!-- req:id=API-BLOCK-REF-001 title="List block references extracted from a record" testable=false -->
-
 ### API-BLOCK-REF-001 — List block references extracted from a record
 
 The Runtime API MUST provide a method that returns the set/list of block CIDs referenced from a given record, extracted per CID-REF-001/CID-REF-002 from:
@@ -1813,7 +1788,6 @@ Returned CID lists MUST be deterministic and SHOULD be sorted lexicographically 
 ---
 
 <!-- req:id=API-BLOCK-GC-001 title="Reachable block set computation is exposed" testable=false -->
-
 ### API-BLOCK-GC-001 — Reachable block set computation is exposed
 
 The Runtime API MUST provide a deterministic method to compute the reachable block set per GC-001.
@@ -1825,7 +1799,6 @@ The returned set/list MUST be deterministic and SHOULD be sorted lexicographical
 ## 16.3 Determinism requirements
 
 <!-- req:id=API-DET-001 title="Read results are deterministic for a fixed snapshot" testable=false -->
-
 ### API-DET-001 — Read results are deterministic for a fixed snapshot
 
 For a fixed dataset snapshot, all Runtime API read operations MUST return deterministic results, including:
@@ -1840,7 +1813,6 @@ For a fixed dataset snapshot, all Runtime API read operations MUST return determ
 ---
 
 <!-- req:id=API-DET-002 title="List order is stable and documented" testable=false -->
-
 ### API-DET-002 — List order is stable and documented
 
 Any Runtime API method that returns a list MUST define a stable ordering rule.
@@ -1860,7 +1832,6 @@ These requirements are written now to preserve contract clarity, but they are **
 ---
 
 <!-- req:id=API-PARK-000 title="Parked requirements are capability-conditional" testable=false -->
-
 ### API-PARK-000 — Parked requirements are capability-conditional
 
 Requirements in §16P apply only when the implementation exposes the corresponding capability in `capabilities` (API-002).
@@ -1874,7 +1845,6 @@ Implementations MUST NOT claim a capability unless they satisfy all requirements
 ---
 
 <!-- req:id=API-WRITE-001 title="Record mutations are capability-gated" testable=false -->
-
 ### API-WRITE-001 — Record mutations are capability-gated
 
 If the Runtime API declares capability `gd.api.records.write`, it MUST expose record mutation operations including at least:
@@ -1888,7 +1858,6 @@ If the capability is not declared, these operations MAY be absent. If present bu
 ---
 
 <!-- req:id=API-WRITE-002 title="Type mutations are capability-gated" testable=false -->
-
 ### API-WRITE-002 — Type mutations are capability-gated
 
 If the Runtime API declares capability `gd.api.types.write`, it MUST expose type mutation operations including at least:
@@ -1902,7 +1871,6 @@ If the capability is not declared, these operations MAY be absent.
 ---
 
 <!-- req:id=API-WRITE-003 title="All mutations validate the resulting dataset" testable=false -->
-
 ### API-WRITE-003 — All mutations validate the resulting dataset
 
 When any mutation is performed, the Runtime API MUST validate the resulting dataset snapshot against import-time validity rules (VAL-001).
@@ -1916,7 +1884,6 @@ If validation fails:
 ---
 
 <!-- req:id=API-WRITE-004 title="Mutations are atomic at the dataset level" testable=false -->
-
 ### API-WRITE-004 — Mutations are atomic at the dataset level
 
 A mutation MUST be atomic:
@@ -1929,7 +1896,6 @@ Partial commits are forbidden.
 ---
 
 <!-- req:id=API-WRITE-005 title="Mutations must not rewrite unrelated files" testable=false -->
-
 ### API-WRITE-005 — Mutations must not rewrite unrelated files
 
 A mutation MUST NOT rewrite any record file bytes other than the specific files it intends to change.
@@ -1939,7 +1905,6 @@ Implementations MUST NOT “normalize” or reserialize unrelated record files a
 ---
 
 <!-- req:id=API-WRITE-006 title="API-created objects must serialize as valid record files" testable=false -->
-
 ### API-WRITE-006 — API-created objects must serialize as valid record files
 
 When the Runtime API creates or updates a type object or record object via structured inputs, it MUST persist the result as a Markdown record file conforming to:
@@ -1952,7 +1917,6 @@ and MUST obey EXT-001 (no extra top-level keys).
 ---
 
 <!-- req:id=API-WRITE-007 title="Structured relationship editing serializes as wiki-links" testable=false -->
-
 ### API-WRITE-007 — Structured relationship editing serializes as wiki-links
 
 If the Runtime API provides any structured operation that creates record relationships (as opposed to raw text replacement), it MUST serialize created relationships using wiki-link syntax:
@@ -1968,7 +1932,6 @@ as required by REL-005.
 ---
 
 <!-- req:id=API-BLOCK-WRITE-001 title="Block insertion by bytes returns CID" testable=false -->
-
 ### API-BLOCK-WRITE-001 — Block insertion by bytes returns CID
 
 If the Runtime API declares capability `gd.api.blocks.write`, it MUST provide an operation to add block bytes, returning the computed CID.
@@ -1980,7 +1943,6 @@ The block bytes MUST be stored at the canonical block store path (BLOCK-LAYOUT-0
 ---
 
 <!-- req:id=API-BLOCK-WRITE-002 title="Block insertion is idempotent" testable=false -->
-
 ### API-BLOCK-WRITE-002 — Block insertion is idempotent
 
 If block insertion is supported, inserting bytes whose CID already exists MUST succeed and MUST return the same CID.
@@ -1990,7 +1952,6 @@ The operation MUST NOT create duplicates and MUST NOT rewrite existing bytes if 
 ---
 
 <!-- req:id=API-BLOCK-WRITE-003 title="Block deletion is constrained by validity" testable=false -->
-
 ### API-BLOCK-WRITE-003 — Block deletion is constrained by validity
 
 If the Runtime API declares capability `gd.api.blocks.delete`, it MAY provide a block deletion operation.
@@ -2002,7 +1963,6 @@ Deleting an unreferenced (garbage) block MAY succeed.
 ---
 
 <!-- req:id=API-BLOCK-WRITE-004 title="Garbage collection mutation removes only garbage blocks" testable=false -->
-
 ### API-BLOCK-WRITE-004 — Garbage collection mutation removes only garbage blocks
 
 If the Runtime API declares capability `gd.api.blocks.gc`, it MAY provide a garbage collection mutation that removes only garbage blocks (GC-002) and MUST NOT remove reachable blocks (GC-001).
@@ -2016,7 +1976,6 @@ Garbage collection MUST be deterministic and idempotent for a fixed snapshot.
 ---
 
 <!-- req:id=API-HASH-001 title="API exposes schema and snapshot fingerprints only" testable=false -->
-
 ### API-HASH-001 — API exposes schema and snapshot fingerprints only
 
 If the Runtime API declares capability `gd.api.hash`, it MUST expose operations to compute:
@@ -2029,7 +1988,6 @@ The API MUST NOT expose any additional standardized fingerprint computation (HAS
 ---
 
 <!-- req:id=API-EXP-001 title="API can produce canonical dataset export bytes" testable=false -->
-
 ### API-EXP-001 — API can produce canonical dataset export bytes
 
 If the Runtime API declares capability `gd.api.export`, it MUST provide an operation to produce the canonical dataset export (EXP-003) as zip bytes.
@@ -2049,7 +2007,6 @@ The export MUST:
 ---
 
 <!-- req:id=API-EVENT-001 title="API provides change notifications" testable=false -->
-
 ### API-EVENT-001 — API provides change notifications
 
 If the Runtime API declares capability `gd.api.events`, it SHOULD provide a mechanism for clients to observe committed dataset changes.
@@ -2062,7 +2019,6 @@ If provided:
 ---
 
 <!-- req:id=API-TXN-001 title="API supports explicit transactions" testable=false -->
-
 ### API-TXN-001 — API supports explicit transactions
 
 If the Runtime API declares capability `gd.api.transactions`, it MAY provide explicit transaction controls (begin/commit/rollback or equivalent).
@@ -2076,7 +2032,6 @@ If provided, transaction semantics MUST preserve atomicity and validation requir
 ---
 
 <!-- req:id=API-QUERY-001 title="No required text query language" testable=false -->
-
 ### API-QUERY-001 — No required text query language
 
 The Runtime API MUST NOT require adopting any standardized external text query language (GraphQL, Datalog, etc.) for conformance.

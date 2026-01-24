@@ -1,0 +1,11 @@
+---
+typeId: req
+recordId: GH-002
+fields:
+  title: Default ref resolution
+  order: 2
+parent: section:11-import-from-github-requirements
+---
+
+
+If no ref is provided, importer MUST use the repository default branch (fallback to `main` if unavailable).

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-22T19:14:19.390Z",
+  "generatedAt": "2026-01-24T09:43:43.914Z",
   "requirements": [
     {
       "id": "GOV-001",
@@ -89,7 +89,7 @@
     },
     {
       "id": "NR-LINK-001",
-      "title": "No requirement that links resolve",
+      "title": "No requirement that links resolve (except composition constraints)",
       "testable": null,
       "verify": null,
       "tests": [
@@ -1584,7 +1584,7 @@
     },
     {
       "id": "NFR-001",
-      "title": "No full reloads for CRUD",
+      "title": "CRUD does not perform full document reloads",
       "testable": true,
       "verify": null,
       "tests": [
@@ -2051,5 +2051,6 @@
     }
   ],
   "unknownReferences": [],
-  "missingTestable": []
+  "missingTestable": [],
+  "untracedTests": []
 }

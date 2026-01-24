@@ -1,0 +1,20 @@
+---
+typeId: req
+recordId: VAL-006
+fields:
+  title: No semantic validation of values
+  order: 5
+parent: section:9-import-time-validity-and-integrity-rules
+---
+
+
+Beyond VAL-005, core MUST NOT validate field values against:
+
+* kind semantics,
+* constraints,
+* enum option sets,
+* number ranges,
+* date formats,
+* money shapes, etc.
+
+Those are not validity rules in this standard.

@@ -1,0 +1,12 @@
+---
+typeId: req
+recordId: NFR-030
+fields:
+  title: Plugins must not require core modification
+  order: 1
+  testable: false
+parent: section:14-plugin-and-extensibility-requirements
+---
+
+
+The system shall be structured so plugins do not require modifying core code.

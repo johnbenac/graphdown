@@ -1,0 +1,19 @@
+---
+typeId: req
+recordId: API-004
+fields:
+  title: Runtime API addresses objects by GraphMD identities
+  order: 4
+  testable: true
+parent: section:versioning-capabilities-and-general-contract-rules
+---
+
+
+Runtime API methods MUST address GraphMD objects using GraphMD identities:
+
+* type objects by `typeId`
+* record objects by `recordKey = typeId:recordId` (or by `(typeId, recordId)`)
+
+The Runtime API MUST NOT require clients to address types or records by repository file paths (LAYOUT-001).
+
+---

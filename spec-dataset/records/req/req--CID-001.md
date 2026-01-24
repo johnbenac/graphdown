@@ -1,0 +1,14 @@
+---
+typeId: req
+recordId: CID-001
+fields:
+  title: CID test vector for empty bytes
+  order: 2
+  testable: true
+parent: section:3-2-block-identity
+---
+
+
+`cidFromRawBytes(new Uint8Array())` MUST equal:
+
+`bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku`

@@ -1,0 +1,26 @@
+---
+typeId: req
+recordId: NFR-031
+fields:
+  title: New field kinds without rewriting CRUD
+  order: 2
+  testable: false
+parent: section:14-plugin-and-extensibility-requirements
+---
+
+
+New schema shapes shall be addable without rewriting the CRUD engine.
+
+This means:
+
+* core MUST treat field definition keys as opaque beyond `required` (§7)
+* CRUD MUST remain possible without plugins (UI-RAW-001)
+
+Plugins MAY:
+
+* interpret kinds,
+* interpret arbitrary metadata (including UI-hint-like keys),
+* provide nicer editors/renderers/validators,
+* add alternative navigation or views,
+
+…but core MUST remain correct without them.

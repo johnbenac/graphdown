@@ -1,0 +1,12 @@
+---
+typeId: req
+recordId: UI-001
+fields:
+  title: Desktop + mobile usable
+  order: 1
+  testable: false
+parent: section:13-ui-requirements
+---
+
+
+UI shall be usable on desktop and mobile form factors (non-testable intent).
